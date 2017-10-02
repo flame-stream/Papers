@@ -1,22 +1,42 @@
 \documentclass {article}
-
+% packages should be added as needed 
 
 \begin {document}
-
 \title {Distributed Run Time for Analytical Stream Processing}
-
 \author {Igor E. Kuralenok \and Nikita Marshalkin \and Artem Trofimov \and Boris Novikov}
 \maketitle
 
 \begin{abstract}
+Current generation of scalable distributed systems designed for analytical processing of large volumens of data (such as  Spark and Flink) have addressed several drawbacks of previous generation. The ability to optimize and process complex analytical workflows  provides for improved performance and flexibility.
 
+However, several issues still remain. This paper describes a run-time components of a scalable distributed environment that guaranttes exctly once  processing and (list here more advantages). The experiments show that this implementation can outperform alternative solutions.
 \end {abstract}
 
 \section {Introduction}
 
 \section {Computational Model}
 
+Stream sources = fronts. 
+
+Definition of an analytical workflow is a grph (DAG)
+
+Base operations: filter, split, merge, group. 
+
+Processing queue: timestamp based. 
+
+Intermediate results are stored in the queue. What properties fo the queue guarantee exactly once?
+
+\section {Implemetaion}
+
+Distributed processing: the whole graph in every node
+
+ACK
+
+Faileover
+
 \section {Experiments}
+
+This is probably the easiest part.
 
 \section {Related work}
 
