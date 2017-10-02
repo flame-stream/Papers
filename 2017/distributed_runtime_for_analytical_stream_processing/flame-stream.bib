@@ -1,0 +1,59 @@
+Gábor Horváth, Norbert Pataki, and Márton Balassi. 2017. Code Generation in Serializers and Comparators of Apache Flink. In Proceedings of the 12th Workshop on Implementation, Compilation, Optimization of Object-Oriented Languages, Programs and Systems (ICOOOLPS'17). ACM, New York, NY, USA, Article 5, 6 pages. DOI: https://proxy.library.spbu.ru:3316/10.1145/3098572.3098579
+
+@inproceedings{Horvath:2017:CGS:3098572.3098579,
+ author = {Horv\'{a}th, G\'{a}bor and Pataki, Norbert and Balassi, M\'{a}rton},
+ title = {Code Generation in Serializers and Comparators of Apache Flink},
+ booktitle = {Proceedings of the 12th Workshop on Implementation, Compilation, Optimization of Object-Oriented Languages, Programs and Systems},
+ series = {ICOOOLPS'17},
+ year = {2017},
+ isbn = {978-1-4503-5088-4},
+ location = {Barcelona, Spain},
+ pages = {5:1--5:6},
+ articleno = {5},
+ numpages = {6},
+ url = {http://proxy.library.spbu.ru:2393/10.1145/3098572.3098579},
+ doi = {10.1145/3098572.3098579},
+ acmid = {3098579},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {Flink, Janino, Java, big data, code generation},
+} 
+
+here is a shift in the Big Data world. Applications used to be I/O bound. InfiniBand, SSDs reduced the I/O overhead and more sophisticated algorithms were developed. CPU became a bottleneck for some applications. Using state of the art CPUs, reduced CPU usage can lead to reduced electricity costs even when an application is I/O bound.
+
+Apache Flink is an open source framework for processing streams of data and batch jobs. It is using serialization for wide variety of purposes. Not only for sending data over the network, saving it to the hard disk, or for fault tolerance, but also some of the operators can work on the serialized representation of the data instead of Java objects. This approach can improve the performance significantly. Flink has a custom serialization method that enables operators to work on the serialized formats.
+
+Currently, Apache Flink uses reflection to serialize Plain Old Java Objects (POJOs). Reflection in Java is notoriously slow. Moreover, the structure of the code is harder to optimize for the JIT compiler. As a Google Summer of Code project in 2016, we implemented code generation for serializers and comparators for POJOs to improve the performance of Apache Flink. Flink has a delicate type system which provides us with lots of information about the types that need to be serialized. Using this information it is possible to generate specialized code with great performance.
+
+We achieved more than 6X performance improvement in the serialization which was a 20% overall improvement.
+
+
+
+Yi Chen and Behzad Bordbar. 2016. DRESS: a rule engine on spark for event stream processing. In Proceedings of the 3rd IEEE/ACM International Conference on Big Data Computing, Applications and Technologies (BDCAT '16). ACM, New York, NY, USA, 46-51. DOI: https://proxy.library.spbu.ru:3316/10.1145/3006299.3006326
+
+@inproceedings{Chen:2016:DRE:3006299.3006326,
+ author = {Chen, Yi and Bordbar, Behzad},
+ title = {DRESS: A Rule Engine on Spark for Event Stream Processing},
+ booktitle = {Proceedings of the 3rd IEEE/ACM International Conference on Big Data Computing, Applications and Technologies},
+ series = {BDCAT '16},
+ year = {2016},
+ isbn = {978-1-4503-4617-7},
+ location = {Shanghai, China},
+ pages = {46--51},
+ numpages = {6},
+ url = {http://proxy.library.spbu.ru:2393/10.1145/3006299.3006326},
+ doi = {10.1145/3006299.3006326},
+ acmid = {3006326},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {apache spark, event stream processing, rule engine},
+} 
+
+
+Rule-based systems process event streams and trigger actions according to pre-defined rule-sets. Over the last three decades, such systems have been widely used in businesses, governments and organisations. However, with today's need to process larger event streams such as events produced in Internet of Things (IoT), current rule-based systems face serious challenges in terms of speed, scalability and fault tolerance. Spark Streaming is emerging as a novel solution to address these challenges. This paper presents an approach for adapting rule-based systems to work with Spark Streaming. We focus on Rete algorithm which is behind many of the current rule engines. We present DRESS (Distributed Rule Engine on Spark Streaming), an infrastructure for executing Rete algorithm on Spark Streaming. In addition, we present an automated method of transforming rules written in Drools' style to be executed on DRESS. The performance of our system was evaluated with the help of a case study.
+
+
+
+
+
+
