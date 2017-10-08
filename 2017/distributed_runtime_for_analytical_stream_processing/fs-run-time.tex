@@ -13,39 +13,22 @@ However, several issues still remain. This paper describes a run-time components
 \end {abstract}
 
 \section {Introduction}
+\input {fs-run-time-intro.tex}
 
 \section {Computational Model}
-
-Stream sources = fronts. 
-
-Definition of an analytical workflow is a grph (DAG)
-
-Base operations: filter, split, merge, group. 
-
-Processing queue: timestamp based. 
-
-Intermediate results are stored in the queue. What properties fo the queue guarantee exactly once?
+\input {fs-run-time-model.tex}
 
 \section {Implemetaion}
-
-Distributed processing: the whole graph in every node
-
-ACK
-
-Faileover
+\input{fs-run-time-impl.tex}
 
 \section {Experiments}
-
-This is probably the easiest part.
+\input {fs-run-time-experiments.tex}
 
 \section {Related work}
-
-Definitely Flink must be mentioned, but the reference should be more relevant than~\cite{Horvath:2017:CGS:3098572.3098579}.
-
-Another eco-system that cannot be avoided is Spark, and again the refirence might be better tan this~\cite{Chen:2016:DRE:3006299.3006326}.
-
+\input {fs-run-time-related.tex}
 
 \section {Conclusion}
+\input {fs-run-time-conclu.tex}
 
 \bibliographystyle {plain}
 \bibliography{flame-stream}
