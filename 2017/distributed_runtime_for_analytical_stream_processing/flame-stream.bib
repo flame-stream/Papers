@@ -53,6 +53,79 @@ Yi Chen and Behzad Bordbar. 2016. DRESS: a rule engine on spark for event stream
 Rule-based systems process event streams and trigger actions according to pre-defined rule-sets. Over the last three decades, such systems have been widely used in businesses, governments and organisations. However, with today's need to process larger event streams such as events produced in Internet of Things (IoT), current rule-based systems face serious challenges in terms of speed, scalability and fault tolerance. Spark Streaming is emerging as a novel solution to address these challenges. This paper presents an approach for adapting rule-based systems to work with Spark Streaming. We focus on Rete algorithm which is behind many of the current rule engines. We present DRESS (Distributed Rule Engine on Spark Streaming), an infrastructure for executing Rete algorithm on Spark Streaming. In addition, we present an automated method of transforming rules written in Drools' style to be executed on DRESS. The performance of our system was evaluated with the help of a case study.
 
 
+Christos Doulkeridis and Kjetil NØrvåg. 2014. A survey of large-scale analytical query processing in MapReduce. The VLDB Journal 23, 3 (June 2014), 355-380. DOI=http://proxy.library.spbu.ru:2083/10.1007/s00778-013-0319-9
+
+@article{Doulkeridis:2014:SLA:2628707.2628782,
+ author = {Doulkeridis, Christos and Norvaag, Kjetil},
+ title = {A Survey of Large-scale Analytical Query Processing in MapReduce},
+ journal = {The VLDB Journal},
+ issue_date = {June      2014},
+ volume = {23},
+ number = {3},
+ month = jun,
+ year = {2014},
+ issn = {1066-8888},
+ pages = {355--380},
+ numpages = {26},
+ url = {http://proxy.library.spbu.ru:2083/10.1007/s00778-013-0319-9},
+ doi = {10.1007/s00778-013-0319-9},
+ acmid = {2628782},
+ publisher = {Springer-Verlag New York, Inc.},
+ address = {Secaucus, NJ, USA},
+ keywords = {Big Data, Data analysis, Large-scale, MapReduce, Query processing, Survey},
+} 
+Enterprises today acquire vast volumes of data from different sources and leverage this information by means of data analysis to support effective decision-making and provide new functionality and services. The key requirement of data analytics is scalability, simply due to the immense volume of data that need to be extracted, processed, and analyzed in a timely fashion. Arguably the most popular framework for contemporary large-scale data analytics is MapReduce, mainly due to its salient features that include scalability, fault-tolerance, ease of programming, and flexibility. However, despite its merits, MapReduce has evident performance limitations in miscellaneous analytical tasks, and this has given rise to a significant body of research that aim at improving its efficiency, while maintaining its desirable properties. This survey aims to review the state of the art in improving the performance of parallel query processing using MapReduce. A set of the most significant weaknesses and limitations of MapReduce is discussed at a high level, along with solving techniques. A taxonomy is presented for categorizing existing research on MapReduce improvements according to the specific problem they target. Based on the proposed taxonomy, a classification of existing research is provided focusing on the optimization objective. Concluding, we outline interesting directions for future parallel data processing systems.
+
+
+Sattam Alsubaiee, Alexander Behm, Raman Grover, Rares Vernica, Vinayak Borkar, Michael J. Carey, and Chen Li. 2012. ASTERIX: scalable warehouse-style web data integration. In Proceedings of the Ninth International Workshop on Information Integration on the Web (IIWeb '12). ACM, New York, NY, USA, , Article 2 , 4 pages. DOI=http://proxy.library.spbu.ru:2083/10.1145/2331801.2331803
+
+@inproceedings{Alsubaiee:2012:ASW:2331801.2331803,
+ author = {Alsubaiee, Sattam and Behm, Alexander and Grover, Raman and Vernica, Rares and Borkar, Vinayak and Carey, Michael J. and Li, Chen},
+ title = {ASTERIX: Scalable Warehouse-style Web Data Integration},
+ booktitle = {Proceedings of the Ninth International Workshop on Information Integration on the Web},
+ series = {IIWeb '12},
+ year = {2012},
+ isbn = {978-1-4503-1239-4},
+ location = {Scottsdale, Arizona, USA},
+ pages = {2:1--2:4},
+ articleno = {2},
+ numpages = {4},
+ url = {http://proxy.library.spbu.ru:2393/10.1145/2331801.2331803},
+ doi = {10.1145/2331801.2331803},
+ acmid = {2331803},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {ASTERIX, cloud computing, data-intensive computing, hyracks, semistructured data},
+} 
+A growing wealth of digital information is being generated on a daily basis in social networks, blogs, online communities, etc. Organizations and researchers in a wide variety of domains recognize that there is tremendous value and insight to be gained by warehousing this emerging data and making it available for querying, analysis, and other purposes. This new breed of "Big Data" applications poses challenging requirements against data management platforms in terms of scalability, flexibility, manageability, and analysis capabilities. At UC Irvine, we are building a next-generation database system, called ASTERIX, in response to these trends. We present ongoing work that approaches the following questions: How does data get into the system? What primitives should we provide to better cope with dirty/noisy data? How can we support efficient data analysis on spatial data? Using real examples, we show the capabilities of ASTERIX for ingesting data via feeds, supporting set-similarity predicates for fuzzy matching, and answering spatial aggregation queries.
+
+
+Paris Carbone, Stephan Ewen, Gyula Fóra, Seif Haridi, Stefan Richter, and Kostas Tzoumas. 2017. State management in Apache Flink®: consistent stateful distributed stream processing. Proc. VLDB Endow. 10, 12 (August 2017), 1718-1729. DOI: https://proxy.library.spbu.ru:3316/10.14778/3137765.3137777
+
+@article{Carbone:2017:SMA:3137765.3137777,
+ author = {Carbone, Paris and Ewen, Stephan and F\'{o}ra, Gyula and Haridi, Seif and Richter, Stefan and Tzoumas, Kostas},
+ title = {State Management in Apache Flink\&Reg;: Consistent Stateful Distributed Stream Processing},
+ journal = {Proc. VLDB Endow.},
+ issue_date = {August 2017},
+ volume = {10},
+ number = {12},
+ month = aug,
+ year = {2017},
+ issn = {2150-8097},
+ pages = {1718--1729},
+ numpages = {12},
+ url = {https://proxy.library.spbu.ru:3316/10.14778/3137765.3137777},
+ doi = {10.14778/3137765.3137777},
+ acmid = {3137777},
+ publisher = {VLDB Endowment},
+} 
+Stream processors are emerging in industry as an apparatus that drives analytical but also mission critical services handling the core of persistent application logic. Thus, apart from scalability and low-latency, a rising system need is first-class support for application state together with strong consistency guarantees, and adaptivity to cluster reconfigurations, software patches and partial failures. Although prior systems research has addressed some of these specific problems, the practical challenge lies on how such guarantees can be materialized in a transparent, non-intrusive manner that relieves the user from unnecessary constraints. Such needs served as the main design principles of state management in Apache Flink, an open source, scalable stream processor.
+
+We present Flink's core pipelined, in-flight mechanism which guarantees the creation of lightweight, consistent, distributed snapshots of application state, progressively, without impacting continuous execution. Consistent snapshots cover all needs for system reconfiguration, fault tolerance and version management through coarse grained rollback recovery. Application state is declared explicitly to the system, allowing efficient partitioning and transparent commits to persistent storage. We further present Flink's backend implementations and mechanisms for high availability, external state queries and output commit. Finally, we demonstrate how these mechanisms behave in practice with metrics and large-deployment insights exhibiting the low performance trade-offs of our approach and the general benefits of exploiting asynchrony in continuous, yet sustainable system deployments.
+
+
+
+
 
 
 

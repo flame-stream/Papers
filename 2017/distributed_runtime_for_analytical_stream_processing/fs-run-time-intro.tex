@@ -2,5 +2,34 @@
 
 \label {fs-intro-seciton}
 
+A need to process huge amounts of data (e.g. Internet scale) was addressed by scalable distributed data processing systems such as  mapreduce. These systems are able to run data processing in a massively parallel mode on a clusters consisting of thousands of commodity computers. 
+
+However, the initial models and frchitectures of this kind suffered from several drawbacks deeply analyzed in~\cite{Doulkeridis:2014:SLA:2628707.2628782,}. Many of these drawbacks were addressed in the next generation of scalable distributed data processing architectures, e.g. Asterix~\cite{Alsubaiee:2012:ASW:2331801.2331803}, Spark~\cite{Franklin}, and Flink~\cite{Carbone:2017:SMA:3137765.3137777}. 
+
+The goal of the FlameStream (how should it be written? with a space or like here?) is to further improve performance and provide for better consistency of the output.  Specifically, the objectives are:
+
+\begin {itemize}
+\item ready on key: the output is delivered as soon as it is computed for every single key, rather than at the completion of  the whole workflow.
+\item exactly once execution: each input item is processed exactly once even in case of partial system failures. 
+\end {itemize}
+
+A brief outline of the overall architecture and planned features: types, declarative workflow specification, ? ? ?
+
+This paper introduces a run-time module of the  FlameStream. 
+Add more details here.
+
+The contributions of this paper are the following:
+
+\begin {itemize}
+\item definition of the computational model
+\item implementation and proof of the concept.
+\end {itemize}
+
+The rest of the paper is structured as follows 
+Describe sections here: model~\ref {fs-model-section}
+implementation~\ref{fs-implementation-section}
+experiments ~\ref{fs-experiments-section}
+related work~\ref{fs-related-section}.
+
 
 \endinput
