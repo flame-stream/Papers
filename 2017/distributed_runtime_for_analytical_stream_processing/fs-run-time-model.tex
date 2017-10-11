@@ -1,12 +1,14 @@
 %%%%% fs-run-time-model  Computational  Model
 
 \label {fs-model-section}
-In our model the dataflow is represented by a directed graph. This graph does not contain information about physical execution, so further we call it {\it logical} graph or stream. Each node of the logical graph contains single operation, also called job. Edges show the order of these operations. The data items are processed one-by-one in a "streaming" manner. Notably, despite the fact that commonly dataflow graphs assumed to be acyclic (DAGs), our model does not have this restriction. Moreover, as we show further in this section, there are cases when cycles are required, e.g. for reduce step in MapReduce-based algorithms. 
+In our model the dataflow is represented by a directed graph. This graph does not contain information about physical execution, so further we call it {\it logical} graph or stream. Items are get into the system through the node called {\it front} and get out through the node called {\it sink}. Fronts and sinks are detailed in the next section; now it is only important that fronts and sinks play the role of the graph enter and graph exit correspondingly. Each other node of the logical graph contains single operation, also called job. Edges show the order of these operations. The data items are processed one-by-one in a "streaming" manner. 
+
+Notably, despite the fact that commonly dataflow graphs assumed to be acyclic (DAGs), our model does not have this restriction. Moreover, as we show further in this section, there are cases when cycles are required, e.g. for reduce step in MapReduce-based algorithms. 
 
 In this section, firstly, the structure of items in the data stream is defined. After that, supported operations and their properties are introduced. Finally, the way to implement any MapReduce transformation using our model is described.
 
 \subsection{The structure of data items}
-Generally, the items of the stream are represented as payload and meta-information. It should be highlighted that meta-information is not provided by business logic. Instead of this, it is assigned when the payload element arrives to the system in the module called {\it front}. Fronts are detailed in the next section; now it is only important that fronts play the role of the system enter. 
+Generally, the items of the stream are represented as payload and meta-information. It should be highlighted that meta-information is not provided by business logic. Instead of this, it is assigned when the payload element arrives to the front. 
 
 \[DataItem := (payload, Meta)\]
 
