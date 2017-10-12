@@ -1,16 +1,67 @@
-\documentclass {article}
+\documentclass[sigconf]{acmart}
 % packages should be added as needed 
 
-\begin {document}
+\usepackage{booktabs} % For formal tables
+
+% Copyright
+%\setcopyright{none}
+     \setcopyright{rightsretained}
+
+% DOI
+\acmDOI{}
+
+% ISBN
+\acmISBN{978-3-89318-078-3}
+
+%Conference
+\acmConference[EDBT 2018]{21st International Conference on Extending Database Technology (EDBT)}{March 26-29, 2018}{Vienna, Austria} 
+\acmYear{2018}
+
+\settopmatter{printacmref=false, printccs=false, printfolios=false}
+
+\pagestyle{plain} % removes running headers
+
+\begin{document}
+
 \title {Distributed Run Time for Analytical Stream Processing}
-\author {Igor E. Kuralenok \and Nikita Marshalkin \and Artem Trofimov \and Boris Novikov}
-\maketitle
+% \titlenote{Produces the permission block, and   copyright information}
+%\subtitle{Extended Abstract}
+% \subtitlenote{The full version of the author's guide is available as   \texttt{acmart.pdf} document}
+
+% \author {Igor E. Kuralenok \and Nikita Marshalkin \and Artem Trofimov \and Boris Novikov}
+
+\author{Igor E. Kuralenok}
+%\authornote{Dr.~Trovato insisted his name be first.}
+%\orcid{1234-5678-9012}
+\affiliation{%
+  \institution{Igor's affiliation}
+  \streetaddress{P.O. Box 1212}
+  \city{St. Petersburg} 
+%  \state{Ohio} 
+  \postcode{190000}
+}
+\email{ikuralenok@gmail.com}
+
+\author{Artem Trovimov, Nikita Marshalkin, Boris Novikov}
+%  \authornote{}
+\affiliation{%
+  \institution{St. Petersburg state University}
+  \streetaddress{Universitetskaya nab. 7/9}
+  \city{St. Petersburg} 
+  \postcode{199034}
+ \country{Russia}
+}
+\email{trofimov9artem@gmail.com, marnikitta@gmail.com, borisnov@acm.org}
+
 
 \begin{abstract}
 Current generation of scalable distributed systems designed for analytical processing of large volumens of data (such as  Spark and Flink) have addressed several drawbacks of previous generation. The ability to optimize and process complex analytical workflows  provides for improved performance and flexibility.
 
 However, several issues still remain. This paper describes a run-time components of a scalable distributed environment that guaranttes exctly once  processing and (list here more advantages). The experiments show that this implementation can outperform alternative solutions.
 \end {abstract}
+
+\maketitle
+
 
 \section {Introduction}
 \input {fs-run-time-intro.tex}
@@ -30,7 +81,7 @@ However, several issues still remain. This paper describes a run-time components
 \section {Conclusion}
 \input {fs-run-time-conclu.tex}
 
-\bibliographystyle {plain}
+\bibliographystyle{ACM-Reference-Format}
 \bibliography{flame-stream}
 \end {document}
 
