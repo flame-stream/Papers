@@ -1,3 +1,26 @@
+Jeffrey Dean and Sanjay Ghemawat. 2008. MapReduce: simplified data processing on large clusters. Commun. ACM 51, 1 (January 2008), 107-113. DOI: https://doi.org/10.1145/1327452.1327492
+
+@article{Dean:2008:MSD:1327452.1327492,
+ author = {Dean, Jeffrey and Ghemawat, Sanjay},
+ title = {MapReduce: Simplified Data Processing on Large Clusters},
+ journal = {Commun. ACM},
+ issue_date = {January 2008},
+ volume = {51},
+ number = {1},
+ month = jan,
+ year = {2008},
+ issn = {0001-0782},
+ pages = {107--113},
+ numpages = {7},
+ url = {http://doi.acm.org/10.1145/1327452.1327492},
+ doi = {10.1145/1327452.1327492},
+ acmid = {1327492},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+} 
+MapReduce is a programming model and an associated implementation for processing and generating large datasets that is amenable to a broad variety of real-world tasks. Users specify the computation in terms of a map and a reduce function, and the underlying runtime system automatically parallelizes the computation across large-scale clusters of machines, handles machine failures, and schedules inter-machine communication to make efficient use of the network and disks. Programmers find the system easy to use: more than ten thousand distinct MapReduce programs have been implemented internally at Google over the past four years, and an average of one hundred thousand MapReduce jobs are executed on Google's clusters every day, processing a total of more than twenty petabytes of data per day.
+
+
 Gábor Horváth, Norbert Pataki, and Márton Balassi. 2017. Code Generation in Serializers and Comparators of Apache Flink. In Proceedings of the 12th Workshop on Implementation, Compilation, Optimization of Object-Oriented Languages, Programs and Systems (ICOOOLPS'17). ACM, New York, NY, USA, Article 5, 6 pages. DOI: https://proxy.library.spbu.ru:3316/10.1145/3098572.3098579
 
 @inproceedings{Horvath:2017:CGS:3098572.3098579,
@@ -102,6 +125,29 @@ A growing wealth of digital information is being generated on a daily basis in s
 
 Paris Carbone, Stephan Ewen, Gyula Fóra, Seif Haridi, Stefan Richter, and Kostas Tzoumas. 2017. State management in Apache Flink®: consistent stateful distributed stream processing. Proc. VLDB Endow. 10, 12 (August 2017), 1718-1729. DOI: https://proxy.library.spbu.ru:3316/10.14778/3137765.3137777
 
+K. Mani Chandy and Leslie Lamport. 1985. Distributed snapshots: determining global states of distributed systems. ACM Trans. Comput. Syst. 3, 1 (February 1985), 63-75. DOI=http://dx.doi.org/10.1145/214451.214456
+
+@article{Chandy:1985:DSD:214451.214456,
+ author = {Chandy, K. Mani and Lamport, Leslie},
+ title = {Distributed Snapshots: Determining Global States of Distributed Systems},
+ journal = {ACM Trans. Comput. Syst.},
+ issue_date = {Feb. 1985},
+ volume = {3},
+ number = {1},
+ month = feb,
+ year = {1985},
+ issn = {0734-2071},
+ pages = {63--75},
+ numpages = {13},
+ url = {http://doi.acm.org/10.1145/214451.214456},
+ doi = {10.1145/214451.214456},
+ acmid = {214456},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+} 
+This paper presents an algorithm by which a process in a distributed system determines a global state of the system during a computation. Many problems in distributed systems can be cast in terms of the problem of detecting global states. For instance, the global state detection algorithm helps to solve an important class of problems: stable property detection. A stable property is one that persists: once a stable property becomes true it remains true thereafter. Examples of stable properties are “computation has terminated,” “ the system is deadlocked” and “all tokens in a token ring have disappeared.” The stable property detection problem is that of devising algorithms to detect a given stable property. Global state detection can also be used for checkpointing.
+
+
 @article{Carbone:2017:SMA:3137765.3137777,
  author = {Carbone, Paris and Ewen, Stephan and F\'{o}ra, Gyula and Haridi, Seif and Richter, Stefan and Tzoumas, Kostas},
  title = {State Management in Apache Flink\&Reg;: Consistent Stateful Distributed Stream Processing},
@@ -124,9 +170,154 @@ Stream processors are emerging in industry as an apparatus that drives analytica
 We present Flink's core pipelined, in-flight mechanism which guarantees the creation of lightweight, consistent, distributed snapshots of application state, progressively, without impacting continuous execution. Consistent snapshots cover all needs for system reconfiguration, fault tolerance and version management through coarse grained rollback recovery. Application state is declared explicitly to the system, allowing efficient partitioning and transparent commits to persistent storage. We further present Flink's backend implementations and mechanisms for high availability, external state queries and output commit. Finally, we demonstrate how these mechanisms behave in practice with metrics and large-deployment insights exhibiting the low performance trade-offs of our approach and the general benefits of exploiting asynchrony in continuous, yet sustainable system deployments.
 
 
+Zhengping Qian, Yong He, Chunzhi Su, Zhuojie Wu, Hongyu Zhu, Taizhi Zhang, Lidong Zhou, Yuan Yu, and Zheng Zhang. 2013.
+TimeStream: reliable stream computation in the cloud. In Proceedings of the 8th ACM European Conference on Computer
+Systems (EuroSys '13). ACM, New York, NY, USA, 1-14. DOI=http://dx.doi.org/10.1145/2465351.2465353
+
+@inproceedings{Qian:2013:TRS:2465351.2465353,
+ author = {Qian, Zhengping and He, Yong and Su, Chunzhi and Wu, Zhuojie and Zhu, Hongyu and Zhang, Taizhi and Zhou, Lidong and Yu, Yuan and Zhang, Zheng},
+ title = {TimeStream: Reliable Stream Computation in the Cloud},
+ booktitle = {Proceedings of the 8th ACM European Conference on Computer Systems},
+ series = {EuroSys '13},
+ year = {2013},
+ isbn = {978-1-4503-1994-2},
+ location = {Prague, Czech Republic},
+ pages = {1--14},
+ numpages = {14},
+ url = {http://doi.acm.org/10.1145/2465351.2465353},
+ doi = {10.1145/2465351.2465353},
+ acmid = {2465353},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {StreamInsight, cluster computing, distributed stream processing, dynamic reconfiguration, fault-tolerance, real-time, resilient substitution},
+} 
+TimeStream is a distributed system designed specifically for low-latency continuous processing of big streaming data on a large cluster of commodity machines. The unique characteristics of this emerging application domain have led to a significantly different design from the popular MapReduce-style batch data processing. In particular, we advocate a powerful new abstraction called resilient substitution that caters to the specific needs in this new computation model to handle failure recovery and dynamic reconfiguration in response to load changes. Several real-world applications running on our prototype have been shown to scale robustly with low latency while at the same time maintaining the simple and concise declarative programming model. TimeStream handles an on-line advertising aggregation pipeline at a rate of 700,000 URLs per second with a 2-second delay, while performing sentiment analysis of Twitter data at a peak rate close to 10,000 tweets per second, with approximately 2-second delay.
 
 
+Sanjeev Kulkarni, Nikunj Bhagat, Maosong Fu, Vikas Kedigehalli, Christopher Kellogg, Sailesh Mittal, Jignesh M. Patel, Karthik Ramasamy, and Siddarth Taneja. 2015. Twitter Heron: Stream Processing at Scale. In Proceedings of the 2015 ACM SIGMOD International Conference on Management of Data (SIGMOD '15). ACM, New York, NY, USA, 239-250. DOI: https://doi.org/10.1145/2723372.2742788
 
 
+@inproceedings{Kulkarni:2015:THS:2723372.2742788,
+ author = {Kulkarni, Sanjeev and Bhagat, Nikunj and Fu, Maosong and Kedigehalli, Vikas and Kellogg, Christopher and Mittal, Sailesh and Patel, Jignesh M. and Ramasamy, Karthik and Taneja, Siddarth},
+ title = {Twitter Heron: Stream Processing at Scale},
+ booktitle = {Proceedings of the 2015 ACM SIGMOD International Conference on Management of Data},
+ series = {SIGMOD '15},
+ year = {2015},
+ isbn = {978-1-4503-2758-9},
+ location = {Melbourne, Victoria, Australia},
+ pages = {239--250},
+ numpages = {12},
+ url = {http://doi.acm.org/10.1145/2723372.2742788},
+ doi = {10.1145/2723372.2742788},
+ acmid = {2742788},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {real-time data processing., stream data processing systems},
+} 
+Storm has long served as the main platform for real-time analytics at Twitter. However, as the scale of data being processed in real-time at Twitter has increased, along with an increase in the diversity and the number of use cases, many limitations of Storm have become apparent. We need a system that scales better, has better debug-ability, has better performance, and is easier to manage -- all while working in a shared cluster infrastructure. We considered various alternatives to meet these needs, and in the end concluded that we needed to build a new real-time stream data processing system. This paper presents the design and implementation of this new system, called Heron. Heron is now the de facto stream data processing engine inside Twitter, and in this paper we also share our experiences from running Heron in production. In this paper, we also provide empirical evidence demonstrating the efficiency and scalability of Heron.
 
+
+Matei Zaharia, Tathagata Das, Haoyuan Li, Scott Shenker, and Ion Stoica. 2012. Discretized streams: an efficient and fault-tolerant model for stream processing on large clusters. In Proceedings of the 4th USENIX conference on Hot Topics in Cloud Ccomputing (HotCloud'12). USENIX Association, Berkeley, CA, USA, 10-10.
+
+@inproceedings{Zaharia:2012:DSE:2342763.2342773,
+ author = {Zaharia, Matei and Das, Tathagata and Li, Haoyuan and Shenker, Scott and Stoica, Ion},
+ title = {Discretized Streams: An Efficient and Fault-tolerant Model for Stream Processing on Large Clusters},
+ booktitle = {Proceedings of the 4th USENIX Conference on Hot Topics in Cloud Ccomputing},
+ series = {HotCloud'12},
+ year = {2012},
+ location = {Boston, MA},
+ pages = {10--10},
+ numpages = {1},
+ url = {http://dl.acm.org/citation.cfm?id=2342763.2342773},
+ acmid = {2342773},
+ publisher = {USENIX Association},
+ address = {Berkeley, CA, USA},
+} 
+Many important "big data" applications need to process data arriving in real time. However, current programming models for distributed stream processing are relatively low-level, often leaving the user to worry about consistency of state across the system and fault recovery. Furthermore, the models that provide fault recovery do so in an expensive manner, requiring either hot replication or long recovery times. We propose a new programming model, discretized streams (D-Streams), that offers a high-level functional programming API, strong consistency, and efficient fault recovery. D-Streams support a new recovery mechanism that improves efficiency over the traditional replication and upstream backup solutions in streaming databases: parallel recovery of lost state across the cluster. We have prototyped D-Streams in an extension to the Spark cluster computing framework called Spark Streaming, which lets users seamlessly intermix streaming, batch and interactive queries.
+
+
+Tyler Akidau, Robert Bradshaw, Craig Chambers, Slava Chernyak, Rafael J. Fernández-Moctezuma, Reuven Lax, Sam McVeety, Daniel Mills, Frances Perry, Eric Schmidt, and Sam Whittle. 2015. The dataflow model: a practical approach to balancing correctness, latency, and cost in massive-scale, unbounded, out-of-order data processing. Proc. VLDB Endow. 8, 12 (August 2015), 1792-1803. DOI=http://dx.doi.org/10.14778/2824032.2824076
+
+@article{Akidau:2015:DMP:2824032.2824076,
+ author = {Akidau, Tyler and Bradshaw, Robert and Chambers, Craig and Chernyak, Slava and Fern\'{a}ndez-Moctezuma, Rafael J. and Lax, Reuven and McVeety, Sam and Mills, Daniel and Perry, Frances and Schmidt, Eric and Whittle, Sam},
+ title = {The Dataflow Model: A Practical Approach to Balancing Correctness, Latency, and Cost in Massive-scale, Unbounded, Out-of-order Data Processing},
+ journal = {Proc. VLDB Endow.},
+ issue_date = {August 2015},
+ volume = {8},
+ number = {12},
+ month = aug,
+ year = {2015},
+ issn = {2150-8097},
+ pages = {1792--1803},
+ numpages = {12},
+ url = {http://dx.doi.org/10.14778/2824032.2824076},
+ doi = {10.14778/2824032.2824076},
+ acmid = {2824076},
+ publisher = {VLDB Endowment},
+} 
+Unbounded, unordered, global-scale datasets are increasingly common in day-to-day business (e.g. Web logs, mobile usage statistics, and sensor networks). At the same time, consumers of these datasets have evolved sophisticated requirements, such as event-time ordering and windowing by features of the data themselves, in addition to an insatiable hunger for faster answers. Meanwhile, practicality dictates that one can never fully optimize along all dimensions of correctness, latency, and cost for these types of input. As a result, data processing practitioners are left with the quandary of how to reconcile the tensions between these seemingly competing propositions, often resulting in disparate implementations and systems.
+
+We propose that a fundamental shift of approach is necessary to deal with these evolved requirements in modern data processing. We as a field must stop trying to groom unbounded datasets into finite pools of information that eventually become complete, and instead live and breathe under the assumption that we will never know if or when we have seen all of our data, only that new data will arrive, old data may be retracted, and the only way to make this problem tractable is via principled abstractions that allow the practitioner the choice of appropriate tradeoffs along the axes of interest: correctness, latency, and cost.
+
+In this paper, we present one such approach, the Dataflow Model, along with a detailed examination of the semantics it enables, an overview of the core principles that guided its design, and a validation of the model itself via the real-world experiences that led to its development.
+
+
+Tyler Akidau, Alex Balikov, Kaya Bekiroğlu, Slava Chernyak, Josh Haberman, Reuven Lax, Sam McVeety, Daniel Mills, Paul Nordstrom, and Sam Whittle. 2013. MillWheel: fault-tolerant stream processing at internet scale. Proc. VLDB Endow. 6, 11 (August 2013), 1033-1044. DOI: http://dx.doi.org/10.14778/2536222.2536229
+
+@article{Akidau:2013:MFS:2536222.2536229,
+ author = {Akidau, Tyler and Balikov, Alex and Bekiro\u{g}lu, Kaya and Chernyak, Slava and Haberman, Josh and Lax, Reuven and McVeety, Sam and Mills, Daniel and Nordstrom, Paul and Whittle, Sam},
+ title = {MillWheel: Fault-tolerant Stream Processing at Internet Scale},
+ journal = {Proc. VLDB Endow.},
+ issue_date = {August 2013},
+ volume = {6},
+ number = {11},
+ month = aug,
+ year = {2013},
+ issn = {2150-8097},
+ pages = {1033--1044},
+ numpages = {12},
+ url = {http://dx.doi.org/10.14778/2536222.2536229},
+ doi = {10.14778/2536222.2536229},
+ acmid = {2536229},
+ publisher = {VLDB Endowment},
+} 
+MillWheel is a framework for building low-latency data-processing applications that is widely used at Google. Users specify a directed computation graph and application code for individual nodes, and the system manages persistent state and the continuous flow of records, all within the envelope of the framework's fault-tolerance guarantees.
+
+This paper describes MillWheel's programming model as well as its implementation. The case study of a continuous anomaly detector in use at Google serves to motivate how many of MillWheel's features are used. MillWheel's programming model provides a notion of logical time, making it simple to write time-based aggregations. MillWheel was designed from the outset with fault tolerance and scalability in mind. In practice, we find that MillWheel's unique combination of scalability, fault tolerance, and a versatile programming model lends itself to a wide variety of problems at Google.
+
+
+Ankit Toshniwal, Siddarth Taneja, Amit Shukla, Karthik Ramasamy, Jignesh M. Patel, Sanjeev Kulkarni, Jason Jackson, Krishna Gade, Maosong Fu, Jake Donham, Nikunj Bhagat, Sailesh Mittal, and Dmitriy Ryaboy. 2014. Storm@twitter. In Proceedings of the 2014 ACM SIGMOD International Conference on Management of Data (SIGMOD '14). ACM, New York, NY, USA, 147-156. DOI: https://doi.org/10.1145/2588555.2595641
+
+@inproceedings{Toshniwal:2014:STO:2588555.2595641,
+ author = {Toshniwal, Ankit and Taneja, Siddarth and Shukla, Amit and Ramasamy, Karthik and Patel, Jignesh M. and Kulkarni, Sanjeev and Jackson, Jason and Gade, Krishna and Fu, Maosong and Donham, Jake and Bhagat, Nikunj and Mittal, Sailesh and Ryaboy, Dmitriy},
+ title = {Storm@Twitter},
+ booktitle = {Proceedings of the 2014 ACM SIGMOD International Conference on Management of Data},
+ series = {SIGMOD '14},
+ year = {2014},
+ isbn = {978-1-4503-2376-5},
+ location = {Snowbird, Utah, USA},
+ pages = {147--156},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/2588555.2595641},
+ doi = {10.1145/2588555.2595641},
+ acmid = {2595641},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {real-time query processing, stream data management},
+} 
+This paper describes the use of Storm at Twitter. Storm is a real-time fault-tolerant and distributed stream data processing system. Storm is currently being used to run various critical computations in Twitter at scale, and in real-time. This paper describes the architecture of Storm and its methods for distributed scale-out and fault-tolerance. This paper also describes how queries (aka. topologies) are executed in Storm, and presents some operational stories based on running Storm at Twitter. We also present results from an empirical evaluation demonstrating the resilience of Storm in dealing with machine failures. Storm is under active development at Twitter and we also present some potential directions for future work.
+
+
+Nathan Marz and James Warren. 2015. Big Data: Principles and Best Practices of Scalable Realtime Data Systems (1st ed.). Manning Publications Co., Greenwich, CT, USA.
+
+@book{Marz:2015:BDP:2717065,
+ author = {Marz, Nathan and Warren, James},
+ title = {Big Data: Principles and Best Practices of Scalable Realtime Data Systems},
+ year = {2015},
+ isbn = {1617290343, 9781617290343},
+ edition = {1st},
+ publisher = {Manning Publications Co.},
+ address = {Greenwich, CT, USA},
+} 
+Services like social networks, web analytics, and intelligent e-commerce often need to manage data at a scale too big for a traditional database. As scale and demand increase, so does Complexity. Fortunately, scalability and simplicity are not mutually exclusiverather than using some trendy technology, a different approach is needed. Big data systems use many machines working in parallel to store and process data, which introduces fundamental challenges unfamiliar to most developers. Big Data shows how to build these systems using an architecture that takes advantage of clustered hardware along with new tools designed specifically to capture and analyze web-scale data. It describes a scalable, easy to understand approach to big data systems that can be built and run by a small team. Following a realistic example, this book guides readers through the theory of big data systems, how to use them in practice, and how to deploy and operate them once they're built. Purchase of the print book comes with an offer of a free PDF, ePub, and Kindle eBook from Manning. Also available is all code from the book.
 
