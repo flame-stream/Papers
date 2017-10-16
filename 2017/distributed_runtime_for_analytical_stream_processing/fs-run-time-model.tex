@@ -61,10 +61,10 @@ tuple item inherits global time from the last element. The trace of tuple item i
   \label {logical-graph-figure}
 \end{figure}
 
-Consider the dataflow that is shown on the figure~\ref {logical-graph-figure}. Data items of this stream are: {\it input} items, {\it mapped} items, and {\it reduced} items. The circumstances of generation of each type of items are detailed further in this section. However, it is worth to mention that mapped and reduced items have key-value structure of payload. The operations of the stream have the following properties:
+Consider the dataflow that is shown on the figure~\ref {logical-graph-figure}. Data items of this stream are: {\it input} items, {\it mapped} items, and {\it reduced} items. Each type of item and the way they were generated are detailed further in this section. However, it is worth to mention that mapped and reduced items have key-value structure of payload. The operations of the stream have the following properties:
 
 \begin{itemize}
-\item The first map operation accepts input items and outputs mapped items according to the business logic. This operation is semantically matched with map step of MapReduce model. Additionally, it should be noted that stream onwards can contain only mapped and reduced items.
+\item The first map operation accepts input items and outputs mapped items, according to the business logic. This operation is semantically matched with map step of MapReduce model. Additionally, it should be noted that stream onwards can contain only mapped and reduced items.
 \item Merge operation is used for cycle implementation.
 \item The window of grouping is set to 2. The hash function is designed to return distinct values for payloads with distinct keys.
 \item Filter operation removes tuples with structure \textit{(mapped item; reduced item)}, i.e. tuples, where mapped item was generated before reduced item.
@@ -74,14 +74,14 @@ Consider the dataflow that is shown on the figure~\ref {logical-graph-figure}. D
 
 According to the provided logical graph, any MapReduce transformation can be implemented using the sequence of map, merge, grouping, filter, and broadcast operations. The key idea is that each mapped item is grouped into tuple with corresponding reduced item and then they are combined into the new reduced item. The cycle gives ability for new reduced items to get in grouping operation. Thereby, the stream reacts to each input item by generating new reduced item, which contains the actual value of the reduce step. 
 
-The important role in this workflow plays grouping operation. Because of the assumption that grouping accepts items according to the meta-information, filter operation can remove tuple {\it (mapped item; reduced item)}, because such order means that mapped item was generated before reduced item, and therefore, it had been already reduced. Moreover, this assumption guarantees that each mapped item would be grouped with the actual reduced item, because grouping always accepts the actual reduced item before new mapped item.
+The grouping operation plays the important role in this workflow. Filter operation can remove tuple {\it (mapped item; reduced item)} because of the assumption that grouping accepts items in order relating to the meta-information. If filter accepts tuple {\it (mapped item; reduced item)}, then it means that mapped item was generated before reduced item, and therefore, it had been already reduced. Moreover, this assumption guarantees that each mapped item would be grouped with the actual reduced item, because grouping always accepts the actual reduced item before new mapped item.
 
-The example of input/output items generated/transformed by the part of the logical graph is shown on the figure~\ref {word-count-figure}. This example represents classical MapReduce-based algorithm for word counting. Map step of this akgorithm transforms each input word into key-value pair where word is the key, and the value is 1. Reduce step sums all values into the final result for specific key. According to our graph for MapReduce transformations, the item {\it m[a, 1]/r[a, 1]} represents mapped/reduced item with key "a" and value 1. The figure shows how the model reacts on two consequent input items containing word "a". The meta-information of items is omitted for simplification.
+The example of input/output items, which are generated/transformed by the part of the logical graph, is shown on the figure~\ref {word-count-figure}. This example represents classical MapReduce-based algorithm for word counting. Map step of this algorithm transforms each input word into key-value pair where word is the key, and the value is 1. Reduce step sums all values into the final result for specific key. According to our graph for MapReduce transformations, the item {\it m[a, 1]/r[a, 1]} represents mapped/reduced item with key "a" and value 1. The figure shows how the model reacts on two consequent input items containing word "a". The meta-information of items is omitted for simplification.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.48\textwidth]{pics/wordcount}
-  \caption{Example of evaluation of the part of the stream for word counting}
+  \caption{Part of the stream evalutaion for word counting}
   \label {word-count-figure}
 \end{figure}
 
