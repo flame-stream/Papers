@@ -1,3 +1,26 @@
+Jeffrey Dean and Sanjay Ghemawat. 2008. MapReduce: simplified data processing on large clusters. Commun. ACM 51, 1 (January 2008), 107-113. DOI: https://doi.org/10.1145/1327452.1327492
+
+@article{Dean:2008:MSD:1327452.1327492,
+ author = {Dean, Jeffrey and Ghemawat, Sanjay},
+ title = {MapReduce: Simplified Data Processing on Large Clusters},
+ journal = {Commun. ACM},
+ issue_date = {January 2008},
+ volume = {51},
+ number = {1},
+ month = jan,
+ year = {2008},
+ issn = {0001-0782},
+ pages = {107--113},
+ numpages = {7},
+ url = {http://doi.acm.org/10.1145/1327452.1327492},
+ doi = {10.1145/1327452.1327492},
+ acmid = {1327492},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+} 
+MapReduce is a programming model and an associated implementation for processing and generating large datasets that is amenable to a broad variety of real-world tasks. Users specify the computation in terms of a map and a reduce function, and the underlying runtime system automatically parallelizes the computation across large-scale clusters of machines, handles machine failures, and schedules inter-machine communication to make efficient use of the network and disks. Programmers find the system easy to use: more than ten thousand distinct MapReduce programs have been implemented internally at Google over the past four years, and an average of one hundred thousand MapReduce jobs are executed on Google's clusters every day, processing a total of more than twenty petabytes of data per day.
+
+
 Gábor Horváth, Norbert Pataki, and Márton Balassi. 2017. Code Generation in Serializers and Comparators of Apache Flink. In Proceedings of the 12th Workshop on Implementation, Compilation, Optimization of Object-Oriented Languages, Programs and Systems (ICOOOLPS'17). ACM, New York, NY, USA, Article 5, 6 pages. DOI: https://proxy.library.spbu.ru:3316/10.1145/3098572.3098579
 
 @inproceedings{Horvath:2017:CGS:3098572.3098579,
@@ -101,6 +124,29 @@ A growing wealth of digital information is being generated on a daily basis in s
 
 
 Paris Carbone, Stephan Ewen, Gyula Fóra, Seif Haridi, Stefan Richter, and Kostas Tzoumas. 2017. State management in Apache Flink®: consistent stateful distributed stream processing. Proc. VLDB Endow. 10, 12 (August 2017), 1718-1729. DOI: https://proxy.library.spbu.ru:3316/10.14778/3137765.3137777
+
+K. Mani Chandy and Leslie Lamport. 1985. Distributed snapshots: determining global states of distributed systems. ACM Trans. Comput. Syst. 3, 1 (February 1985), 63-75. DOI=http://dx.doi.org/10.1145/214451.214456
+
+@article{Chandy:1985:DSD:214451.214456,
+ author = {Chandy, K. Mani and Lamport, Leslie},
+ title = {Distributed Snapshots: Determining Global States of Distributed Systems},
+ journal = {ACM Trans. Comput. Syst.},
+ issue_date = {Feb. 1985},
+ volume = {3},
+ number = {1},
+ month = feb,
+ year = {1985},
+ issn = {0734-2071},
+ pages = {63--75},
+ numpages = {13},
+ url = {http://doi.acm.org/10.1145/214451.214456},
+ doi = {10.1145/214451.214456},
+ acmid = {214456},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+} 
+This paper presents an algorithm by which a process in a distributed system determines a global state of the system during a computation. Many problems in distributed systems can be cast in terms of the problem of detecting global states. For instance, the global state detection algorithm helps to solve an important class of problems: stable property detection. A stable property is one that persists: once a stable property becomes true it remains true thereafter. Examples of stable properties are “computation has terminated,” “ the system is deadlocked” and “all tokens in a token ring have disappeared.” The stable property detection problem is that of devising algorithms to detect a given stable property. Global state detection can also be used for checkpointing.
+
 
 @article{Carbone:2017:SMA:3137765.3137777,
  author = {Carbone, Paris and Ewen, Stephan and F\'{o}ra, Gyula and Haridi, Seif and Richter, Stefan and Tzoumas, Kostas},
@@ -260,3 +306,18 @@ Ankit Toshniwal, Siddarth Taneja, Amit Shukla, Karthik Ramasamy, Jignesh M. Pate
  keywords = {real-time query processing, stream data management},
 } 
 This paper describes the use of Storm at Twitter. Storm is a real-time fault-tolerant and distributed stream data processing system. Storm is currently being used to run various critical computations in Twitter at scale, and in real-time. This paper describes the architecture of Storm and its methods for distributed scale-out and fault-tolerance. This paper also describes how queries (aka. topologies) are executed in Storm, and presents some operational stories based on running Storm at Twitter. We also present results from an empirical evaluation demonstrating the resilience of Storm in dealing with machine failures. Storm is under active development at Twitter and we also present some potential directions for future work.
+
+
+Nathan Marz and James Warren. 2015. Big Data: Principles and Best Practices of Scalable Realtime Data Systems (1st ed.). Manning Publications Co., Greenwich, CT, USA.
+
+@book{Marz:2015:BDP:2717065,
+ author = {Marz, Nathan and Warren, James},
+ title = {Big Data: Principles and Best Practices of Scalable Realtime Data Systems},
+ year = {2015},
+ isbn = {1617290343, 9781617290343},
+ edition = {1st},
+ publisher = {Manning Publications Co.},
+ address = {Greenwich, CT, USA},
+} 
+Services like social networks, web analytics, and intelligent e-commerce often need to manage data at a scale too big for a traditional database. As scale and demand increase, so does Complexity. Fortunately, scalability and simplicity are not mutually exclusiverather than using some trendy technology, a different approach is needed. Big data systems use many machines working in parallel to store and process data, which introduces fundamental challenges unfamiliar to most developers. Big Data shows how to build these systems using an architecture that takes advantage of clustered hardware along with new tools designed specifically to capture and analyze web-scale data. It describes a scalable, easy to understand approach to big data systems that can be built and run by a small team. Following a realistic example, this book guides readers through the theory of big data systems, how to use them in practice, and how to deploy and operate them once they're built. Purchase of the print book comes with an offer of a free PDF, ePub, and Kindle eBook from Manning. Also available is all code from the book.
+
