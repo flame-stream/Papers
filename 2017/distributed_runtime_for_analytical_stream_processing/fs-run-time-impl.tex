@@ -3,6 +3,18 @@
 \label  {fs-implementation-section}
 
 \subsection{Grouping semantics}
+In previous section the semantics of grouping was introduced: the result is the same as if the input elements are ordered by meta-information. The naive approach would be to wait until the end of stream and sort the input elements. But that would introduce high latancy, and wouldn't work at all if stream is infinite. 
+
+To deal with it grouping job optimisticaly produces output tuples. Replay groups on out-of-order inputs. And later down the stream invalidate tuples that doesn't match the semantic.
+
+\subsubsection{Invalidation relationship}
+To distinguish valid and invalid tuples we need to inroduce invalidation relationship on data items. The data item \[A\] is said to be invalidated by data item \[B\] if they have same {\it Global time} and its {\it trace} is less then {\it trace} of \[B\] and the first difference is in \[logical time\]. If the first difference is in \[child id\] than there is no invalidation relationship between items and they are called {\it brothers}. Hence that invalidation relationship is a partial order.
+
+Thus, the input of {\it map} operation is invalidated by its output. The outputs of broadcast are brothers, they have the same {\it Global time}, same prefix of the trace inherited from input, {\it local time} is the same and the only difference is in {\it child ids}. 
+
+The {\it brothers} relation is preserved forever down the stream, because the trace only grows, and the first difference won't change. The same is with invalidation relationship.
+
+\subsubsection{Grouping replay}
 
 \subsection{Physical execution and partitioning}
 
