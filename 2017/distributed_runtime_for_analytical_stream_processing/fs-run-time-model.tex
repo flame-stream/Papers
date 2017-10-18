@@ -54,6 +54,15 @@ The important property of the grouping is that the result is uniquely determined
 
 Tuple item inherits global time from the last element. The trace of tuple item is the trace of the last item appended with the corresponding local time.  
 
+Figure~\ref{logical-graph-ops-figure} shows the topology of each operation and how it affects the trace of local times.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.48\textwidth]{pics/operations}
+  \caption{Supported operations}
+  \label {logical-graph-ops-figure}
+\end{figure}
+
 \subsection{MapReduce transformations on stream}
 
 \begin{figure}[htbp]
