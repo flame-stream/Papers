@@ -40,7 +40,29 @@ Thereby, replaying guarantees that eventually all correct tuples are produced. A
   \label {grouping-invalidation-figure}
 \end{figure}
 
-\subsection{Physical execution and partitioning}
+\subsection{Physical deployment and partitioning}
+
+Each node in our distributed runtime is assigned by integer interval. Intervals are not intersected and cover the range of 32-bit signed integer. Moreover, each node contains complete logical graph.
+
+As it was mentioned in the previous section, logical graph does not provide information about physical deployment. Physical graph extends logical one by assigning hash function to each operation. This hash function is applied to the payload of data items and determines partitioning. More precisely, the value of hash function is computed before each operation and corresponding data item is sent to the node which is responsible for the computed value. Therefore, load balancing explicitly depends on the hash functions of the operations. Optimal balancing requires the knowledge of payload distribution. Hence, the hash functions are assigned by business logic.
+
+Notably, the hash function within grouping should be the same as partitioning hash function for grouping, because it guarantees that the result does not depend on the physical graph deployment.
+
+Figure~\ref{logical-graph-figure} shows the example workflow of logical graph. Possible partitioning of this logical graph on two nodes is shown on the figure~\ref{physical-graph-figure}.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.48\textwidth]{pics/logical-graph}
+  \caption{Logical graph workflow}
+  \label {logical-graph-figure}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.48\textwidth]{pics/physical-graph}
+  \caption{Possible partitioning of the logical graph}
+  \label {physical-graph-figure}
+\end{figure}
 
 \subsection{Adaptive micro-batching}
 
