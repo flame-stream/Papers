@@ -36,7 +36,7 @@
 %%   Grave accent  \`     Left brace    \{     Vertical bar  \|
 %%   Right brace   \}     Tilde         \~}
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{acmart-edbt2018}
+\ProvidesClass{acmart}
 [2017/07/09 v1.43 Typesetting articles for Association of
 Computing Machinery]
 \def\@classname{acmart-edbt2018}

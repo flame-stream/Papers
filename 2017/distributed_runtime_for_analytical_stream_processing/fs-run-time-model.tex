@@ -20,7 +20,7 @@ Global time is assigned to data item once when the item enters the system. It is
 
 \[GlobalTime := (frontTs, frontId)\]
 
-Local time is the concatenation of logical time of operation and the ordinal number of output item which we call {\it child id}. The logical time is represented as simple items counter within each operation. Therefore, child id is required, because some jobs can generate multiple items from one, e.g. flat map. The items with the same child id are called {\lt brothers}. When the item is ready to go out from the operation, its trace of local times is appended by new corresponding local time. The traces of local times can be compared lexicographically.
+Local time is the concatenation of logical time of operation and the ordinal number of output item which we call {\it child id}. The logical time is represented as simple items counter within each operation. Therefore, child id is required, because some jobs can generate multiple items from one, e.g. flat map. The items with the same child id are called {\it brothers}. When the item is ready to go out from the operation, its trace of local times is appended by new corresponding local time. The traces of local times can be compared lexicographically.
 
 \[Trace := [LocalTime]\]
 \[LocalTime := (logicalTime, childId)\]
