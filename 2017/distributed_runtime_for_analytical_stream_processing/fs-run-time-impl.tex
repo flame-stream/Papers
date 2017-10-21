@@ -64,19 +64,33 @@ Figure~\ref{logical-graph-figure} shows the example workflow of logical graph. P
   \label {physical-graph-figure}
 \end{figure}
 
-\subsection{Adaptive micro-batching}
-
 \subsubsection{Barrier}
 
 \subsubsection{Minimal time within stream}
+Minimal time within stream is similar to Low watermark concept used in MillWheel~\cite{Akidau:2013:MFS:2536222.2536229}
+
+Minimal time = Low watermark
+
+OnMinTime = Timer trigger
 
 \subsection{Fault-tolerance}
+
+\subsubsection{State management}
+Upon commit grouping saves a copy of its state on disk. To avoid pipeline blockage it can be done asynchronous to new data arrival. Check section 4.2 of \cite{Carbone:2017:SMA:3137765.3137777}
+
+Not implemented yet but our architecture allows up to do so. 
+
+Should we write about smth that isn't ours contribution?
 
 \subsection{Guarantees}
 
 \subsubsection{At least once}
+On min time: State + replay + determinism = At least once
 
 \subsubsection{Exactly once}
+On min time: State + replay + determinism + idempotent sink = Exactly once
+
+On commit: State + replay = Exactly once
 
 
 

@@ -123,31 +123,6 @@ Sattam Alsubaiee, Alexander Behm, Raman Grover, Rares Vernica, Vinayak Borkar, M
 A growing wealth of digital information is being generated on a daily basis in social networks, blogs, online communities, etc. Organizations and researchers in a wide variety of domains recognize that there is tremendous value and insight to be gained by warehousing this emerging data and making it available for querying, analysis, and other purposes. This new breed of "Big Data" applications poses challenging requirements against data management platforms in terms of scalability, flexibility, manageability, and analysis capabilities. At UC Irvine, we are building a next-generation database system, called ASTERIX, in response to these trends. We present ongoing work that approaches the following questions: How does data get into the system? What primitives should we provide to better cope with dirty/noisy data? How can we support efficient data analysis on spatial data? Using real examples, we show the capabilities of ASTERIX for ingesting data via feeds, supporting set-similarity predicates for fuzzy matching, and answering spatial aggregation queries.
 
 
-Paris Carbone, Stephan Ewen, Gyula Fóra, Seif Haridi, Stefan Richter, and Kostas Tzoumas. 2017. State management in Apache Flink®: consistent stateful distributed stream processing. Proc. VLDB Endow. 10, 12 (August 2017), 1718-1729. DOI: https://proxy.library.spbu.ru:3316/10.14778/3137765.3137777
-
-K. Mani Chandy and Leslie Lamport. 1985. Distributed snapshots: determining global states of distributed systems. ACM Trans. Comput. Syst. 3, 1 (February 1985), 63-75. DOI=http://dx.doi.org/10.1145/214451.214456
-
-@article{Chandy:1985:DSD:214451.214456,
- author = {Chandy, K. Mani and Lamport, Leslie},
- title = {Distributed Snapshots: Determining Global States of Distributed Systems},
- journal = {ACM Trans. Comput. Syst.},
- issue_date = {Feb. 1985},
- volume = {3},
- number = {1},
- month = feb,
- year = {1985},
- issn = {0734-2071},
- pages = {63--75},
- numpages = {13},
- url = {http://doi.acm.org/10.1145/214451.214456},
- doi = {10.1145/214451.214456},
- acmid = {214456},
- publisher = {ACM},
- address = {New York, NY, USA},
-} 
-This paper presents an algorithm by which a process in a distributed system determines a global state of the system during a computation. Many problems in distributed systems can be cast in terms of the problem of detecting global states. For instance, the global state detection algorithm helps to solve an important class of problems: stable property detection. A stable property is one that persists: once a stable property becomes true it remains true thereafter. Examples of stable properties are “computation has terminated,” “ the system is deadlocked” and “all tokens in a token ring have disappeared.” The stable property detection problem is that of devising algorithms to detect a given stable property. Global state detection can also be used for checkpointing.
-
-
 @article{Carbone:2017:SMA:3137765.3137777,
  author = {Carbone, Paris and Ewen, Stephan and F\'{o}ra, Gyula and Haridi, Seif and Richter, Stefan and Tzoumas, Kostas},
  title = {State Management in Apache Flink\&Reg;: Consistent Stateful Distributed Stream Processing},
@@ -286,28 +261,6 @@ MillWheel is a framework for building low-latency data-processing applications t
 This paper describes MillWheel's programming model as well as its implementation. The case study of a continuous anomaly detector in use at Google serves to motivate how many of MillWheel's features are used. MillWheel's programming model provides a notion of logical time, making it simple to write time-based aggregations. MillWheel was designed from the outset with fault tolerance and scalability in mind. In practice, we find that MillWheel's unique combination of scalability, fault tolerance, and a versatile programming model lends itself to a wide variety of problems at Google.
 
 
-# Ankit Toshniwal, Siddarth Taneja, Amit Shukla, Karthik Ramasamy, Jignesh M. Patel, Sanjeev Kulkarni, Jason Jackson, Krishna Gade, Maosong Fu, Jake Donham, Nikunj Bhagat, Sailesh Mittal, and Dmitriy Ryaboy. 2014. Storm at twitter. In Proceedings of the 2014 ACM SIGMOD International Conference on Management of Data (SIGMOD '14). ACM, New York, NY, USA, 147-156. DOI: https://doi.org/10.1145/2588555.2595641
-
-@inproceedings{Toshniwal:2014:STO:2588555.2595641,
- author = {Toshniwal, Ankit and Taneja, Siddarth and Shukla, Amit and Ramasamy, Karthik and Patel, Jignesh M. and Kulkarni, Sanjeev and Jackson, Jason and Gade, Krishna and Fu, Maosong and Donham, Jake and Bhagat, Nikunj and Mittal, Sailesh and Ryaboy, Dmitriy},
- title = {Storm@Twitter},
- booktitle = {Proceedings of the 2014 ACM SIGMOD International Conference on Management of Data},
- series = {SIGMOD '14},
- year = {2014},
- isbn = {978-1-4503-2376-5},
- location = {Snowbird, Utah, USA},
- pages = {147--156},
- numpages = {10},
- url = {http://doi.acm.org/10.1145/2588555.2595641},
- doi = {10.1145/2588555.2595641},
- acmid = {2595641},
- publisher = {ACM},
- address = {New York, NY, USA},
- keywords = {real-time query processing, stream data management},
-} 
-This paper describes the use of Storm at Twitter. Storm is a real-time fault-tolerant and distributed stream data processing system. Storm is currently being used to run various critical computations in Twitter at scale, and in real-time. This paper describes the architecture of Storm and its methods for distributed scale-out and fault-tolerance. This paper also describes how queries (aka. topologies) are executed in Storm, and presents some operational stories based on running Storm at Twitter. We also present results from an empirical evaluation demonstrating the resilience of Storm in dealing with machine failures. Storm is under active development at Twitter and we also present some potential directions for future work.
-
-
 Nathan Marz and James Warren. 2015. Big Data: Principles and Best Practices of Scalable Realtime Data Systems (1st ed.). Manning Publications Co., Greenwich, CT, USA.
 
 @book{Marz:2015:BDP:2717065,
@@ -321,7 +274,7 @@ Nathan Marz and James Warren. 2015. Big Data: Principles and Best Practices of S
 } 
 Services like social networks, web analytics, and intelligent e-commerce often need to manage data at a scale too big for a traditional database. As scale and demand increase, so does Complexity. Fortunately, scalability and simplicity are not mutually exclusiverather than using some trendy technology, a different approach is needed. Big data systems use many machines working in parallel to store and process data, which introduces fundamental challenges unfamiliar to most developers. Big Data shows how to build these systems using an architecture that takes advantage of clustered hardware along with new tools designed specifically to capture and analyze web-scale data. It describes a scalable, easy to understand approach to big data systems that can be built and run by a small team. Following a realistic example, this book guides readers through the theory of big data systems, how to use them in practice, and how to deploy and operate them once they're built. Purchase of the print book comes with an offer of a free PDF, ePub, and Kindle eBook from Manning. Also available is all code from the book.
 
-####################################
+
 Michael Franklin. 2015. Making Sense of Big Data with the Berkeley Data Analytics Stack. In Proceedings of the Eighth ACM International Conference on Web Search and Data Mining (WSDM '15). ACM, New York, NY, USA, 1-2. DOI: http://proxy.library.spbu.ru:2083/10.1145/2684822.2685326
 
 @inproceedings{Franklin:2015:MSB:2684822.2685326,
@@ -367,7 +320,25 @@ Matei Zaharia, Reynold S. Xin, Patrick Wendell, Tathagata Das, Michael Armbrust,
 This open source computing framework unifies streaming, batch, and interactive big data workloads to unlock new applications.
 
 
+Tyler Akidau, Alex Balikov, Kaya Bekiroğlu, Slava Chernyak, Josh Haberman, Reuven Lax, Sam McVeety, Daniel Mills, Paul Nordstrom, and Sam Whittle. 2013. MillWheel: fault-tolerant stream processing at internet scale. Proc. VLDB Endow. 6, 11 (August 2013), 1033-1044. DOI: http://dx.doi.org/10.14778/2536222.2536229
 
+@article{Akidau:2013:MFS:2536222.2536229,
+ author = {Akidau, Tyler and Balikov, Alex and Bekiro\u{g}lu, Kaya and Chernyak, Slava and Haberman, Josh and Lax, Reuven and McVeety, Sam and Mills, Daniel and Nordstrom, Paul and Whittle, Sam},
+ title = {MillWheel: Fault-tolerant Stream Processing at Internet Scale},
+ journal = {Proc. VLDB Endow.},
+ issue_date = {August 2013},
+ volume = {6},
+ number = {11},
+ month = aug,
+ year = {2013},
+ issn = {2150-8097},
+ pages = {1033--1044},
+ numpages = {12},
+ url = {http://dx.doi.org/10.14778/2536222.2536229},
+ doi = {10.14778/2536222.2536229},
+ acmid = {2536229},
+ publisher = {VLDB Endowment},
+} 
+MillWheel is a framework for building low-latency data-processing applications that is widely used at Google. Users specify a directed computation graph and application code for individual nodes, and the system manages persistent state and the continuous flow of records, all within the envelope of the framework's fault-tolerance guarantees.
 
-
-
+This paper describes MillWheel's programming model as well as its implementation. The case study of a continuous anomaly detector in use at Google serves to motivate how many of MillWheel's features are used. MillWheel's programming model provides a notion of logical time, making it simple to write time-based aggregations. MillWheel was designed from the outset with fault tolerance and scalability in mind. In practice, we find that MillWheel's unique combination of scalability, fault tolerance, and a versatile programming model lends itself to a wide variety of problems at Google.
