@@ -64,9 +64,30 @@ Figure~\ref{logical-graph-figure} shows the example workflow of logical graph. P
   \label {physical-graph-figure}
 \end{figure}
 
-\subsubsection{Barrier}
+\subsection{System barriers}
 
-\subsubsection{Minimal time within stream}
+\subsubsection{Front}
+Front plays the role of data source. We assume that link between client’s data and front is reliable and stable. The failure of this link is considered as the failure of client.
+
+When data payloads are arrived to front, meta-information is assigned to them. As soon as the data obtains its meta-information, it is supposed that the system is responsible for this data. 
+
+Each front is connected to corresponding operation. Similarly to the common physical graph vertex, data is sent to the appropriate node according to the value of hash function. Figure <> shows the example of interaction between client, front, and the other graph components.
+
+\subsubsection{Sink}
+Sink is the last node in any graph. It contains a buffer for data items. The items from buffer are released at some points in time. As it was mentioned above, grouping operation can generate invalid items. Consequently, there is a need to remove them from buffer before they get out from the system.  
+
+However, there are two main difficulties. Firstly, sinks are the parts of the physical graph, so they are also partitioned by the business-logic hash function. Hence, item and corresponding invalidation item can arrive to distinct sinks. This issue can be solved by use of special partitioning for sinks by global time. Secondly, it is unclear when the items should be released from the buffer. To do it the system should ensure that there are no in-flight items which can invalidate items in buffer. The solution of this problem is detailed in the next section. 
+
+Figure~\ref{invalidation-problems-figure} illustrates possible sink issues. Red items with labels 4 and 7 got out from the system, despite the fact that they should be invalidated by corresponding green items. 
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.48\textwidth]{pics/invalidation_problems}
+  \caption{Possible sink issues}
+  \label {invalidation-problems-figure}
+\end{figure}
+
+\subsection{Minimal time within stream}
 Minimal time within stream is similar to Low watermark concept used in MillWheel~\cite{Akidau:2013:MFS:2536222.2536229}
 
 Minimal time = Low watermark
