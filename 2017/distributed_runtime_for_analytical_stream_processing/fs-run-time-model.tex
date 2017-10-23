@@ -71,10 +71,10 @@ Figure~\ref{logical-graph-ops-figure} shows the topology of each operation and h
   \centering
   \includegraphics[scale=0.5]{pics/mapreduce}
   \caption{Logical graph for MapReduce transformations}
-  \label {logical-graph-2-figure}
+  \label {mapreduce-graph-figure}
 \end{figure}
 
-Consider the dataflow that is shown on the figure~\ref {logical-graph-figure}. Data items of this stream are: {\it input} items, {\it mapped} items, and {\it reduced} items. Each type of item and the way they were generated are detailed further in this section. However, it is worth to mention that mapped and reduced items have key-value structure of payload. The operations of the stream have the following properties:
+Consider the dataflow that is shown on the figure~\ref{mapreduce-graph-figure}. Data items of this stream are: {\it input} items, {\it mapped} items, and {\it reduced} items. Each type of item and the way they were generated are detailed further in this section. However, it is worth to mention that mapped and reduced items have key-value structure of payload. The operations of the stream have the following properties:
 
 \begin{itemize}
 \item The first map operation accepts input items and outputs mapped items, according to the business logic. This operation is semantically matched with map step of MapReduce model. Additionally, it should be noted that stream onwards can contain only mapped and reduced items.
