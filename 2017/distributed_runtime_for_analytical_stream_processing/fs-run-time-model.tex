@@ -1,6 +1,8 @@
 %%%%% fs-run-time-model  Computational  Model
 
 \label {fs-model-section}
+
+
 In our model the dataflow is represented by a directed graph. This graph does not contain information about physical deployment, so further we call it {\it logical} graph or stream. Items are get into the stream through the node called {\it front} and get out through the node called {\it sink}. Fronts and sinks are detailed in the next section; now it is only important that fronts and sinks play the role of the graph enter and graph exit correspondingly. Each other node of the logical graph contains single operation, also called job. Edges show the order of these operations. The data items are processed one-by-one in a "streaming" manner. 
 
 Notably, despite the fact that commonly dataflow graphs assumed to be acyclic (DAGs), our model does not have this restriction. Moreover, as we show further in this section, there are cases when cycles are required, e.g. for reduce step in MapReduce-based algorithms. 
@@ -58,19 +60,19 @@ Figure~\ref{logical-graph-ops-figure} shows the topology of each operation and h
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.48\textwidth]{pics/operations}
+  \includegraphics[scale=0.5]{pics/operations}
   \caption{Supported operations}
   \label {logical-graph-ops-figure}
 \end{figure}
 
 \subsection{MapReduce transformations on stream}
 
-\begin{figure}[htbp]
+\begin{figure*}[htb]
   \centering
-  \includegraphics[width=0.48\textwidth]{pics/mapreduce}
+  \includegraphics[scale=0.5]{pics/mapreduce}
   \caption{Logical graph for MapReduce transformations}
   \label {logical-graph-figure}
-\end{figure}
+\end{figure*}
 
 Consider the dataflow that is shown on the figure~\ref {logical-graph-figure}. Data items of this stream are: {\it input} items, {\it mapped} items, and {\it reduced} items. Each type of item and the way they were generated are detailed further in this section. However, it is worth to mention that mapped and reduced items have key-value structure of payload. The operations of the stream have the following properties:
 
@@ -89,9 +91,9 @@ The grouping operation plays the important role in this workflow. Filter operati
 
 The example of input/output items, which are generated/ transformed by the part of the logical graph, is shown on the figure~\ref {word-count-figure}. This example represents classical MapReduce-based algorithm for word counting. Map step of this algorithm transforms each input word into key-value pair where word is the key, and the value is 1. Reduce step sums all values into the final result for specific key. According to our graph for MapReduce transformations, the item {\it m[dog, 1]/r[dog, 1]} represents mapped/reduced item with key "dog" and value 1. The figure shows how the model reacts on two consequent input items containing word "dog". The meta-information of items is omitted for simplification.
 
-\begin{figure}[htbp]
+\begin{figure}[htb]
   \centering
-  \includegraphics[width=0.48\textwidth]{pics/wordcount}
+  \includegraphics[scale=0.5]{pics/wordcount}
   \caption{Part of the stream evalutaion for word counting}
   \label {word-count-figure}
 \end{figure}

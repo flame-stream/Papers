@@ -2,24 +2,32 @@
 
 \label {fs-intro-seciton}
 
-A need to process huge amounts of data (e.g. Internet scale) was addressed by scalable distributed data processing systems such as  mapreduce. These systems are able to run data processing in a massively parallel mode on a clusters consisting of thousands of commodity computers. 
+A need to process huge amounts of data (e.g. Internet scale) was addressed by scalable distributed data processing systems such as  mapreduce. These systems are able to run data processing in a massively parallel mode on a clusters consisting of thousands of commodity computers. The main advantages of this approach are fault-tolerance and practically unlimited scalability.
 
-However, the initial models and frchitectures of this kind suffered from several drawbacks deeply analyzed in~\cite{Doulkeridis:2014:SLA:2628707.2628782,}. Many of these drawbacks were addressed in the next generation of scalable distributed data processing architectures, e.g. 
+However, the initial models and frchitectures of this kind suffered from several drawbacks are  deeply analyzed in~\cite{Doulkeridis:2014:SLA:2628707.2628782,}. 
+Many of these drawbacks were addressed in the next generation of scalable distributed data processing architectures, e.g. 
 Asterix~\cite{Alsubaiee:2012:ASW:2331801.2331803}, 
 Spark~\cite{Zaharia:2016:ASU:3013530.2934664,Franklin:2015:MSB:2684822.2685326}, 
 and Flink~\cite{Carbone:2017:SMA:3137765.3137777}. 
 
-The goal of the FlameStream (how should it be written? with a space or like here?) is to further improve performance and provide for better consistency of the output.  Specifically, the objectives are:
+The goal of the \FlameStream  is to further improve performance and provide for better consistency of the output.  Specifically, the objectives are:
 
 \begin {itemize}
+\item  The set of basic operations shoulc provide for specification of arbitrary processing workflows (similar to those found in Spark and Flink). 
+\item The computation is deterministic, that is, repeated processing of the same data should yield same output.
 \item ready on key: the output is delivered as soon as it is computed for every single key, rather than at the completion of  the whole workflow.
 \item exactly once execution: each input item is processed exactly once even in case of partial system failures. 
+\item An ability to check constranits spefified for intermediate results, 
 \end {itemize}
 
 A brief outline of the overall architecture and planned features: types, declarative workflow specification, ? ? ?
 
-This paper introduces a run-time module of the  FlameStream. 
-Add more details here.
+This paper introduces a run-time module of the \FlameStream. 
+
+The computation to be performed with \FlameStream is specified in terms of pre-defined operations that are parametrized with user-defined procedures (collectively called {\em business logic}  in the jargon of java community).  Each operation accepts a stream of data itmes characterized by a logical key and having structured value, and produces one or several output streams consisiting of data items, possible with different keys. The whole computational workflow is described in terms of a graph. The nodes of the graph represent operations, while edges describe logical routing of data items between operations. 
+
+The \FlameStream run-time organizes the data items to be processed by operations into queues  that are prioritized  based on timestamps.  The logical workflow graph is replicated to every computing unit in the cluster, providing for scalable execution. The data items are partitioned (shaffled, sharded) between computational units based on hashing. An important distinctive feature of ]FlameStream is that both timestamps (queue ordering) and destribution of data items are ont in the scope of business logic. Instead, distribution and routing is completely resolved at the system level.
+
 
 The contributions of this paper are the following:
 
