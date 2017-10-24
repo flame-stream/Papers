@@ -342,3 +342,32 @@ Tyler Akidau, Alex Balikov, Kaya Bekiroğlu, Slava Chernyak, Josh Haberman, Reuv
 MillWheel is a framework for building low-latency data-processing applications that is widely used at Google. Users specify a directed computation graph and application code for individual nodes, and the system manages persistent state and the continuous flow of records, all within the envelope of the framework's fault-tolerance guarantees.
 
 This paper describes MillWheel's programming model as well as its implementation. The case study of a continuous anomaly detector in use at Google serves to motivate how many of MillWheel's features are used. MillWheel's programming model provides a notion of logical time, making it simple to write time-based aggregations. MillWheel was designed from the outset with fault tolerance and scalability in mind. In practice, we find that MillWheel's unique combination of scalability, fault tolerance, and a versatile programming model lends itself to a wide variety of problems at Google.
+
+@article{fidge1988timestamps,
+  added-at = {2012-01-14T13:04:26.000+0100},
+  author = {Fidge, C. J.},
+  biburl = {https://www.bibsonomy.org/bibtex/2cc829c490de6ff6203758943b4d3ca84/nosebrain},
+  description = {Timestamps in message-passing systems that preserve the partial ordering | Mendeley},
+  interhash = {27bbdd2f31ec6e29b97770b3e017cddc},
+  intrahash = {cc829c490de6ff6203758943b4d3ca84},
+  journal = {Proceedings of the 11th Australian Computer Science Conference},
+  keywords = {clock vector},
+  number = 1,
+  pages = {56–66},
+  timestamp = {2012-01-14T13:04:26.000+0100},
+  title = {Timestamps in message-passing systems that preserve the partial ordering},
+  url = {http://sky.scitech.qut.edu.au/~fidgec/Publications/fidge88a.pdf},
+  volume = 10,
+  year = 1988
+}
+Timestamping is a common method of totally ordering events in concurrent programs. However, for applications requiring access to the global state, a total ordering is inappropriate. This paper presents algorithms for timestamping events in both synchronous and asynchronous n1essage-passing programs that allow for access to the partial ordering inherent in a parallel system. The algorithms do not change the con1munications graph or require a central timestamp issuing authority. 
+
+@INPROCEEDINGS{mattern88virtualtime,
+    author = {Friedemann Mattern},
+    title = {Virtual Time and Global States of Distributed Systems},
+    booktitle = {PARALLEL AND DISTRIBUTED ALGORITHMS},
+    year = {1988},
+    pages = {215--226},
+    publisher = {North-Holland}
+}
+A distributed system can be characterized by the fact that the global state is distributed and that a common time base does not exist. However, the notion of time is an important concept in every day life of our decentralized "real world" and helps to solve problems like getting a consistent population census or determining the potential causality between events. We argue that a linearly ordered structure of time is not (always) adequate for distributed systems and propose a generalized non-standardmodel of time which consists of vectors of clocks. These clock-vectors arepartially orderedand form a lattice. By using timestamps and a simple clock update mechanism the structure of causality is represented in an isomorphic way. The new model of time has a close analogy to Minkowski's relativistic spacetime and leads among others to an interesting characterization of the global state problem. Finally, we present a new algorithm to compute a consistent global snapshot of a distributed system where messages may bereceived out of order.
