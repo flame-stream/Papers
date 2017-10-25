@@ -127,18 +127,18 @@ Regarding this claim, to output item from sink buffer we should ensure that:
     \item Such items cannot be generated.
 \end{enumerate}
 
-To ensure that stream does not contain these items, we use module called {\it acker}, which idea was proposed by Apache Storm \cite{apache:storm}. Acker tracks data item within stream using a checksum hash. When item is sent or received by operation its hash is XORed into the checksum. Therefore, if all items successfully arrive at sink, the checksum is zero. 
+To ensure that stream does not contain these items, we use module called {\it acker}. Its idea was proposed by Apache Storm \cite{apache:storm}. Acker tracks data item within the stream using a checksum hash. When item is sent or received by operation, its hash is XORed into the checksum. Therefore, if all items arrive at sink successfully, the checksum is zero. 
 
 To find out the least global time of the items in stream, checksums are grouped by timestamps of global time into the structure called {\it ack table}. Hence, if the value of the specific timestamp in the ack table is zero, there are no items with corresponding global time into the stream. 
 
-Notably, to ensure that no one front would generate item with this timestamp, each front periodically sends to acker special message called {\it report}, which contains the least timestamp that front can assign to data item. The value in the ack table can become a zero only after corresponding report is arrived.  
+Notably, to ensure that no fronts would generate item with this timestamp, each front periodically sends to acker special message called {\it report}, which contains the least timestamp that can be assigned to data item by the front. The value in the ack table can become a zero only after corresponding report is arrived.  
 
-\subsection{System achitecture}
+\subsection{System architecture}
 
 \subsubsection{FlameStream API}
-To submit a graph client should describe it in terms of predefined operations, specify fronts, sinks and wrap it in a {\it tick}. Tick is a unit of graph deployment. It consist of an {\it id}, {\it tick start}, {\it duration}, {\it state dependencies}, {\it hash mappings} and a graph itself. Tick start and duration specifies which input events that arrive at the front belongs to the tick. State dependencies is a set of tick ids on which states current tick depends. Hash mapping is a map from a hash range to computation unit id. 
+To submit a graph, client should describe it in terms of predefined operations, specify fronts, sinks and wrap them in a {\it tick}. Tick is a unit of graph deployment. It consists of an {\it id}, {\it tick start timestamp}, {\it duration}, {\it state dependencies}, {\it hash mappings} and the graph itself. Tick start timestamp and duration specify which input events belongs to the tick. State dependencies are a set of tick ids on which states the current tick depends. Hash mapping is a map from a hash range to computation unit id. 
 
-A typical deployment would be 5-second ticks with the same graph and each tick depends on the state of the previous one. In case of sudden load growth, subsequent ticks could be deployed with different hash mapping, splitting some hash ranges.
+A typical deployment would be 5-second ticks with the same graph and each tick depends on the state of the previous one. In the case of sudden load growth, subsequent ticks could be deployed with different hash mapping, splitting some hash ranges.
 
 The reason for such design is that main client of FlameStream is a {\it type inference} system which builds an optimal graph from higher-level language based on a query, current load, a performance of operations, a metrics etc. The need for frequent graph redeployment support on the lowest level is crucial for our system.
 
