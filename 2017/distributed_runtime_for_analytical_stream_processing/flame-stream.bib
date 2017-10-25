@@ -21,6 +21,26 @@ Jeffrey Dean and Sanjay Ghemawat. 2008. MapReduce: simplified data processing on
 MapReduce is a programming model and an associated implementation for processing and generating large datasets that is amenable to a broad variety of real-world tasks. Users specify the computation in terms of a map and a reduce function, and the underlying runtime system automatically parallelizes the computation across large-scale clusters of machines, handles machine failures, and schedules inter-machine communication to make efficient use of the network and disks. Programmers find the system easy to use: more than ten thousand distinct MapReduce programs have been implemented internally at Google over the past four years, and an average of one hundred thousand MapReduce jobs are executed on Google's clusters every day, processing a total of more than twenty petabytes of data per day.
 
 
+Carbone, P., Katsifodimos, A., Ewen, S., Markl, V., Haridi, S. and Tzoumas, K., 2015. Apache flink: Stream and batch processing in a single engine. Bulletin of the IEEE Computer Society Technical Committee on Data Engineering, 36(4).
+Vancouver	
+
+@article{carbone2015apache,
+  title={Apache flink: Stream and batch processing in a single engine},
+  author={Carbone, Paris and Katsifodimos, Asterios and Ewen, Stephan and Markl, Volker and Haridi, Seif and Tzoumas, Kostas},
+  journal={Bulletin of the IEEE Computer Society Technical Committee on Data Engineering},
+  volume={36},
+  number={4},
+  year={2015},
+  publisher={IEEE Computer Society}
+}
+Apache Flink is an open-source system for processing streaming and batch data. Flink is built on the
+philosophy that many classes of data processing applications, including real-time analytics, continuous
+data pipelines, historic data processing (batch), and iterative algorithms (machine learning, graph
+analysis) can be expressed and executed as pipelined fault-tolerant dataflows. In this paper, we present
+Flink’s architecture and expand on how a (seemingly diverse) set of use cases can be unified under a
+single execution model
+
+
 Gábor Horváth, Norbert Pataki, and Márton Balassi. 2017. Code Generation in Serializers and Comparators of Apache Flink. In Proceedings of the 12th Workshop on Implementation, Compilation, Optimization of Object-Oriented Languages, Programs and Systems (ICOOOLPS'17). ACM, New York, NY, USA, Article 5, 6 pages. DOI: https://proxy.library.spbu.ru:3316/10.1145/3098572.3098579
 
 @inproceedings{Horvath:2017:CGS:3098572.3098579,
@@ -49,6 +69,7 @@ Apache Flink is an open source framework for processing streams of data and batc
 Currently, Apache Flink uses reflection to serialize Plain Old Java Objects (POJOs). Reflection in Java is notoriously slow. Moreover, the structure of the code is harder to optimize for the JIT compiler. As a Google Summer of Code project in 2016, we implemented code generation for serializers and comparators for POJOs to improve the performance of Apache Flink. Flink has a delicate type system which provides us with lots of information about the types that need to be serialized. Using this information it is possible to generate specialized code with great performance.
 
 We achieved more than 6X performance improvement in the serialization which was a 20% overall improvement.
+
 
 
 
@@ -320,28 +341,7 @@ Matei Zaharia, Reynold S. Xin, Patrick Wendell, Tathagata Das, Michael Armbrust,
 This open source computing framework unifies streaming, batch, and interactive big data workloads to unlock new applications.
 
 
-Tyler Akidau, Alex Balikov, Kaya Bekiroğlu, Slava Chernyak, Josh Haberman, Reuven Lax, Sam McVeety, Daniel Mills, Paul Nordstrom, and Sam Whittle. 2013. MillWheel: fault-tolerant stream processing at internet scale. Proc. VLDB Endow. 6, 11 (August 2013), 1033-1044. DOI: http://dx.doi.org/10.14778/2536222.2536229
-
-@article{Akidau:2013:MFS:2536222.2536229,
- author = {Akidau, Tyler and Balikov, Alex and Bekiro\u{g}lu, Kaya and Chernyak, Slava and Haberman, Josh and Lax, Reuven and McVeety, Sam and Mills, Daniel and Nordstrom, Paul and Whittle, Sam},
- title = {MillWheel: Fault-tolerant Stream Processing at Internet Scale},
- journal = {Proc. VLDB Endow.},
- issue_date = {August 2013},
- volume = {6},
- number = {11},
- month = aug,
- year = {2013},
- issn = {2150-8097},
- pages = {1033--1044},
- numpages = {12},
- url = {http://dx.doi.org/10.14778/2536222.2536229},
- doi = {10.14778/2536222.2536229},
- acmid = {2536229},
- publisher = {VLDB Endowment},
-} 
-MillWheel is a framework for building low-latency data-processing applications that is widely used at Google. Users specify a directed computation graph and application code for individual nodes, and the system manages persistent state and the continuous flow of records, all within the envelope of the framework's fault-tolerance guarantees.
-
-This paper describes MillWheel's programming model as well as its implementation. The case study of a continuous anomaly detector in use at Google serves to motivate how many of MillWheel's features are used. MillWheel's programming model provides a notion of logical time, making it simple to write time-based aggregations. MillWheel was designed from the outset with fault tolerance and scalability in mind. In practice, we find that MillWheel's unique combination of scalability, fault tolerance, and a versatile programming model lends itself to a wide variety of problems at Google.
+Fidge, C.J., 1987. Timestamps in message-passing systems that preserve the partial ordering.
 
 @article{fidge1988timestamps,
   added-at = {2012-01-14T13:04:26.000+0100},
@@ -362,6 +362,9 @@ This paper describes MillWheel's programming model as well as its implementation
 }
 Timestamping is a common method of totally ordering events in concurrent programs. However, for applications requiring access to the global state, a total ordering is inappropriate. This paper presents algorithms for timestamping events in both synchronous and asynchronous n1essage-passing programs that allow for access to the partial ordering inherent in a parallel system. The algorithms do not change the con1munications graph or require a central timestamp issuing authority. 
 
+
+Mattern, F., 1989. Virtual time and global states of distributed systems. Parallel and Distributed Algorithms, 1(23), pp.215-226.
+
 @INPROCEEDINGS{mattern88virtualtime,
     author = {Friedemann Mattern},
     title = {Virtual Time and Global States of Distributed Systems},
@@ -371,3 +374,63 @@ Timestamping is a common method of totally ordering events in concurrent program
     publisher = {North-Holland}
 }
 A distributed system can be characterized by the fact that the global state is distributed and that a common time base does not exist. However, the notion of time is an important concept in every day life of our decentralized "real world" and helps to solve problems like getting a consistent population census or determining the potential causality between events. We argue that a linearly ordered structure of time is not (always) adequate for distributed systems and propose a generalized non-standardmodel of time which consists of vectors of clocks. These clock-vectors arepartially orderedand form a lattice. By using timestamps and a simple clock update mechanism the structure of causality is represented in an isomorphic way. The new model of time has a close analogy to Minkowski's relativistic spacetime and leads among others to an interesting characterization of the global state problem. Finally, we present a new algorithm to compute a consistent global snapshot of a distributed system where messages may bereceived out of order.
+
+
+Derek G. Murray, Frank McSherry, Rebecca Isaacs, Michael Isard, Paul Barham, and Martín Abadi. 2013. Naiad: a timely dataflow system. In Proceedings of the Twenty-Fourth ACM Symposium on Operating Systems Principles (SOSP '13). ACM, New York, NY, USA, 439-455. DOI: https://doi.org/10.1145/2517349.2522738
+
+@inproceedings{Murray:2013:NTD:2517349.2522738,
+ author = {Murray, Derek G. and McSherry, Frank and Isaacs, Rebecca and Isard, Michael and Barham, Paul and Abadi, Mart\'{\i}n},
+ title = {Naiad: A Timely Dataflow System},
+ booktitle = {Proceedings of the Twenty-Fourth ACM Symposium on Operating Systems Principles},
+ series = {SOSP '13},
+ year = {2013},
+ isbn = {978-1-4503-2388-8},
+ location = {Farminton, Pennsylvania},
+ pages = {439--455},
+ numpages = {17},
+ url = {http://doi.acm.org/10.1145/2517349.2522738},
+ doi = {10.1145/2517349.2522738},
+ acmid = {2522738},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+} 
+Naiad is a distributed system for executing data parallel, cyclic dataflow programs. It offers the high throughput of batch processors, the low latency of stream processors, and the ability to perform iterative and incremental computations. Although existing systems offer some of these features, applications that require all three have relied on multiple platforms, at the expense of efficiency, maintainability, and simplicity. Naiad resolves the complexities of combining these features in one framework.
+
+A new computational model, timely dataflow, underlies Naiad and captures opportunities for parallelism across a wide class of algorithms. This model enriches dataflow computation with timestamps that represent logical points in the computation and provide the basis for an efficient, lightweight coordination mechanism.
+
+We show that many powerful high-level programming models can be built on Naiad's low-level primitives, enabling such diverse tasks as streaming data analysis, iterative machine learning, and interactive graph mining. Naiad outperforms specialized systems in their target application domains, and its unique features enable the development of new high-performance applications.
+
+
+@online{apache:storm,
+  title = {Apache Storm},
+  url = {http://storm.apache.org/}
+}
+Apache Storm is a free and open source distributed realtime computation system. Storm makes it easy to reliably process unbounded streams of data, doing for realtime processing what Hadoop did for batch processing. Storm is simple, can be used with any programming language, and is a lot of fun to use!
+
+Storm has many use cases: realtime analytics, online machine learning, continuous computation, distributed RPC, ETL, and more. Storm is fast: a benchmark clocked it at over a million tuples processed per second per node. It is scalable, fault-tolerant, guarantees your data will be processed, and is easy to set up and operate.
+
+Storm integrates with the queueing and database technologies you already use. A Storm topology consumes streams of data and processes those streams in arbitrarily complex ways, repartitioning the streams between each stage of the computation however needed. Read more in the tutorial.
+
+
+Shadi A. Noghabi, Kartik Paramasivam, Yi Pan, Navina Ramesh, Jon Bringhurst, Indranil Gupta, and Roy H. Campbell. 2017. Samza: stateful scalable stream processing at LinkedIn. Proc. VLDB Endow. 10, 12 (August 2017), 1634-1645. DOI: https://doi.org/10.14778/3137765.3137770
+
+@article{Noghabi:2017:SSS:3137765.3137770,
+ author = {Noghabi, Shadi A. and Paramasivam, Kartik and Pan, Yi and Ramesh, Navina and Bringhurst, Jon and Gupta, Indranil and Campbell, Roy H.},
+ title = {Samza: Stateful Scalable Stream Processing at LinkedIn},
+ journal = {Proc. VLDB Endow.},
+ issue_date = {August 2017},
+ volume = {10},
+ number = {12},
+ month = aug,
+ year = {2017},
+ issn = {2150-8097},
+ pages = {1634--1645},
+ numpages = {12},
+ url = {https://doi.org/10.14778/3137765.3137770},
+ doi = {10.14778/3137765.3137770},
+ acmid = {3137770},
+ publisher = {VLDB Endowment},
+} 
+Distributed stream processing systems need to support stateful processing, recover quickly from failures to resume such processing, and reprocess an entire data stream quickly. We present Apache Samza, a distributed system for stateful and fault-tolerant stream processing. Samza utilizes a partitioned local state along with a low-overhead background changelog mechanism, allowing it to scale to massive state sizes (hundreds of TB) per application. Recovery from failures is sped up by re-scheduling based on Host Affinity. In addition to processing infinite streams of events, Samza supports processing a finite dataset as a stream, from either a streaming source (e.g., Kafka), a database snapshot (e.g., Databus), or a file system (e.g. HDFS), without having to change the application code (unlike the popular Lambda-based architectures which necessitate maintenance of separate code bases for batch and stream path processing).
+
+Samza is currently in use at LinkedIn by hundreds of production applications with more than 10, 000 containers. Samza is an open-source Apache project adopted by many top-tier companies (e.g., LinkedIn, Uber, Netflix, TripAdvisor, etc.). Our experiments show that Samza: a) handles state efficiently, improving latency and throughput by more than 100X compared to using a remote storage; b) provides recovery time independent of state size; c) scales performance linearly with number of containers; and d) supports reprocessing of the data stream quickly and with minimal interference on real-time traffic.

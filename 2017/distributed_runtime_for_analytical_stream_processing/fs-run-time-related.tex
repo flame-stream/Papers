@@ -2,7 +2,21 @@
 
 \label {fs-related-section}
 
-Definitely Flink must be mentioned, but the reference should be more relevant than~\cite{Horvath:2017:CGS:3098572.3098579}.
+\subsection{Dataflow}
+Naiad~\cite{Murray:2013:NTD:2517349.2522738} used cycles for iterative processing and logical timestamps to monitor progress. In contrast to their pessimistic approach, using the notification to propagate the latest timestamp, we optimistically produce possibly invalid items and filter them down the stream such approach reduces latencies in reorder-free cases.
 
-Another eco-system that cannot be avoided is Spark, and again the refirence might be better tan this~\cite{Chen:2016:DRE:3006299.3006326}.
+Using map and group operations as core processing primitives was expressed in the Dataflow model~\cite{Akidau:2015:DMP:2824032.2824076}. FlameStream grouping is aligned with fixed-sized sliding window, other kinds of windows: fixed, session is possible to implement with cycle and grouping by window-affiliation hash. Later approach keeps the model simpier by eliminating window assignment from business logic.
+
+\subsection{Delivery guaranties}
+To track minimal time within stream FlameStream uses acker, an adaptation of Storm's~\cite{apache:storm} {\it acker task}. The original parental relationship between messages that induces a tree is extended with invalidation relation between subtrees. Unlike Storm, {\it xor} optimization couldn't fully free from the burden of tree management. The full history of item's transformation must travel with it, possibly introducing additional overhead.
+
+\subsection{State management}
+TODO after state management chapter.
+
+Flink~\cite{carbone2015apache} async snapshots, solve many problems but there are some left. Eg. state management.
+
+Apache Samza~\cite{Noghabi:2017:SSS:3137765.3137770} should be mentioned but I haven't read the paper yet:).
+
+\subsection{Other streaming systems}
+Spark~\cite{Zaharia:2012:DSE:2342763.2342773}, combines batch and strem. Sacrifice latency.
 
