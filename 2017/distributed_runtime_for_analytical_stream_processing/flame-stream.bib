@@ -434,3 +434,61 @@ Shadi A. Noghabi, Kartik Paramasivam, Yi Pan, Navina Ramesh, Jon Bringhurst, Ind
 Distributed stream processing systems need to support stateful processing, recover quickly from failures to resume such processing, and reprocess an entire data stream quickly. We present Apache Samza, a distributed system for stateful and fault-tolerant stream processing. Samza utilizes a partitioned local state along with a low-overhead background changelog mechanism, allowing it to scale to massive state sizes (hundreds of TB) per application. Recovery from failures is sped up by re-scheduling based on Host Affinity. In addition to processing infinite streams of events, Samza supports processing a finite dataset as a stream, from either a streaming source (e.g., Kafka), a database snapshot (e.g., Databus), or a file system (e.g. HDFS), without having to change the application code (unlike the popular Lambda-based architectures which necessitate maintenance of separate code bases for batch and stream path processing).
 
 Samza is currently in use at LinkedIn by hundreds of production applications with more than 10, 000 containers. Samza is an open-source Apache project adopted by many top-tier companies (e.g., LinkedIn, Uber, Netflix, TripAdvisor, etc.). Our experiments show that Samza: a) handles state efficiently, improving latency and throughput by more than 100X compared to using a remote storage; b) provides recovery time independent of state size; c) scales performance linearly with number of containers; and d) supports reprocessing of the data stream quickly and with minimal interference on real-time traffic.
+
+
+Hunt, P., Konar, M., Junqueira, F.P. and Reed, B., 2010, June. ZooKeeper: Wait-free Coordination for Internet-scale Systems. In USENIX annual technical conference (Vol. 8, p. 9).
+
+@inproceedings{hunt2010zookeeper,
+  title={ZooKeeper: Wait-free Coordination for Internet-scale Systems.},
+  author={Hunt, Patrick and Konar, Mahadev and Junqueira, Flavio Paiva and Reed, Benjamin},
+  booktitle={USENIX annual technical conference},
+  volume={8},
+  pages={9},
+  year={2010},
+  organization={Boston, MA, USA}
+}
+In this paper, we describe ZooKeeper, a service for coordinating
+processes of distributed applications. Since
+ZooKeeper is part of critical infrastructure, ZooKeeper
+aims to provide a simple and high performance kernel
+for building more complex coordination primitives at the
+client. It incorporates elements from group messaging,
+shared registers, and distributed lock services in a replicated,
+centralized service. The interface exposed by ZooKeeper
+has the wait-free aspects of shared registers with
+an event-driven mechanism similar to cache invalidations
+of distributed file systems to provide a simple, yet powerful
+coordination service.
+The ZooKeeper interface enables a high-performance
+service implementation. In addition to the wait-free
+property, ZooKeeper provides a per client guarantee of
+FIFO execution of requests and linearizability for all requests
+that change the ZooKeeper state. These design decisions
+enable the implementation of a high performance
+processing pipeline with read requests being satisfied by
+local servers. We show for the target workloads, 2:1
+to 100:1 read to write ratio, that ZooKeeper can handle
+tens to hundreds of thousands of transactions per second.
+This performance allows ZooKeeper to be used extensively
+by client applications.
+
+
+Kreps, J., Narkhede, N. and Rao, J., 2011, June. Kafka: A distributed messaging system for log processing. In Proceedings of the NetDB (pp. 1-7).
+
+@inproceedings{kreps2011kafka,
+  title={Kafka: A distributed messaging system for log processing},
+  author={Kreps, Jay and Narkhede, Neha and Rao, Jun and others},
+  year={2011}
+}
+Log processing has become a critical component of the data
+pipeline for consumer internet companies. We introduce Kafka, a
+distributed messaging system that we developed for collecting and
+delivering high volumes of log data with low latency. Our system
+incorporates ideas from existing log aggregators and messaging
+systems, and is suitable for both offline and online message
+consumption. We made quite a few unconventional yet practical
+design choices in Kafka to make our system efficient and scalable.
+Our experimental results show that Kafka has superior
+performance when compared to two popular messaging systems.
+We have been using Kafka in production for some time and it is
+processing hundreds of gigabytes of new data each day.
