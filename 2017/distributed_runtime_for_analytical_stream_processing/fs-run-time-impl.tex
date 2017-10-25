@@ -80,7 +80,7 @@ Figure~\ref{logical-graph-figure} shows the example workflow of logical graph. P
 \subsubsection{Front}
 Front plays the role of data source. We assume that link between client's data and front is reliable and stable. The failure of this link is considered as the failure of client.
 
-When data payloads are arrived to front, meta-information is assigned to them. As soon as the data obtains its meta-information, it is supposed that the system is responsible for this data. 
+When data payloads are arrived at front, meta-information is assigned to them. As soon as the data obtains its meta-information, it is supposed that the system is responsible for this data. 
 
 Each front is connected to corresponding operation. Similarly to the common physical graph vertex, data is sent to the appropriate node according to the value of hash function. Figure~\ref{front-figure} shows the example of interaction between client, front, and the other graph components.
 
@@ -94,7 +94,7 @@ Each front is connected to corresponding operation. Similarly to the common phys
 \subsubsection{Sink}
 Sink is the node which outputs items from the graph. It contains a buffer for data items. The items from buffer are released at some points in time. As it was mentioned above, grouping operation can generate invalid items. Consequently, there is a need to remove them from buffer before they get out from the system.  
 
-However, there are two main difficulties. Firstly, sinks are the parts of the physical graph, so they are also partitioned by the business-logic hash function. Hence, item and corresponding invalidation item can arrive to distinct sinks. This issue can be solved by use of special partitioning for sinks by global time. Secondly, it is unclear when the items should be released from the buffer. To do it the system should ensure that there are no in-flight items which can invalidate items in buffer. The solution of this problem is detailed in the next section. 
+However, there are two main difficulties. Firstly, sinks are the parts of the physical graph, so they are also partitioned by the business-logic hash function. Hence, item and corresponding invalidation item can arrive at distinct sinks. This issue can be solved by use of special partitioning for sinks by global time. Secondly, it is unclear when the items should be released from the buffer. To do it the system should ensure that there are no in-flight items which can invalidate items in buffer. The solution of this problem is detailed in the next section. 
 
 Figure~\ref{invalidation-problems-figure} illustrates possible sink issues. Red items with labels 4 and 7 got out from the system, despite the fact that they should be invalidated by corresponding green items. 
 
@@ -106,11 +106,32 @@ Figure~\ref{invalidation-problems-figure} illustrates possible sink issues. Red 
 \end{figure}
 
 \subsection{Minimal time within stream}
-Minimal time within stream is similar to Low watermark concept used in MillWheel~\cite{Akidau:2013:MFS:2536222.2536229}
+In the previous subsection possible approach to output only correct items from sink was demonstrated. However, there is a need to ensure that there are no in-flight data items which can invalidate items in the sink buffer. In this subsection we offer sufficient condition that stream does not contain such items. Additionally, we describe how this condition is used in implementation.
 
-Minimal time = Low watermark
+\newtheorem{minimal-time-claim}{Claim}
 
-OnMinTime = Timer trigger
+\begin{minimal-time-claim}
+Let {\it D} represent data item in sink buffer and let {\it GT} represent its global time. If the items with global time less than or equal to {\it GT} do not exist and cannot appear in the stream, then all items that invalidate {\it D} had already arrived at the sink buffer.
+\end{minimal-time-claim}
+\begin{proof}
+Let {\it $D\prime$} invalidate {\it D}. According to the definition of invalidation relation, {\it $D\prime$} and {\it D} have the same global time {\it GT}, but different traces of local times. Let {\it LT} and {\it $LT\prime$} be the first distinct local times of {\it D} and {\it $D\prime$} respectively. Such difference could appear only as a result of grouping replay. Hence, {\it D} and {\it $D\prime$} are tuple items.
+
+The global time of tuple item is inherited from the last item in the tuple, i.e. the last item in tuple {\it $D\prime$} has global time {\it GT}. Therefore, considering the properties of grouping operation, {\it $D\prime$} could be generated only if item with global time less than or equal to {\it GT} arrived at grouping. 
+
+This implies that if stream does not contain items with global time less than or equal to {\it GT} and such items cannot appear, then all items which invalidate {\it D} had already arrived at sink buffer. 
+\end{proof}
+
+Regarding this claim, to output item from sink buffer we should ensure that:
+\begin{enumerate}
+    \item There are no items in stream with global time less than or equal to the global time of this item;
+    \item Such items cannot be generated.
+\end{enumerate}
+
+To ensure that stream does not contain these items, we use module called {\it acker}, which idea was proposed by Apache Storm \cite{apache:storm}. Acker tracks data item within stream using a checksum hash. When item is sent or received by operation its hash is XORed into the checksum. Therefore, if all items successfully arrive at sink, the checksum is zero. 
+
+To find out the least global time of the items in stream, checksums are grouped by timestamps of global time into the structure called {\it ack table}. Hence, if the value of the specific timestamp in the ack table is zero, there are no items with corresponding global time into the stream. 
+
+Notably, to ensure that no one front would generate item with this timestamp, each front periodically sends to acker special message called {\it report}, which contains the least timestamp that front can assign to data item. The value in the ack table can become a zero only after corresponding report is arrived.  
 
 \subsection{System achitecture}
 
