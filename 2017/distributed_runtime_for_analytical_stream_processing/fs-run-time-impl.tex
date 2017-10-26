@@ -136,11 +136,11 @@ Notably, to ensure that no fronts would generate item with this timestamp, each 
 \subsection{System architecture}
 
 \subsubsection{FlameStream API}
-To submit a graph, client should describe it in terms of predefined operations, specify fronts, sinks and wrap them in a {\it tick}. Tick is a unit of graph deployment. It consists of an {\it id}, {\it tick start timestamp}, {\it duration}, {\it state dependencies}, {\it hash mappings} and the graph itself. Tick start timestamp and duration specify which input events belongs to the tick. State dependencies are a set of tick ids on which states the current tick depends. Hash mapping is a map from a hash range to computation unit id. 
+To submit the graph, client should describe it in terms of predefined operations, specify fronts, sinks, and wrap them in a {\it tick}. Tick is a unit of graph deployment. It consists of an {\it tick start timestamp}, {\it duration}, {\it state dependencies}, {\it hash mappings} and the graph itself. Tick start timestamp and duration specify which data items belong to the tick, according to their global time. State dependencies represent the set of ticks, which the current tick depends on. Hash mapping is a map from a hash ranges to computational units. 
 
-A typical deployment would be 5-second ticks with the same graph and each tick depends on the state of the previous one. In the case of sudden load growth, subsequent ticks could be deployed with different hash mapping, splitting some hash ranges.
+Typically, deployment is assumed to be within several seconds ticks with the same graph, and each tick depends on the state of the previous one. In the case of sudden load growth, subsequent ticks could be deployed with different hash mapping, splitting some hash ranges.
 
-The reason for such design is that main client of FlameStream is a {\it type inference} system which builds an optimal graph from higher-level language based on a query, current load, a performance of operations, a metrics etc. The need for frequent graph redeployment support on the lowest level is crucial for our system.
+We suppose that the main client of FlameStream would be a system which builds graph based on declarative language. However, the performance of graph execution can be influenced by current load, the performance of operations, metrics, etc. Hence, graph redeployment is a crucial goal for our system.
 
 \subsubsection{Process model}
 Figure~\ref{system-arch} shows the FlameStream process model. It is a homogenous set of worker nodes and a Zookeeper~\cite{hunt2010zookeeper} cluster. 
