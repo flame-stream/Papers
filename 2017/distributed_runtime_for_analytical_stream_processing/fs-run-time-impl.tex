@@ -136,20 +136,27 @@ Notably, to ensure that no fronts would generate item with this timestamp, each 
 \subsection{System architecture}
 
 \subsubsection{FlameStream API}
-To submit the graph, client should describe it in terms of predefined operations, specify fronts, sinks, and wrap them in a {\it tick}. Tick is a unit of graph deployment. It consists of an {\it tick start timestamp}, {\it duration}, {\it state dependencies}, {\it hash mappings} and the graph itself. Tick start timestamp and duration specify which data items belong to the tick, according to their global time. State dependencies represent the set of ticks, which the current tick depends on. Hash mapping is a map from a hash ranges to computational units. 
+To submit the graph, client should describe it in terms of predefined operations, specify fronts, sinks, and wrap them in a {\it tick}. Tick is a unit of graph deployment. It consists of an {\it tick start timestamp}, {\it duration}, {\it state dependencies}, {\it hash mappings} and the graph itself. Tick start timestamp and duration specify which data items belong to the tick, according to their global time. State dependencies represent the set of ticks, which the current tick depends on. Hash mapping shows the relation between hash ranges and computational units. 
 
-Typically, deployment is assumed to be within several seconds ticks with the same graph, and each tick depends on the state of the previous one. In the case of sudden load growth, subsequent ticks could be deployed with different hash mapping, splitting some hash ranges.
+Typically, ticks have duration of several seconds, and each tick depends on the state of the previous one. In the case of sudden load growth, subsequent ticks could be deployed with different hash mapping, splitting some hash ranges.
 
-We suppose that the main client of FlameStream would be a system which builds graph based on declarative language. However, the performance of graph execution can be influenced by current load, the performance of operations, metrics, etc. Hence, graph redeployment is a crucial goal for our system.
+We suppose that the main client of FlameStream would be a system which builds graph based on declarative language. However, the performance of graph execution can be influenced by current load, the performance of operations, metrics, etc. Hence, frequent graph redeployment is a crucial goal for our system.
 
 \subsubsection{Process model}
-Figure~\ref{system-arch} shows the FlameStream process model. It is a homogenous set of worker nodes and a Zookeeper~\cite{hunt2010zookeeper} cluster. 
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.48\textwidth]{pics/process-model}
+  \caption{FlameStream process model}
+  \label {process-model}
+\end{figure}
 
-Zookeeper is used to store cluster configuration: cluster management, IP to computation unit mapping, workers and fronts locations, types of fronts and for coordination: state management, ticks, and its statuses. Such extensive usage of Zookeeper mitigates the need for the dedicated master node.
+Figure~\ref{process-model} shows the FlameStream process model. It is represented by a homogenous set of worker nodes and a Zookeeper~\cite{hunt2010zookeeper} cluster.  
 
-Workers execute graph, one for each tick and hash range and manage part of the state that belongs to the graph. Acker is deployed to one of the workers that is randomly chosen. There is one acker per tick. If the new graph is the same as the old part of the steps can be omitted.
+The purpose of workers is to execute graph. Additionally, they manage corresponding part of the state. There is one worker for each hash range within tick. Acker is deployed to the randomly chosen worker. There is one acker per tick. 
 
-To deploy a tick a client writes it to the Zookeeper. Workers are notified when the new tick appears. They set up a new graph, waits for the relevant state on which tick depends and fetch it once it is ready.
+Zookepeer is used for cluster configuration and coordination. Particularly, it stores cluster management information, mapping from IP to computation unit, workers and fronts locations, etc. Regarding coordination, it handles ticks and their statuses. Such extensive usage of Zookeeper mitigates the need for the dedicated master node.
+
+To deploy a tick, client writes it to the Zookeeper. Workers are notified when the new tick appears. Initially, they wait for the relevant state if needed. After that, they set up a new graph.
 
 \subsection{Fault-tolerance}
 The runtime supports exactly-once computation semantics. In failure-free case, it is trivial to provide such guarantees. In presence of process failures system should be able to restore consistent state and replay lost items if any. FlameStream here relies on reply property of a front. It is expected that front is able to replay any number of events. Such front could be a file, database table, of message broker e.g. Apache Kafka~\cite{kreps2011kafka} or Amazon Kinesis~\cite{amazon-kinesis}. 
