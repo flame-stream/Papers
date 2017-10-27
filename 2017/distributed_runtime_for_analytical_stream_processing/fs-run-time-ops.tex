@@ -22,6 +22,8 @@ To completely clarify the semantics of this operation, consider the following ex
 
 \[(1), (2), (1|3), (2|4), (1|3|5), (2|4|6), (3|5|7), (4|6|8)...\]
 
+The result tuple is ordered by meta-information, the latter elemens were produced after the beginning ones. 
+
 The important property of the grouping is that the result is uniquely determined by the last element in the tuple. Therefore, grouping is the bijective mapping. Additionally, the results among items with different values of hash function are independent.
 
 \subsection{User-defined parameters}
