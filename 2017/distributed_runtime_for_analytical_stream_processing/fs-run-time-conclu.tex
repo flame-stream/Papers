@@ -2,19 +2,19 @@
 
 \label {fs-conclusion-tection}
 
-In this paper we introduced the model and 
+In this paper we introduced the model and corresponding implementation of distributed scalable stream processing system. Our contribution consists of the following key ideas:
 
-Stateless model & MapReduce completeness.
+\begin{itemize}
+    \item Computational model is stateless from the business-logic point of view. This property allows user to not care about direct state management. Nevertheless,
+ the model is MapReduce complete. MapReduce was adopted to solve a wide range of analytical and algorithmic tasks [refs??], therefore our system can be applied to them as well.
+    \item Partitioning of operations is defined by business-logic. Such approach is motivated by the fact that typically user has deeper knowledge of underlaying data distribution.
+    \item The collision management is implemented in optimistic manner. We suppose that failures are unavoidable, but, at the same time, quite infrequent events. Hence, unlike prevention-based collision management, optimistic approach does not impose overhead in the case of nothing is failed.
+    \item The computation process is deterministic up to the time assignment at fronts.     
+\end{itemize}
 
-Business logic-managed partitioning.
+Additionally, we introduced a new way to determine a moment when data items can be released from stream without loosing exactly-once guarantee, which we called adaptive micro-batching.
 
-Adaptive micro-batching.
-
-Optimistic collision management.
-
-Deterministic behavior.
-
-Small latency vs Flink on real-life computations.
+Eventually, we showed that our system outperforms Apache Flink on the real-life computations.
 
 
 
