@@ -2,9 +2,10 @@
 
 \label {fs-timing-model}
 
-There is an explicit total order on dataitems. Once element is produced at front it is assigned a GlobalTime, current wall-clock of the front. This allows to order items across different fronts. This ordering is preserve even after operations that is the order of images is the same as order of preimage. Moreover the image of the first element is greater than its preimage but less than the second element. It is shown on figure 7.
+As it was mentioned above, meta-information imposes explicit total order on data items. Without diving into the details, it should be noted that the order of items is maintained across different fronts.
 
+Let {\it image} is an output data item of an operation and {\it preimage} is a corresponding input item. In this terms, the order of images is preserved, i.e. the order of images is the same as the order of preimages. Moreover, the image of the item is greater than its preimage but less than the next item. The concept of ordering is shown on the figure <>.
 
-The semantic of operation asume that input elements are strictly ordered. The particular form of meta-information that has such ordering properties is shown in the following sections.
+We assume that input items of the operations are strictly ordered. The approach for satisfying such ordering properties is detailed in the following sections.
 
-It is worth mentioning that after assigning the GlobalTime at the front the rest of computations is determined.
+It is worth to mention, that after the meta-data is assigned to data item at the front, the rest of computations become deterministic.

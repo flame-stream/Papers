@@ -6,4 +6,4 @@ The top level of our data flow abstraction is a {\it stream}. Stream is represen
 
 \[DataItem := (payload, Meta)\]
 
-Data payloads are got in stream through {\it front} and got out through {\it barrier}. Particularly, front creates data items from input payloads by assigning them meta-data. Inside stream, data items can be dropped or their payloads can be transformed. Eventually, barrier removes meta-information and outputs back pure payloads. The concept of the stream is shown on the figure <>.
+Data payloads are got in stream through {\it front} and got out through {\it barrier}. Particularly, front creates data items from input payloads by assigning them meta-data. Inside stream, data items can be dropped or their payloads and metas can be transformed. Eventually, barrier removes meta-information and outputs back pure payloads. The concept of the stream is shown on the figure <>.
