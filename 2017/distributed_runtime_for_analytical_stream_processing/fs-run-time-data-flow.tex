@@ -1,2 +1,9 @@
-%% It is just an empty TeX file.
-%% Write your code here.
+%%%% fs-run-time-data-flow  FlameStream data flow
+
+\label {fs-data-flow}
+
+Our main entity is a stream. Stream is an ordered unlimited sequence of DataItems. DataItems is a unstructured payload and a structured meta-data associated with it. Meta-data is used primarily for ordering. There is a total order on meta-data.
+
+\subsection{Scope of FlameStream}
+
+There is a front and barrier. Front is an entrance, barrier is an exit. Front assignes meta-data, barrier removes it. See figure 1. Everything in between is an ordered stream of dataitems that is managed by runtime. 
