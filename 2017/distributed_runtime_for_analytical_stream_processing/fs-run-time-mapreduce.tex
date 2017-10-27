@@ -2,6 +2,12 @@
 
 \label {fs-mapreduce}
 
+In this section, we demonstrate a way of implementation of MapReduce-like transformation on a stream in order to show soundness of our model. Map stage of MapReduce is directly mapped on the map operation. However, it is not obvious how to implement reduce step, because it requires an explicit state handling. 
+
+The pseudo-code of the classical MapReduce algorithm for word counting is shown on the figure <>. Map step of this algorithm transforms each input word into key-value pair where word is the key, and the value is 1. Reduce step sums all values into the final result for specific key. We can note, that there is a need to store and update current word count.
+
+One possible way to implement reduce step in out model is to make business logic state a part of the stream, and work with it like with ordinary data item. Figure~\ref{mapreduce-graph-figure} shows a generic graph for MapReduce computation. Map and reduce parts are highlighted with dashed line.
+
 \begin{figure}[htb]
   \centering
   \includegraphics[scale=0.5]{pics/mapreduce}
@@ -9,11 +15,7 @@
   \label {mapreduce-graph-figure}
 \end{figure}
 
-To show soundness of our model we demonstrate a way to implement MapReduce-like transformation of a stream. Map stage of MapReduce is directly mapped on map operation that extracts a key, but there is a complication with reduce step. Reduce step requires an explicit statate handling. The typical pseudo-code of reduce step is shown on figure 17. It need to store and update current word count.
-
-One possibilitly to implement reduce step in out model is to make business logic state a part of a stream, and work with it as with an ordinary dataitem. Figure~\ref{mapreduce-graph-figure} shows a generic graph for MapReduce computation. Map and reduce parts are highlighted with dashed line.
-
-There are three types of dataitems in this stream: {\it input} items, {\it mapped} items, and {\it reduced} items. Each type of item and the way they were generated are detailed further in this section. However, it is worth to mention that mapped and reduced items have key-value structure of payload and presents intermediate values. The operations of the stream have the following purposes:
+There are three types of data items in this stream: {\it input} items, {\it mapped} items, and {\it reduced} items. Each type of item and the way they were generated are detailed further in this section. However, it is worth to mention that mapped and reduced items have key-value structure of payload and presents intermediate values. The operations of the stream have the following purposes:
 
 \begin{itemize}
 \item The first map operation accepts input items and outputs mapped items according to map step of MapReduce model.
@@ -23,9 +25,11 @@ There are three types of dataitems in this stream: {\it input} items, {\it mappe
 \item Broadcast operation is used to return actual reduced item back to the grouping and, at the same time, to output it from stream. 
 \end{itemize}
 
-The key idea is that ordering assumptions of dataitems' images guarantees that each reduced item always arrives at grouping right after already combined mapped item and before new one. Hence, each mapped item would be grouped with the actual reduced item. Additionally, when filter accepts tuple {\it (mapped item, reduced item)}, then it means that mapped item was generated before reduced, and therefore, the had been already combined. The cycle gives ability for new reduced items to get back in grouping operation. Thereby, the stream reacts to each input item by generating new reduced item, which contains the actual value of the reduce step.
+The key idea is that ordering assumptions about data items guarantees that each reduced item always arrives at grouping right after already combined mapped item and before a new one. Hence, each mapped item would be grouped with the actual reduced item. Additionally, when filter accepts tuple {\it (mapped item, reduced item)}, then it means that mapped item was generated before reduced, and therefore, it had been already combined. The cycle gives ability for new reduced items to get back in grouping operation. Thereby, the stream reacts to each input item by generating new reduced item, which contains the actual value of the reduce step.
 
-The example of input/output items, which are generated/ transformed by the part of the logical graph, is shown on the figure~\ref {word-count-figure}. This example represents classical MapReduce-based algorithm for word counting. Map step of this algorithm transforms each input word into key-value pair where word is the key, and the value is 1. Reduce step sums all values into the final result for specific key. According to our graph for MapReduce transformations, the item {\it m[dog, 1]} represents mapped item with key "dog" and value 1. The item {\it r[dog, 1]} describes reduced item with key "dog" and value 1. The figure shows how the model reacts on two consequent input items containing word "dog". The meta-information of items is omitted for simplification. More precisely, there are shown 4 stages separated by dotted lines:
+\subsection{Word counting example}
+
+The example of input/output items, which are generated/ transformed by the part of the logical graph, is shown on the figure~\ref {word-count-figure}. This example represents MapReduce-based algorithm for word counting, which was detailed above. According to our graph for MapReduce transformations, the item {\it m[dog, 1]} represents mapped item with key "dog" and value 1. The item {\it r[dog, 1]} describes reduced item with key "dog" and value 1. The figure shows how the model reacts on two consequent input items containing word "dog". The meta-information of items is omitted for simplification. More precisely, there are shown 4 stages separated by dotted lines:
 
 \begin{enumerate}
     \item New mapped item with key "dog" arrives at grouping with empty state. Grouping outputs tuple with this single item. Filter accepts the tuple, and Map transforms it to the first reduced item for key "dog" and value 1.
