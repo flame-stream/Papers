@@ -2,8 +2,8 @@
 
 \label {fs-data-flow}
 
-Our main entity is a stream. Stream is an ordered unlimited sequence of DataItems. DataItems is a unstructured payload and a structured meta-data associated with it. Meta-data is used primarily for ordering. There is a total order on meta-data.
+The top level of our data flow abstraction is a {\it stream}. Stream is represented by an ordered unlimited sequence of data items. Data item is a {\it payload} and a {\it meta-data} associated with it. Payload is an arbitrary user-provided data. Meta-data is a structured system-assigned information. The primary purpose of the meta-data is to impose the total order on data items. 
 
-\subsection{Scope of FlameStream}
+\[DataItem := (payload, Meta)\]
 
-There is a front and barrier. Front is an entrance, barrier is an exit. Front assignes meta-data, barrier removes it. See figure 1. Everything in between is an ordered stream of dataitems that is managed by runtime. 
+Data payloads are got in stream through {\it front} and got out through {\it barrier}. Particularly, front creates data items from input payloads by assigning them meta-data. Inside stream, data items can be dropped or their payloads can be transformed. Eventually, barrier removes meta-information and outputs back pure payloads. The concept of the stream is shown on the figure <>.
