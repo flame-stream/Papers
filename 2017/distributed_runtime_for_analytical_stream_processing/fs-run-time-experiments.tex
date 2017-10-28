@@ -2,21 +2,21 @@
 
 \label {fs-experiments-section}
 
-We evaluated the system using job for computing inverted index for 10000 articles of Russian-language edition of Wikipedia. The same task was executed by Apache Flink.
+We evaluated the system by computing inverted index for 10000 articles of Wikipedia documents. The same task was executed by Apache Flink for performance comparison.
 
-The computation of inverted index is implemented in terms of MaprReduce transformations. Firstly, wikipedia page is mapped into the pairs {\it (word; word positions within page)}. After that, word positions are reduced by word into the single structure. Notably, we assume the output of the stream to be in the form of change log of the index structure. More precisely, each input page should trigger the output of corresponding change log. In the real-world, such scenario can be used for building inverted index on the fresh data e.g. news. By the notion of {\it latency} we assume the time between two events: 
+The computation of inverted index is implemented in terms of MaprReduce transformations. Firstly, wikipedia page is mapped into the pairs {\it (word; word positions within page)}. After that, word positions are reduced by word into the single structure. Notably, we assume the output of the stream to be in the form of change log of the inverted index structure. More precisely, each input page should trigger the output of corresponding change log. In the real-world, such scenario can be found in freshness-aware systems e.g. news processing engines. By the notion of {\it latency} we assume the time between two events: 
 \begin{enumerate}
-    \item Input page is got into the stream;
+    \item Input page is taken into the stream;
     \item Corresponding change log leaves the stream.
 \end{enumerate}
 
-Regarding FlameStream, this algorithm is implemented as the typical conversion of MapReduce transformation, which is shown above. The only difference is that the last map operation outputs new reduced state of inverted index as well as change log. Change log is received by sink, but filtered before it reaches merge. Therefore, the correctness of MapReduce transformation is not suffered.
+Regarding FlameStream, this algorithm is implemented as the typical conversion of MapReduce transformation, which is shown above. The only difference is that the last map operation outputs new reduced state of inverted index as well as change log. Change log is received by sink, but filtered before it reaches merge. Therefore, the correctness of MapReduce transformation is preserved.
 
 For Apache Flink this algorithm is adopted by the usage of {\it FlatMapFunction} for map step and stateful {\it RichMapFunction} for reduce step and finding the difference.
 
-Our experiments were performed on clusters with 1,2,5,7, and 10 nodes. Each node is an Amazon EC2 micro instance with 1GB RAM and 1 core CPU.
+Our experiments were performed on clusters of 1,2,5,7, and 10 nodes. Each node is an Amazon EC2 micro instance with 1GB RAM and 1 core CPU.
 
-The latencies of FlameStream across multiple workers are shown on the figures~\ref{fs-index-median} and~\ref{fs-index-quantiles}. These figures confirms the scalability of the system.
+The latencies of FlameStream across multiple workers are shown on the figures~\ref{fs-index-median} and~\ref{fs-index-quantiles}. These figures confirms the scalability of the system in terms of latency.
 
 \begin{figure}[htbp]
   \centering
@@ -32,7 +32,7 @@ The latencies of FlameStream across multiple workers are shown on the figures~\r
   \label {fs-index-quantiles}
 \end{figure}
 
-The comparison in latencies between FlameStream and Flink within 10 nodes is shown on the figure~\ref{comp-index-quantiles}. These results clearly show that FlameStream provides lower latency for our task.
+The comparison in latencies between FlameStream and Flink within 10 nodes is shown on the figure~\ref{comp-index-quantiles}. These results clearly show that FlameStream is able to deliver better latency.
 
 \begin{figure}[htbp]
   \centering
