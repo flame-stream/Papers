@@ -2,21 +2,18 @@
 
 \label {fs-related-section}
 
-\subsection{Dataflow}
-Naiad~\cite{Murray:2013:NTD:2517349.2522738} used cycles for iterative processing and logical timestamps to monitor progress. In contrast to their pessimistic approach, using the notification to propagate the latest timestamp, we optimistically produce possibly invalid items and filter them down the stream such approach reduces latencies in reorder-free cases.
+{\bf Data flow:}
+One specific detail of our computational model is cyclic data flow graph support. Naiad~\cite{Murray:2013:NTD:2517349.2522738} by Microsoft Research provides an implementation of this idea. Nevertheless, Naiad applies cycles only for iterative computations and allows for each operation to have its own state. Additionally, Naiad uses logical timestamps to monitor progress. To propagate the latest timestamp the pessimistic approach of notifications broadcasting is defined. Therefore, with the assumption of infrequent out-of-order items, our optimistic behavior is more relevant.
 
-Using map and group operations as core processing primitives was expressed in the Dataflow model~\cite{Akidau:2015:DMP:2824032.2824076}. FlameStream grouping is aligned with fixed-sized sliding window, other kinds of windows: fixed, session is possible to implement with cycle and grouping by window-affiliation hash. Later approach keeps the model simpier by eliminating window assignment from business logic.
+Another related model is provided by Google Dataflow~\cite{Akidau:2015:DMP:2824032.2824076}. The key similarity is that map and group operations are used as core processing primitives. FlameStream grouping is aligned with fixed-sized sliding window, but it is possible to implement other kind of windows by using cycle and grouping with window-affiliation hash. Notably, Dataflow model does not suppose any kind of operation's state.
 
-\subsection{Delivery guaranties}
-To track minimal time within stream FlameStream uses acker, an adaptation of Storm's~\cite{apache:storm} {\it acker task}. The original parental relationship between messages that induces a tree is extended with invalidation relation between subtrees. Unlike Storm, {\it xor} optimization couldn't fully free from the burden of tree management. The full history of item's transformation must travel with it, possibly introducing additional overhead.
+{\bf State:}
+According to the state management, it should be noted that the common approach is to give user the ability to handle state of almost any supported operations. Such behavior is implemented, for isntance, in Apache Flink~\cite{carbone2015apache}, Storm~\cite{apache:storm}, Samza~\cite{Noghabi:2017:SSS:3137765.3137770}, Naiad~\cite{Murray:2013:NTD:2517349.2522738}.
+To the best of our knowledge, FlameStream is the only open-source stream processing system that:
+\begin{itemize}
+    \item Does not require state management;
+    \item Supports any MapReduce transformations. 
+\end{itemize}
 
-\subsection{State management}
-TODO after state management chapter.
-
-Flink~\cite{carbone2015apache} async snapshots, solve many problems but there are some left. Eg. state management.
-
-Apache Samza~\cite{Noghabi:2017:SSS:3137765.3137770} should be mentioned but I haven't read the paper yet:).
-
-\subsection{Other streaming systems}
-Spark~\cite{Zaharia:2012:DSE:2342763.2342773}, combines batch and strem. Sacrifice latency.
-
+{\bf Guarantees}
+To track minimal time within stream our system uses acker, an adaptation of Storm's~\cite{apache:storm} {\it acker task}. The original parental relationship between messages that induces a tree is extended with invalidation relation between subtrees. Unlike Storm, {\it xor} optimization couldn't fully free from the burden of tree management. The full history of item's transformation must travel with it, possibly introducing additional overhead.
