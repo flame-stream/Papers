@@ -3,17 +3,19 @@
 \label {fs-related-section}
 
 {\bf Data flow:}
-One specific detail of our computational model is cyclic data flow graph support. Naiad~\cite{Murray:2013:NTD:2517349.2522738} by Microsoft Research provides an implementation of this idea. Nevertheless, Naiad applies cycles only for iterative computations and allows for each operation to have its own state. Additionally, Naiad uses logical timestamps to monitor progress. To propagate the latest timestamp the pessimistic approach of notifications broadcasting is defined. Therefore, with the assumption of infrequent out-of-order items, our optimistic behavior is more relevant.
+One specific detail of our computational model is cyclic data flow graph support. Naiad~\cite{Murray:2013:NTD:2517349.2522738} by Microsoft Research provides an implementation of this idea. Nevertheless, Naiad applies cycles only for iterative computations and allows for each operation to have its own state. 
 
-Another related model is provided by Google Dataflow~\cite{Akidau:2015:DMP:2824032.2824076}. The key similarity is that map and group operations are used as core processing primitives. FlameStream grouping is aligned with fixed-sized sliding window, but it is possible to implement other kind of windows by using cycle and grouping with window-affiliation hash. Notably, Dataflow model does not suppose any kind of operation's state.
+Another similar concept of Naiad is the usage of logical timestamps to monitor progress. However, to propagate the latest timestamp the pessimistic approach of notifications broadcasting is defined. Therefore, with the assumption of infrequent out-of-order items, our optimistic behavior is more relevant.
+
+In our model, map and group operations are used as core processing primitives. Google Dataflow~\cite{Akidau:2015:DMP:2824032.2824076} provides the same idea. The primary distinction is that Dataflow model does not suppose any kind of operation's state. Additionally, this model provides different window types for grouping. FlameStream grouping is aligned with fixed-sized sliding window, but it is possible to implement other kind of windows by using cycle and grouping with window-affiliation hash.
 
 {\bf State:}
 According to the state management, it should be noted that the common approach is to give user the ability to handle state of almost any supported operations. Such behavior is implemented, for isntance, in Apache Flink~\cite{carbone2015apache}, Storm~\cite{apache:storm}, Samza~\cite{Noghabi:2017:SSS:3137765.3137770}, Naiad~\cite{Murray:2013:NTD:2517349.2522738}.
 To the best of our knowledge, FlameStream is the only open-source stream processing system that:
 \begin{itemize}
-    \item Does not require state management;
-    \item Supports any MapReduce transformations. 
+    \item Stateless in terms of business-logic
+    \item Supports any MapReduce transformations 
 \end{itemize}
 
-{\bf Guarantees}
-To track minimal time within stream our system uses acker, an adaptation of Storm's~\cite{apache:storm} {\it acker task}. The original parental relationship between messages that induces a tree is extended with invalidation relation between subtrees. Unlike Storm, {\it xor} optimization couldn't fully free from the burden of tree management. The full history of item's transformation must travel with it, possibly introducing additional overhead.
+{\bf Tracking mechanisms within stream:}
+One important task that FlameStream faces is handling of the minimal global time. In Apache Storm~\cite{apache:storm} acker is used to eliminate item traces. Unlike Strorm, we use acker to track the least global time of in-flight items.
