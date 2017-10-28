@@ -18,4 +18,4 @@ To the best of our knowledge, FlameStream is the only open-source stream process
 \end{itemize}
 
 {\bf Tracking mechanisms within stream:}
-One important task that FlameStream faces is handling of the minimal global time. In Apache Storm~\cite{apache:storm} acker is used to eliminate item traces. Unlike Strorm, we use acker to track the least global time of in-flight items.
+One important task that FlameStream faces is handling of the minimal global time. In Apache Storm~\cite{apache:storm} acker is used to eliminate item traces. Unlike Strorm, we use acker to track the least global time of in-flight items and to detect package losses.
