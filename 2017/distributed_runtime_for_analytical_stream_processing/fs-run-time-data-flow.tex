@@ -78,16 +78,21 @@ The important property of the grouping is that the result is uniquely determined
 
 \subsection{User-defined parameters}
 
+Regarding the model that we introduced in the previous sections, user can set up the following parameters:
+
 \begin{enumerate}
   \item{Map function}
-  \item{Flatmap function}
+  \item{Flat map function}
   \item{Filter predicate}
   \item{Grouping window}
-  \item{Grouping hash function}
-  \item{Hash-partitioning function of the inputs}
-  \item{Graph itself: vertexed and edges}
+  \item{Balancing functions of the inputs}
+  \item{Graph itself: vertices and edges}
 \end{enumerate}
 
-Grouping hash can be inherited from its input partitioning. Note, that non of this paramiters contains state-management. Therefore, business-logic is stateless. Despite this it is enough to implement MapReduce transformations of the stream.
+Grouping hash function is inherited from its balancing function. It provides independence between graph and its physical execution. 
+
+It is important to mention, that there are no parameters for state-management. Therefore, business-logic is stateless. Nevertheless, it is enough to implement any MapReduce transformation, that is shown in the next section.
+
+Notably, the list of parameters is quite short. Conceptually, it means that there can be a lot of data flow graphs, which can produce equivalent results. This property is useful for the graph optimization problem.    
 
 
