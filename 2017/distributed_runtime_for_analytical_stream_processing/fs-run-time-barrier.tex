@@ -49,13 +49,42 @@ Notice that the invalidation relation is defined not only on the grouping output
 
 Barrier maintains a buffer for items. Once a new item arrives it inserts it in buffer and removes items that are invalidated by it.
 
-However, there are two difficulties. Firstly, sinks are the parts of the physical graph, so they are also partitioned by the business-logic hash function. Hence, item and corresponding invalidation item can arrive to distinct barriers. Invalidating element has the same global time as the invalidee, so the partitioning of barriers by global time solves this problem. Secondly, it is unclear when the items should be released from the barrier. To do it the system should ensure that there are no in-flight items which can invalidate items in buffer. The solution of this problem is detailed in the next section. 
+However, there are two difficulties. Firstly, barriers are deployed on multiple workers and are partitioned by the business-logic hash function. Hence, item and corresponding invalidation item can arrive to distinct barriers. Invalidating element has the same global time as the invalidee, so the partitioning of barriers by global time solves this problem. Secondly, it is unclear when the items should be released from the barrier. To do it the system should ensure that there are no in-flight items which can invalidate items in buffer. The solution of this problem is detailed in the next section. 
 
-Figure~\ref{invalidation-problems-figure} illustrates possible sink issues. Red items with labels 4 and 7 got out from the system, despite the fact that they should be invalidated by corresponding green items. 
+Figure~\ref{invalidation-problems-figure} illustrates possible barrier issues. Red items with labels 4 and 7 got out from the system, despite the fact that they should be invalidated by corresponding green items. 
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.48\textwidth]{pics/invalidation_problems}
-  \caption{Possible sink issues}
+  \caption{Possible barrier issues}
   \label {invalidation-problems-figure}
 \end{figure}
+
+\subsection{Minimal time within stream}
+To output only correct items we need to ensure that there are no in-flight data items which can invalidate items in the barrier's buffer. In this subsection we offer sufficient condition that stream does not contain such items. Additionally, we describe how this condition is used in implementation.
+
+\newtheorem{minimal-time-claim}{Claim}
+
+\begin{minimal-time-claim}
+Let {\it D} represent data item in barrier buffer and let {\it GT} represent its global time. If the items with global time less than or equal to {\it GT} do not exist and cannot appear in the stream, then all items that invalidate {\it D} had already arrived at the barrier buffer.
+\end{minimal-time-claim}
+
+\begin{proof}
+Let {\it $D\prime$} invalidate {\it D}. According to the definition of invalidation relation, {\it $D\prime$} and {\it D} have the same global time {\it GT}, but different traces of local times. Let {\it LT} and {\it $LT\prime$} be the first distinct local times of {\it D} and {\it $D\prime$} respectively. Such difference could appear only as a result of grouping replay. Hence, {\it D} and {\it $D\prime$} are tuple items.
+
+The global time of tuple item is inherited from the last item in the tuple, i.e. the last item in tuple {\it $D\prime$} has global time {\it GT}. Therefore, considering the properties of grouping operation, {\it $D\prime$} could be generated only if item with global time less than or equal to {\it GT} arrived at grouping. 
+
+This implies that if stream does not contain items with global time less than or equal to {\it GT} and such items cannot appear, then all items which invalidate {\it D} had already arrived at barrier buffer. 
+\end{proof}
+
+Regarding this claim, to output item from barrier buffer we should ensure that:
+\begin{enumerate}
+    \item There are no items in stream with global time less than or equal to the global time of this item;
+    \item Such items cannot be generated.
+\end{enumerate}
+
+To ensure that stream does not contain these items, we use module called {\it acker}. Its idea was proposed by Apache Storm \cite{apache:storm}. Acker tracks data item within the stream using a checksum hash. When item is sent or received by operation, its hash is XORed into the checksum. Therefore, if all items arrive at sink successfully, the checksum is zero. 
+
+To find out the least global time of the items in stream, checksums are grouped by timestamps of global time into the structure called {\it ack table}. Hence, if the value of the specific timestamp in the ack table is zero, there are no items with corresponding global time into the stream. 
+
+Notably, to ensure that no fronts would generate item with this timestamp, each front periodically sends to acker special message called {\it report}, which contains the least timestamp that can be assigned to data item by the front. The value in the ack table can become a zero only after corresponding report is arrived.  
