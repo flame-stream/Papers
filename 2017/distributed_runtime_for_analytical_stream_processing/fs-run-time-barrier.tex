@@ -83,8 +83,24 @@ Regarding this claim, to output item from barrier buffer we should ensure that:
     \item Such items cannot be generated.
 \end{enumerate}
 
-To ensure that stream does not contain these items, we use module called {\it acker}. Its idea was proposed by Apache Storm \cite{apache:storm}. Acker tracks data item within the stream using a checksum hash. When item is sent or received by operation, its hash is XORed into the checksum. Therefore, if all items arrive at sink successfully, the checksum is zero. 
+To ensure that stream does not contain these items, we use agent called {\it acker}. It was inspired by Apache Storm's \cite{apache:storm} {\it acker task}. Acker tracks data item within the stream using a checksum hash. When item is sent or received by operation, its global time and checksum is sent to the acker. This message is called {\it ack}. To track elements acker groups acks by a global time into the structure called {\it ack table}. Once acker receives an ack message it updates entry by XORing new XOR with the current one. When item is sent and received by the next operation, corresponding XORs would result into zero.
 
-To find out the least global time of the items in stream, checksums are grouped by timestamps of global time into the structure called {\it ack table}. Hence, if the value of the specific timestamp in the ack table is zero, there are no items with corresponding global time into the stream. 
+To zero item's XOR only when item arrives to the barrier acks are overlapped, that is ack for receive is sent only after processing and the ack sending for transformed item. See the figure~\ref{acker}. Different colors of items means different payloads. The ack for the sending of the blue element is sent before the green's one. We expect the channel between acker and each operation FIFO, so ack for the blue item would be XORes before green's. So the two equal XORs are separated by another one. This way of ack sending guarantees that the XOR of some global time is equal to zero only if there are no elements with such lobal time.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[scale=0.5]{pics/acker}
+  \caption{Acker}
+  \label {acker}
+\end{figure}
+
+Minimal global time with non-zero XOR is the minimal time within stream. On minimal time changes acker broadcasts new minimal time to the barrier and operations. Therefore, barrier can release elements with global time {\it GT} once it received notification from acker with greater {\it with GT}.
 
 Notably, to ensure that no fronts would generate item with this timestamp, each front periodically sends to acker special message called {\it report}, which contains the least timestamp that can be assigned to data item by the front. The value in the ack table can become a zero only after corresponding report is arrived.  
+
+\subsection{Adaptive microbatching}
+The single acker with one ack table introduce a one problem. If computations are done independently by two distinct keys, without shuffling, single acker creates synthetic interrelation between them. If element with the first key arrives to the barrier it can not be released until all the elements with lower global time from another key are processed. As computation within different hash ranges can vary, this can couse additional latency.
+
+The idea is to split single acker into multiple by some feature. This feature can be a value of data item's balancing hash, the worker would send acks to the acker with same hash range. One subtle problem is that when item changes its hash range it also needs to change an acker. This would break the FIFO ordering between operation and ackers. 
+
+The particular feature and a way of acker changing is a topic for future research.
