@@ -21,7 +21,7 @@ In the case of the right order of the input items, there are no redundant items 
 \subsection{Adaptive microbatching}
 In order to filter out invalid elements that are produced on grouping replay, items are collected at barrier before leaving the system. We need to find a feature by which we can differentiate the freshness of items.
 
-To archive this goal we describe the structure of meta-information that meets FlameStream timing model, defined in section~\ref{fs-model}. Then, we introduce an invalidation order on meta, that allows distinguishing proper elements from incorrect ones.
+To archive this goal we describe the structure of meta-information that meets FlameStream ordering model, defined in section~\ref{fs-model}. Then, we introduce an invalidation order on meta, that allows distinguishing proper elements from incorrect ones.
 
 \subsubsection{Meta information}
 The meta-information of data item is a pair of a {\it global time} and a {\it trace}.
