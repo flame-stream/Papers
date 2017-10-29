@@ -24,10 +24,9 @@ These nice properties we trade for in-memory processing: the total state volume 
 
 The optimistic collision management is done over collisions that already happen and it is often more lightweight then prevention mechanisms. We get this property with the ability to replay certain fragments of the stream. These replays demand the computation process to be deterministic. As many other systems we use the graph representation of the computation and dynamically optimize this graph using statistics available. 
 
-``Exactly once'' semantic is arguable topic, we provide this guarantee inside our system but the overall contract could be violated because of source/sink flaws. To achieve this objective we introduce dynamic batching technique, based on Storm~\ref{} Ackers idea. The same mechanism allows us early key availability~\ref{}. 
+``Exactly once'' semantic is arguable topic, we provide this guarantee inside our system but the overall contract could be violated because of source/sink flaws. To achieve this objective we introduce dynamic batching technique, based on Storm~\ref{} Ackers idea. The same mechanism allows us early key availability. 
 
 We follow these principles in our system architecture:
-
 \begin{itemize}
 \item The set of basic operations should not require state handling from the user. At the same time, it should provide for specification of arbitrary processing workflows, similar to those found in Spark and Flink.
 \item State is the system internal term and is provided to the developer as a simple coupling abstraction.
@@ -36,30 +35,20 @@ We follow these principles in our system architecture:
 \item Exactly once execution: each output item is valid and get out of the system exactly once even in case of partial system failures.
 \end{itemize}
 
-The computation to be performed with \FlameStream\ is specified in terms of predefined operations that are parametrized with user-defined procedures (collectively called {\em business logic} in the jargon of developers community). Each operation accepts a stream or several streams of data items, and produces one or several output streams. The whole computational workflow is described in terms of a graph. The nodes of the graph represent operations, while edges set up logical routing of data items between operations.
+Enlisted principles are reflected in the following design. The computation to be performed with \FlameStream\ is specified in terms of predefined operations that are parametrized with user-defined procedures (collectively called {\em business logic} in the jargon of developers community). Each operation accepts a stream or several streams of data items, and produces one or several output streams. The whole computational workflow is described in terms of a graph. The nodes of the graph represent operations, while edges set up logical routing of data items between operations.
 
-The \FlameStream\ runtime organizes the data items to be processed by operations into prioritized queues. The logical workflow graph is replicated to every computing unit in the cluster, providing for scalable execution. The data items are partitioned between computational units based on user-defined hashing. This allows user to control the computational layout.
+The \FlameStream\ runtime organizes the data items to be processed by operations into prioritized queues. The logical workflow graph is replicated to every compute unit in the cluster for scalable execution. The data items are partitioned between computational units based on user-defined hashing. This allows user to control the computational layout and balance the load of the compute units.
 
-\subsection{TODO: rethink}
+\FlameStream\ provides the only operation that maintains state called {\it grouping}. Grouping does not require any state management by a user. Moreover, the structure of its state can be easily made persistent, which is useful for capturing asynchronous snapshots.
 
-In contrast with existing solutions, \FlameStream\ provides the only operation that maintains state called {\it grouping}. Grouping does not require any state management by a user. Moreover, the structure of its state can be easily made persistent, which is useful for capturing asynchronous snapshots.
-
-The contributions of this paper are the following:
-
-\subsection{TODO: rethink contribution}
+In this paper we introduce the basis for implementation of the \FlameStream\ and demonstrate advantages of the proposed system with the prototype developed on top of Akka platform. The contributions of this paper are the following:
 
 \begin {itemize}
-\item Definition of the computational model
-\item Implementation and proof of the concept
+\item Definition of the MapReduce complete computational model without stateful user defined procedures
+\item Development of the mechanisms that provide ``exactly once'' guaranties
+\item Introduce the optimistic collision management schema and demonstrate its performance competitiveness
 \end {itemize}
 
-\subsection{TODO}
-
-The rest of the paper is structured as follows 
-Describe sections here: model~\ref {fs-model-section}
-implementation~\ref{fs-implementation-section}
-experiments ~\ref{fs-experiments-section}
-related work~\ref{fs-related-section}.
-
+The rest of the paper is structured as follows: in section~\ref{fs-data-flow} we introduce the proposed computational model in details, optimistic collision management schema is described in section~\ref{fs-collision}, the implementation details of the prototype are discussed in~\ref{fs-impl} and its performance is demonstrated in~\ref{fs-experiments-section}, the main differences of our system from the existing are shown in~\ref{fs-related-section}, finally we discuss the results and our plans in~\ref{fs-conclusions}.
 
 \endinput
