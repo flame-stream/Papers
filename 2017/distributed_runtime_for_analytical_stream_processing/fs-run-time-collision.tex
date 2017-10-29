@@ -21,7 +21,7 @@ In the case of the right order of the input items, there are no redundant items 
 \subsection{Adaptive microbatching}
 In order to filter out invalid elements that are produced on grouping replay, items are collected at barrier before leaving the system.
 
-To differentiate a freshness of items we utilies the structure of meta-information that implements FlameStream ordering model, defined in section~\ref{fs-model}. Then, we introduce an invalidation order on meta that distinguishs correct elements from incorrect ones.
+To differentiate a freshness of items we utilize the structure of meta-information that implements FlameStream ordering model, defined in section~\ref{fs-model}. Then, we introduce an invalidation order on meta that distinguishes correct elements from incorrect ones.
 
 \subsubsection{Meta information}
 The meta-information of data item is a pair of a {\it global time} and a {\it trace}.
@@ -58,8 +58,8 @@ The figure~\ref{logical-graph-ops-figure} shows the topology of each operation a
 The structure of meta provides for tracking different relations between data items:
 
 \begin{itemize}
-  \item{{\it From which elements current one was produced?} From items with common trace prefix.}
-  \item{{\it Which element was generated earlier?} One with lower meta.}
+  \item Items with common prefixes are produced from the same item
+  \item Item with lower meta is produced earlier, at barrier or in the stream
 \end{itemize}
 
 \subsection{Invalidation mechanism}
@@ -84,13 +84,13 @@ Barrier maintains a buffer of items. Once a new item arrives, it is inserted int
 \caption{Inserting element in buffer}
 \label{buffer-insert}
 \begin{algorithmic}
-  \Function{INSERT}{$a$}
-    \ForAll{$item \in buffer$} 
-      \If{$item$ is invalidated by $a$} 
-        \State \Call{dequeue}{buffer, item}
+  \Function{INSERT}{{\it a}}
+    \ForAll{{\it item} $\in$ {\it buffer}} 
+      \If{{\it item} is invalidated by {\it a}} 
+        \State \Call{dequeue}{{\it buffer}, {\it item}}
       \EndIf
     \EndFor
-    \State \Call{enqueue}{buffer, a}
+    \State \Call{enqueue}{{\it buffer}, {\it a}}
   \EndFunction
 \end{algorithmic}
 \end{algorithm}
@@ -124,7 +124,7 @@ To release the item from the barrier we need to ensure that there are no in-flig
   This implies that if the stream does not contain items with the global time less than or equal to {\it GT}, then all items which invalidate {\it D} had already arrived at the barrier. 
 \end{proof}
 
-Therefore, to output an item from the barrier, we should ensure that there are no items in the stream with global time less than or equal to the global time of this item.
+Therefore, to output an item from the barrier, we should ensure that there are no items in the stream with the global time less than or equal to the global time of this item.
 
 To track the global time of in-flight items we adopt an idea of {\it acker task} borrowed from Apache Storm~\cite{apache:storm}. Acker tracks data items using a checksum hash. When the item is sent or received by an operation, its global time and checksum are sent to the acker. This message is called {\it ack}. Acker groups acks by a global time into the structure called {\it ack table}. Once acker receives an ack message with global time {\it GT} and {\it XOR} it updates {\it GT} entry in the table by xoring {\it XOR} with the current value. When an item is sent and later received by the next operation, xoring corresponding {\it XOR}s would yield zero.
 
