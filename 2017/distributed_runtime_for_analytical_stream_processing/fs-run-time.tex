@@ -2,6 +2,9 @@
 % packages should be added as needed 
 \usepackage{graphicx}
 
+\usepackage{algorithm} % for algorithms
+\usepackage{algpseudocode}
+
 \usepackage{booktabs} % For formal tables
 
 \usepackage{amsthm} % For claims
@@ -30,7 +33,7 @@
 \newcommand {\FlameStream} {FlameStream}
 \begin{document}
 
-\title {\FlameStream: Model and Distributed Runtime for Analytical Stream Processing}
+\title {\FlameStream: Model and Runtime for Distributed Analytical Stream Processing}
 % \titlenote{Produces the permission block, and   copyright information}
 %\subtitle{Extended Abstract}
 % \subtitlenote{The full version of the author's guide is available as   \texttt{acmart.pdf} document}
@@ -91,9 +94,9 @@
 
 
 \begin{abstract}
-Current generation of scalable distributed systems designed for analytical processing of large volumes of data have addressed several drawbacks of previous generation. However, several issues still remain. Particularly, existing solutions suppose that the state of operations should be directly managed.
+Current generation of scalable distributed systems designed for analytical processing of large volumes of data have addressed drawbacks of previous generation. However, several issues still remain. Particularly, existing solutions suppose that the state of operations should be managed directly by user.
 
-\FlameStream is a low-latency oriented distributed framework for executing analytical workflows. We offer a computational model that relieves user of explicit state handling and corresponding distributed environment that guarantees exactly once processing. The experiments show that this implementation can outperform alternative solutions.
+\FlameStream\ is a low-latency oriented distributed framework for executing analytical workflows. We offer a computational model that relieves user of explicit state handling and corresponding distributed environment that guarantees ``exactly once'' processing. The experiments show that prototype of our system is able to outperform alternative solutions.
 \end {abstract}
 
 \maketitle
@@ -110,8 +113,8 @@ Current generation of scalable distributed systems designed for analytical proce
 \section {Optimistic collision management}
 \input {fs-run-time-collision.tex}
 
-\section {Barrier}
-\input {fs-run-time-barrier.tex}
+\section {Adaptive microbatching}
+\input {fs-run-time-adaptive.tex}
 
 \section {Implementation}
 \input {fs-run-time-impl.tex}
