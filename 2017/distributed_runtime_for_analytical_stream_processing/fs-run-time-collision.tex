@@ -3,7 +3,7 @@
 
 As it was defined previously, only grouping depends on the input order, because it maintains a state. Therefore, we assumed that data items flow through the operations in the right order. However, this restriction is hard to satisfy, because of asynchrony and the possible existence of multiple paths between two nodes.
 
-In order address this issue, we accept the fact that grouping can produce incorrect tuples. However, we guarantee that all correct tuples are eventually produced. The correctness of tuple means that this tuple would be generated if the order assumption was satisfied. 
+In order to address this issue, we accept the fact that grouping can produce incorrect tuples. However, we guarantee that all correct tuples are eventually produced. The correctness of tuple means that this tuple would be generated if the order assumption was satisfied. 
 
 To eventually produce all correct tuples, we use an approach called {\it replay}. If an item arrives the grouping operation, according to the meta-information order, nothing is replayed and only the most recent window is produced. However, if the item is out of order, it is inserted in the bucket at the correct location, and all tuples, which contain this element, are reproduced. Thereby, replay guarantees that eventually all correct tuples are generated.
 
@@ -59,7 +59,7 @@ The structure of meta provides for tracking different relations between data ite
 
 \begin{itemize}
   \item Items with common prefixes are produced from the same item
-  \item Item with lower meta is produced earlier, at barrier or in the stream
+  \item Item with lower meta is generated earlier, at front or in the stream
 \end{itemize}
 
 \subsection{Invalidation mechanism}
@@ -141,6 +141,6 @@ This technique guarantees that the {\it XOR} for some global time is equal to ze
 
 The minimal time within a stream is the minimal global time with non-zero {\it XOR}. On minimal time changes, acker broadcasts new minimal time to the barrier and operations. Therefore, the barrier can release elements with global time {\it GT} once it received notification from acker that the minimal time within the stream is greater than {\it GT}.
 
-To ensure that no fronts are able to generate item with the certain timestamp, each front periodically sends to acker special message called {\it report}, which promise to generate items with the greater timestamp. The value in the ack table can become a zero only after the corresponding report arrives.
+To ensure that no fronts are able to generate item with the certain timestamp, each front periodically sends to acker special message called {\it report}, which obligates front to generate items only with the greater timestamp. The value in the ack table can become a zero only after the corresponding report arrives.
 
-The proposed mechanism could be isolated by hash range. This change allows us making invalidation and releasing from barrier independent also known as key readiness.
+The proposed mechanism could be isolated by hash range. This change allows us making invalidation and releasing from barrier independent also known as early key availability.
