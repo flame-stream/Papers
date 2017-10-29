@@ -71,32 +71,6 @@ Currently, Apache Flink uses reflection to serialize Plain Old Java Objects (POJ
 We achieved more than 6X performance improvement in the serialization which was a 20% overall improvement.
 
 
-
-
-Yi Chen and Behzad Bordbar. 2016. DRESS: a rule engine on spark for event stream processing. In Proceedings of the 3rd IEEE/ACM International Conference on Big Data Computing, Applications and Technologies (BDCAT '16). ACM, New York, NY, USA, 46-51. DOI: https://proxy.library.spbu.ru:3316/10.1145/3006299.3006326
-
-@inproceedings{Chen:2016:DRE:3006299.3006326,
- author = {Chen, Yi and Bordbar, Behzad},
- title = {DRESS: A Rule Engine on Spark for Event Stream Processing},
- booktitle = {Proceedings of the 3rd IEEE/ACM International Conference on Big Data Computing, Applications and Technologies},
- series = {BDCAT '16},
- year = {2016},
- isbn = {978-1-4503-4617-7},
- location = {Shanghai, China},
- pages = {46--51},
- numpages = {6},
- url = {http://proxy.library.spbu.ru:2393/10.1145/3006299.3006326},
- doi = {10.1145/3006299.3006326},
- acmid = {3006326},
- publisher = {ACM},
- address = {New York, NY, USA},
- keywords = {apache spark, event stream processing, rule engine},
-} 
-
-
-Rule-based systems process event streams and trigger actions according to pre-defined rule-sets. Over the last three decades, such systems have been widely used in businesses, governments and organisations. However, with today's need to process larger event streams such as events produced in Internet of Things (IoT), current rule-based systems face serious challenges in terms of speed, scalability and fault tolerance. Spark Streaming is emerging as a novel solution to address these challenges. This paper presents an approach for adapting rule-based systems to work with Spark Streaming. We focus on Rete algorithm which is behind many of the current rule engines. We present DRESS (Distributed Rule Engine on Spark Streaming), an infrastructure for executing Rete algorithm on Spark Streaming. In addition, we present an automated method of transforming rules written in Drools' style to be executed on DRESS. The performance of our system was evaluated with the help of a case study.
-
-
 Christos Doulkeridis and Kjetil NØrvåg. 2014. A survey of large-scale analytical query processing in MapReduce. The VLDB Journal 23, 3 (June 2014), 355-380. DOI=http://proxy.library.spbu.ru:2083/10.1007/s00778-013-0319-9
 
 @article{Doulkeridis:2014:SLA:2628707.2628782,
@@ -497,3 +471,28 @@ Our experimental results show that Kafka has superior
 performance when compared to two popular messaging systems.
 We have been using Kafka in production for some time and it is
 processing hundreds of gigabytes of new data each day.
+
+
+Michael Isard, Mihai Budiu, Yuan Yu, Andrew Birrell, and Dennis Fetterly. 2007. Dryad: distributed data-parallel programs from sequential building blocks. In Proceedings of the 2nd ACM SIGOPS/EuroSys European Conference on Computer Systems 2007 (EuroSys '07). ACM, New York, NY, USA, 59-72. DOI=http://dx.doi.org/10.1145/1272996.1273005
+@inproceedings{Isard:2007:DDD:1272996.1273005,
+ author = {Isard, Michael and Budiu, Mihai and Yu, Yuan and Birrell, Andrew and Fetterly, Dennis},
+ title = {Dryad: Distributed Data-parallel Programs from Sequential Building Blocks},
+ booktitle = {Proceedings of the 2Nd ACM SIGOPS/EuroSys European Conference on Computer Systems 2007},
+ series = {EuroSys '07},
+ year = {2007},
+ isbn = {978-1-59593-636-3},
+ location = {Lisbon, Portugal},
+ pages = {59--72},
+ numpages = {14},
+ url = {http://doi.acm.org/10.1145/1272996.1273005},
+ doi = {10.1145/1272996.1273005},
+ acmid = {1273005},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {cluster computing, concurrency, dataflow, distributed programming},
+} 
+Dryad is a general-purpose distributed execution engine for coarse-grain data-parallel applications. A Dryad application combines computational "vertices" with communication "channels" to form a dataflow graph. Dryad runs the application by executing the vertices of this graph on a set of available computers, communicating as appropriate through flies, TCP pipes, and shared-memory FIFOs.
+
+The vertices provided by the application developer are quite simple and are usually written as sequential programs with no thread creation or locking. Concurrency arises from Dryad scheduling vertices to run simultaneously on multiple computers, or on multiple CPU cores within a computer. The application can discover the size and placement of data at run time, and modify the graph as the computation progresses to make efficient use of the available resources.
+
+Dryad is designed to scale from powerful multi-core single computers, through small clusters of computers, to data centers with thousands of computers. The Dryad execution engine handles all the difficult problems of creating a large distributed, concurrent application: scheduling the use of computers and their CPUs, recovering from communication or computer failures, and transporting data between vertices.

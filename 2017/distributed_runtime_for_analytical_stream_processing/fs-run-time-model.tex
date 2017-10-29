@@ -1,12 +1,6 @@
 %%%% fs-run-time-data-flow  FlameStream data flow
 
 \label {fs-model}
-
-{\bf TODO:} preabe
-Сейчас опишем тратата потом труту.
-Барьер отпиливаем. 
-Оставшиеся вопросы в оптимистик коллижен манагемент.
-
 \subsection{Data flow}
 
 The top level of our data flow abstraction is a {\it stream}. Stream is represented by an ordered unlimited sequence of data items. Data item is a {\it payload} and a {\it meta-data} associated with it. 
@@ -62,7 +56,7 @@ We assume that input items of the operations are strictly ordered. After the met
 
 The set of available operations is limited by the following list.
 
-{\bf Map} applies user-defined function to the payload of an input item. This function returns a sequence of data items with new payloads.
+{\bf Map} applies user-defined function to the payload of an input item. This function returns a sequence of data items with new payloads. An output sequence can be empty, in this case the input item is filtered out.
 
 {\bf Broadcast} replicates an input item to the specified number of operations or sinks. 
 
@@ -93,9 +87,21 @@ It is important to mention, that there are no parameters for state-management. T
 
 \subsection{MapReduce transformations on stream}
 
-In this section, we demonstrate possible implementation of MapReduce-like transformation on a stream in order to show soundness of our model. Map stage can be formulated in terms of our map operation. However, it is not obvious how to implement reduce stage, because it requires an explicit state handling. 
+In this section, we demonstrate possible implementation of MapReduce-like transformation on a stream in order to show soundness of our model. Map stage can be formulated in terms of our map operation. However, it is not obvious how to implement reduce stage, because it requires an explicit state handling. The algorithm~\ref{reduce} shows a generic reduce stage. The accumulator is an explicit state that should be maintained between subsequent iterations.
 
-We illustrate the MapReduce algorithm with an example of word counting. Map step of this algorithm transforms each input word into key-value pair where word is the key, and the value is 1. Reduce step sums all values into the final result for specific key. We can note, that there is a need to store and update current word count.
+\begin{algorithm}
+\caption{Generic reduce stage}
+\label{reduce}
+\begin{algorithmic}
+  \Function{reduce}{$key$, $values$}
+    \State $accumulator$ \Comment{reduce's state}
+    \ForAll{$v \in values$} 
+      \State \Call{combine}{$v$, $accumulator$}
+    \EndFor
+    \State \Return{$accumulator$}
+  \EndFunction
+\end{algorithmic}
+\end{algorithm}
 
 One possible way to implement reduce step in our model is to make business logic state a part of the stream, and work with it like with ordinary data item. The figure~\ref{mapreduce-graph-figure} shows a generic graph for MapReduce computation. Map and reduce parts are highlighted with dashed line.
 
@@ -118,7 +124,9 @@ There are three types of data items in this stream: {\it input}, {\it mapped}, a
 
 The key idea is that ordering assumptions about data items guarantees that each reduced item always arrives at grouping right after already combined mapped item and before a new one. Hence, each mapped item would be grouped with the actual reduced item. Additionally, when filter accepts tuple {\it (mapped item, reduced item)}, then it means that mapped item was generated before reduced, and therefore, it had been already combined. The cycle gives ability for new reduced items to get back in grouping operation. Thereby, the stream reacts to each input item by generating new reduced item, which contains the actual value of the reduce step.
 
-The example of input/output items, which are generated/ transformed by the part of the logical graph, is shown on the figure~\ref {word-count-figure}. This example represents MapReduce-based algorithm for word counting, which was detailed above. According to our graph for MapReduce transformations, the item {\it m[dog, 1]} represents mapped item with key "dog" and value 1. The item {\it r[dog, 1]} describes reduced item with key "dog" and value 1. The figure shows how the model reacts on two consequent input items containing word "dog". The meta-information of items is omitted for simplification. More precisely, there are 4 stages separated by dotted lines:
+We illustrate the MapReduce algorithm with an example of word counting. Map step of this algorithm transforms each input word into key-value pair where word is the key, and the value is 1. Reduce step sums all values into the final result for specific key. 
+
+The example of input/output items, which are generated/ transformed by the part of the logical graph, is shown on the figure~\ref {word-count-figure}. According to our graph for MapReduce transformations, the item {\it m[dog, 1]} represents mapped item with key "dog" and value 1. The item {\it r[dog, 1]} describes reduced item with key "dog" and value 1. The figure shows how the model reacts on two consequent input items containing word "dog". The meta-information of items is omitted for simplification. More precisely, there are 4 stages separated by dotted lines:
 
 \begin{enumerate}
     \item New mapped item with key "dog" arrives at grouping with empty state. Grouping outputs tuple with this single item. Filter accepts the tuple, and Map transforms it to the first reduced item for key "dog" and value 1.

@@ -2,12 +2,9 @@
 
 \label {fs-intro-seciton}
 
-A need to process huge amounts of data (e.g. Internet scale) was addressed by distributed data processing systems such as Google's MapReduce~\cite{Dean:2008:MSD:1327452.1327492} and Apache Hadoop~\cite{hadoop}. These systems are able to run in a massively parallel fashion on clusters consisting of thousands of commodity computational units. The main advantages of this approach are fault-tolerance and practically unlimited scalability.
+A need to process huge amounts of data (e.g. Internet scale) was addressed by distributed data processing systems such as Google's MapReduce~\cite{Dean:2008:MSD:1327452.1327492}. These systems are able to run in a massively parallel fashion on clusters consisting of thousands of commodity computational units. The main advantages of this approach are fault-tolerance and practically unlimited scalability.
 
-Several drawbacks of the initial models and architectures of this kind are deeply analyzed in~\cite{Doulkeridis:2014:SLA:2628707.2628782}. 
-Many of these drawbacks were addressed in the next generation of scalable distributed data processing architectures, e.g. 
-Asterix~\cite{Alsubaiee:2012:ASW:2331801.2331803}, 
-Spark~\cite{Zaharia:2016:ASU:3013530.2934664,Franklin:2015:MSB:2684822.2685326}, 
+Several drawbacks of the initial models and architectures of this kind are deeply analyzed in~\cite{Doulkeridis:2014:SLA:2628707.2628782}. Many of these drawbacks were addressed in the next generation of scalable distributed data processing architectures, e.g. Asterix~\cite{Alsubaiee:2012:ASW:2331801.2331803}, Spark~\cite{Zaharia:2016:ASU:3013530.2934664,Franklin:2015:MSB:2684822.2685326}, 
 and Flink~\cite{Carbone:2017:SMA:3137765.3137777}. 
 
 The goal of the \FlameStream\ is to address special case of the data processing: real time stream based computing. This case emerges in short term personalization, real-time analytics and other problems demanding both low update latency and flexibility of the computational subsystem. Specifically, the objectives are:
