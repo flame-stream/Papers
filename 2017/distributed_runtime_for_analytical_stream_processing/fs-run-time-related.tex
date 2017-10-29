@@ -7,10 +7,10 @@ One specific detail of our computational model is cyclic data flow graph support
 
 Another similar concept of Naiad is the usage of logical timestamps to monitor progress. However, to propagate the latest timestamp the pessimistic approach of notifications broadcasting is defined. Therefore, with the assumption of infrequent out-of-order items, our optimistic behavior is more relevant.
 
-In our model, map and group operations are used as core processing primitives. Google Dataflow~\cite{Akidau:2015:DMP:2824032.2824076} provides the same idea. The primary distinction is that Dataflow model does not suppose any kind of operation's state. Additionally, this model provides different window types for grouping. FlameStream grouping is aligned with fixed-sized sliding window, but it is possible to implement other kind of windows by using cycle and grouping with window-affiliation hash.
+In our model, map and group operations are used as core processing primitives. Google Dataflow~\cite{Akidau:2015:DMP:2824032.2824076} provides the same idea. The primary distinction is that Google Dataflow model does not assume any kind of operation state. Additionally, this model provides different window types for grouping. FlameStream grouping is aligned with fixed-sized sliding window, but it is possible to implement other kind of windows by using cycle and grouping with window-affiliation hash.
 
 {\bf State:}
-According to the state management, it should be noted that the common approach is to give user the ability to handle state of almost any supported operations. Such behavior is implemented, for isntance, in Apache Flink~\cite{carbone2015apache}, Storm~\cite{apache:storm}, Samza~\cite{Noghabi:2017:SSS:3137765.3137770}, Naiad~\cite{Murray:2013:NTD:2517349.2522738}.
+The common approach to state management is to give a user the ability to handle a state of almost any supported operations. Such behavior is implemented, for isntance, in Apache Flink~\cite{carbone2015apache}, Storm~\cite{apache:storm}, Samza~\cite{Noghabi:2017:SSS:3137765.3137770}, Naiad~\cite{Murray:2013:NTD:2517349.2522738}.
 To the best of our knowledge, FlameStream is the only open-source stream processing system that:
 \begin{itemize}
     \item Stateless in terms of business-logic

@@ -1,11 +1,11 @@
 %%% fs-run-time-impl Implementation
 \label{fs-impl}
 
-FlameStream is implemented in Java, using Akka framework for messaging and Apache Zookeeper for cluster management. The usage of Zookeeper mitigates the need for the dedicated master node.
+\FlameStream\ is implemented in Java, using Akka framework for messaging and Apache Zookeeper for cluster management. The usage of Zookeeper mitigates the need for the dedicated master node.
 
-Currently, from the user's perspective, system provides an API to define processing in the terms of {\it ticks}. Tick is represented by a time interval and the graph that handles data items, which relate to this interval, according to the global time. To deploy a tick, client writes it directly to Zookeeper, whereas Zookeeper notifies workers when the new tick appears. As soon as tick ends, system starts to execute the next one if any was submitted to Zookeeper. Otherwise, processing is completely stopped.
+From a user perspective, system provides an API to define processing in the terms of {\it ticks}. Tick is represented by a time interval and the graph that handles data items, which relate to this interval, according to the global time. To deploy a tick, client writes it directly to Zookeeper, whereas Zookeeper notifies workers when the new tick appears. As soon as tick ends, system starts to execute the next one if any was submitted to Zookeeper. Otherwise, processing is completely stopped.
 
-The underlaying purpose of ticks is to provide an ability to periodically rebuild and redeploy graph. We keep in mind that the possible client of FlameStream is a system that automatically builds graph based on declarative language. However, such system cannot build it once and use without modifications, because the performance of graph execution can be influenced by current load, the performance of operations, metrics, etc. Hence, frequent graph redeployment is a crucial goal for our system. 
+The underlaying purpose of ticks is to provide an ability to periodically rebuild and redeploy graph. We keep in mind that the possible client of FlameStream is a system that automatically builds graph based on declarative language. However, such system cannot build it once and use without modifications, because the performance of graph execution can be influenced by current load, the performance of operations, metrics, etc. Hence, frequent graph redeployment is a crucial for our system. 
 
 \subsection{Fault tolerance}
 Currently, there are no any fault tolerance mechanisms implemented in our system. However, it is worth to share some initial thoughts on the topic.
@@ -17,8 +17,8 @@ Typically, distributed systems take into consideration the following types of fa
     \item Network partitioning
 \end{itemize}
 
-Regarding the packet loss issue, we can note that acker can determine the problem if it happens. Therefore, the part of the stream can be replayed by front if it supports some kind of reliable buffer. The extra items can be invalidated at barrier.
+Acker can determine the packet loss issue if it happens. Therefore, the part of the stream can be replayed by front if it supports some kind of reliable buffer.
 
-Node failure is also can be easily determined by the acker. The only difficulty is the loss of the grouping state, because it can lead to the fail of exactly-once semantics. Hence, there is a need for grouping state replication.
+Node failure also can be easily determined by the acker. The only difficulty is the loss of the grouping state, because it can lead to the fail of exactly-once semantics. Hence, there is a need for grouping state replication.
 
-Network partitioning tolerance is not planned to be supported, because it requires unavoidable loss of data. We believe that in this case, stream processing does not make sense.
+Support of network partitioning tolerance is not planned, because it requires unavoidable loss of data. We believe that in this case, stream processing does not make sense.

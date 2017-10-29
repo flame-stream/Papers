@@ -2,28 +2,19 @@
 
 \label {fs-conclusions}
 
-We introduced the model and implementation of distributed scalable stream processing system. Our contribution consists of the following key results:
+We introduced the model and implementation of distributed scalable stream processing system. Our key results are the following:
 
 \begin{itemize}
     \item Proposed computational model is stateless in terms of business-logic. On the other hand, the model is MapReduce complete. Therefore, our system can solve a wide range of analytical and algorithmic tasks.
     \item The user of the system is able to influence the computational layout. Such approach is motivated by the fact that typically user has deeper knowledge of underlaying data distribution.
-    \item The collision management is implemented in optimistic manner. Unlike prevention-based collision management, optimistic approach does not impose overhead in the case of nothing is failed.
+    \item The collision management is implemented in optimistic manner. Unlike prevention-based collision management, optimistic approach does not impose overhead in the failure-free case.
     \item The computational process is deterministic up to the time assignment at fronts.
     \item The new way to determine a moment when data items can be released from stream without loosing exactly-once guarantee, called adaptive micro-batching, was introduced.  
     \item It was shown that our system outperforms Apache Flink on the real-life computations.   
 \end{itemize}
 
-Considering the further progress, the following features are planned to be implemented:
+In the future the following features are planned to be implemented:
 \begin{itemize}
     \item Fault tolerance, and, hence, at least once and exactly once guarantees
     \item Independent readiness by key
 \end{itemize}
-
-
-
-
-
-
-
-
-
