@@ -32,7 +32,7 @@ Global time is assigned to data item once the item enters the system. It is a pa
 
 \[GlobalTime := (FrontTs, FrontId)\]
 
-Global times are compared by front timestamp if they coincide - by front id. It is important to notice, that we are not relying on any synchronization between nodes' wall-clocks, but we require a strict monotonicity within the single front.
+Global times are compared by front timestamp if they coincide - by front id. It is important to notice, that we are not relying on any clock synchronization between nodes, but we require a strict monotonicity within the single front.
 
 Local time is an array of logical times of operations and the ordinal number of the output within single input which we call {\it child id}. 
 
