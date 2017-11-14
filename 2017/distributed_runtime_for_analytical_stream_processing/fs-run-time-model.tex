@@ -120,26 +120,26 @@ One possible way to implement reduce stage in our model is to make business logi
   \label {mapreduce-graph-figure}
 \end{figure}
 
-There are three types of data items in this stream: {\it input}, {\it mapped}, and {\it reduced} items. Mapped and reduced items have the key-value structure of a payload. The operations of the stream have the following purposes:
+There are four types of data items in this stream: {\it input}, {\it mapped}, {\it accumulator}, {\it and reduced} items. Mapped, accumulator, and reduced items have the key-value structure of a payload. The operations of the stream have the following purposes:
 
 \begin{itemize}
   \item The first map operation accepts input items and outputs mapped items according to map stage of MapReduce model.
-  \item The window of grouping is set to 2. It is used to group current reduce state with next data item in order to combine them together further. The hash function is designed to return distinct values for payloads with distinct keys.
-  \item The second map implements the actual combining. It accepts inputs that have a form of: \textit{(mapped item)} or \textit{(reduced item, mapped item)}. The first kind is transformed into some initial value. The second one is combined into the reduce item as specified by reduce stage of MapReduce. The tuples with structure \textit{(mapped item, reduced item)} are filtered out.
-  \item Broadcast operation is used to return the actual reduced item back to the grouping and, at the same time, to output it from the stream. 
+  \item The window of grouping is set to 2. It is used to group current accumulator with next data item in order to combine them together further. The hash function is designed to return distinct values for payloads with distinct keys.
+  \item The second map implements the actual combining. It accepts inputs that have a form of: \textit{(mapped item)} or \textit{(accumulator item, mapped item)}. The first kind is transformed into some initial value. The second one is combined into the new accumulator item as specified by reduce stage of MapReduce. The tuples with structure \textit{(mapped item, accumulator item)} are filtered out.
+  \item The third map is the accumulator map. It accepts accumulator items and applies the final map transformation to them.
 \end{itemize}
 
-The key idea is that ordering assumptions about data items guarantees that each reduced item always arrives at grouping right after previous mapped item and before a new one. Hence, each mapped item that has not been combined yet would be grouped with the right reduced item. Additionally, when combine map accepts tuple {\it (mapped item, reduced item)}, then it means that mapped item was generated before reduced, and therefore, it had been already combined. The cycle gives the ability for new reduced items to get back in grouping operation. Thereby, the stream reacts to each input item by generating new reduced item, which contains the actual value of the reduce stage.
+The key idea is that ordering assumptions about data items guarantees that each accumulator item always arrives at the grouping right after previous mapped item and before a new one. Hence, each mapped item that has not been combined yet would be grouped with the right accumulator item. Additionally, when combine map accepts tuple {\it (mapped item, accumulator item)}, then it means that mapped item was generated before accumulator item, and therefore, it had been already combined. The cycle gives the ability for new accumulator items to get back in the grouping operation. The accumulator map transforms the accumulator item into the final reduced item right before sink. Thereby, the stream reacts to each input item by generating new reduced item, which contains the actual value of the reduce stage.
 
-We illustrate the MapReduce algorithm with an example of word counting. Map stage of this algorithm transforms each input word into key-value pair where the word is a key, and the value is 1. Reduce stage sums all values into the final result for the specific key. 
+We illustrate the MapReduce algorithm with an example of word counting. Map stage of this algorithm transforms each input word into key-value pair where the word is a key, and the value is 1. Reduce stage sums all values into the final result for the specific key. As the accumulator is the actual result of the reduce stage the accumulator map can be omitted.
 
-The example of input/output items, which are generated/ transformed by the part of the logical graph, is shown on the figure~\ref {word-count-figure}. According to our graph for MapReduce transformations, the item {\it m[dog, 1]} represents mapped item with key "dog" and value 1. The item {\it r[dog, 1]} describes reduced item with key "dog" and value 1. The figure shows how the model reacts on two consequent input items containing word "dog". The meta-information of items is omitted for simplification. More precisely, there are 4 stages separated by dotted lines:
+The example of input/output items, which are generated/ transformed by the part of the logical graph, is shown on the figure~\ref {word-count-figure}. According to our graph for MapReduce transformations, the item {\it m[dog, 1]} represents mapped item with key "dog" and value 1. The item {\it a[dog, 1]} describes accumulator item with key "dog" and value 1. The figure shows how the model reacts on two consequent input items containing word "dog". The meta-information of items is omitted for simplification. More precisely, there are 4 stages separated by dotted lines:
 
 \begin{enumerate}
-    \item New mapped item with key "dog" arrives at grouping with an empty state. Grouping outputs tuple with this single item. Combine map transforms it to the first reduced item for key "dog" and value 1.
-    \item The reduced item arrives at grouping after it went through the cycle. It is grouped in the tuple with the mapped item that has been already in the state with key "dog". However, combine map drops this tuple, because of the order of items.
-    \item New mapped item with key "dog" arrives at grouping. It is inserted right after the reduced item in the bucket for key "dog". The grouping operation outputs tuple containing the reduced item and new mapped item. Map operation combines reduced and mapped items into new reduced items with key "dog" and value 2.
-    \item New reduced item arrives at grouping through the cycle, but new generated tuple is not accepted by combine map, as well as in step 2.
+    \item New mapped item with key "dog" arrives at grouping with an empty state. Grouping outputs tuple with this single item. Combine map transforms it into the first accumulator item for key "dog" and value 1.
+    \item The accumulator item arrives at grouping after it went through the cycle. It is grouped in the tuple with the mapped item that has been already in the state with key "dog". However, combine map drops this tuple, because of the order of items.
+    \item New mapped item with key "dog" arrives at grouping. It is inserted right after the accumulator in the bucket for key "dog". The grouping operation outputs tuple containing the accumulator item and new mapped item. Map operation combines reduced and mapped items into new reduced items with key "dog" and value 2.
+    \item New accumulator item arrives at grouping through the cycle, but new generated tuple is not accepted by combine map, as well as in step 2.
 \end{enumerate}
 
 \begin{figure}[htb]
