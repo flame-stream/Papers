@@ -12,15 +12,13 @@ In the real-world, such scenario can be found in freshness-aware systems e.g. ne
     \item The last item of the corresponding changelog leaves the stream.
 \end{enumerate}
 
-In \FlameStream\ this algorithm is implemented as the typical conversion of MapReduce transformation, which is shown above. The only difference is that the last map operation outputs a new reduced state of the inverted index as well as a changelog. The changelog is received by a sink but is filtered before it reaches merge. Therefore, the correctness of MapReduce transformation is preserved.
+In \FlameStream\ this algorithm is implemented as the typical conversion of MapReduce transformation, which is shown in the section~\ref{fs-map-reduce}. Inverted index structure plays the role of accumulator, and the last map operation produces the most recent changes of this structure, if any.
 
-The same task was executed by Apache Flink for performance comparison.
-
-For Apache Flink, this algorithm is adopted by the usage of {\it FlatMapFunction} for map step and stateful {\it RichMapFunction} for reduce step and finding the difference.
+The same task was executed by Apache Flink for performance comparison. For Apache Flink, this algorithm is adopted by the usage of {\it FlatMapFunction} for map step and stateful {\it RichMapFunction} for reduce step and for producing the changelog.
 
 Our experiments were performed on clusters of 1,2,5,7, and 10 nodes. Each node is an Amazon EC2 micro instance with 1GB RAM and 1 core CPU. We used 10000 Wikipedia articles as a dataset. 
 
-The latencies of FlameStream across multiple workers are shown on the figures~\ref{fs-index-median} and~\ref{fs-index-quantiles}. These figures demonstrate the scalability of the system in terms of latency.
+The latencies of \FlameStream\ across multiple workers are shown on the figures~\ref{fs-index-median} and~\ref{fs-index-quantiles}. These figures demonstrate the scalability of the system in terms of latency.
 
 \begin{figure}[htbp]
   \centering
@@ -36,7 +34,7 @@ The latencies of FlameStream across multiple workers are shown on the figures~\r
   \label {fs-index-quantiles}
 \end{figure}
 
-The comparison in latencies between FlameStream and Flink within 10 nodes is shown on the figure~\ref{comp-index-quantiles}. These results show that FlameStream is able to deliver better latency.
+The comparison in latencies between FlameStream and Flink within 10 nodes is shown on the figure~\ref{comp-index-quantiles}. These results show that \FlameStream\ is able to deliver better latency.
 
 \begin{figure}[htbp]
   \centering
