@@ -94,6 +94,7 @@ These parameters can produce more than one graph, which can yield equivalent res
 It is important to mention, that there are no parameters for state-management. Therefore, business-logic is stateless. Nevertheless, the operations set is enough to implement any MapReduce transformation.
 
 \subsection{MapReduce transformations on stream}
+\label{fs-map-reduce}
 
 In this section, we demonstrate possible implementation of MapReduce-like transformation on a stream in order to show the soundness of our model. Map stage can be formulated in terms of our map operation. However, it is not obvious how to implement reduce stage, because it requires an explicit state handling. The algorithm~\ref{reduce} shows a generic reduce stage. The accumulator is an explicit state that should be maintained between subsequent iterations.
 
