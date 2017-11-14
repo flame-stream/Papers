@@ -2,14 +2,14 @@
 
 \label{fs-experiments-section}
 
-We evaluated the system by incrementally computing inverted index.
+We evaluated the prototype of the system by incrementally computing inverted index.
 
-The computation of inverted index is implemented in terms of MapReduce transformations. We start with page mapping into the pairs {\it (word; word positions within a page)}. After that, word positions are reduced by word into the single structure. We assume the output of the stream to be in the form of change log of the inverted index structure. More precisely, each input page should trigger the output of corresponding changelog. 
+The computation of inverted index is implemented in terms of MapReduce transformations. We start with page mapping into the pairs {\it (word; word positions within the page)}. After that, word positions are reduced by word into the single structure. We assume the output of the stream to be a change log of the inverted index structure. More precisely, each input page should trigger the output of the corresponding changelog. 
 
 In the real-world, such scenario can be found in freshness-aware systems e.g. news processing engines. By the notion of {\it latency} we assume the time between two events: 
 \begin{enumerate}
     \item Input page is taken into the stream;
-    \item Corresponding changelog leaves the stream.
+    \item The last item of the corresponding changelog leaves the stream.
 \end{enumerate}
 
 In \FlameStream\ this algorithm is implemented as the typical conversion of MapReduce transformation, which is shown above. The only difference is that the last map operation outputs a new reduced state of the inverted index as well as a changelog. The changelog is received by a sink but is filtered before it reaches merge. Therefore, the correctness of MapReduce transformation is preserved.

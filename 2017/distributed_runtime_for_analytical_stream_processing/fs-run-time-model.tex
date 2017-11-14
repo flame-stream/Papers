@@ -28,9 +28,9 @@ Our model allows cycles in the graph while data flow graphs are commonly assumed
 ~\cite{Zaharia:2016:ASU:3013530.2934664, Carbone:2017:SMA:3137765.3137777}. Moreover, as we show further, there are cases when cycles are required, e.g. for MapReduce-based algorithms. 
 
 \subsection{Physical deployment and partitioning}
-Data flow graph is distributed among computation unit. Each computational unit in our runtime runs a process called {\it worker}, and each worker executes complete data flow graph. Every worker is assigned by an integer interval. Intervals are not intersected and cover the range of 32-bit signed integer.
+Data flow graph is distributed among computation units. Each computational unit runs a process called {\it worker}, and each of the workers executes complete data flow graph. Every worker is assigned by an integer interval (hash range). Intervals are not intersected and cover the range of 32-bit signed integer.
 
-Each input of an operation is assigned by the user-provided hash function called {\it balancing function}. This function is applied to the payload of data items and determines partitioning. Data items are repartitioned before each operation. After that, the corresponding data item is sent to the worker, which is responsible for the computed value. Therefore, load balancing explicitly depends on the balancing functions of the operations. The balancing functions are the part of business logic because optimal balancing requires the knowledge of payload distribution. Possible partitioning of this graph on two nodes is shown on the figure~\ref{physical-graph-figure}.
+Each operation input has a user-provided hash function called {\it balancing function}. This function is applied to the payload of data items and determines partitioning before each operation. After that, the data items are sent to the worker, which is responsible for the assosiated hash range. Therefore, load balancing explicitly depends on the user defined balancing functions. This allows the developer to determine optimal balancing which requires the knowledge of the payload distribution. Though the hash ranges assignment is optimized by the system according to the processing statisticts. Possible partitioning of this graph onto two nodes is shown on the figure~\ref{physical-graph-figure}.
 
 \begin{figure}[htbp]
   \centering
@@ -48,7 +48,7 @@ Each input of an operation is assigned by the user-provided hash function called
 
 \subsection{Ordering model}
 
-As it was mentioned above, meta-information imposes an explicit total order on data items. Without diving into the details, it should be noted that the order of items is maintained across different fronts.
+As it was mentioned above, meta-information imposes an explicit total order on data items. Without diving into details, it should be noted that the order of items is maintained across different fronts.
 
 Let {\it image} be an output data item of an operation and {\it preimage} is a corresponding input item. In this terms, the order of images is preserved, i.e. the order of images is the same as the order of preimages. Moreover, the image of the item follows its preimage but precedes the next item. The concept of ordering is shown on the figure~\ref{ordering}
 
@@ -65,19 +65,19 @@ We assume that input items of the operations are strictly ordered. After the met
 
 The set of available operations is limited by the following list.
 
-{\bf Map} applies a user-defined function to the payload of an input item. This function returns a sequence of data items with new payloads. An output sequence can be empty, in this case, the input item is filtered out.
+{\bf Map} applies a user-defined function to the payload of an input item. This function returns a sequence of data items with transformed payloads. An output sequence can be empty.
 
-{\bf Broadcast} replicates an input item to the specified number of operations or sinks. 
+{\bf Broadcast} replicates an input item to the specified number of operations or sinks.
 
-{\bf Merge} operation is initialized with the specified number of input nodes. Each input item from all inputs copied to the single output.
+{\bf Merge} operation is initialized with the specified number of input nodes. It sends all incoming data to the output.
 
-{\bf Grouping} has a {\it window size} parameter. Grouping stores input items in distinct buckets by the value of the input balancing function applied to the payload. When the next item arrives at the grouping, it is appended to the corresponding bucket according to the ordering model. Each time item grouping outputs window-sized {\it tuple item}, which consists of the last items of this bucket. The data items within tuple are ordered by the meta-information. If the size of the bucket is less than the window, all items of the bucket are taken. Grouping is the only operation that maintains state. To prevent collisions user can define equivalence relation to ensure that items with distinct payloads are got in the distinct buckets.
+{\bf Grouping} has a {\it window size} parameter. Grouping stores input items into distinct buckets by the value of the input balancing function applied to the payload. When the next item arrives at the grouping, it is appended to the corresponding bucket according to the ordering model. Each time the grouping outputs window-sized {\it tuple item}, which consists of the most recent (in terms of the meta-information) items of this bucket. If the size of the bucket is less than the window, all items of the bucket are taken. Grouping is the only operation that maintains state. To prevent collisions user can define equivalence relation to ensure that items with distinct payloads are got in the distinct buckets.
 
 The following example illustrates the semantics of the operation. The grouping accepts items with payload represented as natural numbers: 1,2,3, etc. The hash function returns 1 if the number is even and 0 otherwise. If the window is set to 3, the output is:
 
 \[(1), (2), (1|3), (2|4), (1|3|5), (2|4|6), (3|5|7), (4|6|8)...\]
 
-The important property of the grouping is that the result is uniquely determined by the last element in the tuple. Therefore, grouping is the bijective mapping. Additionally, the results among items with different values of hash function are independent.
+There are two important properties of the grouping operation: the output tuple is identified by its last element, the results among items with different values of hash function are independent.
 
 \subsection{User-defined parameters}
 
@@ -106,7 +106,7 @@ In this section, we demonstrate possible implementation of MapReduce-like transf
     \ForAll{$v \in values$} 
       \State \Call{combine}{$v$, $accumulator$}
     \EndFor
-    \State \Return{$accumulator$}
+    \State \Return \Call{map}{$accumulator$}
   \EndFunction
 \end{algorithmic}
 \end{algorithm}

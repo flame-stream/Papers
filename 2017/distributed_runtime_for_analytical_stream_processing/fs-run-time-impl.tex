@@ -8,7 +8,7 @@ From a user perspective, system provides an API to define processing in the term
 The underlaying purpose of ticks is to provide an ability to periodically rebuild and redeploy graph. We keep in mind that the possible client of FlameStream is a system that automatically builds graph based on declarative language. However, such system cannot build it once and use without modifications, because the performance of graph execution can be influenced by current load, the performance of operations, metrics, etc. Hence, frequent graph redeployment is a crucial for our system. 
 
 \subsection{Fault tolerance}
-Currently, there are no any fault tolerance mechanisms implemented in our prototype. However, it is worth to share some initial thoughts on the topic.
+Currently, there are no fault tolerance mechanisms implemented in our prototype. However, it is worth to share few initial ideas on the topic.
 
 Typically, distributed systems take into consideration the following types of failures:
 \begin{itemize}
@@ -17,7 +17,7 @@ Typically, distributed systems take into consideration the following types of fa
     \item Network partitioning
 \end{itemize}
 
-Acker can determine the packet loss issue if it happens. Therefore, the part of the stream can be replayed by front if it supports some kind of reliable buffer.
+Acker can determine the packet loss issue if it happens. Therefore, the part of the stream can be replayed by the fronts subsystem if it supports some kind of reliable buffer.
 
 Node failure also can be easily determined by the acker. The only difficulty is the loss of the grouping state, because it can lead to the fail of exactly-once semantics. Hence, there is a need for grouping state replication.
 
