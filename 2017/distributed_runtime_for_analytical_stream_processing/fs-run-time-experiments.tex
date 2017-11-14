@@ -12,7 +12,7 @@ In the real-world, such scenario can be found in freshness-aware systems e.g. ne
     \item The last item of the corresponding changelog leaves the stream.
 \end{enumerate}
 
-In \FlameStream\ this algorithm is implemented as the typical conversion of MapReduce transformation, which is shown in the section~\ref{fs-map-reduce}. Inverted index structure plays the role of accumulator, and the last map operation produces the most recent changes of this structure, if any.
+In \FlameStream\ this algorithm is implemented as the typical conversion of MapReduce transformation, which is shown in the section~\ref{fs-map-reduce}. Inverted index structure plays the role of accumulator, and the accumulator map produces the most recent changes of this structure, if any.
 
 The same task was executed by Apache Flink for performance comparison. For Apache Flink, this algorithm is adopted by the usage of {\it FlatMapFunction} for map step and stateful {\it RichMapFunction} for reduce step and for producing the changelog.
 
