@@ -9,14 +9,7 @@ To eventually produce all correct tuples, we use an approach called {\it replay}
 
 The example of replay is shown on the figure~\ref{grouping-replaying-figure}. The colored item is out of order and the window of grouping is 2.
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.48\textwidth]{pics/grouping-replaying}
-  \caption{Replay in grouping}
-  \label {grouping-replaying-figure}
-\end{figure}
-
-In the case of the right order of the input items, there are no redundant items produced. Nevertheless, replay can emit more relevant items, and former ones should not be sent to the outer world.
+In the case of the right order of the input items, there are no redundant items produced.  Nevertheless, replay can emit more relevant items, and former ones should not be sent to the outer world.
 
 \subsection{Adaptive microbatching}
 In order to filter out invalid elements that are produced on grouping replay, items are collected at barrier before leaving the system.
