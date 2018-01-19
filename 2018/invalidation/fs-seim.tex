@@ -1,0 +1,73 @@
+% IEEE Paper Template for US-LETTER Page Size (V1)
+% Sample Conference Paper using IEEE LaTeX style file for US-LETTER pagesize.
+% Copyright (C) 2006-2008 Causal Productions Pty Ltd.
+% Permission is granted to distribute and revise this file provided that
+% this header remains intact.
+%
+% REVISION HISTORY
+% 20080211 changed some space characters in the title-author block
+%
+\documentclass[10pt,conference,letterpaper]{IEEEtran}
+\usepackage{times,amsmath,epsfig}
+
+\usepackage{graphicx}
+\usepackage{algorithm} % for algorithms
+\usepackage{algpseudocode}
+\usepackage{booktabs} % For formal tables
+%\usepackage{amsthm} % For claims  ???????
+
+%
+\title{An optimistic approach to handle out-of-order events within analytical stream processing}
+%
+\author{%
+% author names are typeset in 11pt, which is the default size in the author block
+{Igor E. Kuralenok{\small $~^{\#1}$}, 
+    Nikita Marshalkink{\small $~^{\#2}$},
+    Artem Trofimov{\small $~^{\#3}$}, 
+        Boris Novikov{\small $~^{\#4}$} }%
+% add some space between author names and affils
+\vspace{1.6mm}\\
+\fontsize{10}{10}\selectfont\itshape
+% 20080211 CAUSAL PRODUCTIONS
+% separate superscript on following line from affiliation using narrow space
+$^{\#}$\,JetBrains Research\\
+Saint Petersburg, Russia\\
+\fontsize{9}{9}\selectfont\ttfamily\upshape
+%
+% 20080211 CAUSAL PRODUCTIONS
+% in the following email addresses, separate the superscript from the email address 
+% using a narrow space \,
+% the reason is that Acrobat Reader has an option to auto-detect urls and email
+% addresses, and make them 'hot'.  Without a narrow space, the superscript is included
+% in the email address and corrupts it.
+% Also, removed ~ from pre-superscript since it does not seem to serve any purpose
+$^1$\,ikuralenok@gmail.com   %  \\
+$^2$\,marnikitta@gmail.com    %  \\
+$^3$\,trofimov9artem@gmail.com   % \\
+$^4$\,borisnov@acm.org 
+}
+%
+\newcommand{\PicScale}{0.5}
+\newcommand {\FlameStream} {FlameStream}
+
+\begin{document}
+\maketitle
+%
+\begin{abstract} 
+Abstract
+\end{abstract}
+
+% NOTE keywords are not used for conference papers so do not populate them
+% \begin{keywords}
+% keyword-1, keyword-2, keyword-3
+% \end{keywords}
+%
+\section {Introduction}
+Introduction
+
+\bibliographystyle{IEEEtran}
+\bibliography{../../bibliography/flame-stream}
+
+\end{document}
+
+\endinput
