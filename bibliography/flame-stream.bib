@@ -505,3 +505,60 @@ Dryad is a general-purpose distributed execution engine for coarse-grain data-pa
 The vertices provided by the application developer are quite simple and are usually written as sequential programs with no thread creation or locking. Concurrency arises from Dryad scheduling vertices to run simultaneously on multiple computers, or on multiple CPU cores within a computer. The application can discover the size and placement of data at run time, and modify the graph as the computation progresses to make efficient use of the available resources.
 
 Dryad is designed to scale from powerful multi-core single computers, through small clusters of computers, to data centers with thousands of computers. The Dryad execution engine handles all the difficult problems of creating a large distributed, concurrent application: scheduling the use of computers and their CPUs, recovering from communication or computer failures, and transporting data between vertices.
+
+@INPROCEEDINGS{4279071, 
+author={M. Li and M. Liu and L. Ding and E. A. Rundensteiner and M. Mani}, 
+booktitle={Distributed Computing Systems Workshops, 2007. ICDCSW '07. 27th International Conference on}, 
+title={Event Stream Processing with Out-of-Order Data Arrival}, 
+year={2007}, 
+volume={}, 
+number={}, 
+pages={67-67}, 
+keywords={algebra;data handling;distributed processing;mathematical operators;RFID tracking;core stream algebra operators;distributed computing environment;even machine failure;event pattern queries;event stream processing;out-of-order data arrival;real-time intrusion detection;supply chain management;Algebra;Data analysis;Data mining;Delay;Engines;Face;Intrusion detection;Out of order;Radiofrequency identification;Supply chain management}, 
+doi={10.1109/ICDCSW.2007.35}, 
+ISSN={1545-0678}, 
+month={June},}
+Complex event processing has become increasingly important in modern applications, ranging from supply chain management for RFID tracking to real-time intrusion detection. The goal is to extract patterns from such event streams in order to make informed decisions in real-time. However, networking latencies and even machine failure may cause events to arrive out-of-order at the event stream processing engine. In this work, we address the problem of processing event pattern queries specified over event streams that may contain out-of-order data. First, we analyze the problems state-of-the-art event stream processing technology would experience when faced with out-of-order data arrival. We then propose a new solution of physical implementation strategies for the core stream algebra operators such as sequence scan and pattern construction, including stack- based data structures and associated purge algorithms. Optimizations for sequence scan and construction as well as state purging to minimize CPU cost and memory consumption are also introduced. Lastly, we conduct an experimental study demonstrating the effectiveness of our approach.
+
+@inproceedings{Wei:2009:SSO:1559845.1559973,
+ author = {Wei, Mingzhu and Liu, Mo and Li, Ming and Golovnya, Denis and Rundensteiner, Elke A. and Claypool, Kajal},
+ title = {Supporting a Spectrum of Out-of-order Event Processing Technologies: From Aggressive to Conservative Methodologies},
+ booktitle = {Proceedings of the 2009 ACM SIGMOD International Conference on Management of Data},
+ series = {SIGMOD '09},
+ year = {2009},
+ isbn = {978-1-60558-551-2},
+ location = {Providence, Rhode Island, USA},
+ pages = {1031--1034},
+ numpages = {4},
+ url = {http://doi.acm.org/10.1145/1559845.1559973},
+ doi = {10.1145/1559845.1559973},
+ acmid = {1559973},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {complex event processing, out-of-order data, stream processing},
+} 
+This demonstration presents a complex event processing system which focuses on out-of-order handling. State-of-the-art event stream processing technology experiences significant challenges when faced with out-of-order data arrival including huge system latencies, missing results, and incorrect result generation. We propose two out-of-order handling techniques, conservative and aggressive strategies. We will show the efficiency of our techniques and how they can satisfy various QoS requirements of different applications.
+
+@article{Mutschler:2014:ASP:2659232.2633686,
+ author = {Mutschler, Christopher and Philippsen, Michael},
+ title = {Adaptive Speculative Processing of Out-of-Order Event Streams},
+ journal = {ACM Trans. Internet Technol.},
+ issue_date = {July 2014},
+ volume = {14},
+ number = {1},
+ month = aug,
+ year = {2014},
+ issn = {1533-5399},
+ pages = {4:1--4:24},
+ articleno = {4},
+ numpages = {24},
+ url = {http://doi.acm.org/10.1145/2633686},
+ doi = {10.1145/2633686},
+ acmid = {2633686},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {Distributed event processing, low latency, message-oriented middleware, out-of-order event processing, publish/subscribe, speculative processing},
+} 
+Distributed event-based systems are used to detect meaningful events with low latency in high data-rate event streams that occur in surveillance, sports, finances, etc. However, both known approaches to dealing with the predominant out-of-order event arrival at the distributed detectors have their shortcomings: buffering approaches introduce latencies for event ordering, and stream revision approaches may result in system overloads due to unbounded retraction cascades.
+This article presents an adaptive speculative processing technique for out-of-order event streams that enhances typical buffering approaches. In contrast to other stream revision approaches developed so far, our novel technique encapsulates the event detector, uses the buffering technique to delay events but also speculatively processes a portion of it, and adapts the degree of speculation at runtime to fit the available system resources so that detection latency becomes minimal.
+Our technique outperforms known approaches on both synthetical data and real sensor data from a realtime locating system (RTLS) with several thousands of out-of-order sensor events per second. Speculative buffering exploits system resources and reduces latency by 40 percent on average.
