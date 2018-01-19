@@ -63,7 +63,28 @@ Abstract
 % \end{keywords}
 %
 \section {Introduction}
-Introduction
+State-of-the-art stream processing systems like Flink \cite{carbone2015apache} can provide low-latency and high-throughput in distributed environment. However, there are tasks which require the order of input elements. Even if input items arrive monotonically, they can be reordered within system by shuffling and/or asynchronous operations. The typical way to achieve in-order processing is to lock operation's input for some time to ensure that there are no out-of-order items. Such technique can lead to significantly large latency, especially if processing pipeline contains several operations that require ordered input. In this paper we propose an optimistic approach, which can reduce waiting time for multiple operations with order constraints.
+
+\section{Stream processing dataflow}
+Here we should introduce preliminaries: stream, items, meta-information. How stream processing is typically organized.
+
+\section{Tasks that require in-order input}
+Introduce some problems. Why ordering is so important? Grouping should be mentioned :)
+
+\section{Typical solutions}
+How this problem can be solved using Flink, Storm, etc.?
+
+\section{Optimistic approach}
+The main idea of our technique. Working example - grouping. Barrier as a single point of locking.
+
+\section{Experiments}
+Show that our idea works.
+
+\section{Related work}
+...
+
+\section{Conslusion}
+We are winners :)
 
 \bibliographystyle{IEEEtran}
 \bibliography{../../bibliography/flame-stream}
