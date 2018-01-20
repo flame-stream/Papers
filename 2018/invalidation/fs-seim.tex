@@ -63,7 +63,7 @@ Abstract
 % \end{keywords}
 %
 \section {Introduction}
-State-of-the-art stream processing systems like Flink \cite{carbone2015apache} can provide low-latency and high-throughput in distributed environment. However, there are tasks which require the order of input elements. Even if input items arrive monotonically, they can be reordered within system by shuffling and/or asynchronous operations. The typical way to achieve in-order processing is to lock operation's input for some time to ensure that there are no out-of-order items. Such technique can lead to significantly large latency, especially if processing pipeline contains several operations that require ordered input. Alternative option is to handle out-of-order items as a special case in business logic. The main disadvantage of this way is the complexity of business logic maintanance. In this paper we propose an optimistic approach, which can reduce waiting time for multiple operations with order constraints, but does not affect the complexity of business logic.
+State-of-the-art stream processing systems like Flink \cite{carbone2015apache} can provide low-latency and high-throughput in distributed environment. However, there are tasks which require the order of input elements. Even if input items arrive monotonically, they can be reordered within system by shuffling and/or asynchronous operations. The typical way to achieve in-order processing is to lock operation's input for some time to ensure that there are no out-of-order items. Such technique can lead to significantly large latency, especially if  the processing pipeline contains several operations that require ordered input. An alternative option is to handle out-of-order items as a special case in business logic. The main disadvantage of this way is the complexity of business logic maintanance. In this paper we propose an optimistic approach, which can reduce waiting time for multiple operations with order constraints, but does not affect the complexity of business logic.
 
 \section{Stream processing dataflow}
 Here we should introduce preliminaries: stream, items, meta-information. How stream processing is typically organized: shared-nothing, queue-based.
@@ -81,7 +81,7 @@ Working example - grouping.
 
 Discuss limitations.
 
-Barrier as a single point of locking. 
+Barrier as a single point of locking.  Probably synchronization, rather than locking?
 
 \section{Experiments}
 Show that our idea works. Problem: how to perform experiments without introducing our MapReduce model?
