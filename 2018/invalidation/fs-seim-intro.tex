@@ -1,3 +1,25 @@
 %%% fs-seim-intro - Introduction
 
-State-of-the-art stream processing systems like Flink \cite{carbone2015apache} can provide low-latency and high-throughput in distributed environment. However, there are tasks which require the order of input elements. Even if input items arrive monotonically, they can be reordered within system by shuffling and/or asynchronous operations. The typical way to achieve in-order processing is to lock operation's input for some time to ensure that there are no out-of-order items. Such technique can lead to significantly large latency, especially if  the processing pipeline contains several operations that require ordered input. An alternative option is to handle out-of-order items as a special case in business logic. The main disadvantage of this way is the complexity of business logic maintanance. In this paper we propose an optimistic approach, which can reduce waiting time for multiple operations with order constraints, but does not affect the complexity of business logic.
+\label {fs-intro}
+
+Nowadays, a lot of real-life applications use stream processing for network monitoring, financial analysis, training machine learning models, etc. State-of-the-art industrial stream processing systems, such as Flink \cite{carbone2015apache}, Samza \cite{Noghabi:2017:SSS:3137765.3137770}, Storm \cite{apache:storm}, Heron \cite{Kulkarni:2015:THS:2723372.2742788}, are able to provide low-latency and high-throughput in distributed environment for a wide range of analytical problems. However, issues related to the order-sensitive computations still remain. Most systems assume that events arrive with monotonically increasing timestamps. Often, such timestamps can be assigned at system's entry. Nevertheless, even if input items arrive at system's entry monotonically, they can be reordered by shuffling and/or asynchronous processing. In this case, order-sensitive operations located in dataflow pipeline quite deeply can be broken. Figure ~\ref{break-order-dataflow} shows the example of common distributed stream processing pipeline that breaks the input order of operation, even if input events are monotonic and links between operations guarantee FIFO order.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.38\textwidth]{pics/break_order_pipeline}
+  \caption{The example of common distributed stream processing pipeline that breaks the input order of operation}
+  \label {break-order-dataflow}
+\end{figure}
+
+The typical way to achieve in-order processing is to buffer operation's input for some time to ensure that there are no out-of-order items. Most of the modern stream processing systems provide special technique called {\it windowing}, which can be used particularly for this puprose. The basic idea of windowing method is to buffer all input items before specified operations until some user-provided conditions are satisfied. Generally, conditions can be set on timing or the count of elements in buffer. The main disadvantage of such technique is that it can lead to significantly large latency, especially if the processing pipeline contains several operations that require ordered input. 
+
+An alternative option is to handle out-of-order items as a special case in business logic of operation. However, this way is suitable only for limited number of tasks. Moreover, it may dramatically complicate the business-logic, which can lead to increasing the cost of its maintanance and sophisticated bugs.    
+
+In this paper we propose an optimistic approach to handle out-of order events and demonstrate its advantages compared to existing solutions. The contributions of this paper are the following: 
+\begin {itemize}
+\item Definition of new optimistic technique to handle out-of-order items
+\item Demonstration of properties of this approach, particularly, reducing waiting time for multiple operations with order constraints without affecting the complexity of business logic
+\item Demonstration of working example that applies proposed method
+\end {itemize}
+
+The rest of the paper is structured as follows: in section~\ref{fs-stream} we formalize the preliminaries of stream processing, the examples of tasks that require ordered input are described in section~\ref{fs-tasks}, the typical approaches for handling out-of-order events are discussed in~\ref{fs-typical}, our optimistic technique is detailed in~\ref{fs-optimistic} and its performance is demonstrated in ~\ref{fs-experiments}, the main differences between proposed method and existing ones are shown in~\ref{fs-related}, finally we discuss the results and our plans in~\ref{fs-conclusion}.
