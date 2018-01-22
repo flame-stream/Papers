@@ -63,34 +63,28 @@ Abstract
 % \end{keywords}
 %
 \section {Introduction}
-State-of-the-art stream processing systems like Flink \cite{carbone2015apache} can provide low-latency and high-throughput in distributed environment. However, there are tasks which require the order of input elements. Even if input items arrive monotonically, they can be reordered within system by shuffling and/or asynchronous operations. The typical way to achieve in-order processing is to lock operation's input for some time to ensure that there are no out-of-order items. Such technique can lead to significantly large latency, especially if  the processing pipeline contains several operations that require ordered input. An alternative option is to handle out-of-order items as a special case in business logic. The main disadvantage of this way is the complexity of business logic maintanance. In this paper we propose an optimistic approach, which can reduce waiting time for multiple operations with order constraints, but does not affect the complexity of business logic.
+\input {fs-seim-intro.tex}
 
 \section{Stream processing dataflow}
-Here we should introduce preliminaries: stream, items, meta-information. How stream processing is typically organized: shared-nothing, queue-based.
+\input {fs-seim-stream.tex}
 
 \section{Tasks that require in-order input}
-Introduce some problems. Why ordering is so important? Grouping should be mentioned :)
+\input {fs-seim-tasks.tex}
 
 \section{Typical solutions}
-How this problem can be solved using Flink, Storm, etc.? Observe several types of windows introduced in Google Dataflow \cite{Akidau:2015:DMP:2824032.2824076}.
+\input {fs-seim-typical.tex}
 
 \section{Optimistic approach}
-Introduce the main idea of our technique. Draw parallels with transactions/transactional memory. 
-
-Working example - grouping. 
-
-Discuss limitations.
-
-Barrier as a single point of locking.  Probably synchronization, rather than locking?
+\input {fs-seim-optimistic.tex}
 
 \section{Experiments}
-Show that our idea works. Problem: how to perform experiments without introducing our MapReduce model?
+\input {fs-seim-experiments.tex}
 
 \section{Related work}
-Seems to be related: \cite{4279071}, \cite{Wei:2009:SSO:1559845.1559973}, \cite{Mutschler:2014:ASP:2659232.2633686}.
+\input {fs-seim-related.tex}
 
 \section{Conslusion}
-We are winners :)
+\input {fs-seim-conclusion.tex}
 
 \bibliographystyle{IEEEtran}
 \bibliography{../../bibliography/flame-stream}
