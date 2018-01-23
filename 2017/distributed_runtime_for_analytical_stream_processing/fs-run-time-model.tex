@@ -11,7 +11,7 @@ The top level of our data flow abstraction is a {\it stream}. Stream is represen
 
 Payload is an arbitrary user-provided data. Meta-data is a structured system-assigned information. The primary purpose of the meta-data is to impose the total order on data items. 
 
-Data payloads are got into the stream through {\it front} and got out through {\it barrier}. Particularly, front creates data items from input payloads by assigning them meta-data. Inside stream, data items can be dropped or their payloads and metas can be transformed. Eventually, barrier removes meta-information and outputs back pure payloads. High-level view of our stream is shown on the figure~\ref{stream}.
+Data payloads are got into the stream through {\it front} and got out through {\it barrier}. Particularly, front creates data items from input payloads by assigning them meta-data. Inside stream, data items can be dropped or their payloads and metas can be transformed. Eventually, barrier removes meta-information and outputs back pure payloads. High-level view of our stream is shown in the figure~\ref{stream}.
 
 \begin{figure}[htbp]
   \centering
@@ -30,7 +30,7 @@ Our model allows cycles in the graph while data flow graphs are commonly assumed
 \subsection{Physical deployment and partitioning}
 Data flow graph is distributed among computation units. Each computational unit runs a process called {\it worker}, and each of the workers executes complete data flow graph. Every worker is assigned by an integer interval (hash range). Intervals are not intersected and cover the range of 32-bit signed integer.
 
-Each operation input has a user-provided hash function called {\it balancing function}. This function is applied to the payload of data items and determines partitioning before each operation. After that, the data items are sent to the worker, which is responsible for the assosiated hash range. Therefore, load balancing explicitly depends on the user defined balancing functions. This allows the developer to determine optimal balancing which requires the knowledge of the payload distribution. Though the hash ranges assignment is optimized by the system according to the processing statisticts. Possible partitioning of this graph onto two nodes is shown on the figure~\ref{physical-graph-figure}.
+Each operation input has a user-provided hash function called {\it balancing function}. This function is applied to the payload of data items and determines partitioning before each operation. After that, the data items are sent to the worker, which is responsible for the assosiated hash range. Therefore, load balancing explicitly depends on the user defined balancing functions. This allows the developer to determine optimal balancing which requires the knowledge of the payload distribution. Though the hash ranges assignment is optimized by the system according to the processing statisticts. Possible partitioning of this graph onto two nodes is shown in the figure~\ref{physical-graph-figure}.
 
 \begin{figure}[htbp]
   \centering
@@ -50,7 +50,7 @@ Each operation input has a user-provided hash function called {\it balancing fun
 
 As it was mentioned above, meta-information imposes an explicit total order on data items. Without diving into details, it should be noted that the order of items is maintained across different fronts.
 
-Let {\it image} be an output data item of an operation and {\it preimage} is a corresponding input item. In this terms, the order of images is preserved, i.e. the order of images is the same as the order of preimages. Moreover, the image of the item follows its preimage but precedes the next item. The concept of ordering is shown on the figure~\ref{ordering}
+Let {\it image} be an output data item of an operation and {\it preimage} is a corresponding input item. In this terms, the order of images is preserved, i.e. the order of images is the same as the order of preimages. Moreover, the image of the item follows its preimage but precedes the next item. The concept of ordering is shown in the figure~\ref{ordering}
 
 \begin{figure}[htbp]
   \centering
@@ -134,7 +134,7 @@ The key idea is that ordering assumptions about data items guarantees that each 
 
 We illustrate the MapReduce algorithm with an example of word counting. Map stage of this algorithm transforms each input word into key-value pair where the word is a key, and the value is 1. Reduce stage sums all values into the final result for the specific key. In this case the accumulator map is omitted, because the accumulator is the actual result of the reduce stage.
 
-The example of input/output items, which are generated/ transformed by the part of the logical graph, is shown on the figure~\ref {word-count-figure}. According to our graph for MapReduce transformations, the item {\it m[dog, 1]} represents mapped item with key "dog" and value 1. The item {\it a[dog, 1]} describes accumulator item with key "dog" and value 1. The figure shows how the model reacts on two consequent input items containing word "dog". The meta-information of items is omitted for simplification. More precisely, there are 4 stages separated by dotted lines:
+The example of input/output items, which are generated/ transformed by the part of the logical graph, is shown in the figure~\ref {word-count-figure}. According to our graph for MapReduce transformations, the item {\it m[dog, 1]} represents mapped item with key "dog" and value 1. The item {\it a[dog, 1]} describes accumulator item with key "dog" and value 1. The figure shows how the model reacts on two consequent input items containing word "dog". The meta-information of items is omitted for simplification. More precisely, there are 4 stages separated by dotted lines:
 
 \begin{enumerate}
     \item New mapped item with key "dog" arrives at grouping with an empty state. Grouping outputs tuple with this single item. Combine map transforms it into the first accumulator item for key "dog" and value 1.
