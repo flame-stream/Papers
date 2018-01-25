@@ -23,10 +23,10 @@ It is supposed that there is total order on meta-data. Moreover, meta-data is as
 Similarly to the most stream processing systems, our model assumes that computational pipeline is defined in the form of {\it execution graph}. The vertices of execution graph are operations, and edges are links between them. 
 
 \subsection{Operations}
-Because of the fact that distinct production systems provide the distinct predefined operations, our model does not have any requirements relating to the set of base operations.
+We assume that the set of basic operations are complete enough to express {\it reduce} operation in terms of MapReduce framework.
 
 \subsection{Physical deployment}
-Generally, we do not have strict restrictions regarding physical execution of the data flow. Nevertheless, we assume that each operation can be partitioned between multiple shards. Partitioning can be applied by key extracted from item's payload or randomly. Regarding physical links between operations, we suppose that they guarantee FIFO order.
+Generally, we do not have strict restrictions regarding physical execution of the data flow. Nevertheless, we assume that each operation can be partitioned between multiple shards. Partitioning can be applied by key extracted from item's payload for stateful operations or randomly for stateless. Regarding physical links between operations, we suppose that they guarantee FIFO order.
 
 \subsection{Guarantees}
 We do not require any guarantees on data processing. At the same time, it should be noted that ordering properties can be important for guarantees satisfaction within specific tasks.
