@@ -2,4 +2,16 @@
 
 \label {fs-typical}
 
-How this problem can be solved using Flink, Storm, etc.? Observe several types of windows introduced in Google Dataflow \cite{Akidau:2015:DMP:2824032.2824076}.
+There are two common methods that are used to enforce ordering: in-order processing (IOP) and out-of-order processing (OOP).
+
+\subsection{IOP}
+
+In IOP approach each operation enforces total order on elements. For example union combines multiple streams into one (pic 123). Each input stream of union is ordered, as predecessor must meet ordering constraint. If there is arrival time skew between input stream merge must buffer the earlier stream to produce ordered output. Operators such as projection and selection applies function and propagete items down the stream without any additional buffering. The known systems that addopt this technique are Gigascope \ref{bla}, Niagara \ref{bla} and ADD MORE.
+
+IOP is know to be memory demanding \ref{bla-bla}, to have unpredictible latencies \ref{bla-bla} and limitid scalability.
+
+\subsection{OOP}
+
+OOP is an architecture of streaming streaming that doesn't require order maintaince. To unblock blocking operations OOP systems use progress indicators such as such as punchuations \ref{bla-bla}, watermarks \ref{bla-bla} or hearbeats \ref{bla-bla}. Punctuations are periodically yielded by data sources and carries timestamp that promises that there won't be any elements older that heartbeats value. Punctuations are monotonic and data items between two consecutive heartbeats can be arbitrarily reordered, pic 123. Operations propagates them with respect to their semantics.
+
+For example, windows collects partial aggregates until punctuation that guarantees that there no element that belogs to the ongoing window can be delivered to the window's input. On punctuation's arrival it flushes completed windows and propagates punctuation to the next operation down the stream, pic 123.
