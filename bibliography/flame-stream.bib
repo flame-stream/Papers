@@ -562,3 +562,131 @@ This demonstration presents a complex event processing system which focuses on o
 Distributed event-based systems are used to detect meaningful events with low latency in high data-rate event streams that occur in surveillance, sports, finances, etc. However, both known approaches to dealing with the predominant out-of-order event arrival at the distributed detectors have their shortcomings: buffering approaches introduce latencies for event ordering, and stream revision approaches may result in system overloads due to unbounded retraction cascades.
 This article presents an adaptive speculative processing technique for out-of-order event streams that enhances typical buffering approaches. In contrast to other stream revision approaches developed so far, our novel technique encapsulates the event detector, uses the buffering technique to delay events but also speculatively processes a portion of it, and adapts the degree of speculation at runtime to fit the available system resources so that detection latency becomes minimal.
 Our technique outperforms known approaches on both synthetical data and real sensor data from a realtime locating system (RTLS) with several thousands of out-of-order sensor events per second. Speculative buffering exploits system resources and reduces latency by 40 percent on average.
+
+@article{Li:2008:OPN:1453856.1453890,
+ author = {Li, Jin and Tufte, Kristin and Shkapenyuk, Vladislav and Papadimos, Vassilis and Johnson, Theodore and Maier, David},
+ title = {Out-of-order Processing: A New Architecture for High-performance Stream Systems},
+ journal = {Proc. VLDB Endow.},
+ issue_date = {August 2008},
+ volume = {1},
+ number = {1},
+ month = aug,
+ year = {2008},
+ issn = {2150-8097},
+ pages = {274--288},
+ numpages = {15},
+ url = {http://dx.doi.org/10.14778/1453856.1453890},
+ doi = {10.14778/1453856.1453890},
+ acmid = {1453890},
+ publisher = {VLDB Endowment},
+} 
+Many stream-processing systems enforce an order on data streams during query evaluation to help unblock blocking operators and purge state from stateful operators. Such in-order processing (IOP) systems not only must enforce order on input streams, but also require that query operators preserve order. This order-preserving requirement constrains the implementation of stream systems and incurs significant performance penalties, particularly for memory consumption. Especially for high-performance, potentially distributed stream systems, the cost of enforcing order can be prohibitive. We introduce a new architecture for stream systems, out-of-order processing (OOP), that avoids ordering constraints. The OOP architecture frees stream systems from the burden of order maintenance by using explicit stream progress indicators, such as punctuation or heartbeats, to unblock and purge operators. We describe the implementation of OOP stream systems and discuss the benefits of this architecture in depth. For example, the OOP approach has proven useful for smoothing workload bursts caused by expensive end-of-window operations, which can overwhelm internal communication paths in IOP approaches. We have implemented OOP in two stream systems, Gigascope and NiagaraST. Our experimental study shows that the OOP approach can significantly outperform IOP in a number of aspects, including memory, throughput and latency.
+
+@inproceedings{Cranor:2003:GSD:872757.872838,
+ author = {Cranor, Chuck and Johnson, Theodore and Spataschek, Oliver and Shkapenyuk, Vladislav},
+ title = {Gigascope: A Stream Database for Network Applications},
+ booktitle = {Proceedings of the 2003 ACM SIGMOD International Conference on Management of Data},
+ series = {SIGMOD '03},
+ year = {2003},
+ isbn = {1-58113-634-X},
+ location = {San Diego, California},
+ pages = {647--651},
+ numpages = {5},
+ url = {http://doi.acm.org/10.1145/872757.872838},
+ doi = {10.1145/872757.872838},
+ acmid = {872838},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+} 
+We have developed Gigascope, a stream database for network applications including traffic analysis, intrusion detection, router configuration analysis, network research, network monitoring, and performance monitoring and debugging. Gigascope is undergoing installation at many sites within the AT&T network, including at OC48 routers, for detailed monitoring. In this paper we describe our motivation for and constraints in developing Gigascope, the Gigascope architecture and query language, and performance issues. We conclude with a discussion of stream database research problems we have found in our application.
+
+@article{hammad2004optimizing,
+  title={Optimizing in-order execution of continuous queries over streamed sensor data},
+  author={Hammad, Moustafa and Aref, Walid and Elmagarmid, Ahmed},
+  year={2004},
+  publisher={University of Calgary}
+}
+The widespread use of sensor networks in scientific and
+engineering applications leads to increased demand on the
+efficient computation of the collected sensor data. Recent
+research in sensor and stream data systems adopts the notion
+of sliding windows to process continuous queries over
+infinite sensor readings. Ordered processing of input data is
+essential during query execution for many application scenarios.
+In this paper we present three approaches for ordered
+execution of continuous sliding window queries over
+sensor data. The first approach enforces ordered processing
+at the input side of the query execution plan. In the second
+approach we utilize the advantage of out-of-order execution
+to optimize query operators and enforce an ordered
+release of the output results. The third approach is adaptive
+and switches between the first and second approaches
+to achieve the best overall performance with current input
+arrival rates and level of multiprogramming. We study the
+performance of the proposed approaches both analytically
+and experimentally and under a variety of conditions such
+as the asynchronous arrival of input data, and various levels
+of multiprogramming. Our performance study is based
+on an extensive set of experiments using a realization of the
+proposed approaches in a prototype stream query processing
+system.
+
+@article{Arasu:2006:CCQ:1146461.1146463,
+ author = {Arasu, Arvind and Babu, Shivnath and Widom, Jennifer},
+ title = {The CQL Continuous Query Language: Semantic Foundations and Query Execution},
+ journal = {The VLDB Journal},
+ issue_date = {June 2006},
+ volume = {15},
+ number = {2},
+ month = jun,
+ year = {2006},
+ issn = {1066-8888},
+ pages = {121--142},
+ numpages = {22},
+ url = {http://dx.doi.org/10.1007/s00778-004-0147-z},
+ doi = {10.1007/s00778-004-0147-z},
+ acmid = {1146463},
+ publisher = {Springer-Verlag New York, Inc.},
+ address = {Secaucus, NJ, USA},
+ keywords = {Continuous queries, Data streams, Query language, Query processing},
+} 
+CQL, a continuous query language, is supported by the STREAM prototype data stream management system (DSMS) at Stanford. CQL is an expressive SQL-based declarative language for registering continuous queries against streams and stored relations. We begin by presenting an abstract semantics that relies only on “black-box” mappings among streams and relations. From these mappings we define a precise and general interpretation for continuous queries. CQL is an instantiation of our abstract semantics using SQL to map from relations to relations, window specifications derived from SQL-99 to map from streams to relations, and three new operators to map from relations to streams. Most of the CQL language is operational in the STREAM system. We present the structure of CQL's query execution plans as well as details of the most important components: operators, interoperator queues, synopses, and sharing of components among multiple operators and queries. Examples throughout the paper are drawn from the Linear Road benchmark recently proposed for DSMSs. We also curate a public repository of data stream applications that includes a wide variety of queries expressed in CQL. The relative ease of capturing these applications in CQL is one indicator that the language contains an appropriate set of constructs for data stream processing.
+
+@article{Tucker:2003:EPS:776752.776780,
+ author = {Tucker, Peter A. and Maier, David and Sheard, Tim and Fegaras, Leonidas},
+ title = {Exploiting Punctuation Semantics in Continuous Data Streams},
+ journal = {IEEE Trans. on Knowl. and Data Eng.},
+ issue_date = {March 2003},
+ volume = {15},
+ number = {3},
+ month = mar,
+ year = {2003},
+ issn = {1041-4347},
+ pages = {555--568},
+ numpages = {14},
+ url = {http://dx.doi.org/10.1109/TKDE.2003.1198390},
+ doi = {10.1109/TKDE.2003.1198390},
+ acmid = {776780},
+ publisher = {IEEE Educational Activities Department},
+ address = {Piscataway, NJ, USA},
+ keywords = {Continuous queries, stream semantics, continuous data streams, query operators, stream iterators.},
+}
+As most current query processing architectures are already pipelined, it seems logical to apply them to data streams. However, two classes of query operators are impractical for processing long or infinite data streams. Unbounded stateful operators maintain state with no upper bound in size and, so, run out of memory. Blocking operators read an entire input before emitting a single output and, so, might never produce a result. We believe that a priori knowledge of a data stream can permit the use of such operators in some cases. We discuss a kind of stream semantics called punctuated streams. Punctuations in a stream mark the end of substreams allowing us to view an infinite stream as a mixture of finite streams. We introduce three kinds of invariants to specify the proper behavior of operators in the presence of punctuation. Pass invariants define when results can be passed on. Keep invariants define what must be kept in local state to continue successful operation. Propagation invariants define when punctuation can be passed on. We report on our initial implementation and show a strategy for proving implementations of these invariants are faithful to their relational counterparts.
+
+@inproceedings{Srivastava:2004:FTM:1055558.1055596,
+ author = {Srivastava, Utkarsh and Widom, Jennifer},
+ title = {Flexible Time Management in Data Stream Systems},
+ booktitle = {Proceedings of the Twenty-third ACM SIGMOD-SIGACT-SIGART Symposium on Principles of Database Systems},
+ series = {PODS '04},
+ year = {2004},
+ isbn = {158113858X},
+ location = {Paris, France},
+ pages = {263--274},
+ numpages = {12},
+ url = {http://doi.acm.org/10.1145/1055558.1055596},
+ doi = {10.1145/1055558.1055596},
+ acmid = {1055596},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+} 
+Continuous queries in a Data Stream Management System (DSMS) rely on time as a basis for windows on streams and for defining a consistent semantics for multiple streams and updatable relations. The system clock in a centralized DSMS provides a convenient and well-behaved notion of time, but often it is more appropriate for a DSMS application to define its own notion of time---its own clock(s), sequence numbers, or other forms of ordering and times-tamping. Flexible application-defined time poses challenges to the DSMS, since streams may be out of order and uncoordinated with each other, they may incur latency reaching the DSMS, and they may pause or stop. We formalize these challenges and specify how to generate heartbeats so that queries can be evaluated correctly and continuously in an application-defined time domain. Our heartbeat generation algorithm is based on parameters capturing skew between streams, unordering within streams, and latency in streams reaching the DSMS. We also describe how to estimate these parameters at run-time, and we discuss how heartbeats can be used for processing continuous queries.
