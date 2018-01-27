@@ -2,10 +2,18 @@
 
 \label {fs-optimistic}
 
-Introduce the main idea of our technique. Draw parallels with transactions/transactional memory. 
+In this section firstly we show that reduce stage can be implemented using windowed grouping and map operations with cycle in execution graph. After that, proposed optimistic technique is demonstrated. Eventually, we discuss the limitations of such technique.
 
-Working example - grouping. 
+\subsection{Reduce through grouping, map, and cycle}
+The pipeline for reduce stage is shown in the figure.  
 
-Discuss limitations.
+\subsection{Optimistic solution}
 
-Barrier as a single point of locking.  Probably synchronization, rather than locking?
+
+\subsection{Limitations}
+
+Barrier
+If consumer can invalidate 
+
+
+
