@@ -2,12 +2,10 @@
 
 \label {fs-tasks}
 
-In general, operations requiring order are stateful and reacts on each input item, i.e. item is combined with precomputed state on its arrival. Thereby, we may assume without loss of generality that such operations can be represented as reduce stages.
-
 In this section we mention common problems that require the order of input items. Additionally, we note a couple of computation scenarios, which can be found in many real-life projects.
 
 \subsection{Tasks requiring complete event retrieval}
-Quite often we suppose that event is an atomic object, i.e. single data item. However, there are cases when single input event is split into multiple items within a stream. These pieces can be processed independently, despite the fact that they all have the same meta-information. As it was shown in the figure ~\ref{break-order-dataflow}, independent processing can lead to reordering. Therefore, operations which require complete event data to process valid output cannot simply detect the completeness by the order of input items.
+Quite often we suppose that business-logic event is an atomic object, i.e. single data item. However, there are cases when single input event is split into multiple items within a stream. These input item derivatives can be processed independently, despite the fact that they all have the same meta-information. As it was shown in the figure ~\ref{break-order-dataflow}, independent processing can lead to reordering. Therefore, operations which require complete event data to process valid output cannot simply detect the completeness by the order of input items.
 
 There are other solutions for this kind of problems rather than ordering of input items. They are shown in the section ~\ref{fs-typical}. 
 
@@ -17,7 +15,6 @@ This class includes all non-commutative operations. Such tasks strictly requires
 \subsection{Examples}
 
 \subsubsection{???}
-
 
 \subsubsection{Inverted index}
 Pipeline shown in the figure ~\ref{break-order-dataflow} can be used for computing inverted index. In this case, operation 1 accepts documents from input and for each word produces corresponding positions. Operation 2 accepts pairs of word and positions and computes change log of inverted index for each word. Because of the fact that output change logs must be ordered in order to get valid index after applying them, operation 2 requires ordered input. 
