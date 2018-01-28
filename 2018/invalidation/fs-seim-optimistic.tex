@@ -2,13 +2,28 @@
 
 \label {fs-optimistic}
 
+The main idea of our method is to represent stateful transformations as a sequence of map and windowed grouping operations and handle out-of-order items within them. 
+
+Following our approach, we make some assumptions about stream processing system, that is suitable for applying it. Such system must support meta-information on data items, allow cycles in logical graph, and its set of predefined operations must be sufficient to express map and windowed grouping operations.
+
 In this section, firstly, we show that any stateful transformation can be implemented using the combination of windowed grouping and map operations. After that, we demonstrate an optimistic approach to handle out-of-order items within these operations. Eventually, the limitations of such technique are discussed.
 
 \subsection{Semantics of map and windowed grouping operations}
 
 \subsubsection{Map}
+Map transforms input item into a sequence of its derivatives according to a function on item's payload provided by user. This sequence can consist of any number of items or even be empty.
 
 \subsubsection{Windowed grouping}
+Windowed grouping is a stateful operation with a numeric parameter {\it window}. It is supposed that payloads of input items of grouping operation have key-value form. The state of this operation is represented by a set of buckets, one for each key. Windowed grouping has the following semantics:
+
+\begin{itemize}
+    \item Each input item is put into corresponding bucket at position defined by its meta-information
+    \item The output of grouping operation is a window-sized list of last items in the corresponding bucket. If bucker size is less than window, the output contain full bucket
+\end{itemize}
+
+The following example illustrates the semantics of the windowed grouping operation. In this example, payloads of input items are represented as natural numbers: 1, 2, 3, etc. The hash function returns 1 if the number is even and 0 otherwise. If the window is set to 3, the output is:
+
+\[(1), (2), (1|3), (2|4), (1|3|5), (2|4|6), (3|5|7), (4|6|8)...\]
 
 \subsection{Stateful transformations using defined operations}
 
@@ -16,8 +31,6 @@ In this section, firstly, we show that any stateful transformation can be implem
 
 \subsection{Limitations}
 
-Barrier
-If consumer can invalidate 
 
 
 
