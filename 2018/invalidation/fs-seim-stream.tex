@@ -7,7 +7,7 @@ In this section we define some preliminaries for stream processing. It allows us
 Commonly, stream processing system is a shared-nothing distributed runtime that handles potentially unbounded number of input events and process them one-by-one, according to the procedures provided by user. The main purpose of this kind of data processing systems is to provide low latency between event occurrence and its processing. Term {\it distributed} implies that user's procedures can have partitions on distinct computational units or shards. The following subsections detail the properties of such systems more precisely.  
 
 \subsection{Data flow}
-The basic data flow abstraction is a {\it stream}. Stream is an infinite sequence of events or data items. Each data item contains payload defined by user. Besides, it can be assigned by meta-information. Usually, meta-information is used to define an order on data items. For instance, it can be represented as a UNIX timestamp in milliseconds.
+The basic data flow abstraction is a {\it stream}. Stream is an infinite sequence of events or data items. Each data item contains payload defined by user. Besides, it can be assigned by meta-information. Usually, meta-information is used to define an order on data items. For instance, it can be represented as a UNIX timestamp in milliseconds with a trace of applied operations.
 
 \subsection{Computation flow}
 Commonly, computational pipeline is defined in the form of {\it logical graph}. The vertices of logical graph are operations, and edges are links between them. Logical graph defines only relations between operations, but it does not detail its physical deployment.    
