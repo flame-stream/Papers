@@ -39,8 +39,8 @@ The following example illustrates the semantics of the windowed grouping operati
 Figure ~\ref{stateful-schema} shows the part of the logical pipeline, that can be used for stateful transformation. The input of windowed grouping operation is supposed to be ordered. There are several functional steps to produce output and update state. These steps can be detailed by considering two cases:
 
 \begin{itemize}
-    \item When the first item arrives at grouping, it is inserted into the empty bucket. Grouping outputs single-element tuple, and then it is sent to combined map. Combined map generates state object and sends it back to the grouping in the form of ordinal data item. At the same time, combined map can generate some output and send it further down the stream
-    \item When new regular input item arrives at windowed grouping, it is inserted into the corresponding bucket's tail, because of the order assumptions. Additionally, the right ordering guarantees that input item is grouped into the tuple with previously generated state item. The next map operation combines new item and previous state into the new one. After that, the new state item is returned to the grouping through the cycle. As in the preceding case, combined map can generate some additional output
+    \item When the first item arrives at grouping, it is inserted into the empty bucket. Grouping outputs single-element tuple, and then it is sent to combined map. Combined map generates state object and sends it back to the grouping in the form of ordinal key-value data item. The key of the state item is the same as in the item in tuple and value is the state. Combined map can generate some additional output and send it further down the stream
+    \item When new regular input item arrives at windowed grouping, it is inserted into the corresponding bucket's tail, because of the order assumptions. Additionally, the right ordering guarantees that input item is grouped into the tuple with previously generated state item. The next map operation combines new item and previous state into the new state item. After that, the new state item is returned to the grouping through the cycle. As in the preceding case, combined map can generate some additional output
 \end{itemize}
 
 \begin{figure}[htbp]
@@ -48,6 +48,21 @@ Figure ~\ref{stateful-schema} shows the part of the logical pipeline, that can b
   \includegraphics[width=0.48\textwidth]{pics/stateful-schema}
   \caption{The part of the logical pipeline for stateful transformation}
   \label {stateful-schema}
+\end{figure}
+
+The example of square matrix multiplication within proposed approach is shown in the figure ~\ref{matrix-example}. In this example, input items are represented as key-value pairs, where key is the dimension of a matrix and the value is the matrix itself. The reaction on three input matrices are the following:
+
+\begin{itemize}
+    \item When the first matrix {\it A} arrives at grouping, it is put into the empty bucket for 3x3 matrices. After that, single-element tuple with matrix {\it A} is sent to combine map operation. Combine map creates state object for matrix {\it A}, which is actually just {\it A} itself. In the last step, state item is sent back to grouping, and it is inserted right after item for matrix {\it A}
+    \item Matrix {\it B} is arrived and inserted into the bucket right after state item. Tuple containing state item and item for matrix {\it B} is sent to combine map. Combine map multiplies matrix in the state by matrix {\it B}. The result of this operation is matrix {\it AB}. New state item for matrix {\it AB} is created and sent back to the grouping. It is inserted in bucket right after item with matrix {\it B}
+    \item Matrix {\it C} is arrived and went through the pipeline in the similar way as matrix {\it B}
+\end{itemize}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.48\textwidth]{pics/matrix-example}
+  \caption{Matrix multiplication example}
+  \label {matrix-example}
 \end{figure}
 
 \subsection{Handling out-of-order events}
