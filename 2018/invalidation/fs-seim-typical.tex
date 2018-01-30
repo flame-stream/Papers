@@ -6,7 +6,7 @@ There are two common methods that are used to implement order-sensitive operator
 
 \subsection{IOP}
 
-In IOP approach each operation enforces total order on elements. For example union combines multiple streams into one \ref{iop}. Each input stream of union is ordered, as predecessor must meet ordering constraint. If there is arrival time skew between input stream merge must buffer the earlier stream to produce ordered output. Operators such as projection and selection applies function and propagete items down the stream without any additional buffering.
+In IOP approach each operation enforces total order on elements. For example union combines multiple streams into one \ref{iop}. Each input stream of union is ordered, as predecessors must meet ordering constraint. If there is arrival time skew between input stream, union must buffer the earlier stream to produce ordered output. Operators such as projection and selection applies function and propagete items down the stream without any additional buffering.
 
 \begin{figure}[htbp]
   \centering
@@ -19,7 +19,7 @@ IOP is know to be memory demanding, to have unpredictible latencies and limitid 
 
 \subsection{OOP}
 
-OOP is an architecture of streaming streaming that doesn't require order maintaince. To unblock blocking operations OOP systems use progress indicators such as such as punchuations \cite{Tucker:2003:EPS:776752.776780}, low watermarks \cite{Akidau:2013:MFS:2536222.2536229} or hearbeats \cite{Srivastava:2004:FTM:1055558.1055596}. Punctuations are periodically yielded by data sources and carries timestamp that promises that there won't be any elements older that heartbeats value. Punctuations are monotonic and data items between two consecutive heartbeats can be arbitrarily reordered, pic 123. Operations propagates them with respect to their semantics.
+OOP is an architecture of streaming systems that doesn't require order maintaince. To unblock blocking operations OOP systems use progress indicators such as punchuations \cite{Tucker:2003:EPS:776752.776780}, low watermarks \cite{Akidau:2013:MFS:2536222.2536229} or hearbeats \cite{Srivastava:2004:FTM:1055558.1055596}. Punctuations are periodically yielded by data sources and carries timestamp that promises that there won't be any elements older that punctuation's value. Punctuations are monotonic and data items between two consecutive punctuations can be arbitrarily reordered. Operations propagates them with respect to their semantics.
 
 \begin{figure}[htbp]
   \centering
@@ -28,4 +28,6 @@ OOP is an architecture of streaming streaming that doesn't require order maintai
   \label {oop}
 \end{figure}
 
-For example, windows collects partial aggregates until punctuation that guarantees that there no element that belogs to the ongoing window can be delivered to the window's input. On punctuation's arrival it flushes completed windows and propagates punctuation to the next operation down the stream \ref{oop}
+For example, windows collects partial aggregates until punctuation that guarantees that there are no elements can be delivered to the window's input that belog to the ongoing window.  On punctuation's arrival it flushes completed windows and propagates punctuation to the next operation down the stream \ref{oop}
+
+OOP resolves some of the downsides of IOP but it has several flaws. Even if the input stream is totally ordered, operation must wait the punctuation to guarantee it. Another issues is that periodial flushes can result in load bursts. This can result in latency increase.
