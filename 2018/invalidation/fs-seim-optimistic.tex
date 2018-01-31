@@ -2,9 +2,9 @@
 
 \label {fs-optimistic}
 
-The main idea of our method is to represent stateful transformations as a sequence of a map and a windowed grouping operations and handle out-of-order items within them. 
+The main idea of our method is to represent stateful transformations as a sequence of a map and windowed grouping operations and handle out-of-order items within them. 
 
-Following our approach, we make some assumptions about stream processing system, that is suitable for applying it. Such system must support meta-information on data items, allow cycles in logical graph, and its set of predefined operations must be sufficient to express map and windowed grouping operations. Additionally, it should provide functionality to periodically promise that there are no any data items with meta-information less than specified.
+Following our approach, we make some assumptions about stream processing system, that is suitable for applying it. Such system must support meta-information on data items, allow cycles in the logical graph, and its set of predefined operations must be sufficient to express map and windowed grouping operations. Additionally, it should provide functionality to periodically promise that there are no any data items with meta-information less than specified.
 
 In this section, firstly, we define the ordering model of data items. Then, we show that any stateful transformation can be implemented using the combination of windowed grouping and map operations. After that, we demonstrate an optimistic approach to handle out-of-order items within these operations. In the end of the section, the limitations of such technique are discussed.
 
@@ -66,18 +66,85 @@ The example of square matrix multiplication within proposed approach is shown in
 \end{figure}
 
 \subsection{Handling out-of-order events}
-When we introduce model for stateful operations, we suppose that all items arrive at grouping in the right order. However, as it was shown above, it is not possible in practice without additional buffering due to the parallel and asynchronous processing. We propose the following approach to handle events in grouping:
+When we introduce the model for stateful operations, we suppose that all items arrive at grouping in the right order. However, as it was shown above, it is not possible in practice without additional buffering due to the parallel and asynchronous processing. We propose the following approach to handle events in grouping:
 
 \begin{itemize}
-    \item If item is arrived in order, it is processed as usual
-    \item If item is out-of-order, then it is inserted into the corresponding position within specified bucket. After that, tuples, which contain new item are generated and sent further down the stream. At the same time, tuples, that already has been generated, but became invalid, are generated again, but with special flag in meta-information. This flag means that tuples with such meta-information are invalid, and they and their derivatives should not be sent to the user. Such elements are called {\it tombstones}. Tombstones have the same payloads as invalid items in order to go through the same path in the computational pipeline
+    \item If item arrives in order, it is processed as usual
+    \item If item is out-of-order, then it is inserted into the corresponding position within the specified bucket. After that, tuples, which contain new item are generated and sent further down the stream. At the same time, tuples, that already has been generated, but became invalid, are generated again, but with a special flag in meta-information. This flag means that tuples with such meta-information are invalid, and they and their derivatives should not be sent to the user. Such elements are called {\it tombstones}. Tombstones have the same payloads as invalid items in order to go through the same path in the computational pipeline
 \end{itemize}
 
-This technique guarantees that all correct tuples are eventually produced. However, invalid items are also generated. Therefore, there is a need for {\it barrier} at the pipeline's sink, that removes invalid output items, when corresponding tombstones are arrived. Barrier is partially flushed for some meta-information interval when there is a guarantee that there are no any out-of-order items and tombstones further up the stream for this interval. This guarantee can be provided by punctuations or low watermarks, as it is implemented in the most stream processing systems. 
+The pseudocode of the grouping insertion is shown in algorithm \ref{group-insert}. The functions accept new element whether it ordinal item or tombstone and a bucket for element's hash. They call {\it EMIT} function to send new items downstream.
+
+\begin{algorithm*}
+\caption{Grouping insertion}
+\label{group-insert}
+  \begin{algorithmic}[1]
+    \Function{InsertTombstone}{$item$, $bucket$}
+      
+      \State $cleanPosition \gets lowerBound(item, bucket)$
+      \ForAll{$group: group \cap cleanPosition \neq \emptyset$} 
+        \State \Call{Emit}{$DataItem_{tomb}(group)$} \Comment{Send tombstones for invalid groups}
+      \EndFor
+
+      \State \Call{Remove}{$bucket, cleanPosition$}
+
+      \ForAll{$group: group \cap cleanPosition \neq \emptyset$} 
+        \State \Call{Emit}{$DataItem(group)$} \Comment{Emit new groups that appeared after collapse}
+      \EndFor
+    \EndFunction
+
+    \item[]
+
+    \Function{InsertRegular}{$item$, $bucket$}
+      \State $insertPosition \gets lowerBound(item, bucket)$
+      \ForAll{$group: group \cap insertPosition \neq \emptyset$} 
+        \State \Call{Emit}{$DataItem_{tomb}(group)$} \Comment{Send tombstones for groups that would dissapear after insert}
+      \EndFor
+      
+      \State \Call{Insert}{$bucket, insertPosition$}
+
+      \ForAll{$group: group \cap insertPosition \neq \emptyset$} 
+        \State \Call{Emit}{$DataItem(group)$} \Comment{Emit new groups}
+      \EndFor
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm*}
+
+This technique guarantees that all correct tuples are eventually produced. However, invalid items are also generated. Therefore, there is a need for {\it barrier} at the pipeline's sink ~\ref{graph-with-barrier}, that removes invalid output items, when corresponding tombstones arrive. The Barrier is partially flushed for some meta-information interval when there is a guarantee that there are no any out-of-order items and tombstones further up the stream for this interval. This guarantee can be provided by punctuations or low watermarks, as it is implemented in the most stream processing systems. 
+
+The pseudocode for the barrier is shown in the algorithm  ~\ref{barrier-insert}. The function {\it INSERT} is called upon new item's arrival, {\it PUNCTUATION} - on punctuation's.
+
+\begin{algorithm*}
+\caption{Barrier insertion}
+\label{barrier-insert}
+  \begin{algorithmic}[1]
+    \State $buffer \gets \emptyset$
+
+    \Function{Insert}{$item$}
+      \State $position \gets lowerBound(item, buffer)$
+      \If {$isTombstone(item)$}
+        \State \Call{Remove}{$buffer, position$}
+      \Else
+        \State \Call{Insert}{$buffer, position$}
+      \EndIf
+    \EndFunction
+
+    \item[]
+
+    \Function{PUNCTUATION}{$timestamp$}
+      \ForAll{$item \in buffer : item_{timestamp} < timestamp$}
+        \State \Call{Emit}{$item$}
+        \State \Call{Remove}{$item$, $buffer$}
+      \EndFor
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm*}
+
+The key idea behind this approach is to shift blocking as far as possible down the stream.
+
 \subsection{Advantages and limitations}
+The main advantage of the proposed technique is that items are processed optimistically, without waiting for the punctuation or low watermark. Therefore, when the watermark arrives, all computations can be already done, and there is only a need to flush barrier. Such approach can be especially efficient when stream computations are heavy and there are large time intervals between watermarks.
 
-The main advantage of the proposed technique is that items are processed optimistically, without waiting for the punctuation or low watermark. Therefore, when watermark is arrived, all computations can be already done, and there is only a need to flush barrier. Such approach can be especially efficient, when stream computations are heavy and there are large time intervals between watermarks.
-
-Regarding the weaknesses, this method can generate additional items, which can lead to extra network traffic. Experiments, that is shown in the section ~\ref{fs-experiments} demonstrates that in some cases the number of extra items is extremely low. However, if task requires a very large number of out-of-order items, there is a need to analyse the applicability of proposed solution.
+Regarding the weaknesses, this method can generate additional items, which can lead to extra network traffic. Experiments, that is shown in the section ~\ref{fs-experiments} demonstrates that in some cases the number of extra items is extremely low. However, if the task requires a very large number of out-of-order items, there is a need to analyze the applicability of proposed solution.
 
 
