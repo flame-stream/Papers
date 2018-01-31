@@ -73,23 +73,24 @@ When we introduce the model for stateful operations, we suppose that all items a
     \item If item is out-of-order, then it is inserted into the corresponding position within the specified bucket. After that, tuples, which contain new item are generated and sent further down the stream. At the same time, tuples, that already has been generated, but became invalid, are generated again, but with a special flag in meta-information. This flag means that tuples with such meta-information are invalid, and they and their derivatives should not be sent to the user. Such elements are called {\it tombstones}. Tombstones have the same payloads as invalid items in order to go through the same path in the computational pipeline
 \end{itemize}
 
-The pseudocode of the grouping insertion is shown in algorithm \ref{group-insert}. The functions accept new element whether it ordinal item or tombstone and a bucket for element's hash. They call {\it Emit} function to send new items downstream.
+The pseudocode of the grouping insertion is shown in the algorithm \ref{group-insert}. The functions accept new element whether it ordinal item or tombstone and a bucket for element's hash. They call {\it Emit} function to send new items downstream.
 
-\begin{algorithm*}
+\begin{algorithm}
 \caption{Grouping insertion}
 \label{group-insert}
   \begin{algorithmic}[1]
     \Function{InsertTombstone}{$item$, $bucket$}
       
       \State $cleanPosition \gets lowerBound(item, bucket)$
-      \ForAll{$group: group \cap cleanPosition \neq \emptyset$} 
-        \State \Call{Emit}{$DataItem_{tomb}(group)$} \Comment{Send tombstones for invalid groups}
+      \ForAll{$group: group \cap cleanPosition \neq \emptyset$}
+      \LineComment{Send tombstones for invalid groups}
+        \State \Call{Emit}{$DataItem_{tomb}(group)$}
       \EndFor
 
       \State \Call{Remove}{$bucket, cleanPosition$}
 
       \ForAll{$group: group \cap cleanPosition \neq \emptyset$} 
-        \State \Call{Emit}{$DataItem(group)$} \Comment{Emit new groups that appeared after collapse}
+        \State \Call{Emit}{$DataItem(group)$} \LineComment{Emit new groups that appeared after collapse}
       \EndFor
     \EndFunction
 
@@ -98,21 +99,23 @@ The pseudocode of the grouping insertion is shown in algorithm \ref{group-insert
     \Function{InsertRegular}{$item$, $bucket$}
       \State $insertPosition \gets lowerBound(item, bucket)$
       \ForAll{$group: group \cap insertPosition \neq \emptyset$} 
-        \State \Call{Emit}{$DataItem_{tomb}(group)$} \Comment{Send tombstones for groups that would dissapear after insert}
+        \State \Call{Emit}{$DataItem_{tomb}(group)$} 
+        \LineComment{Send tombstones for groups that would disappear}
+        \LineComment{after insert}
       \EndFor
       
       \State \Call{Insert}{$bucket, insertPosition$}
 
       \ForAll{$group: group \cap insertPosition \neq \emptyset$} 
-        \State \Call{Emit}{$DataItem(group)$} \Comment{Emit new groups}
+        \State \Call{Emit}{$DataItem(group)$} \LineComment{Emit new groups}
       \EndFor
     \EndFunction
   \end{algorithmic}
-\end{algorithm*}
+\end{algorithm}
 
-This technique guarantees that all correct tuples are eventually produced. However, invalid items are also generated. Therefore, there is a need for {\it barrier} at the pipeline's sink ~\ref{graph-with-barrier}, that removes invalid output items, when corresponding tombstones arrive. The Barrier is partially flushed for some meta-information interval when there is a guarantee that there are no any out-of-order items and tombstones further up the stream for this interval. This guarantee can be provided by punctuations or low watermarks, as it is implemented in the most stream processing systems. 
+This technique guarantees that all correct tuples are eventually produced. However, invalid items are also generated. Therefore, there is a need for {\it barrier} at the pipeline's sink ~\ref{graph-with-barrier}, that removes invalid output items, when corresponding tombstones arrive. The barrier is partially flushed for some meta-information interval when there is a guarantee that there are no any out-of-order items and tombstones further up the stream for this interval. This guarantee can be provided by punctuations or low watermarks, as it is implemented in the most stream processing systems. 
 
-The pseudocode for the barrier is shown in the algorithm  ~\ref{barrier-insert}. The function {\it Insert} is called upon new item's arrival, {\it Punctuation} - on punctuation's.
+The pseudocode for the barrier is shown in the algorithm  ~\ref{barrier-insert}. The function {\it Insert} is called upon new item's arrival, {\it Punctuation} - on punctuation's. The key idea behind this approach is to shift blocking as far as possible down the stream.
 
 \begin{algorithm}
 \caption{Barrier insertion}
@@ -139,8 +142,6 @@ The pseudocode for the barrier is shown in the algorithm  ~\ref{barrier-insert}.
     \EndFunction
   \end{algorithmic}
 \end{algorithm}
-
-The key idea behind this approach is to shift blocking as far as possible down the stream.
 
 \subsection{Advantages and limitations}
 The main advantage of the proposed technique is that items are processed optimistically, without waiting for the punctuation or low watermark. Therefore, when the watermark arrives, all computations can be already done, and there is only a need to flush barrier. Such approach can be especially efficient when stream computations are heavy and there are large time intervals between watermarks.
