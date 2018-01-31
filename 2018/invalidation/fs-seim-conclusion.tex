@@ -2,4 +2,14 @@
 
 \label {fs-conclusion}
 
-We are winners :)
+In this paper, we introduce an optimistic approach for handling out-of-order events. Our technique has the following key properties:
+
+\begin{itemize}
+    \item Unlike the most typical approaches, it does not require buffering before each order-sensitive operation
+    \item This method can be applied to any stateful operation
+    \item It produces extra items, which can generate additional network traffic
+\end{itemize}
+
+The optimistic nature of this method is able to help to reduce the cost of waiting for punctuations or watermarks. It is implied by the fact, that at the moment when the watermark arrives, all computations can be already done. 
+
+Regarding the generation of extra items, the experiment shows that the ratio of additional data is quite low. Therefore, this method can potentially provide lower latency in stream processing systems.
