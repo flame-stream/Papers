@@ -114,7 +114,7 @@ This technique guarantees that all correct tuples are eventually produced. Howev
 
 The pseudocode for the barrier is shown in the algorithm  ~\ref{barrier-insert}. The function {\it Insert} is called upon new item's arrival, {\it Punctuation} - on punctuation's.
 
-\begin{algorithm*}
+\begin{algorithm}
 \caption{Barrier insertion}
 \label{barrier-insert}
   \begin{algorithmic}[1]
@@ -138,7 +138,7 @@ The pseudocode for the barrier is shown in the algorithm  ~\ref{barrier-insert}.
       \EndFor
     \EndFunction
   \end{algorithmic}
-\end{algorithm*}
+\end{algorithm}
 
 The key idea behind this approach is to shift blocking as far as possible down the stream.
 
