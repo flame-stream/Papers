@@ -21,10 +21,16 @@ We assume that there is a total order on meta-information of data items. Besides
 \subsection{Semantics of map and windowed grouping operations}
 
 \subsubsection{Map}
-Map transforms input item into a sequence of its derivatives, according to a function on item's payload provided by a user. This sequence can consist of any number of items or even be empty.
+Map transforms input item into a sequence of its derivatives, according to a user-provided function $f$. This sequence can consist of any number of items or even be empty.
+
+\[Map(f: T \rightarrow List[V])\]
 
 \subsubsection{Windowed grouping}
-Windowed grouping is a stateful operation with a numeric parameter {\it window}. It is supposed that payloads of input items of grouping operation have key-value form. The state of this operation is represented by a set of buckets, one for each key. Windowed grouping has the following semantics:
+Windowed grouping is a stateful operation with a numeric parameter {\it window}. It is supposed that payloads of input items of grouping operation have key-value form. The state of this operation is represented by a set of buckets, one for each key. 
+
+\[Grouping(window: Integer)\]
+
+Windowed grouping has the following semantics:
 
 \begin{itemize}
     \item Each input item is put into the corresponding bucket at position defined by its meta-information
