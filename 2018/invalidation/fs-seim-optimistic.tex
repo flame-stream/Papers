@@ -37,6 +37,21 @@ Windowed grouping has the following semantics:
     \item The output of grouping operation is a window-sized tuple of the last items in the corresponding bucket. If bucket size is less than window, the output contains full bucket
 \end{itemize}
 
+The pseudocode for insertion is presented in algorothm~\ref{group-semantics}
+
+\begin{algorithm}
+\caption{Grouping semantics}
+\label{group-semantics}
+  \begin{algorithmic}[1]
+    \Function{Insert}{$item$, $bucket$}
+      \State \Call{Append}{$bucket, item$}
+      \State $left \gets max(0, bucket_{length} - window)$
+      \State $right \gets bucket_{length}$
+      \State \Call{Emit}{$DataItem(bucket[left, right])$}
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
 The following example illustrates the semantics of the windowed grouping operation. In this example, payloads of input items are represented as natural numbers: 1, 2, 3, etc. The hash function returns 1 if the number is even and 0 otherwise. If the window is set to 3, the output is:
 
 \[(1), (2), (1|3), (2|4), (1|3|5), (2|4|6), (3|5|7), (4|6|8)...\]
@@ -72,12 +87,14 @@ The example of square matrix multiplication within proposed approach is shown in
 \end{figure}
 
 \subsection{Handling out-of-order events}
-When we introduce the model for stateful operations, we suppose that all items arrive at grouping in the right order. However, as it was shown above, it is not possible in practice without additional buffering due to the parallel and asynchronous processing. We propose the following approach to handle events in grouping:
+When we introduce the model for stateful operations, we suppose that all items arrive at grouping in the right order. However, as it was shown above, it is not possible in practice without additional buffering. We propose the following approach to handle events in grouping:
 
 \begin{itemize}
     \item If item arrives in order, it is processed as usual
-    \item If item is out-of-order, then it is inserted into the corresponding bucket at position defined by the meta-information. After that, tuples, which contain new item are generated and sent further down the stream. At the same time, tuples, that already has been generated, but became invalid, are generated again, but with a special flag in meta-information. This flag means that tuples with such meta-information are invalid, and they and their derivatives should not be sent to the user. Such elements are called {\it tombstones}. Tombstones have the same payloads as invalid items in order to go through the same path in the computational pipeline
+    \item If item is out-of-order, then it is inserted into the corresponding bucket at position defined by the meta-information. After that, tuples, which contain new item are generated and sent further down the stream. At the same time, for tuples, that has been generated, but became invalid, {\it tombstones} are sent. 
 \end{itemize}
+
+Tombstones are ordinal data items but with a special flag in meta-information. This flag means that tuples with such meta-information are invalid, and they should not leave system. Tombstones have the same payloads as invalid items in order to go through the same path in the computational pipeline.
 
 The pseudocode of the grouping insertion is shown in the algorithm \ref{group-insert}. The functions accept new element whether it ordinal item or tombstone and a bucket for element's hash. They call {\it Emit} function to send new items downstream.
 
@@ -120,9 +137,9 @@ The pseudocode of the grouping insertion is shown in the algorithm \ref{group-in
   \end{algorithmic}
 \end{algorithm}
 
-This technique guarantees that all correct tuples are eventually produced. However, invalid items are also generated. Therefore, there is a need for {\it barrier} at the pipeline's sink, that removes invalid output items, when corresponding tombstones arrive. The barrier is partially flushed for some meta-information interval when there is a guarantee that there are no any out-of-order items and tombstones further up the stream for this interval. This guarantee can be provided by punctuations or low watermarks, as it is implemented in the most stream processing systems. 
+This technique guarantees that all correct tuples are eventually produced. However, invalid ones are also generated. Therefore, there is a need for {\it barrier} at the pipeline's sink, that filters invalid items, when corresponding tombstones arrive. The barrier is partially flushed for some meta-information interval when there is a guarantee that there are no any out-of-order items and tombstones further up the stream for this interval. This guarantee can be provided by punctuations or low watermarks, as it is implemented in the most stream processing systems. 
 
-The pseudocode for the barrier is shown in the algorithm  ~\ref{barrier-insert}. The function {\it Insert} is called upon new item's arrival, {\it Punctuation} - on punctuation's. The key idea behind this approach is to shift blocking as far as possible down the stream.
+The pseudocode for the barrier is shown in the algorithm~\ref{barrier-insert}. The function {\it Insert} is called upon new item's arrival, {\it Punctuation} - on punctuation's. The key idea behind this approach is to shift blocking as far as possible down the stream.
 
 \begin{algorithm}
 \caption{Barrier insertion}
