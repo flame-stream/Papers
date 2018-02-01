@@ -690,3 +690,153 @@ As most current query processing architectures are already pipelined, it seems l
  address = {New York, NY, USA},
 } 
 Continuous queries in a Data Stream Management System (DSMS) rely on time as a basis for windows on streams and for defining a consistent semantics for multiple streams and updatable relations. The system clock in a centralized DSMS provides a convenient and well-behaved notion of time, but often it is more appropriate for a DSMS application to define its own notion of time---its own clock(s), sequence numbers, or other forms of ordering and times-tamping. Flexible application-defined time poses challenges to the DSMS, since streams may be out of order and uncoordinated with each other, they may incur latency reaching the DSMS, and they may pause or stop. We formalize these challenges and specify how to generate heartbeats so that queries can be evaluated correctly and continuously in an application-defined time domain. Our heartbeat generation algorithm is based on parameters capturing skew between streams, unordering within streams, and latency in streams reaching the DSMS. We also describe how to estimate these parameters at run-time, and we discuss how heartbeats can be used for processing continuous queries.
+
+@article{Babu:2004:EKC:1016028.1016032,
+ author = {Babu, Shivnath and Srivastava, Utkarsh and Widom, Jennifer},
+ title = {Exploiting K-constraints to Reduce Memory Overhead in Continuous Queries over Data Streams},
+ journal = {ACM Trans. Database Syst.},
+ issue_date = {September 2004},
+ volume = {29},
+ number = {3},
+ month = sep,
+ year = {2004},
+ issn = {0362-5915},
+ pages = {545--580},
+ numpages = {36},
+ url = {http://doi.acm.org/10.1145/1016028.1016032},
+ doi = {10.1145/1016028.1016032},
+ acmid = {1016032},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {Continuous queries, constraints, data streams},
+} 
+Continuous queries often require significant run-time state over arbitrary data streams. However, streams may exhibit certain data or arrival patterns, or constraints, that can be detected and exploited to reduce state considerably without compromising correctness. Rather than requiring constraints to be satisfied precisely, which can be unrealistic in a data streams environment, we introduce k-constraints, where k is an adherence parameter specifying how closely a stream adheres to the constraint. (Smaller k's are closer to strict adherence and offer better memory reduction.) We present a query processing architecture, called k-Mon, that detects useful k-constraints automatically and exploits the constraints to reduce run-time state for a wide range of continuous queries. Experimental results showed dramatic state reduction, while only modest computational overhead was incurred for our constraint monitoring and query execution algorithms.
+
+@inproceedings{Li:2007:ESP:1270388.1270975,
+ author = {Li, Ming and Liu, Mo and Ding, Luping and Rundensteiner, Elke A. and Mani, Murali},
+ title = {Event Stream Processing with Out-of-Order Data Arrival},
+ booktitle = {Proceedings of the 27th International Conference on Distributed Computing Systems Workshops},
+ series = {ICDCSW '07},
+ year = {2007},
+ isbn = {0-7695-2838-4},
+ pages = {67--},
+ url = {http://dx.doi.org/10.1109/ICDCSW.2007.35},
+ doi = {10.1109/ICDCSW.2007.35},
+ acmid = {1270975},
+ publisher = {IEEE Computer Society},
+ address = {Washington, DC, USA},
+} 
+Complex event processing has become increasingly important in modern applications, ranging from supply chain management for RFID tracking to real-time intrusion detection. The goal is to extract patterns from such event streams in order to make informed decisions in real-time. However, networking latencies and even machine failure may cause events to arrive out-of-order at the event stream processing engine. In this work, we address the problem of processing event pattern queries specified over event streams that may contain out-of-order data. First, we analyze the problems state-of-the-art event stream processing technology would experience when faced with out-of-order data arrival. We then propose a new solution of physical implementation strategies for the core stream algebra operators such as sequence scan and pattern construction, including stack-based data structures and associated purge algorithms. Optimizations for sequence scan and construction as well as state purging to minimize CPU cost and memory consumption are also introduced. Lastly, we conduct an experimental study demonstrating the effectiveness of our approach.
+
+@article{Abadi:2003:ANM:950481.950485,
+ author = {Abadi, Daniel J. and Carney, Don and \c{C}etintemel, Ugur and Cherniack, Mitch and Convey, Christian and Lee, Sangdon and Stonebraker, Michael and Tatbul, Nesime and Zdonik, Stan},
+ title = {Aurora: A New Model and Architecture for Data Stream Management},
+ journal = {The VLDB Journal},
+ issue_date = {August 2003},
+ volume = {12},
+ number = {2},
+ month = aug,
+ year = {2003},
+ issn = {1066-8888},
+ pages = {120--139},
+ numpages = {20},
+ url = {http://dx.doi.org/10.1007/s00778-003-0095-z},
+ doi = {10.1007/s00778-003-0095-z},
+ acmid = {950485},
+ publisher = {Springer-Verlag New York, Inc.},
+ address = {Secaucus, NJ, USA},
+ keywords = {Continuous queries, Data stream management, Database triggers, Quality-of-service, Real-time systems},
+} 
+Abstract.This paper describes the basic processing model and architecture of Aurora, a new system to manage data streams for monitoring applications. Monitoring applications differ substantially from conventional business data processing. The fact that a software system must process and react to continual inputs from many sources (e.g., sensors) rather than from human operators requires one to rethink the fundamental architecture of a DBMS for this application area. In this paper, we present Aurora, a new DBMS currently under construction at Brandeis University, Brown University, and M.I.T. We first provide an overview of the basic Aurora model and architecture and then describe in detail a stream-oriented set of operators.
+
+@article{Arasu:2006:CCQ:1146461.1146463,
+ author = {Arasu, Arvind and Babu, Shivnath and Widom, Jennifer},
+ title = {The CQL Continuous Query Language: Semantic Foundations and Query Execution},
+ journal = {The VLDB Journal},
+ issue_date = {June 2006},
+ volume = {15},
+ number = {2},
+ month = jun,
+ year = {2006},
+ issn = {1066-8888},
+ pages = {121--142},
+ numpages = {22},
+ url = {http://dx.doi.org/10.1007/s00778-004-0147-z},
+ doi = {10.1007/s00778-004-0147-z},
+ acmid = {1146463},
+ publisher = {Springer-Verlag New York, Inc.},
+ address = {Secaucus, NJ, USA},
+ keywords = {Continuous queries, Data streams, Query language, Query processing},
+} 
+CQL, a continuous query language, is supported by the STREAM prototype data stream management system (DSMS) at Stanford. CQL is an expressive SQL-based declarative language for registering continuous queries against streams and stored relations. We begin by presenting an abstract semantics that relies only on “black-box” mappings among streams and relations. From these mappings we define a precise and general interpretation for continuous queries. CQL is an instantiation of our abstract semantics using SQL to map from relations to relations, window specifications derived from SQL-99 to map from streams to relations, and three new operators to map from relations to streams. Most of the CQL language is operational in the STREAM system. We present the structure of CQL's query execution plans as well as details of the most important components: operators, interoperator queues, synopses, and sharing of components among multiple operators and queries. Examples throughout the paper are drawn from the Linear Road benchmark recently proposed for DSMSs. We also curate a public repository of data stream applications that includes a wide variety of queries expressed in CQL. The relative ease of capturing these applications in CQL is one indicator that the language contains an appropriate set of constructs for data stream processing.
+
+@inproceedings{Ding:2004:EWJ:1031171.1031189,
+ author = {Ding, Luping and Rundensteiner, Elke A.},
+ title = {Evaluating Window Joins over Punctuated Streams},
+ booktitle = {Proceedings of the Thirteenth ACM International Conference on Information and Knowledge Management},
+ series = {CIKM '04},
+ year = {2004},
+ isbn = {1-58113-874-1},
+ location = {Washington, D.C., USA},
+ pages = {98--107},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/1031171.1031189},
+ doi = {10.1145/1031171.1031189},
+ acmid = {1031189},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {join algorithm, punctuation, sliding window, streaming data processing},
+} 
+We explore join optimizations in the presence of both time-based constraints (sliding windows) and value-based constraints (punctuations). We present the first join solution named PWJoin that exploits such combined constraints to shrink the runtime join state and to propagate punctuations to benefit downstream operators. We design a state structure for PWJoin that facilitates the exploitation of both constraint types. We also explore optimizations enabled by the interactions between window and punctuation, e.g., early punctuation propagation. The costs of the PWJoin are analyzed using a cost model. We also conduct an experimental study using CAPE continuous query system. The experimental results show that in most cases, by exploiting punctuations, PWJoin outperforms the pure window join with regard to both memory overhead and throughput. Our technique complements the joins in the literature, such as symmetric hash join or window join, to now require less runtime resources without compromising the accuracy of the result.
+
+@inproceedings{Hammad:2005:OIE:1116877.1116897,
+ author = {Hammad, Moustafa A. and Aref, Walid G. and Elmagarmid, Ahmed K.},
+ title = {Optimizing In-order Execution of Continuous Queries over Streamed Sensor Data},
+ booktitle = {Proceedings of the 17th International Conference on Scientific and Statistical Database Management},
+ series = {SSDBM'2005},
+ year = {2005},
+ isbn = {1-88888-111-X},
+ location = {Santa Barbara, CA},
+ pages = {143--146},
+ numpages = {4},
+ url = {http://dl.acm.org/citation.cfm?id=1116877.1116897},
+ acmid = {1116897},
+ publisher = {Lawrence Berkeley Laboratory},
+ address = {Berkeley, CA, US},
+} 
+
+@inproceedings{Hammad:2003:SSW:1315451.1315478,
+ author = {Hammad, Moustafa A. and Franklin, Michael J. and Aref, Walid G. and Elmagarmid, Ahmed K.},
+ title = {Scheduling for Shared Window Joins over Data Streams},
+ booktitle = {Proceedings of the 29th International Conference on Very Large Data Bases - Volume 29},
+ series = {VLDB '03},
+ year = {2003},
+ isbn = {0-12-722442-4},
+ location = {Berlin, Germany},
+ pages = {297--308},
+ numpages = {12},
+ url = {http://dl.acm.org/citation.cfm?id=1315451.1315478},
+ acmid = {1315478},
+ publisher = {VLDB Endowment},
+} 
+Continuous Query (CQ) systems typically exploit commonality among query expressions to achieve improved efficiency through shared processing. Recently proposed CQ systems have introduced window specifications in order to support unbounded data streams. There has been, however, little investigation of sharing for windowed query operators. In this paper, we address the shared execution of windowed joins, a core operator for CQ systems. We show that the strategy used in systems to date has a previously unreported performance flaw that can negatively impact queries with relatively small windows. We then propose two new execution strategies for shared joins. We evaluate the alternatives using both analytical models and implementation in a DBMS. The results show that one strategy, called MQT, provides the best performance over a range of workload settings.
+
+@Article{Li2011,
+author="Li, Chuan-Wen
+and Gu, Yu
+and Yu, Ge
+and Hong, Bonghee",
+title="Aggressive Complex Event Processing with Confidence over Out-of-Order Streams",
+journal="Journal of Computer Science and Technology",
+year="2011",
+month="Jul",
+day="01",
+volume="26",
+number="4",
+pages="685--696",
+abstract="In recent years, there has been a growing need for complex event processing (CEP), ranging from supply chain management to security monitoring. In many scenarios events are generated in different sources but arrive at the central server out of order, due to the differences of network latencies. Most state-of-the-art techniques process out-of-order events by buffering the events until the total event order within a specified range can be guaranteed. Their main problems are leading to increasing response time and reducing system throughput. This paper aims to build a high performance out-of-order event processing mechanism, which can match events as soon as they arrive instead of buffering them till all arrive. A suffix-automaton-based event matching algorithm is proposed to speed up query processing, and a confidence-based accuracy evaluation is proposed to control the query result quality. The performance of our approach is evaluated through detailed accuracy and response time analysis. As experimental results show, our approach can obviously speed up the query matching time and produce reasonable query results.",
+issn="1860-4749",
+doi="10.1007/s11390-011-1168-x",
+url="https://doi.org/10.1007/s11390-011-1168-x"
+}
+In recent years, there has been a growing need for complex event processing (CEP), ranging from supply chain management to security monitoring. In many scenarios events are generated in different sources but arrive at the central server out of order, due to the differences of network latencies. Most state-of-the-art techniques process out-of-order events by buffering the events until the total event order within a specified range can be guaranteed. Their main problems are leading to increasing response time and reducing system throughput. This paper aims to build a high performance out-of-order event processing mechanism, which can match events as soon as they arrive instead of buffering them till all arrive. A suffix-automaton-based event matching algorithm is proposed to speed up query processing, and a confidence-based accuracy evaluation is proposed to control the query result quality. The performance of our approach is evaluated through detailed accuracy and response time analysis. As experimental results show, our approach can obviously speed up the query matching time and produce reasonable query results.
