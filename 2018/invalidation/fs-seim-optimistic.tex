@@ -80,40 +80,41 @@ The pseudocode of the grouping insertion is shown in the algorithm \ref{group-in
 \label{group-insert}
   \begin{algorithmic}[1]
     \Function{InsertTombstone}{$item$, $bucket$}
-      
       \State $cleanPosition \gets lowerBound(item, bucket)$
       \ForAll{$group: group \cap cleanPosition \neq \emptyset$}
-      \LineComment{Send tombstones for invalid groups}
+        \LineComment{Send tombstones for invalid groups}
         \State \Call{Emit}{$DataItem_{tomb}(group)$}
       \EndFor
 
       \State \Call{Remove}{$bucket, cleanPosition$}
 
       \ForAll{$group: group \cap cleanPosition \neq \emptyset$} 
-        \State \Call{Emit}{$DataItem(group)$} \LineComment{Emit new groups that appeared after collapse}
+        \LineComment{Emit new groups that appeared after collapse}
+        \State \Call{Emit}{$DataItem(group)$} 
       \EndFor
     \EndFunction
 
-    \item[]
+    \State
 
     \Function{InsertRegular}{$item$, $bucket$}
       \State $insertPosition \gets lowerBound(item, bucket)$
       \ForAll{$group: group \cap insertPosition \neq \emptyset$} 
-        \State \Call{Emit}{$DataItem_{tomb}(group)$} 
         \LineComment{Send tombstones for groups that would disappear}
         \LineComment{after insert}
+        \State \Call{Emit}{$DataItem_{tomb}(group)$} 
       \EndFor
       
       \State \Call{Insert}{$bucket, insertPosition$}
 
       \ForAll{$group: group \cap insertPosition \neq \emptyset$} 
-        \State \Call{Emit}{$DataItem(group)$} \LineComment{Emit new groups}
+        \LineComment{Emit new groups}
+        \State \Call{Emit}{$DataItem(group)$} 
       \EndFor
     \EndFunction
   \end{algorithmic}
 \end{algorithm}
 
-This technique guarantees that all correct tuples are eventually produced. However, invalid items are also generated. Therefore, there is a need for {\it barrier} at the pipeline's sink ~\ref{graph-with-barrier}, that removes invalid output items, when corresponding tombstones arrive. The barrier is partially flushed for some meta-information interval when there is a guarantee that there are no any out-of-order items and tombstones further up the stream for this interval. This guarantee can be provided by punctuations or low watermarks, as it is implemented in the most stream processing systems. 
+This technique guarantees that all correct tuples are eventually produced. However, invalid items are also generated. Therefore, there is a need for {\it barrier} at the pipeline's sink, that removes invalid output items, when corresponding tombstones arrive. The barrier is partially flushed for some meta-information interval when there is a guarantee that there are no any out-of-order items and tombstones further up the stream for this interval. This guarantee can be provided by punctuations or low watermarks, as it is implemented in the most stream processing systems. 
 
 The pseudocode for the barrier is shown in the algorithm  ~\ref{barrier-insert}. The function {\it Insert} is called upon new item's arrival, {\it Punctuation} - on punctuation's. The key idea behind this approach is to shift blocking as far as possible down the stream.
 
@@ -122,6 +123,8 @@ The pseudocode for the barrier is shown in the algorithm  ~\ref{barrier-insert}.
 \label{barrier-insert}
   \begin{algorithmic}[1]
     \State $buffer \gets \emptyset$
+
+    \State
 
     \Function{Insert}{$item$}
       \State $position \gets lowerBound(item, buffer)$
@@ -132,10 +135,10 @@ The pseudocode for the barrier is shown in the algorithm  ~\ref{barrier-insert}.
       \EndIf
     \EndFunction
 
-    \item[]
+    \State
 
-    \Function{Punctuation}{$timestamp$}
-      \ForAll{$item \in buffer : item_{timestamp} < timestamp$}
+    \Function{Punctuation}{$time$}
+      \ForAll{$item:  item \in buffer \And item_{ts} < time$}
         \State \Call{Emit}{$item$}
         \State \Call{Remove}{$item$, $buffer$}
       \EndFor
