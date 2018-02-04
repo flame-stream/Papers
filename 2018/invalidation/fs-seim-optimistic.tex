@@ -37,7 +37,7 @@ Windowed grouping has the following semantics:
     \item The output of grouping operation is a window-sized tuple of the last items in the corresponding bucket. If bucket size is less than window, the output contains full bucket
 \end{itemize}
 
-The pseudocode for insertion is presented in algorothm~\ref{group-semantics}
+The pseudocode is presented in the algorithm~\ref{group-semantics}. {\it Emit} function is called to send new items downstream.
 
 \begin{algorithm}
 \caption{Grouping semantics}
@@ -91,15 +91,15 @@ When we introduce the model for stateful operations, we suppose that all items a
 
 \begin{itemize}
     \item If item arrives in order, it is processed as usual
-    \item If item is out-of-order, then it is inserted into the corresponding bucket at position defined by the meta-information. After that, tuples, which contain new item are generated and sent further down the stream. At the same time, for tuples, that has been generated, but became invalid, {\it tombstones} are sent. 
+    \item If item is out-of-order, then it is inserted into the corresponding bucket at position defined by the meta-information. After that, tuples, which contain new item are generated and sent further down the stream. At the same time, for tuples, that has been generated, but became invalid, {\it tombstones} are sent
 \end{itemize}
 
 Tombstones are ordinal data items but with a special flag in meta-information. This flag means that tuples with such meta-information are invalid, and they should not leave system. Tombstones have the same payloads as invalid items in order to go through the same path in the computational pipeline.
 
-The pseudocode of the grouping insertion is shown in the algorithm \ref{group-insert}. The functions accept new element whether it ordinal item or tombstone and a bucket for element's hash. They call {\it Emit} function to send new items downstream.
+The pseudocode of the grouping is shown in the algorithm \ref{group-insert}. The functions accept new element, depending on its type. They also accept a bucket for element's hash. {\it Emit} function is called to send new items downstream.
 
 \begin{algorithm}
-\caption{Grouping insertion}
+\caption{Updated grouping semantics}
 \label{group-insert}
   \begin{algorithmic}[1]
     \Function{InsertTombstone}{$item$, $bucket$}
@@ -142,7 +142,7 @@ This technique guarantees that all correct tuples are eventually produced. Howev
 The pseudocode for the barrier is shown in the algorithm~\ref{barrier-insert}. The function {\it Insert} is called upon new item's arrival, {\it Punctuation} - on punctuation's. The key idea behind this approach is to shift blocking as far as possible down the stream.
 
 \begin{algorithm}
-\caption{Barrier insertion}
+\caption{Barrier}
 \label{barrier-insert}
   \begin{algorithmic}[1]
     \State $buffer \gets \emptyset$
