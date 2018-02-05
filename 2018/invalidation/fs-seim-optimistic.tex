@@ -99,7 +99,7 @@ Tombstones are ordinal data items but with a special flag in meta-information. T
 The pseudocode of the grouping is shown in the algorithm \ref{group-insert}. The functions accept new element, depending on its type. They also accept a bucket for element's hash. {\it Emit} function is called to send new items downstream.
 
 \begin{algorithm}
-\caption{Updated grouping semantics}
+\caption{Implementation of grouping semantics}
 \label{group-insert}
   \begin{algorithmic}[1]
     \Function{InsertTombstone}{$item$, $bucket$}
