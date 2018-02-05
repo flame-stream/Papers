@@ -11,7 +11,7 @@ Nowadays, a lot of real-life applications use stream processing for network moni
   \label {break-order-dataflow}
 \end{figure}
 
-The typical way to achieve in-order processing is to buffer operation's input for some time to ensure that there are no out-of-order items. Most of the modern stream processing systems provide functionality to buffer all input items before specified operations until some user-provided conditions are satisfied. Conditions can be set on timing or the count of elements in the buffer. The main disadvantage of such techniques is that it can lead to significantly large latency, especially if the processing pipeline contains several operations that require ordered input. 
+The typical way to achieve in-order processing is to buffer operation's input for some time to ensure that there are no out-of-order items. Most of the modern stream processing systems provide functionality to buffer all input items before specified operations until some user-provided conditions are satisfied. Conditions can be set on timing or the count of elements in the buffer. The main disadvantage of such techniques is that it can lead to significant latency increasing, especially if the processing pipeline contains several operations that require ordered input. 
 
 An alternative option is to handle out-of-order items as a special case in the business logic of operation. However, this way is suitable only for the limited number of tasks. Moreover, it may dramatically complicate the business-logic, which can lead to increasing the cost of its maintenance and is error-prone.
 % sophisticated bugs.    
