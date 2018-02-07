@@ -2,7 +2,7 @@
 
 \label {fs-intro}
 
-Nowadays, a lot of real-life applications use stream processing for network monitoring, financial analysis, training machine learning models, etc. State-of-the-art industrial stream processing systems, such as Flink \cite{carbone2015apache}, Samza \cite{Noghabi:2017:SSS:3137765.3137770}, Storm \cite{apache:storm}, Heron \cite{Kulkarni:2015:THS:2723372.2742788}, are able to provide low-latency and high-throughput in distributed environment for a wide range of analytical problems. However, issues related to the order-sensitive computations still remain. Most of these systems assume that events are fed to the system with monotonically increasing timestamps or with minor inversions. Often, such timestamps can be assigned at system's entry. Nevertheless, even if input items arrive at system's entry monotonically, they can be reordered because of parallel and asynchronous processing. In this case, order-sensitive operations located in data flow pipeline quite deeply can be broken. Figure ~\ref{break-order-dataflow} shows the example of common distributed stream processing pipeline that breaks the input order of operation, even if input events are monotonic and links between operations guarantee FIFO order. Basically, ordering constraints make sense only for stateful operations.
+Nowadays, a lot of real-life applications use stream processing for network monitoring, financial analytics, training machine learning models, etc. State-of-the-art industrial stream processing systems, such as Flink \cite{carbone2015apache}, Samza \cite{Noghabi:2017:SSS:3137765.3137770}, Storm \cite{apache:storm}, Heron \cite{Kulkarni:2015:THS:2723372.2742788}, are able to provide low-latency and high-throughput in distributed environment for this kind of problems. However, providers of the order-sensitive computations still remain suboptimal. Most of these systems assume that events are fed to the system with monotonically increasing timestamps or with minor inversions. Often, such timestamps can be assigned at system's entry. Nevertheless, even if input items arrive monotonically, they can be reordered because of the subsequent parallel and asynchronous processing. In this case, order-sensitive operations located deeper in data flow pipeline can be broken. Figure ~\ref{break-order-dataflow} shows the example of common distributed stream processing pipeline that breaks the input order of the operation 2, even if input is monotonic and links between operations guarantee FIFO order.
 
 \begin{figure}[htbp]
   \centering
@@ -11,17 +11,17 @@ Nowadays, a lot of real-life applications use stream processing for network moni
   \label {break-order-dataflow}
 \end{figure}
 
-The typical way to achieve in-order processing is to buffer operation's input for some time to ensure that there are no out-of-order items. Most of the modern stream processing systems provide functionality to buffer all input items before specified operations until some user-provided conditions are satisfied. Conditions can be set on timing or the count of elements in the buffer. The main disadvantage of such techniques is that they  can  significantly increase the latency, especially if the processing pipeline contains several operations that require ordered input. 
+The typical way to achieve in-order processing is to set up a special buffer in front of operation. This buffer collects all input items until some user-provided condition is satisfied. Then the contents of the buffer is sorted and fed to the operation. The main disadvantage of such technique is latency growth. This issue becomes even more significant if the processing pipeline contains several operations that require ordered input. 
 
-An alternative option is to handle out-of-order items as a special case in the user-defined business logic of an operation. However, this approach  is suitable only for a limited number of tasks. Moreover, it may dramatically complicate the business-logic, which can lead to increasing the cost of its maintenance and is error-prone.
+The alternative is to develop business logic tolerant to out-of-order items. However, this approach  is suitable only for a limited set of tasks. Moreover, it may dramatically complicate the business-logic, which can lead to the maintenance cost increase and is error-prone.
 % sophisticated bugs.    
 
-In this paper we introduce  an optimistic approach to handle out-of-order events in any stateful operation. Our evaluation  demonstrates its advantages compared to existing solutions. The contributions of this paper are the following: 
+In this paper we introduce an optimistic approach to handle out-of-order items. Our evaluation demonstrates its advantages compared to existing solutions. The contributions of this paper are the following: 
 
 \begin {itemize}
-\item Definition of new optimistic technique to handle out-of-order items in stateful operations
-\item Analysis  of properties of this approach
-\item Demonstration of working example that applies proposed method
+  \item Definition of new optimistic technique to handle out-of-order items in stateful operations
+  \item Analysis of properties of this approach
+  \item Demonstration of working example that applies proposed method
 \end {itemize}
 
 The rest of the paper is structured as follows: in section~\ref{fs-stream} we formalize the preliminaries of stream processing, the examples of tasks that require ordered input are described in section~\ref{fs-tasks}, the typical approaches for handling out-of-order events are discussed in~\ref{fs-typical}, our optimistic technique is detailed in~\ref{fs-optimistic} and its performance is demonstrated in ~\ref{fs-experiments}, the main differences between proposed method and existing ones are shown in~\ref{fs-related}, finally we discuss the results and our plans in~\ref{fs-conclusion}.
