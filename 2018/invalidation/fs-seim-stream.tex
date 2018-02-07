@@ -4,7 +4,7 @@
 
 In this section we define some preliminaries for distributed stream processing. It allows us to unify required terms and to introduce definitions, which are needed for the subsequent statements.
 
-A  stream processing system considered in this paper  is a shared-nothing distributed runtime that handles a potentially unbounded number of input events and processes them one-by-one, according to the procedures provided by a user. The main requirement  of this kind of data processing systems is to provide low latency between event occurrence and its processing. The term {\em distributed} implies that user's procedures can have partitions on distinct computational units or shards. The following subsections detail the properties of such systems more precisely.  
+In this paper a stream processing system is considered as a shared-nothing distributed runtime. It handles input items and processes them one-by-one according to user-provided logic. It is able to handle a potentially unlimited number of items. The main requirement of this kind of data processing systems is to provide low latency between event occurrence and its processing. The term {\em distributed} implies that user's procedures can have partitions on distinct computational units or shards. The following subsections detail the properties of such systems more precisely.  
 
 \subsection{Data flow}
 The basic data flow abstraction is a {\it stream}. The stream is an infinite sequence of events or data items. Each data item contains a payload defined by a user. Besides, it can be accompanied  by meta-information. Typically  meta-information is used to define an order on data items. For instance, it can be represented as a UNIX timestamp in milliseconds with a trace of applied operations.
