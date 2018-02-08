@@ -4,12 +4,12 @@
 
 The main idea of our method is to represent stateful transformations as a sequence of a map and windowed grouping operations and handle out-of-order items within them. 
 
-Following our approach, we make some assumptions about stream processing system, that is suitable for applying it. Such system must support meta-information on data items, allow cycles in the logical graph, and its set of predefined operations must be sufficient to express map and windowed grouping operations. Additionally, it should provide functionality to periodically promise that there are no any data items with meta-information less than specified.
+Following our approach, we make some assumptions about stream processing system, that is suitable for applying it. Such system must support meta-information on data items, allow cycles in the logical graph, and its set of predefined operations must be sufficient to express map and windowed grouping operations. Additionally, OOP indicators should be supported.
 
-In this section, firstly, we define the ordering model of data items. Then, we show that any stateful transformation can be implemented using the combination of windowed grouping and map operations. After that, we demonstrate an optimistic approach to handle out-of-order items within these operations. In the end of the section, the limitations of such technique are discussed.
+The ordering model of data items is defined in the beginning of this section. Then, we show that any stateful transformation can be implemented using the combination of windowed grouping and map operations. After that, we demonstrate an optimistic approach to handle out-of-order items within these operations. In the end of the section, the limitations of such technique are discussed.
 
 \subsection{Ordering model}
-We assume that there is a total order on meta-information of data items. Besides, ordering is preserved, when an item is going through the operations. More precisely, the order of output items is the same as the order of corresponding input items. Moreover, the output follows corresponding input but precedes the next item. The ordering model is shown in the figure ~\ref{ordering}.
+We assume that there is a total order on data items. Ordering is preserved, when an item is going through the operations. More precisely, the order of output items is the same as the order of corresponding input items. If more than one item is generated then they are inserted in output stream sequentially. Moreover, the output follows corresponding input but precedes the next item. The ordering model is shown in the figure ~\ref{ordering}.
 
 \begin{figure}[htbp]
   \centering
