@@ -10,4 +10,4 @@ IOP and OOP architectures, that are mentioned in the section~\ref{fs-typical}, a
 
 Regarding optimistic techniques, there is much less scientific and industrial activity. In \cite{Wei:2009:SSO:1559845.1559973} so-called {\it aggressive} approach is proposed. This approach provides the idea that operation can immediately output {\it insertion} message on the first input. After that, if that message became invalid, because of the arrival of out-of-order items, an operation can send {\it deletion} message to remove the previous result and then send new insertion item. The idea of deletion messages is very similar to our tombstone items. However, authors describe their idea in an abstract way and do not provide any techniques to apply their method for arbitrary operations.
 
-One other optimistic strategy is detailed in \cite{Li2011}. Nevertheless, this method is probabilistic and supports only the limited number of query operators.
+Yet  another  optimistic strategy is detailed in \cite{Li2011}. Nevertheless, this method is probabilistic and supports only the limited number of query operators.
