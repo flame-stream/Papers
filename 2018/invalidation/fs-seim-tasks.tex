@@ -2,25 +2,20 @@
 
 \label {fs-tasks}
 
-In this section we outline  common problems that require the order of input items. Further we describe a couple of computation scenarios, which can be found in many real-life projects.
+In this section we outline common problems that require the order persistence of input items. Further we describe a couple of computation scenarios, which can be found in many real-life projects.
 
 \subsection{Tasks requiring complete event retrieval}
-Quite often we suppose that a business-logic event is an atomic object, i.e. single data item. However, there are cases when the single input event is split into multiple items within a stream. These input item derivatives can be processed independently, despite the fact that they all have the same meta-information. As it was shown in the figure~\ref{break-order-dataflow}, independent processing via different paths can lead to reordering. Therefore, operations which require complete event data to process valid output cannot easily detect the completeness by the order of input items.
-
-There are other solutions for this kind of problems rather than the ordering of input items. They are outlined  in the section ~\ref{fs-typical}. 
-
-\subsection{Tasks that depend on the order of input events}
-This class includes all non-commutative operations. Such tasks strictly require the order of input items, because there are no any other methods  to compute a valid result.
-
-\subsection{Examples}
-
-\subsubsection{Moving average}
-Generally, this class of examples includes all windowed aggregations. Calculation of moving average over numerical stream is a  typical special  case. Even if values inside window could be arbitrary reordered, due to commutativity of sum, the order between windows is required to ensure that incomplete windows are not produced.
+The processing of the single event could be split into multiple independent parts that could be executed in parallel. After execution finishes the results must be combined into single cumulative item. This task could be naturally implemented using order guarantees: the final part of the task could be flaged and receiving the flaged result guarantees that the rest of the operation is completeed. Unfortuantely, as it was shown in the figure~\ref{break-order-dataflow}, independent processing via different paths can lead to reordering.
 
 \subsubsection{Inverted index}
-
 Pipeline shown in the figure ~\ref{break-order-dataflow} can be used for computing the inverted index. In this case, operation 1 accepts documents from the input and for each word produces corresponding positions. Operation 2 accepts pairs of word and positions and computes change log of the inverted index for each word. Because of the fact that output change logs must be ordered in order to get valid index after applying them, operation 2 requires ordered input. 
 
-%%%% BN THis is not convincing as it depends on index structure. If post-lists are ordered, then insertions commute and the order is not important. 
+\subsection{Tasks that depend on the order of input events}
+This class includes all non-commutative operations. Such tasks strictly require the order of input items, because there are no any other methods to compute a valid result.
 
+\subsubsection{Moving average}
+Generally, this class of examples includes all windowed aggregations. Moving average calculation over a numerical stream is a typical case. Even if values inside window could be arbitrary reordered, due to commutativity of sum, the order between windows is required to ensure that incomplete windows are not produced.
 
+%% TODO rewrite
+
+%%%% BN This is not convincing as it depends on index structure. If post-lists are ordered, then insertions commute and the order is not important. 
