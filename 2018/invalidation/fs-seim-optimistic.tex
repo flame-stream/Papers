@@ -9,7 +9,7 @@ Following our approach, we make some assumptions about stream processing system,
 The ordering model of data items is defined in the beginning of this section. Then, we show that any stateful transformation can be implemented using the combination of windowed grouping and map operations. After that, we demonstrate an optimistic approach to handle out-of-order items within these operations. In the end of the section, the limitations of such technique are discussed.
 
 \subsection{Ordering model}
-We assume that there is a total order on data items. Ordering is preserved, when an item is going through the operations. More precisely, the order of output items is the same as the order of corresponding input items. If more than one item is generated then they are inserted in output stream sequentially. Moreover, the output follows corresponding input but precedes the next item. The ordering model is shown in the figure ~\ref{ordering}.
+We assume that there is a total order on data items. Ordering is preserved, when an item is going through the operations. More precisely, the order of output items is the same as the order of corresponding input items. If more than one item is generated then they are inserted in output stream sequentially. Moreover, the output follows corresponding input but precedes the next item. The ordering model is shown in Figure ~\ref{ordering}.
 
 \begin{figure}[htbp]
   \centering
@@ -37,7 +37,7 @@ Windowed grouping has the following semantics:
     \item The output of grouping operation is a window-sized tuple of the last items in the corresponding bucket. If bucket size is less than window, the output contains full bucket
 \end{itemize}
 
-The pseudocode is presented in the algorithm~\ref{group-semantics}. {\it Emit} function is called to send new items downstream.
+The pseudocode is presented in Algorithm~\ref{group-semantics}. {\it Emit} function is called to send new items downstream.
 
 \begin{algorithm}
 \caption{Grouping semantics}
@@ -71,7 +71,7 @@ Figure ~\ref{stateful-schema} shows the part of the logical pipeline, that can b
   \label {stateful-schema}
 \end{figure}
 
-The example of square matrix multiplication within proposed approach is shown in the figure ~\ref{matrix-example}. In this example, input items are represented as key-value pairs, where the key is the dimension of a matrix and the value is the matrix itself. The reaction on three input matrices are the following:
+The example of square matrix multiplication within proposed approach is shown in Figure ~\ref{matrix-example}. In this example, input items are represented as key-value pairs, where the key is the dimension of a matrix and the value is the matrix itself. The reaction on three input matrices are the following:
 
 \begin{itemize}
     \item When the first matrix {\it A} arrives at grouping, it is put into the empty bucket for 3x3 matrices. After that, the single-element tuple with matrix {\it A} is sent to combine map operation. Combine map creates state object for matrix {\it A}, which is actually just {\it A} itself. In the last step, state item is sent back to grouping, and it is inserted right after item for matrix {\it A}
@@ -96,7 +96,7 @@ When we introduce the model for stateful operations, we assume  that all items a
 
 Tombstones are ordinal data items but with a special flag in meta-information. This flag means that tuples with such meta-information are invalid, and they should not leave system. Tombstones have the same payloads as invalid items in order to go through the same path in the computational pipeline.
 
-The pseudocode of the grouping is shown in the algorithm \ref{group-insert}. The functions accept new element, depending on its type. They also accept a bucket for element's hash. {\it Emit} function is called to send new items downstream.
+The pseudocode of the grouping is shown in Algorithm \ref{group-insert}. The functions accept new element, depending on its type. They also accept a bucket for element's hash. {\it Emit} function is called to send new items downstream.
 
 \begin{algorithm}
 \caption{Implementation of grouping semantics}
@@ -139,7 +139,7 @@ The pseudocode of the grouping is shown in the algorithm \ref{group-insert}. The
 
 This technique guarantees that all correct tuples are eventually produced. However, invalid ones are also generated. Therefore, there is a need for {\it barrier} at the pipeline's sink, that filters invalid items, when corresponding tombstones arrive. The barrier is partially flushed for some meta-information interval when there is a guarantee that there are no any out-of-order items and tombstones further up the stream for this interval. This guarantee can be provided by punctuations or low watermarks, as it is implemented in the most stream processing systems. 
 
-The pseudocode for the barrier is shown in the algorithm~\ref{barrier-insert}. The function {\it Insert} is called upon new item's arrival, {\it Punctuation} - on punctuation's. The key idea behind this approach is to shift blocking as far as possible down the stream.
+The pseudocode for the barrier is shown in Algorithm~\ref{barrier-insert}. The function {\it Insert} is called upon new item's arrival, {\it Punctuation} - on punctuation's. The key idea behind this approach is to shift blocking as far as possible down the stream.
 
 \begin{algorithm}
 \caption{Barrier}
