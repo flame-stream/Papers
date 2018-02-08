@@ -13,7 +13,13 @@ This stateful transformation is implemented in the form of groping and map opera
   \label {inverted-index}
 \end{figure}
 
-As a key metric in our experiment, we take the ratio of arrived at the barrier items count to number of the valid items among them. This value clearly represents the overhead of our approach. The relation between the number of workers, the delay between input documents and the proposed ratio is shown in Figure ~\ref{experiment}. This figure demonstrates that the ratio of all items to the valid items is quite low even when the delay between documents is very short. Therefore, the experiment reveals that our approach is able to provide low network traffic overhead. 
+Our experiments were performed on clusters of 2, 4, 6, 8, and 10 nodes. Each node is an Amazon EC2 micro instance with 1GB RAM and 1 core CPU.
+
+As a key metric in our experiment, we take the ratio of arrived at the barrier items count to number of the valid items among them. This value clearly represents the overhead of our approach. 
+
+The relation between the number of workers, the delay between input documents and the proposed ratio is shown in Figure ~\ref{experiment}. As expected, the peak of the ratio is achieved when delay between documents is short (less than 50 ms). This behavior can be explained by the fact that a few workers cannot effectively deal with such intensive load. Nevertheless, the proportion of invalid items reduces down to 1.3 with the increase of workers number within fixed short delay. Moreover, the ratio is under 1.1 for longer delays with any number of workers. These results confirms that the ratio is not increased with the growth of the number of nodes.
+
+Therefore, the most important conclusion of the experiments is that proposed method is scalable. Additionally, it is shown that the ratio of all items to the valid items is quite low for multiple workers even when the delay between documents is very short.
 
 \begin{figure}[htbp]
   \centering
