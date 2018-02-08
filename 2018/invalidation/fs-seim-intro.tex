@@ -14,7 +14,6 @@ Nowadays, a lot of real-life applications use stream processing for network moni
 The typical way to achieve in-order processing is to set up a special buffer in front of operation. This buffer collects all input items until some user-provided condition is satisfied. Then the contents of the buffer is sorted and fed to the operation. The main disadvantage of such technique is latency growth. This issue becomes even more significant if the processing pipeline contains several operations that require ordered input. 
 
 The alternative is to develop business logic tolerant to out-of-order items. However, this approach  is suitable only for a limited set of tasks. Moreover, it may dramatically complicate the business-logic, which can lead to the maintenance cost increase and is error-prone.
-% sophisticated bugs.    
 
 In this paper we introduce an optimistic approach to handle out-of-order items. Our evaluation demonstrates its advantages compared to existing solutions. The contributions of this paper are the following: 
 
