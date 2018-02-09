@@ -146,7 +146,7 @@ The pseudocode of the grouping is shown in Algorithm \ref{group-insert}. The fun
   \end{algorithmic}
 \end{algorithm}
 
-This technique guarantees that all correct tuples are eventually produced. However, invalid ones are also generated. Therefore, there is a need for {\it barrier} at the pipeline's sink, that filters invalid items, when corresponding tombstones arrive. The barrier is partially flushed for some meta-information interval when there is a guarantee that there are no any out-of-order items and tombstones further up the stream for this interval. This guarantee can be provided by punctuations or low watermarks, as it is implemented in the most stream processing systems. The key idea behind this approach is to shift blocking as far as possible down the stream. Notably, this is the only buffer in the whole system unlike existing solutions.
+This technique guarantees that all correct tuples are eventually produced. However, invalid ones are also generated. Therefore, there is a need for {\it barrier} at the pipeline's sink, that filters invalid items when corresponding tombstones arrive. The barrier is partially flushed for some meta-information interval when there is a guarantee that there are no any out-of-order items and tombstones further up the stream for this interval. This guarantee can be provided by punctuations or low watermarks, as it is implemented in the most stream processing systems. The key idea behind this approach is to shift blocking as far as possible down the stream. Notably, this is the only buffer in the whole system, unlike existing solutions.
 
 The pseudocode for the barrier is shown in Algorithm~\ref{barrier-insert}. The function {\it Insert} is called upon new item's arrival, {\it Punctuation} - on punctuation's. 
 
@@ -180,6 +180,6 @@ The pseudocode for the barrier is shown in Algorithm~\ref{barrier-insert}. The f
 \end{algorithm}
 
 \subsection{Advantages and limitations}
-The proposed architecture's performance depends on how often reorderings are observed during the runtime. In case when the order naturally preserved there is almost no overhead: when the watermark arrives, all computations are already done. The probability of reordering could be managed on business-logic level and optimized by the developer. In experiments section it is shown that the computational nodes count is one of such parameters.
+The proposed architecture's performance depends on how often reorderings are observed during the runtime. In the case when the order naturally preserved there is almost no overhead: when the watermark arrives, all computations are already done. The probability of reordering could be managed on a business-logic level and optimized by the developer. In experiments section it is shown that the computational nodes count is one of such parameters.
 
 Regarding the weaknesses, this method can generate additional items, which lead to extra network traffic and computations. Experiments, that are shown in the section~\ref{fs-experiments} demonstrate that the number of extra items is low.
