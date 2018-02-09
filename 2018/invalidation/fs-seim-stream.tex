@@ -9,11 +9,7 @@ In this section we define some preliminaries for distributed stream processing. 
 In this paper a stream processing system is considered as a shared-nothing distributed runtime. It handles input items and processes them one-by-one according to user-provided logic. It is able to handle a potentially unlimited number of items. The main requirement of this kind of data processing systems is to provide low latency between event occurrence and its processing under a fixed load. The term {\em distributed} implies that user's procedures can be partitioned into distinct computational units or shards. The following subsections detail the properties of such systems more precisely.  
 
 \subsection{Data flow}
-The basic data flow abstraction is a {\it stream}. The stream is an infinite sequence of data items. Each data item contains a payload defined by a user. Besides, it can be accompanied by meta-information. Typically, meta-information is used to define an order on data items. For instance, it can be represented as a UNIX timestamp in milliseconds.
-
-%%% Stream is heterogeneous
-
-%%% Trace?
+The basic data flow abstraction is a {\it stream}. The stream is an infinite sequence of heterogeneous data items. Each data item contains a payload defined by a user. Besides, it can be accompanied by meta-information. Typically, meta-information is used to define an order on data items. For instance, it can be represented as a UNIX timestamp in milliseconds.
 
 \subsection{Computation flow}
 Commonly, the computational pipeline is defined in the form of {\it logical graph}. The vertices of the logical graph are operations, and the edges are links between them. Logical graph defines only relations between operations, but it does not describe the physical deployment. The logical graph for the pipeline shown in Figure~\ref{break-order-dataflow} is presented in Figure~\ref{break-order-dataflow-logical}
