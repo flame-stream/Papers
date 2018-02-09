@@ -9,7 +9,7 @@ Following our approach, we make some assumptions about stream processing system,
 The ordering model of data items is defined in the beginning of this section. Then, we show that any stateful transformation can be implemented using the combination of windowed grouping and map operations. After that, we demonstrate an optimistic approach to handle out-of-order items within these operations. In the end of the section, the limitations of such technique are discussed.
 
 \subsection{Ordering model}
-We assume that there is a total order on data items. Ordering is preserved, when an item is going through the operations. More precisely, the order of output items is the same as the order of corresponding input items. If more than one item is generated then they are inserted in output stream sequentially. Moreover, the output follows corresponding input but precedes the next item. The ordering model is shown in Figure ~\ref{ordering}.
+We assume that there is a total order on data items. Ordering is preserved when an item is going through the operations. More precisely, the order of output items is the same as the order of corresponding input items. If more than one item is generated, they are inserted in output stream sequentially. Moreover, the output follows corresponding input but precedes the next item. The ordering model is shown in Figure ~\ref{ordering}.
 
 \begin{figure}[htbp]
   \centering
@@ -87,14 +87,14 @@ The example of square matrix multiplication within proposed approach is shown in
 \end{figure}
 
 \subsection{Handling out-of-order events}
-When we introduce the model for stateful operations, we assume  that all items arrive at grouping in the right order. However, as it was shown above, it is not possible in practice without additional buffering. We propose the following approach to handle events in grouping:
+When we introduce the model for stateful operations, we assume that all items arrive at grouping in the right order. However, as it was shown above, it is not possible in practice without additional buffering. We propose the following approach to handle events in grouping:
 
 \begin{itemize}
-    \item If item arrives in order, it is processed as usual
-    \item If item is out-of-order, then it is inserted into the corresponding bucket at position defined by the meta-information. After that, tuples, which contain new item are generated and sent further down the stream. At the same time, for tuples, that has been generated, but became invalid, {\it tombstones} are sent
+    \item If an item arrives in order, it is processed as usual
+    \item If an item is out-of-order, then it is inserted into the corresponding bucket at the position defined by the meta-information. After that, tuples, which contain new item are generated and sent further down the stream. At the same time, for tuples, that has been generated but became invalid, {\it tombstones} are sent
 \end{itemize}
 
-Tombstones are ordinal data items but with a special flag in meta-information. This flag means that tuples with such meta-information are invalid, and they should not leave system. Tombstones have the same payloads as invalid items in order to go through the same path in the computational pipeline.
+Tombstones are ordinal data items but with a special flag in meta-information. This flag means that tuples with such meta-information are invalid, and they should not leave the system. Tombstones have the same payloads as invalid items in order to go through the same path in the computational pipeline.
 
 The pseudocode of the grouping is shown in Algorithm \ref{group-insert}. The functions accept new element, depending on its type. They also accept a bucket for element's hash. {\it Emit} function is called to send new items downstream.
 
@@ -172,6 +172,6 @@ The pseudocode for the barrier is shown in Algorithm~\ref{barrier-insert}. The f
 \subsection{Advantages and limitations}
 The main advantage of the proposed technique is that items are processed optimistically, without waiting for the punctuation or low watermark. Therefore, when the watermark arrives, all computations can be already done, and there is only a need to flush barrier. Such approach can be especially efficient when stream computations are heavy and there are large time intervals between watermarks.
 
-Regarding the weaknesses, this method can generate additional items, which can lead to extra network traffic. Experiments, that is shown in the section ~\ref{fs-experiments} demonstrates that in some cases the number of extra items is extremely low. However, if the task requires a very large number of out-of-order items, there is a need to analyze the applicability of proposed solution.
+Regarding the weaknesses, this method can generate additional items, which can lead to extra network traffic. Experiments, that is shown in the section~\ref{fs-experiments} demonstrates that in some cases the number of extra items is extremely low. However, if the task requires a very large number of out-of-order items, there is a need to analyze the applicability of proposed solution.
 
 
