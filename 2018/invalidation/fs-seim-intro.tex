@@ -7,7 +7,7 @@ Nowadays, a lot of real-life applications use stream processing for network moni
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.38\textwidth]{pics/break_order_pipeline}
-  \caption{An  example of common distributed stream processing pipeline that breaks the input order of operation}
+  \caption{An example of common distributed stream processing pipeline that breaks the input order of operation}
   \label {break-order-dataflow}
 \end{figure}
 
@@ -15,7 +15,7 @@ The typical way to achieve in-order processing is to set up a special buffer in 
 
 The alternative is to develop business logic tolerant to out-of-order items. However, this approach is suitable only for a limited set of tasks. Moreover, it may dramatically complicate the business-logic, which can lead to the maintenance cost increase and is error-prone.
 
-In this paper we introduce an optimistic approach to handle out-of-order items. Our evaluation demonstrates its advantages compared to existing solutions. The contributions of this paper are the following: 
+In this paper we introduce an optimistic approach to handle out-of-order items. Our evaluation demonstrates the low overhead of our method. The contributions of this paper are the following: 
 
 \begin {itemize}
   \item Definition of new optimistic technique to handle out-of-order items in stateful operations
