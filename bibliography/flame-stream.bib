@@ -819,3 +819,17 @@ doi="10.1007/s11390-011-1168-x",
 url="https://doi.org/10.1007/s11390-011-1168-x"
 }
 In recent years, there has been a growing need for complex event processing (CEP), ranging from supply chain management to security monitoring. In many scenarios events are generated in different sources but arrive at the central server out of order, due to the differences of network latencies. Most state-of-the-art techniques process out-of-order events by buffering the events until the total event order within a specified range can be guaranteed. Their main problems are leading to increasing response time and reducing system throughput. This paper aims to build a high performance out-of-order event processing mechanism, which can match events as soon as they arrive instead of buffering them till all arrive. A suffix-automaton-based event matching algorithm is proposed to speed up query processing, and a confidence-based accuracy evaluation is proposed to control the query result quality. The performance of our approach is evaluated through detailed accuracy and response time analysis. As experimental results show, our approach can obviously speed up the query matching time and produce reasonable query results.
+
+@INPROCEEDINGS{S7530084, 
+author={S. Chintapalli and D. Dagit and B. Evans and R. Farivar and T. Graves and M. Holderbaugh and Z. Liu and K. Nusbaum and K. Patil and B. J. Peng and P. Poulosky}, 
+booktitle={2016 IEEE International Parallel and Distributed Processing Symposium Workshops (IPDPSW)}, 
+title={Benchmarking Streaming Computation Engines: Storm, Flink and Spark Streaming}, 
+year={2016}, 
+volume={}, 
+number={}, 
+pages={1789-1792}, 
+abstract={Streaming data processing has been gaining attention due to its application into a wide range of scenarios. To serve the booming demands of streaming data processing, many computation engines have been developed. However, there is still a lack of real-world benchmarks that would be helpful when choosing the most appropriate platform for serving real-time streaming needs. In order to address this problem, we developed a streaming benchmark for three representative computation engines: Flink, Storm and Spark Streaming. Instead of testing speed-of-light event processing, we construct a full data pipeline using Kafka and Redis in order to more closely mimic the real-world production scenarios. Based on our experiments, we provide a performance comparison of the three data engines in terms of 99th percentile latency and throughput for various configurations.}, 
+keywords={data analysis;pipeline processing;Flink streaming;Kafka;Redis;Spark streaming;Storm streaming;computation engines;data engines;data pipeline;streaming data processing;Benchmark testing;Data processing;Engines;Pipelines;Sparks;Storms;Throughput;Benchmark;Flink;Low Latency;Spark;Storm;Streaming processing}, 
+doi={10.1109/IPDPSW.2016.138}, 
+ISSN={}, 
+month={May},}
