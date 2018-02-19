@@ -21,7 +21,7 @@ These nice properties we trade for in-memory processing: the total state volume 
 
 The optimistic collision management is done over collisions that already happen and it is often more lightweight then prevention mechanisms. This property is proided by the ability of the system to replay certain fragments of the stream. These replays demand the computation process to be deterministic. As many other systems, we use the graph representation of the computation and dynamically optimize this graph using statistics available. 
 
-``Exactly once'' semantic is an arguable topic, we provide this guarantee inside our system but the overall contract could be violated because of source/sink flaws. To achieve this objective we introduce dynamic batching technique, based on Storm~\cite{apache:storm} ackers idea. The same mechanism allows us to get early key availability.
+``Exactly once'' semantic is an arguable topic, we provide this guarantee inside our system but the overall contract could be violated because of source/sink limitations. To achieve this objective we introduce dynamic batching technique, based on Storm~\cite{apache:storm} ackers idea. The same mechanism allows us to get early key availability.
 
 We follow these principles in our system architecture:
 \begin{itemize}
@@ -34,7 +34,7 @@ We follow these principles in our system architecture:
 
 Enlisted principles are reflected in the following design. The computation to be performed with \FlameStream\ is specified in terms of predefined operations that are parametrized with user-defined procedures (collectively called {\em business logic} in the jargon of developers community). Each operation accepts a stream or several streams of data items, and produces one or several output streams. The whole computational workflow is described in terms of a graph. The nodes of the graph represent operations, while edges set up logical routing of data items between operations.
 
-The \FlameStream\ runtime organizes the data items to be processed by operations into prioritized queues. The logical workflow graph is replicated to every compute unit in the cluster for scalable execution. The data items are partitioned between computational units based on user-defined hashing. This allows user to influence the computational layout and balance the load of the compute units if needed.
+The \FlameStream\ runtime organizes the data items to be processed by operations into queues. The logical workflow graph is replicated to every computational unit in the cluster for scalable execution. The data items are partitioned between computational units based on user-defined hashing. This allows user to influence the computational layout and balance the load if needed.
 
 \FlameStream\ provides the only operation that maintains state called {\it grouping}. Grouping does not require any state management by a user. Moreover, the structure of its state can be easily made persistent, which is useful for capturing snapshots.
 
