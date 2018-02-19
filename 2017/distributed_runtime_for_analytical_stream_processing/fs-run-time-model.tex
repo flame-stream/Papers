@@ -50,12 +50,12 @@ Each operation input has a user-provided hash function called {\it balancing fun
 
 As it was mentioned above, meta-information imposes an explicit total order on data items. Without diving into details, it should be noted that the order of items is maintained across different fronts.
 
-Let {\it image} be an output data item of an operation and {\it preimage} is a corresponding input item. In this terms, the order of images is preserved, i.e. the order of images is the same as the order of preimages. Moreover, the image of the item follows its preimage but precedes the next item. The concept of ordering is shown in the figure~\ref{ordering}
+Let {\it image} be an output data item of an operation and {\it preimage} is a corresponding input item. In this terms, the order of images is preserved, i.e. the order of images is the same as the order of preimages. Moreover, the image of the item follows its preimage but precedes the next item. If more than one item is generated, they are inserted in output stream sequentially. The concept of ordering is shown in the figure~\ref{ordering}
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.30\textwidth]{pics/ordering}
-  \caption{Ordering}
+  \includegraphics[width=0.5\textwidth]{pics/ordering}
+  \caption{Ordering model}
   \label {ordering}
 \end{figure}
 
@@ -67,11 +67,30 @@ The set of available operations is limited by the following list.
 
 {\bf Map} applies a user-defined function to the payload of an input item. This function returns a sequence of data items with transformed payloads. An output sequence can be empty.
 
+\[Map(f: T \rightarrow List[V])\]
+
 {\bf Broadcast} replicates an input item to the specified number of operations or sinks.
 
 {\bf Merge} operation is initialized with the specified number of input nodes. It sends all incoming data to the output.
 
 {\bf Grouping} has a {\it window size} parameter. Grouping stores input items into distinct buckets by the value of the input balancing function applied to the payload. When the next item arrives at the grouping, it is appended to the corresponding bucket according to the ordering model. Each time the grouping outputs window-sized {\it tuple item}, which consists of the most recent (in terms of the meta-information) items of this bucket. If the size of the bucket is less than the window, all items of the bucket are taken. Grouping is the only operation that maintains state. To prevent collisions user can define equivalence relation to ensure that items with distinct payloads are got in the distinct buckets.
+
+\[Grouping(window: Integer)\]
+
+The pseudocode is presented in Algorithm~\ref{group-semantics}. {\it Emit} function is called to send new items downstream.
+
+\begin{algorithm}
+\caption{Grouping semantics}
+\label{group-semantics}
+  \begin{algorithmic}[1]
+    \Function{Insert}{$item$, $bucket$}
+      \State \Call{Append}{$bucket, item$}
+      \State $left \gets max(0, bucket_{length} - window)$
+      \State $right \gets bucket_{length}$
+      \State \Call{Emit}{$DataItem(bucket[left, right])$}
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
 
 The following example illustrates the semantics of the operation. The grouping accepts items with payload represented as natural numbers: 1,2,3, etc. The hash function returns 1 if the number is even and 0 otherwise. If the window is set to 3, the output is:
 
@@ -124,10 +143,10 @@ One possible way to implement reduce stage in our model is to make business logi
 There are four types of data items in this stream: {\it input}, {\it mapped}, {\it accumulator}, {\it and reduced} items. Mapped, accumulator, and reduced items have the key-value structure of a payload. The operations of the stream have the following purposes:
 
 \begin{itemize}
-  \item The first map operation accepts input items and outputs mapped items according to map stage of MapReduce model.
-  \item The window of grouping is set to 2. It is used to group current accumulator with next data item in order to combine them together further. The hash function is designed to return distinct values for payloads with distinct keys.
-  \item The second map implements the actual combining. It accepts inputs that have a form of: \textit{(mapped item)} or \textit{(accumulator item, mapped item)}. The first kind is transformed into some initial value. The second one is combined into the new accumulator item as specified by reduce stage of MapReduce. The tuples with structure \textit{(mapped item, accumulator item)} are filtered out.
-  \item The third map is the accumulator map. It accepts accumulator items and applies the final map transformation to them.
+  \item The first map operation accepts input items and outputs mapped items according to map stage of MapReduce model
+  \item The window of grouping is set to 2. It is used to group current accumulator with next data item in order to combine them together further. The hash function is designed to return distinct values for payloads with distinct keys
+  \item The second map implements the actual combining. It accepts inputs that have a form of: \textit{(mapped item)} or \textit{(accumulator item, mapped item)}. The first kind is transformed into some initial value. The second one is combined into the new accumulator item as specified by reduce stage of MapReduce. The tuples with structure \textit{(mapped item, accumulator item)} are filtered out
+  \item The third map is the accumulator map. It accepts accumulator items and applies the final map transformation to them
 \end{itemize}
 
 The key idea is that ordering assumptions about data items guarantees that each accumulator item always arrives at the grouping right after previous mapped item and before a new one. Hence, each mapped item that has not been combined yet would be grouped with the right accumulator item. Additionally, when combine map accepts tuple {\it (mapped item, accumulator item)}, then it means that mapped item was generated before accumulator item, and therefore, it had been already combined. The cycle gives the ability for new accumulator items to get back in the grouping operation. The accumulator map transforms the accumulator item into the final reduced item right before sink. Thereby, the stream reacts to each input item by generating new reduced item, which contains the actual value of the reduce stage.

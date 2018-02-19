@@ -5,28 +5,27 @@ As it was defined previously, only the grouping operation maintains a state and 
 
 In order to address this issue, we accept the fact that grouping can produce incorrect tuples. However, we guarantee that all correct tuples are eventually produced. The correctness of tuple means that this tuple would be generated if the order assumption was satisfied. 
 
-To eventually produce all correct tuples, we use an approach called {\it replay}. If an item arrives the grouping operation, according to the meta-information order, nothing is replayed and only the most recent window is produced. However, if the item is out of order, it is inserted in the bucket at the correct location, and all tuples, which contain this element, are reproduced. Thereby, replay guarantees that eventually all correct tuples are generated.
+To eventually produce all correct tuples, we use an approach called {\it replay}. If an item arrives the grouping operation, according to the meta-information order, nothing is replayed and only the most recent window is produced. However, if an item is out of order, it is inserted in the bucket at the correct location, and all tuples, which contain this element, are reproduced. Thereby, replay guarantees that eventually all correct tuples are generated. At the same time, for tuples, that has been produced but became invalid, {\it tombstones} are sent.
 
-The example of replay is shown in the figure~\ref{grouping-replaying}. The colored item is out of order and the window of grouping is 2.
+Tombstones are ordinal data items but with a special flag in its meta-information. This flag means that tuples with such meta-information are invalid, and they should not leave the system. Tombstones have the same payloads as invalid items in order to go through the same path in the computational pipeline.
+
+The example of replay is shown in the figure~\ref{grouping-replaying}, The green item is out of order. The ouput consists of the new valid items, {\it (1, 2) and (2, 3)}, and the tombsone, {\it (1, 3)}.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.48\textwidth]{pics/grouping-replaying}
-  \caption{Grouping replay}
+  \caption{The replay in groupig with window = w. The new items are generated on insertion}
   \label {grouping-replaying}
 \end{figure}
 
-In the case of the right order of the input items, there are no redundant items produced.  Nevertheless, replay can emit more relevant items, and former ones should not be sent to the outer world.
+In the case of the right order of input items, there are no redundant items produced.
 
-\subsection{Adaptive microbatching}
-In order to filter out invalid elements that are produced on grouping replay, items are collected at barrier before leaving the system.
-
-To differentiate a freshness of items we utilize the structure of meta-information that implements FlameStream ordering model, defined in section~\ref{fs-model}. Then, we introduce an invalidation order on meta that distinguishes correct elements from incorrect ones.
+In order to filter out all invalid elements there is a need for {\it barrier} at the pipeline's sink, that filters invalid items when corresponding tombstones arrive. The barrier is partially flushed for some meta-information interval when there is a guarantee that there are no any out-of-order items and tombstones further up the stream for this range. The exact technique for providing such guarantee is defined further.
 
 \subsubsection{Meta information}
-The meta-information of data item is a pair of a {\it global time} and a {\it trace}.
+The meta-information of data item is a tuple of a {\it global time}, a {\it trace}, {\it child ids} and a tombstone flag.
 
-\[Meta := (GlobalTime, Trace)\]
+\[Meta := (GlobalTime, ChildIds[], Trace, IsTombstone)\]
 
 Global time is assigned to data item once the item enters the system. It is a pair of milliseconds since the epoch start and the identifier of the front. The identifier is used to assign different global times to different items, even in case of wall-clock collisions. 
 
@@ -34,17 +33,17 @@ Global time is assigned to data item once the item enters the system. It is a pa
 
 Global times are compared by front timestamp if they coincide - by front id. It is important to notice, that we are not relying on any clock synchronization between nodes, but we require a strict monotonicity within the single front. The only implication of the clock skew is the system degradation in terms of latency: 1ms of the nodes clock difference appends 1ms to minimal latency.
 
-Trace is an array of logical times of operations and the ordinal number of the output within single input which we call {\it child id}. 
+Each map operation can produce multiple items from one. This items are ordered between each other. To differentiate them the ordinal number, {\it child id}, is stored in the meta information. The {\it ChildIds } is an array of child ids, that corresponds to the all visited map operations.
 
-\[Trace := [LocalTime]\]
+The global time and child ids are enougth to uniquly identify data item within stream, if all processing is done without replays. If there are any replays happened during processing, multiple items with the same global time and child ids exists in the stream. There are multiple tombstones with the same global time and child ids can exist as well. They can take different paths in computational flow and travel within them with different speeds. 
 
-\[LocalTime := (LogicalTime, ChildId)\]
+Despite this fact, an invalid element and the tombstone for it are taking the same path, because they have the same payload and the balancing functions are determenistic. Moreover, the tombstome visits operations strictly after corresponding item, as links between operation are considered to be FIFO. To match tombstone with proper item there is {\it Trace} value stored in the meta-information.
 
-The logical time is a simple item counter within each operation. Therefore, child id is required as map and broadcast can generate multiple items from one. Items with the same child id are called {\it siblings}. When an item leaves an operation, its trace is appended with a new local time. The traces are compared lexicographically.
+Trace encodes the path item have traversed. Each phsical copy of each operation is assigned with unique random 64-bit identifier. The trace is a xor of the all operations' ids visited by item so far.
 
-In spite of the fact that initially there are no items with the same global time, they can be generated by some operations. The trace is used to distinguish two elements with the same global time.
+\[Trace := \bigoplus_{op \in \text{visited}} Id(op)\]
 
-Our concept of meta-information is similar to vector clocks~\cite{fidge1988timestamps, mattern88virtualtime}. However, unlike vector clocks, meta-information provides for the total order of data items due to the global time.
+Metas are compared lexicographically. That is to say, firstly global times are compared, then child ids, then traces. Notice, this order is in line with the \FlameStream's ordering model.
 
 The figure~\ref{logical-graph-ops-figure} shows the topology of each operation and how it affects the trace of local times.
 
@@ -58,56 +57,12 @@ The figure~\ref{logical-graph-ops-figure} shows the topology of each operation a
 The structure of meta provides for tracking different relations between data items:
 
 \begin{itemize}
-  \item Items with common prefixes are produced from the same item
+  \item Items with same global time and common prefixes are produced from the same item
   \item Item with lower meta is generated earlier, at front or in the stream
+  \item If there are two items with the same global time and child ids, only one of them is the right one
 \end{itemize}
 
-\subsection{Invalidation mechanism}
-
-Replay in the grouping can generate multiple tuples with the same last item. Only one tuple from such set is correct. To find out which tuples are correct we introduce the invalidation rule on data items: if there are several tuples with the same last element, the most recent one is the correct one.
-
-The item {\it A} is said to be invalidated by item {\it B} and {\it B} is called {\it invalidator} of {\it A}, or simply {\it invalidator} iff:
-
-\begin{enumerate}
-\item They have the same global time
-\item The trace of {\it A} is lexicographically less than the trace of {\it B}
-\item The first difference in traces is in logical time
-\end{enumerate}
-
-If the first difference is in child id, e.g. they were generated by the broadcast operation, there is no invalidation order between them. Hence, the invalidation order is a partial order. 
-
-Invalidation order is defined not only for the grouping output but for all items. Stateless operations cannot distinguish items thus act on them identically. However, the invalidation order will not be lost, when an item goes through operations because the trace of local times is append-only.
-
-Barrier maintains a buffer of items. Once a new item arrives, it is inserted into the buffer and items that are invalidated by newcomer are removed. The pseudocode is shown in the alogorithm~\ref{buffer-insert}.
-
-\begin{algorithm}
-\caption{Inserting element in buffer}
-\label{buffer-insert}
-\begin{algorithmic}
-  \Function{INSERT}{{\it a}}
-    \ForAll{{\it item} $\in$ {\it buffer}} 
-      \If{{\it item} is invalidated by {\it a}} 
-        \State \Call{dequeue}{{\it buffer}, {\it item}}
-      \EndIf
-    \EndFor
-    \State \Call{enqueue}{{\it buffer}, {\it a}}
-  \EndFunction
-\end{algorithmic}
-\end{algorithm}
-
-There are two complications with invalidation mechanism. The first one, barriers are deployed on multiple workers and are partitioned by the business-logic balancing function. Hence, the item and corresponding invalidator can arrive at distinct barriers. As defined earlier they have the same global time, so the partitioning of barriers by global time solves this problem. The second one, it is unclear when the items should be released from the barrier. The system should ensure that there are no in-flight invalidators. 
-
-The figure~\ref{invalidation-problems-figure} illustrates possible barrier issues. Triangular items with labels 4 and 7 got out from the system, despite the fact that they should be invalidated by corresponding rectangular items. 
-
-The solution of this problem is described in the next subsection. 
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.48\textwidth]{pics/invalidation_problems}
-  \caption{Possible barrier issues}
-  \label {invalidation-problems-figure}
-\end{figure}
-
+\label{mininal-time}
 \subsection{Minimal time within stream}
 
 To release the item from the barrier we need to ensure that there are no in-flight invalidators. 
@@ -115,11 +70,12 @@ To release the item from the barrier we need to ensure that there are no in-flig
 \newtheorem{minimal-time-claim}{Lemma}
 
 \begin{minimal-time-claim}
-  If data item {\it D} has global time {\it GT} greater than the global time of the in-flight elements, then all items that could invalidate {\it D} had already arrived at the barrier.
+  If data item {\it D} has global time {\it GT} greater than the global time of the in-flight elements, then all tombstones for that item had already arrived at the barrier.
 \end{minimal-time-claim}
 
 \begin{proof}
-  Let {\it E} is in-flight element that invalidates {\it D}. According to the definition of invalidation order, {\it E} and {\it D} have the same global time {\it GT}, but the different trace. We assumed that there are no in-flight element with the global time equal to {\it GT}. Contradiction.
+  {\it RETHINK}
+  Let {\it E} is in-flight element that invalidates {\it D}. According to the definition of invalidation order, {\it E} and {\it D} has the same global time {\it GT}, but the tombstone flag. We assumed that there are no in-flight element with the global time equal to {\it GT}. Contradiction.
 
   This implies that if the stream does not contain items with the global time less than or equal to {\it GT}, then all items which invalidate {\it D} had already arrived at the barrier. 
 \end{proof}
