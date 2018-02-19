@@ -20,7 +20,7 @@ The example of replay is shown in the figure~\ref{grouping-replaying}, The green
 
 In the case of the right order of input items, there are no redundant items produced.
 
-In order to filter out all invalid elements there is a need for {\it barrier} at the pipeline's sink, that filters invalid items when corresponding tombstones arrive. The barrier is partially flushed for some meta-information interval when there is a guarantee that there are no any out-of-order items and tombstones further up the stream for this range. The exact technique for providing such guarantee is defined further.
+The barrier filters out invalid elements, when corresponding tombstones arrive. It is partially flushed for some meta-information interval when there is a guarantee that there are no any out-of-order items and tombstones further up the stream for this range. The exact technique for providing such guarantee is defined further.
 
 \subsubsection{Meta information}
 The meta-information of data item is a tuple of a {\it global time}, a {\it trace}, {\it child ids} and a tombstone flag.
@@ -31,19 +31,19 @@ Global time is assigned to data item once the item enters the system. It is a pa
 
 \[GlobalTime := (FrontTs, FrontId)\]
 
-Global times are compared by front timestamp if they coincide - by front id. It is important to notice, that we are not relying on any clock synchronization between nodes, but we require a strict monotonicity within the single front. The only implication of the clock skew is the system degradation in terms of latency: 1ms of the nodes clock difference appends 1ms to minimal latency.
+Global times are compared by front timestamp if they coincide - by front id. It is important to notice, that we are not relying on any clock synchronization between nodes, but we require a strict monotonicity within the single front. The only implication of the clock skew is the system degradation in terms of latency: 1ms of the nodes clock difference appends 1 ms to minimal latency.
 
-Each map operation can produce multiple items from one. This items are ordered between each other. To differentiate them the ordinal number, {\it child id}, is stored in the meta information. The {\it ChildIds } is an array of child ids, that corresponds to the all visited map operations.
+Each map operation can produce multiple items from one. To differentiate them the ordinal number, {\it child id}, is stored in the meta information. The {\it ChildIds } is an array of child ids, that corresponds to the all visited map operations.
 
-The global time and child ids are enougth to uniquly identify data item within stream, if all processing is done without replays. If there are any replays happened during processing, multiple items with the same global time and child ids exists in the stream. There are multiple tombstones with the same global time and child ids can exist as well. They can take different paths in computational flow and travel within them with different speeds. 
+The global time and child ids are enough to uniquely identify data item within stream, if all processing is done without replays. If there are any replays happened during processing, multiple items with the same global time and child ids exist in the stream. Multiple tombstones with the same global time and child ids can exist as well. They can take different paths in computational flow and travel within them with different speeds. 
 
-Despite this fact, an invalid element and the tombstone for it are taking the same path, because they have the same payload and the balancing functions are determenistic. Moreover, the tombstome visits operations strictly after corresponding item, as links between operation are considered to be FIFO. To match tombstone with proper item there is {\it Trace} value stored in the meta-information.
+Despite this fact, an invalid element and the corresponding tombstone are go through the same path, because they have the same payload and the balancing functions are deterministic. Moreover, the tombstone visits operations strictly after corresponding item, as links between operation are expected to be FIFO. 
 
-Trace encodes the path item have traversed. Each phsical copy of each operation is assigned with unique random 64-bit identifier. The trace is a xor of the all operations' ids visited by item so far.
+To match tombstone with proper item there is {\it Trace} value stored in the meta-information. Trace encodes the path item have traversed. Each phsical copy of each operation is assigned with unique random 64-bit identifier. The trace is a xor of the all operations' ids visited by item so far.
 
 \[Trace := \bigoplus_{op \in \text{visited}} Id(op)\]
 
-Metas are compared lexicographically. That is to say, firstly global times are compared, then child ids, then traces. Notice, this order is in line with the \FlameStream's ordering model.
+Metas are compared lexicographically: firstly global times are compared, then child ids, then traces. Notice, this order is in line with the \FlameStream's ordering model.
 
 The figure~\ref{logical-graph-ops-figure} shows the topology of each operation and how it affects the trace of local times.
 
@@ -65,7 +65,7 @@ The structure of meta provides for tracking different relations between data ite
 \label{mininal-time}
 \subsection{Minimal time within stream}
 
-To release the item from the barrier we need to ensure that there are no in-flight invalidators. 
+To release the item from the barrier we need to ensure that there are no in-flight tombstones. 
 
 \newtheorem{minimal-time-claim}{Lemma}
 
@@ -75,7 +75,7 @@ To release the item from the barrier we need to ensure that there are no in-flig
 
 \begin{proof}
   {\it RETHINK}
-  Let {\it E} is in-flight element that invalidates {\it D}. According to the definition of invalidation order, {\it E} and {\it D} has the same global time {\it GT}, but the tombstone flag. We assumed that there are no in-flight element with the global time equal to {\it GT}. Contradiction.
+  Let {\it E} is in-flight element that invalidates {\it D}. According to the definition of invalidation order, {\it E} and {\it D} has the same global time {\it GT}, but {\it E} is assigned by the tombstone flag. We assumed that there are no in-flight element with the global time equal to {\it GT}. Contradiction.
 
   This implies that if the stream does not contain items with the global time less than or equal to {\it GT}, then all items which invalidate {\it D} had already arrived at the barrier. 
 \end{proof}
