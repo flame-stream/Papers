@@ -25,11 +25,11 @@ The optimistic collision management is done over collisions that already happen 
 
 We follow these principles in our system architecture:
 \begin{itemize}
-\item The set of basic operations should not require state handling from the user. At the same time, it should provide for specification of arbitrary processing workflows, similar to those found in Spark and Flink.
-\item State is the system internal term and is available to the developer as a simple coupling abstraction.
-\item The processing is divided into ticks. Each tick could use different execution graph. These graphs must be equivalent in terms of the resulting stream, but can layout the computations differently.
-\item The computation is deterministic: repeated processing of the same data should yield the same output.
-\item Exactly once execution: each output item is valid and get out of the system exactly once even in case of partial system failures.
+\item The set of basic operations should not require state handling from the user. At the same time, it should provide for specification of arbitrary processing workflows, similar to those found in Spark and Flink
+\item State is the system internal term and is available to the developer as a simple coupling abstraction
+\item The processing is divided into ticks. Each tick could use different execution graph. These graphs must be equivalent in terms of the resulting stream, but can layout the computations differently
+\item The computation is deterministic: repeated processing of the same data should yield the same output
+\item Exactly once execution: each output item is valid and get out of the system exactly once even in case of partial system failures
 \end{itemize}
 
 Enlisted principles are reflected in the following design. The computation to be performed with \FlameStream\ is specified in terms of predefined operations that are parametrized with user-defined procedures (collectively called {\em business logic} in the jargon of developers community). Each operation accepts a stream or several streams of data items, and produces one or several output streams. The whole computational workflow is described in terms of a graph. The nodes of the graph represent operations, while edges set up logical routing of data items between operations.
