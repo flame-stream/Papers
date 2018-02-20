@@ -9,7 +9,7 @@ Our key results are the following:
 \begin{itemize}
     \item Proposed computational model is stateless in terms of business-logic. On the other hand, the model is MapReduce complete. Therefore, our system can solve a wide range of analytical and algorithmic tasks
     \item The user of the system is able to influence the computational layout. Such approach is motivated by the fact that typically user has deeper knowledge of underlying data distribution
-    \item The collision management is implemented in optimistic manner. Unlike prevention-based collision management, optimistic approach does not impose overhead in the failure-free case
+    \item Out-of-order items are handled in optimistic manner. Unlike prevention-based methods, that usually apply buffering before each order-sensitive operations, optimistic approach does not impose overhead in the collision-free case
     \item The total overhead could be managed by optimization of the computational layout
     \item The computational process is deterministic up to the time assignment at fronts
     \item The adaptive micro-batching determines a moment when data items can be released from the stream without loosing exactly-once guarantee  

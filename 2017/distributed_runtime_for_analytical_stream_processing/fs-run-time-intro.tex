@@ -12,14 +12,14 @@ The goal of the \FlameStream\ is to address special case of the data processing:
 \begin {itemize}
 \item Support map/reduce transformations
 \item Provide ``exactly once'' semantics
-\item Be optimistic in terms of collision management
+\item Be optimistic in terms of handling out-of-order items
 \item Be able to optimize computational layout based on execution statistics
 \item Let the keys to get ready independently
 \end {itemize}
 
 These nice properties we trade for in-memory processing: the total state volume must be less than the total available memory of the compute units. We analyzed where the states are coming from and reshaped the operations to optimize the state management while remaining map/reduce complete. 
 
-The optimistic collision management is done over collisions that already happen and it is often more lightweight then prevention mechanisms. This property is proided by the ability of the system to replay certain fragments of the stream. These replays demand the computation process to be deterministic. As many other systems, we use the graph representation of the computation and dynamically optimize this graph using statistics available. 
+The optimistic management of out-of-order items is often more lightweight then prevention mechanisms, that are commonly based on buffering. This property is provided by the ability of the system to replay certain fragments of the stream. These replays demand the computation process to be deterministic. As many other systems, we use the graph representation of the computation and dynamically optimize this graph using statistics available. 
 
 ``Exactly once'' semantic is an arguable topic, we provide this guarantee inside our system but the overall contract could be violated because of source/sink limitations. To achieve this objective we introduce dynamic batching technique, based on Storm~\cite{apache:storm} ackers idea. The same mechanism allows us to get early key availability.
 
@@ -43,9 +43,9 @@ In this paper, we introduce the basis for an implementation of the \FlameStream\
 \begin {itemize}
 \item Definition of the MapReduce complete computational model without stateful user-defined procedures
 \item Development of the mechanisms that provide ``exactly once'' guarantees
-\item Introduce the optimistic collision management schema and demonstrate its performance competitiveness
+\item Introduce the optimistic  schema and demonstrate its performance competitiveness
 \end {itemize}
 
-The rest of the paper is structured as follows: in section~\ref{fs-model} we introduce the proposed model in details, optimistic collision management schema is described in section~\ref{fs-collision}, the implementation details of the prototype are discussed in~\ref{fs-impl} and its performance is demonstrated in~\ref{fs-experiments-section}, the main differences of our system from the existing are shown in~\ref{fs-related-section}, finally we discuss the results and our plans in~\ref{fs-conclusions}.
+The rest of the paper is structured as follows: in section~\ref{fs-model} we introduce the proposed model in details, optimistic schema for out-of-order items processing is described in section~\ref{fs-collision}, the implementation details of the prototype are discussed in~\ref{fs-impl} and its performance is demonstrated in~\ref{fs-experiments-section}, the main differences of our system from the existing are shown in~\ref{fs-related-section}, finally we discuss the results and our plans in~\ref{fs-conclusions}.
 
 \endinput
