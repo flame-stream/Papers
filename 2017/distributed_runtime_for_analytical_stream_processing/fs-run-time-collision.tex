@@ -76,7 +76,7 @@ To release the item from the barrier we need to ensure that there are no in-flig
 \begin{proof}
   Let $D_{tomb}$ be an in-flight tombstone for {\it D}. According to the definition of the tombstone item, $D_{tomb}$ and {\it D} has the same global time {\it GT}. We assumed that there are no in-flight element with the global time equal to {\it GT}. Contradiction.
   
-  It is worth to note, that new tombstones for {\it D} cannot be generated, because items with global time greater than {\it GT} cannot trigger replay that affects {\it D}.
+  New tombstones for {\it D} cannot be generated, because items with global time greater than {\it GT} cannot trigger replay that affects {\it D}.
 
   This implies that if the stream does not contain items with the global time less than or equal to {\it GT}, then all tombstones for {\it D} had already arrived at the barrier. 
 \end{proof}
