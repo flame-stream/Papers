@@ -1,7 +1,7 @@
 %%%% fs-run-time-data-flow  FlameStream data flow
 
 \label {fs-model}
-In this section we describe the structure of the proposed system. We will focus on operation set definition and computational layout. The guarantee mechanisms will be discussed in separate section~\ref{fs-collision}.
+In this section we describe the structure of the proposed system. We focus on operation set definition and computational layout. The guarantee mechanisms are discussed in separate section~\ref{fs-collision}.
 
 \subsection{Data flow}
 
@@ -28,9 +28,9 @@ Our model allows cycles in the graph while data flow graphs are commonly assumed
 ~\cite{Zaharia:2016:ASU:3013530.2934664, Carbone:2017:SMA:3137765.3137777}. Moreover, as we show further, there are cases when cycles are required, e.g. for MapReduce-based algorithms. 
 
 \subsection{Physical deployment and partitioning}
-Data flow graph is distributed among computational units. Each unit runs a process called {\it worker}, and each of the workers executes complete data flow graph. Every worker is assigned by an integer interval (hash range). Intervals are not intersected and cover the range of 32-bit signed integer.
+Data flow graph is distributed among computational units. Each unit runs a process called {\it worker}, and each of the workers executes complete data flow graph. An integer interval (hash range) is assigned to every worker. Intervals are not intersected and cover the range of 32-bit signed integer.
 
-Each operation input has a user-provided hash function called {\it balancing function}. This function is applied to the payload of data items and determines partitioning before each operation. After that, the data items are sent to the worker, which is responsible for the assosiated hash range. Therefore, load balancing explicitly depends on the user defined balancing functions. This allows the developer to determine optimal balancing which requires the knowledge of the payload distribution. Though the hash ranges assignment is optimized by the system according to the processing statisticts. Possible partitioning of this graph onto two nodes is shown in Figure~\ref{physical-graph-figure}. In this case the first partition is assigned by $[A, B)$ hash range, and the second is assigned by $[C, D)$. This example demonstrates the extreme case, when the data item is shuffled between partitions after each operation.
+Each operation input has a user-provided hash function called {\it balancing function}. This function is applied to the payload of data items and determines partitioning before each operation. After that, the data items are sent to the worker, which is responsible for the assosiated hash range. Therefore, load balancing explicitly depends on the user-defined balancing functions. This allows the developer to determine optimal balancing which requires the knowledge of the payload distribution. Though the hash ranges assignment is optimized by the system according to the processing statisticts. Possible partitioning of this graph onto two nodes is shown in Figure~\ref{physical-graph-figure}. In this case, the first partition has the $[A, B)$ hash range, and the second has the $[C, D)$. This example demonstrates the extreme case, when the data item is shuffled between partitions after each operation.
 
 \begin{figure}[htbp]
   \centering
@@ -52,7 +52,7 @@ As it was mentioned above, meta-information imposes an explicit total order on d
 
 Let {\it image} be an output data item of an operation and {\it preimage} is a corresponding input item. In this terms, the order of images is preserved, i.e. the order of images is the same as the order of preimages. Moreover, the image of the item follows its preimage but precedes the next item. If more than one item is generated, they are inserted in output stream sequentially. 
 
-The concept of ordering is shown in Figure~\ref{ordering}. Data item with payload $1'$ is the image of the item with payload $1$, according to operation $F$. The same is satisfied for items with payloads $2'$ and $2$. After union operation, the order between $1$ and $2$ is preserved. Furthermore, $1'$ is located right after $1$, and $2'$ is located right after $2$.  
+The concept of ordering is shown in Figure~\ref{ordering}. Data item with payload $1'$ is the image of the item with payload $1$, according to operation $F$. The same is for items with payloads $2'$ and $2$. After union operation, the order between $1$ and $2$ is preserved. Furthermore, $1'$ follows $1$, and $2'$ follows $2$.  
 
 \begin{figure}[htbp]
   \centering
@@ -71,11 +71,11 @@ The set of available operations is limited by the following list.
 
 \[Map(f: T \rightarrow List[V])\]
 
-{\bf Broadcast} replicates an input item to the specified number of operations or sinks.
+{\bf Broadcast} replicates an input item to the specified number of operations.
 
 {\bf Merge} operation is initialized with the specified number of input nodes. It sends all incoming data to the output.
 
-{\bf Grouping} has a {\it window size} parameter. Grouping stores input items into distinct buckets by the value of the input balancing function applied to the payload. When the next item arrives at the grouping, it is appended to the corresponding bucket according to the ordering model. Each time the grouping outputs window-sized {\it tuple item}, which consists of the most recent (in terms of the meta-information) items of this bucket. If the size of the bucket is less than the window, all items of the bucket are taken. Grouping is the only operation that maintains state. To prevent collisions user can define equivalence relation to ensure that items with distinct payloads are got in the distinct buckets.
+{\bf Grouping} has a {\it window size} parameter. Grouping stores input items into distinct buckets by the value of the input balancing function applied to the payload. When the next item arrives at the grouping, it is appended to the corresponding bucket. Each time the grouping outputs window-sized {\it tuple item}, which consists of the most recent (in terms of the meta-information) items of this bucket. If the size of the bucket is less than the window, all items of the bucket are taken. Grouping is the only operation that maintains state. To prevent collisions user can define equivalence relation to ensure that items with distinct payloads are got in the distinct buckets.
 
 \[Grouping(window: Integer)\]
 
@@ -117,7 +117,7 @@ It is important to mention, that there are no parameters for state-management. T
 \subsection{MapReduce transformations on stream}
 \label{fs-map-reduce}
 
-In this section, we demonstrate possible implementation of MapReduce-like transformation on a stream in order to show the soundness of our model. Map stage can be formulated in terms of our map operation. However, it is not obvious how to implement reduce stage, because it requires an explicit state handling. The algorithm~\ref{reduce} shows a generic reduce stage. The accumulator is an explicit state that should be maintained between subsequent iterations.
+In this section, we demonstrate possible implementation of MapReduce-like transformation on a stream in order to show the soundness of our model. Map stage can be formulated in terms of our map operation. However, it is not obvious how to implement reduce stage, because it requires an explicit state handling. The algorithm~\ref{reduce} shows a generic reduce stage. The {\it accumulator} is an explicit state that should be maintained between subsequent iterations.
 
 \begin{algorithm}
 \caption{Generic reduce stage}

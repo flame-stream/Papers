@@ -4,9 +4,9 @@
 
 A need to process huge amounts of data (e.g. Internet scale) was addressed by distributed data processing systems such as Google's MapReduce~\cite{Dean:2008:MSD:1327452.1327492} and Apache Hadoop~\cite{hadoop2009hadoop}. These systems are able to run in a massively parallel fashion on clusters consisting of thousands of commodity computational units. The main advantages of this approach are fault-tolerance and practically unlimited scalability.
 
-Several drawbacks of the initial models and architectures of this kind are deeply analyzed in~\cite{Doulkeridis:2014:SLA:2628707.2628782}. Many of these drawbacks were addressed in the next generation of scalable distributed data processing architectures, e.g. Asterix~\cite{Alsubaiee:2012:ASW:2331801.2331803}, Spark~\cite{Zaharia:2016:ASU:3013530.2934664}, and Flink~\cite{carbone2015apache}. Nevertheless, these systems still experience difficulties with handling out-of-order items and deterministic processing. Besides, they require implicit state handling by user.  
+Several drawbacks of the initial models and architectures of this kind are deeply analyzed in~\cite{Doulkeridis:2014:SLA:2628707.2628782}. Many of these drawbacks were addressed in the next generation of scalable distributed data processing architectures, e.g. Asterix~\cite{Alsubaiee:2012:ASW:2331801.2331803}, Spark~\cite{Zaharia:2016:ASU:3013530.2934664}, and Flink~\cite{carbone2015apache}. Nevertheless, these systems still experience difficulties with handling out-of-order items and deterministic processing. Besides, they require explicit state handling by user.  
 
-The goal of the \FlameStream\ is to address special case of the data processing: real-time stream-based computing. This case emerges in short-term personalization, real-time analytics and other problems demanding both low update latency and flexibility of the computational subsystem. Specifically, the objectives are:
+The goal of the \FlameStream\ is to address special case of the data processing: real-time stream-based computing. This case emerges in short-term personalization, real-time analytics and other problems demanding both low latency and flexibility of the computational subsystem. Specifically, the objectives are:
 
 \begin {itemize}
 \item Support map/reduce transformations
@@ -18,7 +18,9 @@ The goal of the \FlameStream\ is to address special case of the data processing:
 
 These nice properties we trade for in-memory processing: the total state volume must be less than the total available memory of the compute units. We analyzed where the states are coming from and reshaped the operations to optimize the state management while remaining map/reduce complete. 
 
-The optimistic management of out-of-order items is often more lightweight then prevention mechanisms, that are commonly based on buffering. This property is provided by the ability of the system to replay certain fragments of the stream. These replays demand the computation process to be deterministic. As many other systems, we use the graph representation of the computation and dynamically optimize this graph using statistics available. 
+The optimistic management of out-of-order items is often more lightweight then prevention mechanisms, that are commonly based on buffering. This property is provided by the ability of the system to replay certain fragments of the stream. These replays demand the computation process to be deterministic. 
+
+As many other systems, we use the graph representation of the computations and dynamically optimize this graph using statistics available. 
 
 ``Exactly once'' semantic is an arguable topic, we provide this guarantee inside our system but the overall contract could be violated because of source/sink limitations. To achieve this objective we introduce dynamic batching technique, based on Storm~\cite{apache:storm} ackers idea. The same mechanism allows us to get early key availability.
 

@@ -9,7 +9,7 @@ To eventually produce all correct tuples, we use an approach called {\it replay}
 
 Tombstones are ordinal data items but with a special flag in its meta-information. This flag means that tuples with such meta-information are invalid, and they should not leave the system. Tombstones have the same payloads as invalid items in order to go along the same path in the computational pipeline.
 
-The example of replay is shown in Figure~\ref{grouping-replaying}, The green item is out-of-order. The ouput consists of the new valid items, {\it (1, 2) and (2, 3)}, and the tombsone, {\it (1, 3)}.
+The example of replay is shown in Figure~\ref{grouping-replaying}, The green item is out-of-order. The output consists of the new valid items {\it (1, 2) and (2, 3)}, and the tombstone {\it (1, 3)} for the previously generated item.
 
 \begin{figure}[htbp]
   \centering
@@ -20,9 +20,9 @@ The example of replay is shown in Figure~\ref{grouping-replaying}, The green ite
 
 In the case of the right order of input items, there are no redundant items produced.
 
-The barrier filters out invalid elements, when corresponding tombstones arrive. It is partially flushed for some meta-information interval when there is a guarantee that there are no any out-of-order items and tombstones further up the stream for this range. The exact technique for providing such guarantee is defined further.
+The barrier filters out invalid elements, when corresponding tombstones arrive. It is partially flushed for some meta-information interval when there is a guarantee that there are no any out-of-order items and tombstones further up the stream for this range. The exact technique for providing such guarantee is defined in the next subsection.
 
-\subsubsection{Meta information}
+\subsection{Ordering model implementation}
 The meta-information of data item is a tuple of a {\it global time}, a {\it trace}, {\it child ids} and a tombstone flag.
 
 \[Meta := (GlobalTime, ChildIds[], Trace, IsTombstone)\]
@@ -31,15 +31,15 @@ Global time is assigned to data item once the item enters the system. It is a pa
 
 \[GlobalTime := (FrontTs, FrontId)\]
 
-Global times are compared by front timestamp if they coincide - by front id. It is important to notice, that we are not relying on any clock synchronization between nodes, but we require a strict monotonicity within the single front. The only implication of the clock skew is the system degradation in terms of latency: 1ms of the nodes clock difference appends 1 ms to minimal latency.
+Global times are compared by front timestamp if they coincide - by front id. It is important to notice, that we do not rely on any clock synchronization between nodes, but we require a strict monotonicity within the single front. The only implication of the clock skew is the system degradation in terms of latency: 1ms of the nodes clock difference appends 1 ms to minimal latency.
 
 Each map operation can produce multiple items from one. To differentiate them the ordinal number, {\it child id}, is stored in the meta information. The {\it ChildIds } is an array of child ids, that corresponds to the all visited map operations.
 
 The global time and child ids are enough to uniquely identify data item within stream, if all processing is done without replays. If there are any replays happened during processing, multiple items with the same global time and child ids exist in the stream. Multiple tombstones with the same global time and child ids can exist as well. They can take different paths in computational flow and travel within them with different speeds. 
 
-Despite this fact, an invalid element and the corresponding tombstone are go along the same path, because they have the same payload and the balancing functions are deterministic. Moreover, the tombstone visits operations strictly after corresponding item, as links between operation are expected to be FIFO. 
+Despite this fact, an invalid element and the corresponding tombstone go along the same path, because they have the same payload and the balancing functions are deterministic. Moreover, the tombstone visits operations strictly after corresponding item, as links between operation are expected to be FIFO. 
 
-To match tombstone with proper item there is {\it Trace} value stored in the meta-information. Trace encodes the path item have traversed. Each phsical copy of each operation is assigned with unique random 64-bit identifier. The trace is a xor of the all operations' ids visited by item so far.
+To match tombstone with proper item there is {\it Trace} value stored in the meta-information. Trace encodes the path that item have traversed. The unique random 64-bit identifier is assigned to each physical operation. The trace is a xor of the all operations' ids visited by item so far.
 
 \[Trace := \bigoplus_{op \in \text{visited}} Id(op)\]
 
@@ -59,7 +59,7 @@ The structure of meta provides for tracking different relations between data ite
 \begin{itemize}
   \item Items with same global time and common prefixes are produced from the same item
   \item Item with lower meta is generated earlier, at front or in the stream
-  \item If there are two items with the same global time and child ids, only one of them is the right one
+  \item If there are two items with the same global time and child ids, only one of them is the valid one
 \end{itemize}
 
 \label{mininal-time}
@@ -70,11 +70,11 @@ To release the item from the barrier we need to ensure that there are no in-flig
 \newtheorem{minimal-time-claim}{Lemma}
 
 \begin{minimal-time-claim}
-  If data item {\it D} has global time {\it GT} greater than the global time of the in-flight elements, then all tombstones for that item had already arrived at the barrier.
+  If data item {\it D} has global time {\it GT} greater than the global time of each in-flight element, then all tombstones for that item had already arrived at the barrier.
 \end{minimal-time-claim}
 
 \begin{proof}
-  Let $D_{tomb}$ is in-flight tombstone for {\it D}. According to the definition of the tombstone item, $D_{tomb}$ and {\it D} has the same global time {\it GT}. We assumed that there are no in-flight element with the global time equal to {\it GT}. Contradiction.
+  Let $D_{tomb}$ be an in-flight tombstone for {\it D}. According to the definition of the tombstone item, $D_{tomb}$ and {\it D} has the same global time {\it GT}. We assumed that there are no in-flight element with the global time equal to {\it GT}. Contradiction.
   
   It is worth to note, that new tombstones for {\it D} cannot be generated, because items with global time greater than {\it GT} cannot trigger replay that affects {\it D}.
 
