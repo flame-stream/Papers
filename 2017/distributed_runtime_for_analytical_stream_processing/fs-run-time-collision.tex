@@ -14,7 +14,7 @@ The example of replay is shown in Figure~\ref{grouping-replaying}, The green ite
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.48\textwidth]{pics/grouping-replaying}
-  \caption{The replay in groupig with window = w. The new items are generated on insertion}
+  \caption{The replay in groupig with window = 2. The new items are generated on insertion}
   \label {grouping-replaying}
 \end{figure}
 
@@ -45,7 +45,7 @@ To match tombstone with proper item there is {\it Trace} value stored in the met
 
 Metas are compared lexicographically: firstly global times are compared, then child ids, then traces. Notably, this order is in line with the \FlameStream's ordering model.
 
-The figure~\ref{logical-graph-ops-figure} shows the topology of each operation and how it affects the trace of local times.
+Figure~\ref{logical-graph-ops-figure} shows the topology of each operation and how it affects the meta. Grouping and merge operations update trace of data item by xoring initial trace with its physical id. Map and broadcast apply the same update, but also append child id for each output item.
 
 \begin{figure}[htbp]
   \centering
