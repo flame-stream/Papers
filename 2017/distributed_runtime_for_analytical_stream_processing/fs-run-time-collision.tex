@@ -43,7 +43,7 @@ To match tombstone with proper item there is {\it Trace} value stored in the met
 
 \[Trace := \bigoplus_{op \in \text{visited}} Id(op)\]
 
-Metas are compared lexicographically: firstly global times are compared, then child ids, then traces. Notice, this order is in line with the \FlameStream's ordering model.
+Metas are compared lexicographically: firstly global times are compared, then child ids, then traces. Notably, this order is in line with the \FlameStream's ordering model.
 
 The figure~\ref{logical-graph-ops-figure} shows the topology of each operation and how it affects the trace of local times.
 
@@ -78,7 +78,7 @@ To release the item from the barrier we need to ensure that there are no in-flig
   
   It is worth to note, that new tombstones for {\it D} cannot be generated, because items with global time greater than {\it GT} cannot trigger replay that affects {\it D}.
 
-  This implies that if the stream does not contain items with the global time less than or equal to {\it GT}, then all items which invalidate {\it D} had already arrived at the barrier. 
+  This implies that if the stream does not contain items with the global time less than or equal to {\it GT}, then all tombstones for {\it D} had already arrived at the barrier. 
 \end{proof}
 
 Therefore, to output an item from the barrier, we should ensure that there are no items in the stream with the global time less than or equal to the global time of this item.
@@ -100,4 +100,4 @@ The minimal time within a stream is the minimal global time with non-zero {\it X
 
 To ensure that no fronts are able to generate item with the certain timestamp, each front periodically sends to acker special message called {\it report}, which promises that front will not generate items with a timestamp lower than the reported. The value in the ack table can become a zero only after the corresponding report arrives.
 
-The proposed mechanism could be isolated by hash range. This change allows us making invalidation and releasing from barrier independent also known as early key availability.
+The proposed mechanism could be isolated by hash range. This change allows us releasing from barrier independent also known as early key availability.
