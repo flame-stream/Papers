@@ -1,7 +1,7 @@
 %%%% fs-run-time-data-flow  FlameStream data flow
 
 \label {fs-model}
-In this section we describe the computation structure of the proposed system. We will focus on operation set definition and computational layout. The guarantee mechanisms will be discussed in separate section~\ref{fs-collision}.
+In this section we describe the structure of the proposed system. We will focus on operation set definition and computational layout. The guarantee mechanisms will be discussed in separate section~\ref{fs-collision}.
 
 \subsection{Data flow}
 
@@ -20,7 +20,7 @@ Data payloads are got into the stream through {\it front} and got out through {\
   \label {stream}
 \end{figure}
 
-\subsection{Computaion flow}
+\subsection{Computational flow}
 
 The stream between front and barrier is handled by a directed data flow graph. Each node of the graph represents a single operation, which can have multiple inputs and outputs. Edges indicate the order of these operations. Data items are processed one-by-one in a "streaming" manner. Figure~\ref{logical-graph-figure} shows the example of data flow graph.
 
@@ -28,7 +28,7 @@ Our model allows cycles in the graph while data flow graphs are commonly assumed
 ~\cite{Zaharia:2016:ASU:3013530.2934664, Carbone:2017:SMA:3137765.3137777}. Moreover, as we show further, there are cases when cycles are required, e.g. for MapReduce-based algorithms. 
 
 \subsection{Physical deployment and partitioning}
-Data flow graph is distributed among computational units. Each computational unit runs a process called {\it worker}, and each of the workers executes complete data flow graph. Every worker is assigned by an integer interval (hash range). Intervals are not intersected and cover the range of 32-bit signed integer.
+Data flow graph is distributed among computational units. Each unit runs a process called {\it worker}, and each of the workers executes complete data flow graph. Every worker is assigned by an integer interval (hash range). Intervals are not intersected and cover the range of 32-bit signed integer.
 
 Each operation input has a user-provided hash function called {\it balancing function}. This function is applied to the payload of data items and determines partitioning before each operation. After that, the data items are sent to the worker, which is responsible for the assosiated hash range. Therefore, load balancing explicitly depends on the user defined balancing functions. This allows the developer to determine optimal balancing which requires the knowledge of the payload distribution. Though the hash ranges assignment is optimized by the system according to the processing statisticts. Possible partitioning of this graph onto two nodes is shown in Figure~\ref{physical-graph-figure}. In this case the first partition is assigned by $[A, B)$ hash range, and the second is assigned by $[C, D)$. This example demonstrates the extreme case, when the data item is shuffled between partitions after each operation.
 
@@ -105,7 +105,7 @@ There are two important properties of the grouping operation: the output tuple i
 User is able to set up the following parameters:
 
 \begin{enumerate}
-  \item{Computation flow}
+  \item{Computational flow}
   \item{Balancing functions of the inputs}
   \item{Map functions}
   \item{Grouping windows}
@@ -133,7 +133,7 @@ In this section, we demonstrate possible implementation of MapReduce-like transf
 \end{algorithmic}
 \end{algorithm}
 
-One possible way to implement reduce stage in our model is to make business logic state a part of the stream and work with it like with an ordinary data item. Figure~\ref{mapreduce-graph-figure} shows a generic graph for MapReduce computation. Map and reduce parts are highlighted with a dashed line.
+One possible way to implement reduce stage in our model is to make business logic state a part of the stream and work with it like with an ordinary data item. Figure~\ref{mapreduce-graph-figure} shows a generic graph for MapReduce transformation. Map and reduce parts are highlighted with a dashed line.
 
 \begin{figure}[htb]
   \centering

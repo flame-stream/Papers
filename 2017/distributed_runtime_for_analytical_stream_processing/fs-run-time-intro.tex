@@ -10,7 +10,7 @@ and Flink~\cite{carbone2015apache}.
 The goal of the \FlameStream\ is to address special case of the data processing: real-time stream-based computing. This case emerges in short-term personalization, real-time analytics and other problems demanding both low update latency and flexibility of the computational subsystem. Specifically, the objectives are:
 
 \begin {itemize}
-\item Support map/reduce computations
+\item Support map/reduce transformations
 \item Provide ``exactly once'' semantics
 \item Be optimistic in terms of collision management
 \item Be able to optimize computational layout based on execution statistics
@@ -27,14 +27,14 @@ We follow these principles in our system architecture:
 \begin{itemize}
 \item The set of basic operations should not require state handling from the user. At the same time, it should provide for specification of arbitrary processing workflows, similar to those found in Spark and Flink
 \item State is the system internal term and is available to the developer as a simple coupling abstraction
-\item The processing is divided into ticks. Each tick could use different execution graph. These graphs must be equivalent in terms of the resulting stream, but can layout the computations differently
+\item The processing is divided into ticks. Each tick could use different execution graph. These graphs must be equivalent in terms of the resulting stream, but can layout the operations differently
 \item The computation is deterministic: repeated processing of the same data should yield the same output
 \item Exactly once execution: each output item is valid and get out of the system exactly once even in case of partial system failures
 \end{itemize}
 
-Enlisted principles are reflected in the following design. The computation to be performed with \FlameStream\ is specified in terms of predefined operations that are parametrized with user-defined procedures (collectively called {\em business logic} in the jargon of developers community). Each operation accepts a stream or several streams of data items, and produces one or several output streams. The whole computational workflow is described in terms of a graph. The nodes of the graph represent operations, while edges set up logical routing of data items between operations.
+Enlisted principles are reflected in the following design. The computation to be performed with \FlameStream\ is specified in terms of predefined operations that are parametrized with user-defined procedures (collectively called {\em business logic} in the jargon of developers community). Each operation accepts a stream or several streams of data items, and produces one or several output streams. The whole workflow is described in terms of a graph. The nodes of the graph represent operations, while edges set up logical routing of data items between operations.
 
-The \FlameStream\ runtime organizes the data items to be processed by operations into queues. The logical workflow graph is replicated to every computational unit in the cluster for scalable execution. The data items are partitioned between computational units based on user-defined hashing. This allows user to influence the computational layout and balance the load if needed.
+The \FlameStream\ runtime organizes the data items to be processed by operations into queues. The logical workflow graph is replicated to every computational unit in the cluster for scalable execution. The data items are partitioned between units based on user-defined hashing. This allows user to influence the computational layout and balance the load if needed.
 
 \FlameStream\ provides the only operation that maintains state called {\it grouping}. Grouping does not require any state management by a user. Moreover, the structure of its state can be easily made persistent, which is useful for capturing snapshots.
 
@@ -46,6 +46,6 @@ In this paper, we introduce the basis for an implementation of the \FlameStream\
 \item Introduce the optimistic collision management schema and demonstrate its performance competitiveness
 \end {itemize}
 
-The rest of the paper is structured as follows: in section~\ref{fs-model} we introduce the proposed computational model in details, optimistic collision management schema is described in section~\ref{fs-collision}, the implementation details of the prototype are discussed in~\ref{fs-impl} and its performance is demonstrated in~\ref{fs-experiments-section}, the main differences of our system from the existing are shown in~\ref{fs-related-section}, finally we discuss the results and our plans in~\ref{fs-conclusions}.
+The rest of the paper is structured as follows: in section~\ref{fs-model} we introduce the proposed model in details, optimistic collision management schema is described in section~\ref{fs-collision}, the implementation details of the prototype are discussed in~\ref{fs-impl} and its performance is demonstrated in~\ref{fs-experiments-section}, the main differences of our system from the existing are shown in~\ref{fs-related-section}, finally we discuss the results and our plans in~\ref{fs-conclusions}.
 
 \endinput
