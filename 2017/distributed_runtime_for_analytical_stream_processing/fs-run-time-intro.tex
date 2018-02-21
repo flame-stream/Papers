@@ -2,6 +2,19 @@
 
 \label {fs-intro-seciton}
 
-A need to process huge amounts of data (e.g. Internet scale) was addressed by distributed data processing systems such as Google's MapReduce~\cite{Dean:2008:MSD:1327452.1327492} and Apache Hadoop~\cite{hadoop2009hadoop}. These systems are able to run in a massively parallel fashion on clusters consisting of thousands of commodity computational units. The main advantages of this approach are fault-tolerance and practically unlimited scalability.
+Nowadays, a lot of real-life applications use stream processing for network monitoring, financial analytics, training machine learning models, etc. State-of-the-art industrial stream processing systems, such as Flink \cite{carbone2015apache}, Samza \cite{Noghabi:2017:SSS:3137765.3137770}, Storm \cite{apache:storm}, Heron \cite{Kulkarni:2015:THS:2723372.2742788}, are able to provide low-latency and high-throughput in distributed environment for this kind of problems. However, users of these systems still experience a variety of difficulties during the process of their adaptation to custom tasks. Firstly, implementation of stateful operations requires explicit state handling. Such paradigm is flexible but can complicate business logic that in turn can lead to sophisticated bugs. Secondly, the current generation of stream processing systems requires high overhead for the property of determinism. This property implies that repeated processing of the same data yields the same output. Most of the modern systems assume that events are fed to the system with monotonically increasing timestamps or with minor inversions. Often, such timestamps can be assigned at system's entry. Nevertheless, even if input items arrive monotonically, they can be reordered because of the subsequent parallel and asynchronous processing that leads to losing the determinism property. The lack of determinism causes complex processes of workflow verification and limits the applicability of such systems.
 
-Several drawbacks of the initial models and architectures of this kind are deeply analyzed in~\cite{Doulkeridis:2014:SLA:2628707.2628782}. Many of these drawbacks were addressed in the next generation of scalable distributed data processing architectures, e.g. Asterix~\cite{Alsubaiee:2012:ASW:2331801.2331803}, Spark~\cite{Zaharia:2016:ASU:3013530.2934664}, and Flink~\cite{carbone2015apache}.
+In this work, we propose stream processing model called \FlameStream\ that addresses both suggested issues. We define {\it drifting state} technique in order to make computations stateless from the business-logic point of view. This approach is based on the idea that state can go along the stream as an ordinary element. 
+
+The deterministic processing is achieved in our model using strong ordering. The typical way to achieve in-order processing is to set up a special buffer in front of operation. This buffer collects all input items until some user-provided condition is satisfied. Then the contents of the buffer are sorted and fed to the operation. The main disadvantage of such technique is latency growth. This issue becomes even more significant if the processing pipeline contains several operations that require ordered input. We introduce an optimistic approach to handle out-of-order items to avoid this issue. Our evaluation demonstrates that our method has low overhead and can outperform alternative industrial solution under normal load conditions.
+
+Therefore, the contributions of this paper are the following:
+
+\begin {itemize}
+\item Definition of stateful computational model that does not require state handling from user
+\item Introduce the optimistic schema for deterministic processing and demonstrate its performance competitiveness
+\end {itemize}
+
+The rest of the paper is structured as follows: in section~\ref{fs-model} we introduce the basics of the proposed model, state management is detailed in section~\ref{fs-drifting}, optimistic schema for deterministic processing is described in section~\ref{fs-collision}, the implementation details of the prototype are discussed in~\ref{fs-impl} and its performance is demonstrated in~\ref{fs-experiments-section}, the main differences of our system from the existing are shown in~\ref{fs-related-section}, finally we discuss the results and our plans in~\ref{fs-conclusions}.
+
+\endinput

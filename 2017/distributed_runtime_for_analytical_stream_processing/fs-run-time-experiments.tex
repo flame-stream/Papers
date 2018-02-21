@@ -13,7 +13,7 @@ In the real-world, such scenario can be found in freshness-aware systems e.g. ne
     \item All the change records for the page leave the stream
 \end{enumerate}
 
-In \FlameStream\ this algorithm is implemented as the typical conversion of MapReduce transformation, which is shown in section~\ref{fs-map-reduce}. Inverted index structure plays the role of an accumulator, and the accumulator map produces the most recent changes of this structure if any.
+In \FlameStream\ this algorithm is implemented as the typical conversion of MapReduce transformation, which is shown in section~\ref{fs-drifting}. Inverted index structure plays the role of an accumulator, and the accumulator map produces the most recent changes of this structure if any.
 
 Our experiments were performed on the cluster of Amazon EC2 micro instances with 1GB RAM and 1 core CPU. We used 10000 Wikipedia articles as a dataset. 
 
