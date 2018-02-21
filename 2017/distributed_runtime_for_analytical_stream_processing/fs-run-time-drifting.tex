@@ -3,11 +3,14 @@
 
 \label{fs-drifting}
 
-Add bla-bla.
+Most of the computational pipelines requires state carring between consecutive data items. For example, moving average calculation requires partial sums to be stored. The state management in distributed systems is a complicated topic that requires delicate treatment~\ref{some-state-handling}.
+
+Some systems require that all state management is put in busines-logic: making state persistent, replication, ensuring state consistency etc. Others shifts some dificulties to the system's concern, e.g. Flink provides a state API that guarantees consistency in case of failures \ref{async-snapshots}. While it eases the heavy desteny of users, the core problem remains, there is a need to think about state.
+
+We propose a technique to simplify the development of stateful pipelines by eliminating the operation's state, while still remaining able to implement common transformations. We call this approach {\it drifting state}. The core idea is to make common state a part of the heterogeneous data flow. We demonstrate this idea using generic MapReduce-like transformation.
 
 \subsection{MapReduce transformation}
-
-TODO: rewrite. In this section, we demonstrate possible implementation of MapReduce-like transformation on a stream in order to show the soundness of our model. Map stage can be formulated in terms of our map operation. However, it is not obvious how to implement reduce stage, because it requires an explicit state handling. The algorithm~\ref{reduce} shows a generic reduce stage. The {\it accumulator} is an explicit state that should be maintained between subsequent iterations.
+Map stage can be formulated in terms of our map operation. However, it is not obvious how to implement reduce stage, because it requires an explicit state handling. The algorithm~\ref{reduce} shows a generic reduce stage. The {\it accumulator} is an explicit state that should be maintained between subsequent iterations.
 
 \begin{algorithm}
 \caption{Generic reduce stage}
