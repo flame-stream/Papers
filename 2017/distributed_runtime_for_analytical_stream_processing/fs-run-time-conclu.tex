@@ -2,15 +2,26 @@
 
 \label {fs-conclusions}
 
-
-
-In this paper, we presented stream processing model that provides for the following key features:
+We recognized two issues that are able to increase the complexity of stream processing workflows:
 
 \begin{itemize}
-    \item User is relieved from the direct working with the state. It is implemented using drifting state technique, which allows state to be the part of the stream in the form of an ordinal data item  
-    \item The computational process is deterministic up to the time assignment at fronts. Novel optimistic approach for handling out-of-order items is designed to achieve this property
+    \item Direct state handling can distract from the main task and is error-prone 
+    \item The lack of determinism implies very limited ability of verification
 \end{itemize}
 
-Both features are able to significantly simplify the development of stream processing workflows, because the system takes on itself all complexity related to state management and order constraints maintenance.
+In this paper, we presented stream processing model that resolves proposed issues. Particularly, it has the following properties:
 
-Besides, 
+\begin{itemize}
+    \item State management is implemented using drifting state technique, which allows state to be the part of the stream in the form of an ordinary data item. Such approach relieves user from the direct state handling
+    \item Novel optimistic approach for handling out-of-order items is designed to achieve determinism
+\end{itemize}
+
+Both features are able to significantly simplify the development of stream processing workflows, because the system takes on itself problems, that previously were addressed to a software developer.
+
+Besides, we implemented the prototype of the proposed model and deeply analyzed its performance and provided overhead. The series of benchmarks within distinct number of computational units demonstrated the scalability of our prototype. Additionally, we compared it with the industrial solution that does not resolve suggested problems. These experiments showed that our system can outperform the alternative under non-extreme load.
+
+In the future the following features are planned to be implemented:
+\begin{itemize}
+    \item Fault tolerance, and, hence, at least once and exactly once guarantees
+    \item Acker can be isolated by hash range. This change allows us releasing from barrier independently also known as early key availability
+\end{itemize}
