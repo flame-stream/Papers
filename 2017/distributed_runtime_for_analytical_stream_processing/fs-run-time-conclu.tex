@@ -2,22 +2,15 @@
 
 \label {fs-conclusions}
 
-We introduced the model and implementation of distributed scalable stream processing system. 
 
-Our key results are the following:
+
+In this paper, we presented stream processing model that provides for the following key features:
 
 \begin{itemize}
-    \item Proposed computational model is stateless in terms of business-logic. On the other hand, the model is MapReduce complete. Therefore, our system can solve a wide range of analytical and algorithmic tasks
-    \item The user of the system is able to influence the computational layout. Such approach is motivated by the fact that typically user has deeper knowledge of underlying data distribution
-    \item Out-of-order items are handled in optimistic manner. Unlike prevention-based methods, that usually apply buffering before each order-sensitive operations, optimistic approach does not impose overhead in the collision-free case
-    \item The total overhead could be managed by optimization of the computational layout
-    \item The computational process is deterministic up to the time assignment at fronts
-    \item The adaptive micro-batching determines a moment when data items can be released from the stream without loosing exactly-once guarantee  
-    \item It was shown that our system is able to outperform Apache Flink on the real-life computations
+    \item User is relieved from the direct working with the state. It is implemented using drifting state technique, which allows state to be the part of the stream in the form of an ordinal data item  
+    \item The computational process is deterministic up to the time assignment at fronts. Novel optimistic approach for handling out-of-order items is designed to achieve this property
 \end{itemize}
 
-In the future the following features are planned to be implemented:
-\begin{itemize}
-    \item Fault tolerance, and, hence, at least once and exactly once guarantees
-    \item Early key availability
-\end{itemize}
+Both features are able to significantly simplify the development of stream processing workflows, because the system takes on itself all complexity related to state management and order constraints maintenance.
+
+Besides, 
