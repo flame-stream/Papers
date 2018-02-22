@@ -6,7 +6,6 @@
 We evaluated the series of experiments in order to estimate the performance of our system's prototype. As a stream processing task, we apply the computation of inverted index for Wikipedia documents. The computation of inverted index is implemented in terms of MapReduce transformations. We start with page mapping into the pairs {\it (word; word positions within the page)}. After that, word positions are reduced by word into the single structure. We assume the output of the stream to be change records of the inverted index structure, i.e. each input page triggers the output of the corresponding updates. 
 
 Pairs {\it (word; word positions within the page)} must be ordered by page id and version before the update of inverted index state. Otherwise, it is possible to obtain the inconsistent index, if there are multiple versions of the same document.  
-
 In the real-world, such scenario can be found in freshness-aware systems e.g. news processing engines. By the notion of {\it latency} we assume the time between two events: 
 \begin{enumerate}
     \item Input page is taken into the stream
@@ -30,21 +29,14 @@ The relation between the number of workers, the delay between input documents an
   \label {overhead}
 \end{figure}
 
-The latencies of \FlameStream\ across multiple workers for the fixed document rate of 100 ms are shown in Figures~\ref{fs-index-median} and~\ref{fs-index-quantiles}. These figures demonstrate that latency is not significantly increased with the growth of the number of workers. 
+The latencies of \FlameStream\ across multiple workers for the fixed document rate of 70 ms are shown in Figure~\ref{fs-index-quantiles}. These figure demonstrate that latency is not significantly increased with the growth of the number of workers. 
 
 Therefore, the most important conclusions of these experiments are: the proposed method is scalable, the overhead could be optimized by system setup.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.48\textwidth]{pics/fs-index-median}
-  \caption{FlameStream median latencies}
-  \label {fs-index-median}
-\end{figure}
-
-\begin{figure}[htbp]
-  \centering
   \includegraphics[width=0.48\textwidth]{pics/fs-index-quantiles}
-  \caption{FlameStream tail latencies}
+  \caption{FlameStream latency distribution. Left - the whole distribution, right - tail latencies}
   \label {fs-index-quantiles}
 \end{figure}
 
