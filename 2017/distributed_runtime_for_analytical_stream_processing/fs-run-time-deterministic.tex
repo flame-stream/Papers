@@ -22,13 +22,13 @@ According to IOP approach, each operation must enforce the total order on output
 
 OOP is an approach that does not require order maintenance if it is not needed. In the case of ordering requirements, OOP buffers input items until a special condition is satisfied. This condition is supported by progress indicators such as punctuations \cite{Tucker:2003:EPS:776752.776780}, low watermarks \cite{Akidau:2013:MFS:2536222.2536229}, or heartbeats \cite{Srivastava:2004:FTM:1055558.1055596}. They go through the stream as ordinal items, but do not trigger business-logic of the operations. Each progress indicator carries meta-information and promises that there are no any elements with lesser meta-information. Therefore, indicators must be monotonic, but data items between two consecutive indicators can be arbitrarily reordered. Data sources periodically yield them.
 
-While these methods are commonly adapted in practice we find them to have unpredictible latencies and to have bursty loads. In our system we employ an optimistic approach for handling out-of-order items.
+While these methods are commonly adapted in practice we find them to have unpredictable latencies. In our system we employ an optimistic approach for handling out-of-order items.
 
 \subsection{Optimistic approach}
 
-Только группировка, поэтому все это добро
+As it was defined previously, only the grouping operation maintains a state and the state depends on the order of incoming items. Therefore, there is a need to enforce the right order to achieve deterministic processing.
 
-In order to implement ordering model, we accept the fact that grouping can produce incorrect tuples. However, we guarantee that all correct tuples are eventually produced. The correctness of tuple means that this tuple would be generated if the order assumption was satisfied. 
+As it was mentioned above, conservative methods for order enforcing can imply high latency overhead. Regarding our optimistic approach, we accept the fact that grouping can produce incorrect tuples. However, we guarantee that all correct tuples are eventually produced. The correctness of tuple means that this tuple would be generated if the order assumption was satisfied.
 
 To eventually produce all correct tuples, we use an approach called {\it replay}. If an item arrives the grouping operation, according to the meta-information order, nothing is replayed and only the most recent window is produced. However, if an item is out-of-order, it is inserted in the bucket at the correct location, and all tuples, which contain this element, are reproduced. Thereby, replay guarantees that eventually all correct tuples are generated. At the same time, for tuples, that has been produced but became invalid, {\it tombstones} are sent.
 
@@ -39,7 +39,7 @@ The example of replay is shown in Figure~\ref{grouping-replaying}, The green ite
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.48\textwidth]{pics/grouping-replaying}
-  \caption{The replay in groupig with window = 2. The new items are generated on insertion}
+  \caption{The replay in grouping with window = 2. The new items are generated on insertion}
   \label {grouping-replaying}
 \end{figure}
 
