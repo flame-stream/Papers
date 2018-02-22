@@ -3,16 +3,16 @@
 \label{fs-experiments-section}
 
 \subsection{Setup}
-We performed the series of experiments in order to estimate the performance of our system's prototype. As a stream processing task, we apply building an inverted index. This task is chosen, because it has the following properties:
+We performed the series of experiments to estimate the performance of our system's prototype. As a stream processing task, we apply building an inverted index. This task is chosen because it has the following properties:
 
 \begin{enumerate}
     \item Task requires stateful operations. It allows us to check the performance of the proposed stateful pipeline
     \item Computational flow of the task contains network shuffle that can violate the ordering constraints of some operations. Therefore, inverted index task can verify the performance of our optimistic approach
 \end{enumerate}
 
-It is worthwhile to mention that building inverted index can be considered as the halfway task between documents generation and searching. In the real-world, such scenario can be found in freshness-aware systems e.g. news processing engines.
+It is worthwhile to mention that building inverted index can be considered as the halfway task between documents generation and searching. In the real-world, such scenario can be found in freshness-aware systems, e.g., news processing engines.
 
-Building of inverted index is implemented in terms of MapReduce transformations. We start with page mapping into the pairs {\it (word; word positions within the page)}. After that, word positions are reduced by word into the single structure. We assume the output of the stream to be change records of the inverted index structure, i.e. each input page triggers the output of the corresponding updates. 
+Building of inverted index is implemented in terms of MapReduce transformations. We start with page mapping into the pairs {\it (word; word positions within the page)}. After that, word positions are reduced by word into the single structure. We assume the output of the stream to be change records of the inverted index structure, i.e., each input page triggers the output of the corresponding updates. 
 
 Pairs {\it (word; word positions within the page)} must be ordered by page id and version before the update of inverted index state. Otherwise, it is possible to obtain the inconsistent index, if there are multiple versions of the same document.  
  
@@ -28,11 +28,11 @@ By the notion of {\it latency} we assume the time between two events:
 Our experiments were performed on the cluster of Amazon EC2 micro instances with 1GB RAM and 1 core CPU. We used 10000 Wikipedia articles as a dataset. 
 
 \subsection{Overhead and scalability}
-The proposed method can bring an additional overhead. Thus, it is important to analyze the system's behaviour under different configurations.
+The proposed method can bring an additional overhead. Thus, it is essential to analyze the system's behavior under different configurations.
 
-We take the ratio of arrived at the barrier items count to the number of the valid items among them as a key metric for the estimation of the overhead of our prototype. This value clearly measures the extra cost of our approach.
+We take the ratio of arrived at the barrier items count to the number of the valid items among them as a key metric for the estimation of the overhead of our prototype. This value measures the extra cost of our approach.
 
-The relation between the number of workers, the average delay between input documents and the proposed ratio is shown in Figure~\ref{overhead}. As expected, the peak of the ratio is achieved when the document per second rate is high, and the number of the nodes is low. This behavior can be explained by the fact that a few workers cannot effectively deal with such intensive load. Nevertheless, the proportion of invalid items reduces with the increase of workers number. Under non-extreme load, the total overhead of the optimistic approach is under 10\% for all considered number of workers. These results confirm that the ratio does not increase with the growth of the number of nodes.
+The relation between the number of workers, the average delay between input documents and the proposed ratio is shown in Figure~\ref{overhead}. As expected, the peak of the ratio is achieved when the document per second rate is high, and the number of the nodes is low. This behavior can be explained by the fact that a few workers cannot effectively deal with such intensive load. Nevertheless, the proportion of invalid items reduces with the increase of workers number. Under not very high pressure, the total overhead of the optimistic approach is under 10\% for all considered number of workers. These results confirm that the ratio does not increase with the growth of the number of nodes.
 
 \begin{figure}[htbp]
   \centering
@@ -54,13 +54,13 @@ Therefore, the most important conclusions of these experiments are: the proposed
 
 \subsection{Comparison against Apache Flink}
 
-One of the most important goals of the experiments is the performance comparison with an industrial solution in terms of latency. Apache Flink is chosen for evaluation because it is state-of-the-art stream processing system that provides similar functionality and achieves low latency in the real-world scenarios~\cite{S7530084}. 
+One of the most important goals of the experiments is the performance comparison with an industrial solution regarding latency. Apache Flink is chosen for evaluation because it is state-of-the-art stream processing system that provides similar functionality and achieves low latency in the real-world scenarios~\cite{S7530084}. 
 
-For Apache Flink, the algorithm for building inverted index is adopted by the usage of {\it FlatMapFunction} for map step and stateful {\it RichMapFunction} for reduce step and for producing the change records. Order enforcing before reduce is implemented using custom {\it ProcessFunction} that buffers all input until corresponding low watermark is received. Watermarks are sent after each document. The network buffer timeout is set to 0 to minimize latency.
+For Apache Flink, the algorithm for building the inverted index is adopted by the usage of {\it FlatMapFunction} for map step and stateful {\it RichMapFunction} for reduce step and for producing the change records. Order enforcing before reduce is implemented using custom {\it ProcessFunction} that buffers all input until corresponding low watermark is received. Watermarks are sent after each document. The network buffer timeout is set to 0 to minimize latency.
 
-In this paper we compare $50^{th}$, $75^{th}$, $95^{th}$, and $99^{th}$ percentile of distributions, which clearly represent the performance from the perspective of the users' experience. Many papers report on averages, so these are included where it makes sense for comparison purposes. 
+In this paper, we compare $50^{th}$, $75^{th}$, $95^{th}$, and $99^{th}$ percentile of distributions, which clearly represent the performance from the perspective of the users' experience. Many papers report on averages, so these are included where it makes sense for comparison purposes. 
 
-The comparison in latencies between \FlameStream\ and Flink within 10 nodes and distinct document rates is shown in Figure~\ref{fs-index-quantiles}. These results indicate that \FlameStream\ starts to provide lower latency since a given load. This fact corresponds with Figure~\ref{overhead}, which demonstrates that the overhead under load of 25 rps is quite high. Furthermore, we can draw parallels between our approach and other optimistic approaches for collision management, e.g. method for concurrency control of transactions in~\cite{Cahill:2009:SIS:1620585.1620587}. In common case, they are able to outperform conservative techniques if contention is kept under some threshold.
+The comparison of latencies between \FlameStream\ and Flink within 10 nodes and distinct document rates is shown in Figure~\ref{fs-index-quantiles}. These results indicate that \FlameStream\ starts to provide lower latency since a given load. This fact corresponds with Figure~\ref{overhead}, which demonstrates that the overhead under the load of 25 rps is quite high. Furthermore, we can draw parallels between our approach and other optimistic approaches for collision management, e.g., the method for concurrency control of transactions that reviewed in~\cite{Cahill:2009:SIS:1620585.1620587}. In common case, they are able to outperform conservative techniques if contention is kept under some threshold.
 
 Firstly, the reason for better performance can be the fact that Flink starts to update index only after the buffer before reduce stage is flushed. In contrast, \FlameStream\ flushes its barrier right before data is sent to a user, according to its optimistic nature. Secondly, low watermarks go along the stream and can be delayed by long-running operations, while acker processes ack messages independently. It is confirmed by Figure~\ref{buffer-vs-barrier}, which shows the comparison between waiting time in Flink's buffer and \FlameStream's barrier. 
 

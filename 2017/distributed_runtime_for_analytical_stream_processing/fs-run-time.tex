@@ -78,6 +78,9 @@
 
 
 \begin{abstract}
+Current generation of scalable distributed systems designed for analytical processing of large volumes of data have addressed drawbacks of previous generation. However, several issues still remain. Particularly, existing solutions suppose that the state of operations should be managed directly by user, require significant overhead for handling out-of-out items, and do not provide for deterministic processing.
+
+\FlameStream\ is a low-latency oriented distributed framework for executing analytical workflows. We offer a computational model that relieves user of explicit state handling and corresponding distributed environment. Additionally, our model is deterministic and proposes an optimistic approach for handling out-of-order items. The experiments show that prototype of our system is able to outperform alternative industrial solutions.
 \end {abstract}
 
 \maketitle
