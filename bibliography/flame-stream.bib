@@ -902,3 +902,26 @@ Distributed stateful stream processing enables the deployment and execution of l
  address = {New York, NY, USA},
 } 
 Applications that require real-time processing of high-volume data steams are pushing the limits of traditional data processing infrastructures. These stream-based applications include market feed processing and electronic trading on Wall Street, network and infrastructure monitoring, fraud detection, and command and control in military environments. Furthermore, as the "sea change" caused by cheap micro-sensor technology takes hold, we expect to see everything of material significance on the planet get "sensor-tagged" and report its state or location in real time. This sensorization of the real world will lead to a "green field" of novel monitoring and control applications with high-volume and low-latency processing requirements.Recently, several technologies have emerged---including off-the-shelf stream processing engines---specifically to address the challenges of processing high-volume, real-time data without requiring the use of custom code. At the same time, some existing software technologies, such as main memory DBMSs and rule engines, are also being "repurposed" by marketing departments to address these applications.In this paper, we outline eight requirements that a system software should meet to excel at a variety of real-time stream processing applications. Our goal is to provide high-level guidance to information technologists so that they will know what to look for when evaluation alternative stream processing solutions. As such, this paper serves a purpose comparable to the requirements papers in relational DBMSs and on-line analytical processing. We also briefly review alternative system software technologies in the context of our requirements.The paper attempts to be vendor neutral, so no specific commercial products are mentioned.
+
+@article{Cahill:2009:SIS:1620585.1620587,
+ author = {Cahill, Michael J. and R\"{o}hm, Uwe and Fekete, Alan D.},
+ title = {Serializable Isolation for Snapshot Databases},
+ journal = {ACM Trans. Database Syst.},
+ issue_date = {December 2009},
+ volume = {34},
+ number = {4},
+ month = dec,
+ year = {2009},
+ issn = {0362-5915},
+ pages = {20:1--20:42},
+ articleno = {20},
+ numpages = {42},
+ url = {http://doi.acm.org/10.1145/1620585.1620587},
+ doi = {10.1145/1620585.1620587},
+ acmid = {1620587},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {Multiversion concurrency control, serializability, snapshot isolation},
+}
+Many popular database management systems implement a multiversion concurrency control algorithm called snapshot isolation rather than providing full serializability based on locking. There are well-known anomalies permitted by snapshot isolation that can lead to violations of data consistency by interleaving transactions that would maintain consistency if run serially. Until now, the only way to prevent these anomalies was to modify the applications by introducing explicit locking or artificial update conflicts, following careful analysis of conflicts between all pairs of transactions.
+This article describes a modification to the concurrency control algorithm of a database management system that automatically detects and prevents snapshot isolation anomalies at runtime for arbitrary applications, thus providing serializable isolation. The new algorithm preserves the properties that make snapshot isolation attractive, including that readers do not block writers and vice versa. An implementation of the algorithm in a relational DBMS is described, along with a benchmark and performance study, showing that the throughput approaches that of snapshot isolation in most cases.
