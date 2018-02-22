@@ -9,6 +9,12 @@ Some systems require that all state management is put in business-logic: making 
 
 We propose a technique to simplify the development of stateful pipelines by eliminating the operation's state, while still remaining able to implement common transformations. We call this approach {\it drifting state}. The core idea is to make common state a part of the heterogeneous data flow. We demonstrate this idea using generic MapReduce-like transformation.
 
+We have more complex graph that consists of simple operation. Each part can be implemented by cycle. State = cycle => We can have cycles. Добавили возможность в систему делять циклические операции. Не даг потому что стейт в потоке. МР приведен в качестве примера. Ребят смотрите у нас сложнее граф, это позволяет делать много всего, не обязательно в терминах МР, Глобальная блядь идея с огромнми возможностями. Более ложный граф более простых операций.
+
+Граф сложный, но пользователь может в других терминах говорить. Настоящий граф может состоять из более глобальных частей. Не бойся, юзверь, тебе будет не так больно.
+
+Уменьшить объем мап редьюсом.
+
 \subsection{MapReduce transformation}
 Map stage can be formulated in terms of our map operation. However, it is not obvious how to implement reduce stage, because it requires an explicit state handling. The algorithm~\ref{reduce} shows a generic reduce stage. The {\it accumulator} is an explicit state that should be maintained between subsequent iterations.
 
