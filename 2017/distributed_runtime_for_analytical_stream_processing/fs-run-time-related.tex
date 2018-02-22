@@ -17,6 +17,9 @@ To the best of our knowledge, FlameStream is the only open-source stream process
     \item Supports any MapReduce transformations 
 \end{itemize}
 
+{\bf Deterministic processing:}
+To the best of our knowledge, there are no any industrial stream processing systems that support determinism for arbitrary computational pipeline by design. In~\cite{Zacheilas:2017:MDS:3093742.3093921}, the mechanism to control the trade-off between determinism and low latency is proposed. However, such approach only provides for relaxing determinism properties in order to achieve low latency if needed.
+
 {\bf Handling out-of-order items:}
 Research works on this topic analyze different methods, but most of them are based on buffering.
 
@@ -25,9 +28,6 @@ K-slack technique can be applied, if network delay is predictable \cite{Babu:200
 IOP and OOP architectures are popular within research works and industrial applications. IOP architecture is applied in \cite{Cranor:2003:GSD:872757.872838, Abadi:2003:ANM:950481.950485, Arasu:2006:CCQ:1146461.1146463, Ding:2004:EWJ:1031171.1031189, Hammad:2003:SSW:1315451.1315478, Hammad:2005:OIE:1116877.1116897}. OOP approach is introduced in \cite{Li:2008:OPN:1453856.1453890} and it is widely used in the industrial stream processing systems, for instance, Flink \cite{carbone2015apache} and Millwheel \cite{Akidau:2013:MFS:2536222.2536229}. However, these methods require buffering all input items before each order-sensitive operation.
 
 Regarding optimistic techniques, there is less scientific and industrial activity. In \cite{Wei:2009:SSO:1559845.1559973} so-called {\it aggressive} approach is proposed. This approach uses the idea that operation can immediately output {\it insertion} message on the first input. After that, if that message became invalid, because of the arrival of out-of-order items, an operation can send {\it deletion} message to remove the previous result and then send new insertion item. The idea of deletion messages is very similar to our tombstone items. However, authors describe their idea in an abstract way and do not provide any techniques to apply their method for arbitrary operations. Yet another optimistic strategy is detailed in \cite{Li2011}. This method is probabilistic: it guarantees the right order with some probability. Besides, it supports only the limited number of query operators.
-
-{\bf Deterministic processing:}
-To the best of our knowledge, there are no any industrial stream processing systems that support determinism for arbitrary computational pipeline. In~\cite{Zacheilas:2017:MDS:3093742.3093921}, the mechanism to control the trade-off between determinism and low latency is proposed. However, such approach only provides for relaxing determinism properties in order to achieve low latency if needed.
 
 {\bf Tracking mechanisms within stream:}
 One important task that FlameStream faces is handling of the minimal global time. In Apache Storm~\cite{apache:storm} acker is used to eliminate item traces. Unlike Strom, we use acker to track the least global time of in-flight items and to detect package losses.

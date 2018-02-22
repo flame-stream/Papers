@@ -3,9 +3,9 @@
 
 \label{fs-drifting}
 
-Most of the computational pipelines requires state carring between consecutive data items. For example, moving average calculation requires partial sums to be stored. The state management in distributed systems is a complicated topic that requires delicate treatment~\cite{Carbone:2017:SMA:3137765.3137777}.
+Most of the computational pipelines requires state carrying between consecutive data items. For example, moving average calculation requires partial sums to be stored. The state management in distributed systems is a complicated topic that requires delicate treatment~\cite{Carbone:2017:SMA:3137765.3137777}.
 
-Some systems require that all state management is put in busines-logic: making state persistent, replication, ensuring state consistency etc. Others shifts some dificulties to the system's concern, e.g. Flink provides a state API that guarantees consistency in case of failures \cite{2015arXiv150608603C}. While it eases the heavy desteny of users, the core problem remains, there is a need to think about state.
+Some systems require that all state management is put in business-logic: making state persistent, replication, ensuring state consistency etc. Others shifts some difficulties to the system's concern, e.g. Flink provides a state API that guarantees consistency in case of failures \cite{2015arXiv150608603C}. While it eases the heavy destiny of users, the core problem remains, there is a need to think about state.
 
 We propose a technique to simplify the development of stateful pipelines by eliminating the operation's state, while still remaining able to implement common transformations. We call this approach {\it drifting state}. The core idea is to make common state a part of the heterogeneous data flow. We demonstrate this idea using generic MapReduce-like transformation.
 
@@ -62,6 +62,6 @@ The example of input/output items, which are generated/ transformed by the part 
 \begin{figure}[htb]
   \centering
   \includegraphics[scale=0.5]{pics/wordcount}
-  \caption{Part of the stream evalutaion for word counting}
+  \caption{Part of the pipeline for word counting}
   \label {word-count-figure}
 \end{figure}
