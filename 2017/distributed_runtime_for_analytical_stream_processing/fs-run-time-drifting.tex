@@ -3,20 +3,16 @@
 
 \label{fs-drifting}
 
-Most of the computational pipelines requires state carrying between consecutive data items. For example, moving average calculation requires partial sums to be stored. The state management in distributed systems is a complicated topic that requires delicate treatment~\cite{Carbone:2017:SMA:3137765.3137777}.
+Most of the computational pipelines requires state carrying between consecutive data items. For example, moving average calculation needs partial sums to be stored. The state management in distributed systems is a complicated topic that requires delicate treatment
 
-Some systems require that all state management is put in business-logic: making state persistent, replication, ensuring state consistency etc. Others shifts some difficulties to the system's concern, e.g. Flink provides a state API that guarantees consistency in case of failures \cite{2015arXiv150608603C}. While it eases the heavy destiny of users, the core problem remains, there is a need to think about state.
+Some systems forces that all state management is put in business-logic: making state persistent, replication, ensuring state consistency etc. Others shifts some difficulties to the system's concern, e.g. Flink provides a state API that guarantees consistency in case of failures \cite{Carbone:2017:SMA:3137765.3137777}. While it eases the heavy destiny of users, the core problem remains, there is a need to think about state.
 
-We propose a technique to simplify the development of stateful pipelines by eliminating the operation's state, while still remaining able to implement common transformations. We call this approach {\it drifting state}. The core idea is to make common state a part of the heterogeneous data flow. We demonstrate this idea using generic MapReduce-like transformation.
+We propose a technique to simplify the development of stateful pipelines by eliminating the operation's state, while still remaining able to implement common transformations. We call this approach {\it drifting state}. The core idea is to make common state a part of the heterogeneous data flow. In order to do state updates, the drifting state is grouped with new elements, combined togther, and the new state is emitted. The limited number of such combines can be implemented with DAG by repetition of grouping and map operations. As stream processing is aimed to infinite sequences, so there is a need for a cycle in the computational pipeline. The exact structure of such cycle is described in the following subsection with an example of typical stateful transformation, MapReduce.
 
-We have more complex graph that consists of simple operation. Each part can be implemented by cycle. State = cycle => We can have cycles. Добавили возможность в систему делять циклические операции. Не даг потому что стейт в потоке. МР приведен в качестве примера. Ребят смотрите у нас сложнее граф, это позволяет делать много всего, не обязательно в терминах МР, Глобальная блядь идея с огромнми возможностями. Более ложный граф более простых операций.
-
-Граф сложный, но пользователь может в других терминах говорить. Настоящий граф может состоять из более глобальных частей. Не бойся, юзверь, тебе будет не так больно.
-
-Уменьшить объем мап редьюсом.
+The complex graph with multiple stateful operators can be constructed using a cycle for each stateful component. It is important to say that such tangled structures may not be exposed to the end-user and can be hidden by some high-level API.
 
 \subsection{MapReduce transformation}
-Map stage can be formulated in terms of our map operation. However, it is not obvious how to implement reduce stage, because it requires an explicit state handling. The algorithm~\ref{reduce} shows a generic reduce stage. The {\it accumulator} is an explicit state that should be maintained between subsequent iterations.
+Map stage of MapReduce can be formulated directrly in terms of our map operation. The algorithm~\ref{reduce} shows a generic reduce stage. The {\it accumulator} is an explicit state that should be kept between subsequent iterations.
 
 \begin{algorithm}
 \caption{Generic reduce stage}
@@ -32,7 +28,7 @@ Map stage can be formulated in terms of our map operation. However, it is not ob
 \end{algorithmic}
 \end{algorithm}
 
-One possible way to implement reduce stage in our model is to make business logic state a part of the stream and work with it like with an ordinary data item. Figure~\ref{mapreduce-graph-figure} shows a generic graph for MapReduce transformation. Map and reduce parts are highlighted with a dashed line.
+To implement reduce stage we apply the drifting state idea and make the accumulator value a part of the stream. Figure~\ref{mapreduce-graph-figure} shows a generic graph for MapReduce transformation. Map and reduce parts are highlighted with a dashed line. 
 
 \begin{figure}[htb]
   \centering
