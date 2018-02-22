@@ -3,16 +3,27 @@
 \label{fs-experiments-section}
 
 \subsection{Setup}
-We performed the series of experiments in order to estimate the performance of our system's prototype. As a stream processing task, we apply building an inverted index for Wikipedia documents. The computation of inverted index is implemented in terms of MapReduce transformations. We start with page mapping into the pairs {\it (word; word positions within the page)}. After that, word positions are reduced by word into the single structure. We assume the output of the stream to be change records of the inverted index structure, i.e. each input page triggers the output of the corresponding updates. 
+We performed the series of experiments in order to estimate the performance of our system's prototype. As a stream processing task, we apply building an inverted index. This task is chosen, because it has the following properties:
+
+\begin{enumerate}
+    \item Task requires stateful operations. It allows us to check the performance of the proposed stateful pipeline
+    \item Computational flow of the task contains network shuffle that can violate the ordering constraints of some operations. Therefore, inverted index task can verify the performance of our optimistic approach
+\end{enumerate}
+
+It is worthwhile to mention that building inverted index can be considered as the halfway task between documents generation and searching. In the real-world, such scenario can be found in freshness-aware systems e.g. news processing engines.
+
+Building of inverted index is implemented in terms of MapReduce transformations. We start with page mapping into the pairs {\it (word; word positions within the page)}. After that, word positions are reduced by word into the single structure. We assume the output of the stream to be change records of the inverted index structure, i.e. each input page triggers the output of the corresponding updates. 
 
 Pairs {\it (word; word positions within the page)} must be ordered by page id and version before the update of inverted index state. Otherwise, it is possible to obtain the inconsistent index, if there are multiple versions of the same document.  
-In the real-world, such scenario can be found in freshness-aware systems e.g. news processing engines. By the notion of {\it latency} we assume the time between two events: 
+ 
+In \FlameStream\ this algorithm is implemented as the typical conversion of MapReduce transformation, which is shown in section~\ref{fs-drifting}. Inverted index structure plays the role of an accumulator, and the accumulator map produces the most recent changes of this structure if any.
+
+By the notion of {\it latency} we assume the time between two events: 
 \begin{enumerate}
     \item Input page is taken into the stream
     \item All the change records for the page leave the stream
 \end{enumerate}
 
-In \FlameStream\ this algorithm is implemented as the typical conversion of MapReduce transformation, which is shown in section~\ref{fs-drifting}. Inverted index structure plays the role of an accumulator, and the accumulator map produces the most recent changes of this structure if any.
 
 Our experiments were performed on the cluster of Amazon EC2 micro instances with 1GB RAM and 1 core CPU. We used 10000 Wikipedia articles as a dataset. 
 
@@ -48,7 +59,9 @@ For Apache Flink, the algorithm for inverted index computation is adopted by the
 
 In this paper we compare $50^{th}$, $75^{th}$, $95^{th}$, and $99^{th}$ percentile of distributions, which clearly represent the performance from the perspective of the users' experience. Many papers report on averages, so these are included where it makes sense for comparison purposes. 
 
-The comparison in latencies between \FlameStream\ and Flink within 10 nodes and distinct document rates is shown in Figure~\ref{fs-index-quantiles}. These results indicate that \FlameStream\ provides greater latency in the case of high load (25 rps). This fact corresponds with Figure~\ref{overhead}, which demonstrates that the overhead under such load is quite high. However, \FlameStream\ delivers better latency under less extreme loads. Firstly, the reason for such behavior can be the fact that Flink starts to update index only after the buffer before reduce stage is flushed. In contrast, \FlameStream\ flushes its barrier right before data is sent to a user, according to its optimistic nature. Secondly, low watermarks go along the stream and can be delayed by long-running operations, while acker processes ack messages independently. It is confirmed by Figure~\ref{buffer-vs-barrier}, which shows the comparison between waiting time in Flink's buffer and \FlameStream's barrier. 
+The comparison in latencies between \FlameStream\ and Flink within 10 nodes and distinct document rates is shown in Figure~\ref{fs-index-quantiles}. These results indicate that \FlameStream\ starts to provide lower latency since a given load. This fact corresponds with Figure~\ref{overhead}, which demonstrates that the overhead under load of 25 rps is quite high. Furthermore, we can draw parallels between our approach and other optimistic approaches for collision management, e.g. method for concurrency control of transactions in~\cite{Cahill:2009:SIS:1620585.1620587}. In common case, they are able to outperform conservative techniques if contention is kept under some threshold.
+
+Firstly, the reason for better performance can be the fact that Flink starts to update index only after the buffer before reduce stage is flushed. In contrast, \FlameStream\ flushes its barrier right before data is sent to a user, according to its optimistic nature. Secondly, low watermarks go along the stream and can be delayed by long-running operations, while acker processes ack messages independently. It is confirmed by Figure~\ref{buffer-vs-barrier}, which shows the comparison between waiting time in Flink's buffer and \FlameStream's barrier. 
 
 \begin{figure}[htbp]
   \centering
