@@ -9,16 +9,16 @@ We recognized two issues that are able to increase the complexity of stream proc
     \item The lack of determinism implies very limited ability of verification and composition
 \end{itemize}
 
-In this paper, we presented stream processing model that resolves proposed issues. Particularly, it has the following properties:
+In this paper, we presented stream processing model that resolves these problems. Particularly, it has the following properties:
 
 \begin{itemize}
     \item State management is implemented using drifting state technique, which allows state to be the part of the stream in the form of an ordinary data item. Such approach relieves user from the direct state handling
     \item Novel optimistic approach for handling out-of-order items is designed to achieve determinism
 \end{itemize}
 
-Both features are able to significantly simplify the development of stream processing workflows, because the system takes on itself problems, that previously were addressed to a software developer.
+Both features are able to significantly simplify the development of stream processing workflows, because the system addresses problems, that were previously forwaded to a software developer.
 
-Besides, we implemented the prototype of the proposed model and deeply analyzed its performance and imposed overhead. The series of benchmarks within different computational layouts demonstrated the scalability of our prototype. Additionally, we compared it with the industrial solution that does not resolve suggested problems. These experiments showed that our system can outperform the alternative under non-extreme load.
+Besides, we implemented the prototype of the proposed model and deeply analyzed its performance and imposed overhead. The series of benchmarks within different computational layouts demonstrated the scalability of the proposed framework. These experiments also showed that our system can outperform the alternative.
 
 In the future the following features are planned to be implemented:
 \begin{itemize}

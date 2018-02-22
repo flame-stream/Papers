@@ -80,18 +80,18 @@ The minimal time within a stream is the minimal global time with non-zero {\it X
 
 To ensure that no fronts are able to generate item with the certain timestamp, each front periodically sends to acker special message called {\it report}, which promises that front will not generate items with a timestamp lower than the reported. The value in the ack table can become a zero only after the corresponding report arrives.
 
-The proposed mechanism could be isolated by hash range. This change allows us releasing from barrier independent also known as early key availability.
+The proposed mechanism could be isolated by hash range. This change allows us releasing from barriers on different workers independently. This feature also known as early key availability.
 
 \subsection{Distributed runtime}
 
-\FlameStream\ is implemented in Java, using Akka framework for messaging and Apache Zookeeper for cluster management. The usage of Zookeeper mitigates the need for the dedicated master node.
+\FlameStream\ is implemented in Java, using Akka framework for messaging and Apache Zookeeper for cluster state management. The usage of Zookeeper mitigates the need for the dedicated master node.
 
 From a user perspective, system provides an API to define processing in the terms of {\it ticks}. Tick is represented by a time interval and the graph that handles data items, which relate to this interval, according to the global time. To deploy a tick, client writes it directly to Zookeeper, whereas Zookeeper notifies workers when the new tick appears. As soon as tick ends, system starts to execute the next one if any was submitted to Zookeeper. Otherwise, processing is completely stopped.
 
 The underlaying purpose of ticks is to provide an ability to periodically rebuild and redeploy graph. We keep in mind that the possible client of FlameStream is a system that automatically builds graph based on declarative language. However, such system cannot build it once and use without modifications, because the performance of graph execution can be influenced by current load, the performance of operations, metrics, etc. Hence, frequent graph redeployment is a crucial for our system. 
 
-\subsection{Guarantees}
-Currently, there are no fault tolerance mechanisms implemented in our prototype. However, it is worth to share few initial ideas on the topic.
+\subsection{Fault tolerance}
+Currently, fault tolerance mechanisms are not among the goals of our prototype. However, it is worth to share how they can be implemented in our system.
 
 Typically, distributed systems take into consideration the following types of failures:
 \begin{itemize}

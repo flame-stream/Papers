@@ -28,10 +28,11 @@ By the notion of {\it latency} we assume the time between two events:
 Our experiments were performed on the cluster of Amazon EC2 micro instances with 1GB RAM and 1 core CPU. We used 10000 Wikipedia articles as a dataset. 
 
 \subsection{Overhead and scalability}
+The proposed method can bring an additional overhead. Thus, it is important to analyze the system's behaviour under different configurations.
 
-We take the ratio of arrived at the barrier items count to the number of the valid items among them as a key metric for the estimation of the overhead of our prototype. This value clearly represents the extra cost of our approach.
+We take the ratio of arrived at the barrier items count to the number of the valid items among them as a key metric for the estimation of the overhead of our prototype. This value clearly measures the extra cost of our approach.
 
-The relation between the number of workers, the delay between input documents and the proposed ratio is shown in Figure~\ref{overhead}. As expected, the peak of the ratio is achieved when the document per second rate is high, and the number of the nodes is low. This behavior can be explained by the fact that a few workers cannot effectively deal with such intensive load. Nevertheless, the proportion of invalid items reduces with the increase of workers number. Under non-extreme load, the total overhead of the optimistic approach is under 10\% for all considered number of workers. These results confirm that the ratio does not increase with the growth of the number of nodes.
+The relation between the number of workers, the average delay between input documents and the proposed ratio is shown in Figure~\ref{overhead}. As expected, the peak of the ratio is achieved when the document per second rate is high, and the number of the nodes is low. This behavior can be explained by the fact that a few workers cannot effectively deal with such intensive load. Nevertheless, the proportion of invalid items reduces with the increase of workers number. Under non-extreme load, the total overhead of the optimistic approach is under 10\% for all considered number of workers. These results confirm that the ratio does not increase with the growth of the number of nodes.
 
 \begin{figure}[htbp]
   \centering
@@ -47,7 +48,7 @@ Therefore, the most important conclusions of these experiments are: the proposed
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.48\textwidth]{pics/fs-index-quantiles}
-  \caption{FlameStream latency distribution. Left - the whole distribution, right - tail latencies}
+  \caption{FlameStream latency distribution. Left - the whole distribution, right - high quantiles}
   \label {fs-index-quantiles}
 \end{figure}
 
@@ -55,7 +56,7 @@ Therefore, the most important conclusions of these experiments are: the proposed
 
 One of the most important goals of the experiments is the performance comparison with an industrial solution in terms of latency. Apache Flink is chosen for evaluation because it is state-of-the-art stream processing system that provides similar functionality and achieves low latency in the real-world scenarios~\cite{S7530084}. 
 
-For Apache Flink, the algorithm for inverted index computation is adopted by the usage of {\it FlatMapFunction} for map step and stateful {\it RichMapFunction} for reduce step and for producing the change records. Order enforcing before reduce is implemented using custom {\it ProcessFunction} that buffers all input until corresponding low watermark is received. Watermarks are sent after each document. The network buffer timeout is set to 0 to minimize latency.
+For Apache Flink, the algorithm for building inverted index is adopted by the usage of {\it FlatMapFunction} for map step and stateful {\it RichMapFunction} for reduce step and for producing the change records. Order enforcing before reduce is implemented using custom {\it ProcessFunction} that buffers all input until corresponding low watermark is received. Watermarks are sent after each document. The network buffer timeout is set to 0 to minimize latency.
 
 In this paper we compare $50^{th}$, $75^{th}$, $95^{th}$, and $99^{th}$ percentile of distributions, which clearly represent the performance from the perspective of the users' experience. Many papers report on averages, so these are included where it makes sense for comparison purposes. 
 
