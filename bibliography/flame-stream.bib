@@ -882,3 +882,23 @@ archivePrefix = "arXiv",
   adsnote = {Provided by the SAO/NASA Astrophysics Data System}
 }
 Distributed stateful stream processing enables the deployment and execution of large scale continuous computations in the cloud, targeting both low latency and high throughput. One of the most fundamental challenges of this paradigm is providing processing guarantees under potential failures. Existing approaches rely on periodic global state snapshots that can be used for failure recovery. Those approaches suffer from two main drawbacks. First, they often stall the overall computation which impacts ingestion. Second, they eagerly persist all records in transit along with the operation states which results in larger snapshots than required. In this work we propose Asynchronous Barrier Snapshotting (ABS), a lightweight algorithm suited for modern dataflow execution engines that minimises space requirements. ABS persists only operator states on acyclic execution topologies while keeping a minimal record log on cyclic dataflows. We implemented ABS on Apache Flink, a distributed analytics engine that supports stateful stream processing. Our evaluation shows that our algorithm does not have a heavy impact on the execution, maintaining linear scalability and performing well with frequent snapshots.
+
+@article{Stonebraker:2005:RRS:1107499.1107504,
+ author = {Stonebraker, Michael and \c{C}etintemel, U\v{g}ur and Zdonik, Stan},
+ title = {The 8 Requirements of Real-time Stream Processing},
+ journal = {SIGMOD Rec.},
+ issue_date = {December 2005},
+ volume = {34},
+ number = {4},
+ month = dec,
+ year = {2005},
+ issn = {0163-5808},
+ pages = {42--47},
+ numpages = {6},
+ url = {http://doi.acm.org/10.1145/1107499.1107504},
+ doi = {10.1145/1107499.1107504},
+ acmid = {1107504},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+} 
+Applications that require real-time processing of high-volume data steams are pushing the limits of traditional data processing infrastructures. These stream-based applications include market feed processing and electronic trading on Wall Street, network and infrastructure monitoring, fraud detection, and command and control in military environments. Furthermore, as the "sea change" caused by cheap micro-sensor technology takes hold, we expect to see everything of material significance on the planet get "sensor-tagged" and report its state or location in real time. This sensorization of the real world will lead to a "green field" of novel monitoring and control applications with high-volume and low-latency processing requirements.Recently, several technologies have emerged---including off-the-shelf stream processing engines---specifically to address the challenges of processing high-volume, real-time data without requiring the use of custom code. At the same time, some existing software technologies, such as main memory DBMSs and rule engines, are also being "repurposed" by marketing departments to address these applications.In this paper, we outline eight requirements that a system software should meet to excel at a variety of real-time stream processing applications. Our goal is to provide high-level guidance to information technologists so that they will know what to look for when evaluation alternative stream processing solutions. As such, this paper serves a purpose comparable to the requirements papers in relational DBMSs and on-line analytical processing. We also briefly review alternative system software technologies in the context of our requirements.The paper attempts to be vendor neutral, so no specific commercial products are mentioned.
