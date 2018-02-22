@@ -852,3 +852,19 @@ month={May},}
  keywords = {Complex Event Processing, Deterministic Processing, Stream Processing},
 }
 The problem of coping with the demands of determinism and meeting latency constraints is challenging in distributed data stream processing systems that have to process high volume data streams that arrive from different unsynchronized input sources. In order to deterministically process the streaming data, they need mechanisms that synchronize the order in which tuples are processed by the operators. On the other hand, achieving real-time response in such a system requires careful tradeoff between determinism and low latency performance. We build on a recently proposed approach to handle data exchange and synchronization in stream processing, namely ScaleGate, which comes with guarantees for determinism and an efficient lock-free implementation, enabling high scalability. Considering the challenge and trade-offs implied by real-time constraints, we propose a system which comprises (a) a novel data structure called Slack-ScaleGate (SSG), along with its algorithmic implementation; SSG enables us to guarantee the deterministic processing of tuples as long as they are able to meet their latency constraints, and (b) a method to dynamically tune the maximum amount of time that a tuple can wait in the SSG data-structure, relaxing the determinism guarantees when needed, in order to satisfy the latency constraints. Our detailed experimental evaluation using a traffic monitoring application deployed in the city of Dublin, illustrates the working and benefits of our approach.
+
+@ARTICLE{2015arXiv150608603C,
+   author = {{Carbone}, P. and {F{\'o}ra}, G. and {Ewen}, S. and {Haridi}, S. and 
+	{Tzoumas}, K.},
+    title = "{Lightweight Asynchronous Snapshots for Distributed Dataflows}",
+  journal = {ArXiv e-prints},
+archivePrefix = "arXiv",
+   eprint = {1506.08603},
+ primaryClass = "cs.DC",
+ keywords = {Computer Science - Distributed, Parallel, and Cluster Computing},
+     year = 2015,
+    month = jun,
+   adsurl = {http://adsabs.harvard.edu/abs/2015arXiv150608603C},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+Distributed stateful stream processing enables the deployment and execution of large scale continuous computations in the cloud, targeting both low latency and high throughput. One of the most fundamental challenges of this paradigm is providing processing guarantees under potential failures. Existing approaches rely on periodic global state snapshots that can be used for failure recovery. Those approaches suffer from two main drawbacks. First, they often stall the overall computation which impacts ingestion. Second, they eagerly persist all records in transit along with the operation states which results in larger snapshots than required. In this work we propose Asynchronous Barrier Snapshotting (ABS), a lightweight algorithm suited for modern dataflow execution engines that minimises space requirements. ABS persists only operator states on acyclic execution topologies while keeping a minimal record log on cyclic dataflows. We implemented ABS on Apache Flink, a distributed analytics engine that supports stateful stream processing. Our evaluation shows that our algorithm does not have a heavy impact on the execution, maintaining linear scalability and performing well with frequent snapshots.
