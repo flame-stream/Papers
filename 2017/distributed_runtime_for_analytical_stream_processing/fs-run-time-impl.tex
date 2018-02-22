@@ -90,7 +90,7 @@ From a user perspective, system provides an API to define processing in the term
 
 The underlaying purpose of ticks is to provide an ability to periodically rebuild and redeploy graph. We keep in mind that the possible client of FlameStream is a system that automatically builds graph based on declarative language. However, such system cannot build it once and use without modifications, because the performance of graph execution can be influenced by current load, the performance of operations, metrics, etc. Hence, frequent graph redeployment is a crucial for our system. 
 
-\subsection{Fault tolerance}
+\subsection{Guarantees}
 Currently, there are no fault tolerance mechanisms implemented in our prototype. However, it is worth to share few initial ideas on the topic.
 
 Typically, distributed systems take into consideration the following types of failures:

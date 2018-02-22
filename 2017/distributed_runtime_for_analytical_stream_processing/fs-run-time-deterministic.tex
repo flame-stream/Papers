@@ -1,12 +1,12 @@
 %%%% fs-run-mapreduce Optimistic collision management
 \label {fs-collision}
 
-Deterministc execution is a desired property of any kind of system. If there are multiple, often exponential, possible outcomes the developer needs to reason about which results are valid, which are equivalent and which are considered to be invalid.
+Deterministc execution is a desired property of any kind of system. If there are multiple possible outcomes, the developer needs to reason about which results are valid, which are equivalent and which are considered to be invalid.
 
 To reduce outputs to only one possible result we impose two restrictions on our model: 
 
 \begin{itemize}
-  \item We require {\it map} function to be pure: return value is only determined by its input values, without observable side effects~\ref{wiki}
+  \item We require {\it map} function to be pure: return value is only determined by its input values, without observable side effects
   \item We impose a strict ordering requirements on the {\it grouping}'s input
 \end{itemize}
 
