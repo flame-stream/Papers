@@ -32,12 +32,12 @@ The proposed method can bring an additional overhead. Thus, it is essential to a
 
 We take the ratio of arrived at the barrier items count to the number of the valid items among them as a key metric for the estimation of the overhead of our prototype. This value measures the extra cost of our approach.
 
-The relation between the number of workers, the average delay between input documents and the proposed ratio is shown in Figure~\ref{overhead}. As expected, the peak of the ratio is achieved when the document per second rate is high, and the number of the nodes is low. This behavior can be explained by the fact that a few workers cannot effectively deal with such intensive load. Nevertheless, the proportion of invalid items reduces with the increase of workers number. Under not very high pressure, the total overhead of the optimistic approach is under 10\% for all considered number of workers. These results confirm that the ratio does not increase with the growth of the number of nodes.
+The relation between the number of workers, the input document's average rate and the proposed ratio is shown in Figure~\ref{overhead}. As expected, the peak of the ratio is achieved when the document per second rate is high, and the number of the nodes is low. This behavior can be explained by the fact that a few workers cannot effectively deal with such intensive load. Nevertheless, the proportion of invalid items reduces with the increase of workers number. Under not very high pressure, the total overhead of the optimistic approach is under 10\% for all considered number of workers. These results confirm that the ratio does not increase with the growth of the number of nodes.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.5\textwidth]{pics/overhead}
-  \caption{The relation between the number of workers, the delay between input documents and the replay ratio}
+  \caption{The relation between the number of workers, the input document's average rate and the replay ratio}
   \label {overhead}
 \end{figure}
 
@@ -58,7 +58,7 @@ One of the most important goals of the experiments is the performance comparison
 
 For Apache Flink, the algorithm for building the inverted index is adopted by the usage of {\it FlatMapFunction} for map step and stateful {\it RichMapFunction} for reduce step and for producing the change records. Order enforcing before reduce is implemented using custom {\it ProcessFunction} that buffers all input until corresponding low watermark is received. Watermarks are sent after each document. The network buffer timeout is set to 0 to minimize latency.
 
-In this paper, we compare $50^{th}$, $75^{th}$, $95^{th}$, and $99^{th}$ percentile of distributions, which clearly represent the performance from the perspective of the users' experience. Many papers report on averages, so these are included where it makes sense for comparison purposes. 
+In this paper, we compare $50^{th}$, $75^{th}$, $95^{th}$, and $99^{th}$ percentile of distributions, which clearly represent the performance from the perspective of the users' experience.
 
 The comparison of latencies between \FlameStream\ and Flink within 10 nodes and distinct document rates is shown in Figure~\ref{fs-index-quantiles}. These results indicate that \FlameStream\ starts to provide lower latency since a given load. This fact corresponds with Figure~\ref{overhead}, which demonstrates that the overhead under the load of 25 rps is quite high. Furthermore, we can draw parallels between our approach and other optimistic approaches for collision management, e.g., the method for concurrency control of transactions that reviewed in~\cite{Cahill:2009:SIS:1620585.1620587}. In common case, they are able to outperform conservative techniques if contention is kept under some threshold.
 
