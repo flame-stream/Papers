@@ -11,14 +11,16 @@ The basic data flow abstraction is a {\it stream}. The stream is represented by 
 
 The payload is an arbitrary user-provided data. Meta is structured system-assigned information. The primary purpose of the meta-information is to impose the total order on data items. 
 
-Data payloads are got into the stream through {\it front} and got out through {\it barrier}. Particularly, front creates data items from input events by assigning them meta-information. Inside stream, data items can be dropped or their payloads and metas can be transformed. Barrier removes meta-information and outputs back pure payloads. A high-level view of a stream is shown in Figure~\ref{stream}.
+Data payloads are got into the stream through {\it front} and got out through {\it barrier}. Particularly, front creates data items from input events by assigning them meta-information. Inside stream, data items can be dropped or their payloads and metas can be transformed. Barrier removes meta-information and outputs back pure payloads. 
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.48\textwidth]{pics/stream}
-  \caption{The basic components of data flow}
-  \label {stream}
-\end{figure}
+% A high-level view of a stream is shown in Figure~\ref{stream}.
+
+% \begin{figure}[htbp]
+%   \centering
+%   \includegraphics[width=0.48\textwidth]{pics/stream}
+%   \caption{The basic components of data flow}
+%   \label {stream}
+% \end{figure}
 
 \subsection{Computational flow}
 
@@ -30,7 +32,8 @@ Our model allows cycles in the graph while data flow graphs are commonly assumed
 \subsection{Physical deployment and partitioning}
 Data flow graph is distributed among computational units. Each unit runs a process called {\it worker}, and each of the workers executes complete data flow graph. An integer interval (hash range) is assigned to every worker. Intervals are not intersected and cover the range of 32-bit signed integer.
 
-Each operation input has a user-provided hash function called {\it balancing function}. This function is applied to the payload of data items and determines partitioning before each operation. After that, the data items are sent to the worker, which is responsible for the associated hash range. Therefore, load balancing explicitly depends on the user-defined balancing functions. This allows the developer to determine optimal balancing which requires the knowledge of the payload distribution. The system optimizes the hash ranges assignment according to the processing statistics. Possible partitioning of this graph onto two nodes is shown in Figure~\ref{physical-graph-figure}. In this case, the first partition has the $[A, B)$ hash range and the second has the $[C, D)$. This example demonstrates the extreme case when the data item is shuffled between partitions after each operation.
+Each operation input has a user-provided hash function called {\it balancing function}. This function is applied to the payload of data items and determines partitioning before each operation. After that, the data items are sent to the worker, which is responsible for the associated hash range. Therefore, load balancing explicitly depends on the user-defined balancing functions. This allows the developer to determine optimal balancing which requires the knowledge of the payload distribution. The system optimizes the hash ranges assignment according to the processing statistics. 
+% Possible partitioning of this graph onto two nodes is shown in Figure~\ref{physical-graph-figure}. In this case, the first partition has the $[A, B)$ hash range and the second has the $[C, D)$. This example demonstrates the extreme case when the data item is shuffled between partitions after each operation.
 
 \begin{figure}[htbp]
   \centering
@@ -39,12 +42,12 @@ Each operation input has a user-provided hash function called {\it balancing fun
   \label {logical-graph-figure}
 \end{figure}
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.48\textwidth]{pics/physical-graph}
-  \caption{Possible partitioning of the data flow graph}
-  \label {physical-graph-figure}
-\end{figure}
+% \begin{figure}[htbp]
+%   \centering
+%   \includegraphics[width=0.48\textwidth]{pics/physical-graph}
+%   \caption{Possible partitioning of the data flow graph}
+%   \label {physical-graph-figure}
+% \end{figure}
 
 \subsection{Ordering model}
 
