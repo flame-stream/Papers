@@ -1,7 +1,7 @@
 %%%% fs-run-time-data-flow  FlameStream data flow
 
 \label {fs-model}
-In this section we describe the outline of the proposed system. We focus on the core concepts and definitions. Such model is in line with common stream processing systems but has some differences: the strict ordering model and reduced operation set.
+In this section we outline the model of our system. We focus on the core concepts and definitions. Such model is in line with common stream processing systems but has some differences: the strict ordering model and reduced operation set.
 
 \subsection{Data flow}
 
@@ -63,7 +63,7 @@ We assume that input items of the operations are strictly ordered.
 
 \subsection{Operations}
 
-The set of available operations is limited by the following list.
+The list of available operations includes:
 
 {\bf Map} applies a user-defined function to the payload of an input item. This function returns a sequence of data items with transformed payloads. An output sequence can be empty.
 
