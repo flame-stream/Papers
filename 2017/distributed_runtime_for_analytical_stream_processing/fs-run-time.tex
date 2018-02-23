@@ -78,9 +78,7 @@
 
 
 \begin{abstract}
-Current generation of scalable distributed systems designed for analytical processing of large volumes of data have addressed drawbacks of previous generation. However, several issues still remain. Particularly, existing solutions suppose that the state of operations should be managed directly by user, require significant overhead for handling out-of-out items, and do not provide for deterministic processing.
-
-\FlameStream\ is a low-latency oriented distributed framework for executing analytical workflows. We offer a computational model that relieves user of explicit state handling and corresponding distributed environment. Additionally, our model is deterministic and proposes an optimistic approach for handling out-of-order items. The experiments show that prototype of our system is able to outperform alternative industrial solutions.
+In recent years, there has been a growth in research and industrial solutions in the field of distributed stream processing. However, even state-of-the-art stream processing systems are inconvenient to work with in some ways. Firstly, existing solutions suppose that the state of operations should be managed directly by a user, and that can be confusingly for inexperienced users of analytical processing systems. Secondly, these systems do not provide for deterministic processing by default. Furthermore, the most common approach for this feature is buffering. Its main problem is the extra cost for blocking before each order-sensitive operation. The goal of this paper is to propose a model, which addresses both recognized issues. On the one hand, our model stateless from the business logic perspective. Such behavior is obtained by the technique that allows a state to be a part of a stream. On the other hand, it is deterministic by design. We introduce an optimistic method that avoids buffering before each operation to achieve determinism with low overhead. The experiments show that prototype of our system requires a low extra cost for supporting proposed features and is able to outperform alternative industrial solutions in certain conditions.
 \end {abstract}
 
 \maketitle
