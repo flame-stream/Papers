@@ -76,7 +76,7 @@ The comparison of latencies between \FlameStream\ and Flink within 10 nodes and 
   \label {buffer-vs-barrier}
 \end{figure}
 
-However, the optimistic approach is not applicable to all cases. Figure~\ref{fs-index-quantiles-5} shows the comparison of latencies between \FlameStream\ and Flink within 5 nodes and distinct document rates. Flink outperforms \FlameStream\ under extreme load. Such behavior follows from the fact that \FlameStream\ provides significant overhead under very high pressure within a few computational units. This result evidently corresponds with measurements of the overhead in Figure~\ref{overhead}. Nevertheless, it should be noted that \FlameStream\ demonstrates better latency under non-extreme load.
+However, there are conditions, which are not suitable for the optimistic approach. Figure~\ref{fs-index-quantiles-5} shows the comparison of latencies between \FlameStream\ and Flink within 5 nodes and distinct document rates. Flink outperforms \FlameStream\ under extreme load. Such behavior follows from the fact that \FlameStream\ provides significant overhead under very high pressure within a few computational units. This result evidently corresponds with measurements of the overhead in Figure~\ref{overhead}. Nevertheless, it should be noted that \FlameStream\ demonstrates better latency under non-extreme load.
 
 \begin{figure}[htbp]
   \centering
@@ -85,4 +85,4 @@ However, the optimistic approach is not applicable to all cases. Figure~\ref{fs-
   \label {fs-index-quantiles-5}
 \end{figure}
 
-Thus, Flink can be more appropriate if there is a need to optimize computational resources, but the demands on latency are not very strict, or determinism is not required. \FlameStream\ is more relevant for cases when low latency and determinism are strict requirements, but an allocation of additional resources is not a problem.  
+Thus, Flink can be more appropriate if there is a need to optimize computational resources under a fixed load, but the demands on latency are not very strict, or determinism is not required. \FlameStream\ is more relevant for cases when low latency and determinism are strict requirements, but an allocation of additional resources is not a problem.  
