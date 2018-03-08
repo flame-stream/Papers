@@ -1,0 +1,191 @@
+\documentclass[sigconf]{acmart}
+% packages should be added as needed 
+\usepackage{graphicx}
+
+\usepackage{algorithm} % for algorithms
+\usepackage{algpseudocode}
+
+\usepackage{booktabs} % For formal tables
+
+\usepackage{amsthm} % For claims
+\theoremstyle{remark}
+
+\settopmatter{printacmref=false, printccs=false, printfolios=false}
+\pagestyle{plain} % removes running headers
+
+\newcommand{\PicScale}{0.5}
+\newcommand {\FlameStream} {FlameStream}
+\begin{document}
+
+\title {Deterministic stateful computational model for consistent distributed stream processing}
+% \titlenote{Produces the permission block, and   copyright information}
+%\subtitle{Extended Abstract}
+% \subtitlenote{The full version of the author's guide is available as   \texttt{acmart.pdf} document}
+
+% \author {Igor E. Kuralenok \and Nikita Marshalkin \and Artem Trofimov \and Boris Novikov}
+
+\author{Igor E. Kuralenok}
+%\authornote{Dr.~Trovato insisted his name be first.}
+%\orcid{1234-5678-9012}
+\affiliation{%
+  \institution{JetBrains Research}
+%streetaddress{P.O. Box 1212}
+  \city{St. Petersburg} 
+%  \state{Ohio} 
+%  \postcode{190000}
+  \country{Russia}
+}
+\email{ikuralenok@gmail.com}
+
+\author{Artem Trofimov}
+\affiliation{%
+  \institution{JetBrains Research}
+  %streetaddress{P.O. Box 1212}
+  \city{St. Petersburg} 
+  \country{Russia}
+}
+\email{trofimov9artem@gmail.com}
+
+\author{Nikita Marshalkin}
+\affiliation{%
+\institution{JetBrains Research}
+  %streetaddress{P.O. Box 1212}
+  \city{St. Petersburg} 
+  \country{Russia}
+}
+\email{marnikitta@gmail.com}
+
+\author{Boris Novikov}
+\affiliation{%
+\institution{JetBrains Research}
+  %streetaddress{P.O. Box 1212}
+  \city{St. Petersburg} 
+  \country{Russia}
+}
+\email{borisnov@acm.org}
+
+
+%\author{Artem Trofimov, Nikita Marshalkin, Boris Novikov}
+%  \authornote{}
+%\affiliation{%
+%  \institution{St. Petersburg state University}
+%  \streetaddress{Universitetskaya nab. 7/9}
+%  \city{St. Petersburg} 
+%  \postcode{199034}
+% \country{Russia}
+%}
+%\email{trofimov9artem@gmail.com, marnikitta@gmail.com, borisnov@acm.org}
+
+
+\begin{abstract}
+\end {abstract}
+
+\maketitle
+
+\section {Introduction}
+Distributed batch processing systems, such as Google's MapReduce~\cite{Dean:2008:MSD:1327452.1327492} and Apache Hadoop~\cite{hadoop2009hadoop}, addresses a need to process huge amounts of data (e.g. Internet scale). The key idea behind them is to process data blocks that have already been stored over a period of time. These systems are able to run in a massively parallel fashion on clusters consisting of thousands of commodity computational units. The main advantages of this approach are consistency, fault-recovery, and practically unlimited scalability.
+
+However, there are a lot of scenarios where data is most valuable at its time of arrival, for example, news processing, financial analysis, network monitoring, etc. Therefore, there is a need for systems that provide low latency between event occurrence and its processing under a fixed load. Micro-batching technique, that is used in Apache Spark~\cite{Zaharia:2012:DSE:2342763.2342773} and in Storm Trident~\cite{apache:storm:trident}, inherits strong consistency properties from batch systems. It is possible to achieve the latency of several second using such systems, but it is still too high for many applications~\cite{?}.
+
+State-of-the-art industrial distributed stream processing systems, such as Flink \cite{carbone2015apache}, Samza \cite{Noghabi:2017:SSS:3137765.3137770}, Storm \cite{apache:storm}, address this issue by providing {\it record-at-a-time} processing model. According to this model, computational units receive each record, update internal state if any, and send out new records. 
+
+The main difficulty that stream processing systems experience is providing strong consistency. Regarding stream processing, the strongest consistency semantics is {\it exactly once}. Exactly once semantics requires that every input data item is processed only once, with or without the existence of failures. Although, such behavior is natural for batch processing systems, it is challenging for streaming systems. For instance, Samza and Storm do not support such guarantee at all, while Flink requires a complex protocol that can lead to significant latency increasing.
+
+The key problem here is that unlike batch processing, stream processing is inherently more non-deterministic. Particularly, there is no guarantee that the messages will be processed in the same order between any two runs. Therefore, it can be unclear how to determine which elements have been already released from the system after recovery to avoid duplicates. Finding the right resuming input point can be tricky as well. Additionally, if the states of operations are replicated, there is a need to determine that they are in a consistent state at the moment of taking the snapshot. 
+
+In this paper we propose a stateful stream processing model that hides non-deterministic nature of stream processing. We show that this model can be efficiently implemented in a distributed environment and provide consistency maintaining.
+
+The deterministic processing is achieved in our model using strong ordering. The typical way to perform in-order processing is to set up a special buffer in front of operation~\cite{Li:2008:OPN:1453856.1453890}. This buffer collects all input items until some user-provided condition is satisfied. Then the contents of the buffer are sorted and fed to the operation. The main disadvantage of such technique is latency growth~\cite{Zacheilas:2017:MDS:3093742.3093921}. This issue becomes even more significant if the processing pipeline contains several operations that require ordered input. We introduce an optimistic approach to handle out-of-order items to avoid this issue. Our evaluation demonstrates that our method has low overhead and can outperform alternative industrial solution under normal load conditions.
+
+The proposed deterministic model allows us to uniquely identify which data items have already left the system, from which point computations should start after recovery, and which version of the operations' state should be loaded. Because of these features, exactly once semantics is very cheap in terms of performance, that is shown in our experiments.
+
+Therefore, the contributions of this paper are the following:
+
+\begin {itemize}
+\item Definition of deterministic stateful streaming computational model 
+\item Introduce the optimistic schema to implement the proposed model and demonstrate its performance competitiveness
+\item Show how strong consistency properties can be achieved within the proposed model and demonstrate its low overhead
+\end {itemize}
+
+The rest of the paper is structured as follows: ...
+
+\section{Preliminaries}
+Stream processing system is considered as
+a shared-nothing distributed runtime.
+
+\subsection{Data flow}
+Define stream and data items.
+
+\subsection{Computation flow}
+Flow is represented in the form of a graph.
+
+\subsection{Deployment and partitioning}
+How partitioning is usually implemented in stream processing systems.
+
+\subsection{Operations}
+There are stateless and stateful operations.
+
+\subsection{Guarantees}
+Define at most once, at least once, and exactly once guarantees. Describe why careful state management is a crucial task for providing these guarantees.
+
+\section {Drifting state model}
+This section contains the high-level view of our model without implementation details.
+
+\subsection{Ordering assumptions}
+The main idea: we define a total ordering on items to achieve determinism.
+
+\subsection{Physical deployment}
+The graph is deployed on each node.
+
+\subsection{Supported operations}
+Map/grouping and their properties.
+
+\subsection{Stateful transformations}
+Pipeline for any stateful transformation using only map and grouping. 
+
+\section {Implementation}
+In this section we describe how proposed model can be efficiently implemented.
+
+\subsection{Optimistic approach}
+We handle out-of-order items optimistically.
+
+\subsection{Ordering model}
+The structure of meta-information.
+
+\subsection{Minimal time within stream}
+Define acker and its logic.
+
+\section{Guarantees}
+
+All existing industrial stream processing systems provide high overhead for end-to-end guarantees, especially for exactly once. Our deterministic model is able to naturally provide such guarantees.
+
+Define requirements on fronts and rears.
+
+\subsection{At most once}
+Processing without replay.
+
+\subsection{At least once}
+Loosing of barrier state do not influence on guarantees.
+
+\subsection{Exactly once}
+Releasing items form the system and saving barrier state must be done atomically.
+
+\section {Experiments}
+
+\subsection{Overhead and scalability}
+Show that our model is scalable and provides low overhead.
+
+\subsection{Comparison against Apache Flink}
+Show that our prototype outperforms Flink with at least once/exactly once mode on. Explain such behavior.
+
+\section {Related work}
+
+\section {Conclusion and future work}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{../../bibliography/flame-stream}
+\end {document}
+
+
+\endinput
+you can put whatever here
