@@ -19,14 +19,15 @@
 
 \title {Consistency guarantees for deterministic stateful stream processing}
 
-\author{Igor E. Kuralenok, Artem Trofimov, Nikita Marshalkin, \and Boris Novikov}
+\author{Igor E. Kuralenok \and Artem Trofimov \and Nikita Marshalkin \and Boris Novikov}
 \institute{JetBrains Research, St. Petersburg, Russia}
-\email{ikuralenok@gmail.com, trofimov9artem@gmail.com, marnikitta@gmail.com, borisnov@acm.org}
+
+\maketitle
+
+\email{\{ikuralenok, trofimov9artem, marnikitta\}@gmail.com, borisnov@acm.org}
 
 \begin{abstract}
 \end{abstract}
-
-\maketitle
 
 \section {Introduction}
 Distributed batch processing systems, such as Google's MapReduce~\cite{Dean:2008:MSD:1327452.1327492} and Apache Hadoop~\cite{hadoop2009hadoop}, addresses a need to process huge amounts of data (e.g. Internet scale). The key idea behind them is to process data blocks that have already been stored over a period of time. These systems are able to run in a massively parallel fashion on clusters consisting of thousands of commodity computational units. The main advantages of this approach are consistency, fault-recovery, and practically unlimited scalability.
