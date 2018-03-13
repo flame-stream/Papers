@@ -1,4 +1,4 @@
-\documentclass[sigconf]{acmart}
+\documentclass{llncs}
 % packages should be added as needed 
 \usepackage{graphicx}
 
@@ -7,10 +7,10 @@
 
 \usepackage{booktabs} % For formal tables
 
-\usepackage{amsthm} % For claims
-\theoremstyle{remark}
+%\usepackage{amsthm} % For claims
+%\theoremstyle{remark}
 
-\settopmatter{printacmref=false, printccs=false, printfolios=false}
+%\settopmatter{printacmref=false, printccs=false, printfolios=false}
 \pagestyle{plain} % removes running headers
 
 \newcommand{\PicScale}{0.5}
@@ -18,67 +18,13 @@
 \begin{document}
 
 \title {Consistency guarantees for deterministic stateful stream processing}
-% \titlenote{Produces the permission block, and   copyright information}
-%\subtitle{Extended Abstract}
-% \subtitlenote{The full version of the author's guide is available as   \texttt{acmart.pdf} document}
 
-% \author {Igor E. Kuralenok \and Nikita Marshalkin \and Artem Trofimov \and Boris Novikov}
-
-\author{Igor E. Kuralenok}
-%\authornote{Dr.~Trovato insisted his name be first.}
-%\orcid{1234-5678-9012}
-\affiliation{%
-  \institution{JetBrains Research}
-%streetaddress{P.O. Box 1212}
-  \city{St. Petersburg} 
-%  \state{Ohio} 
-%  \postcode{190000}
-  \country{Russia}
-}
-\email{ikuralenok@gmail.com}
-
-\author{Artem Trofimov}
-\affiliation{%
-  \institution{JetBrains Research}
-  %streetaddress{P.O. Box 1212}
-  \city{St. Petersburg} 
-  \country{Russia}
-}
-\email{trofimov9artem@gmail.com}
-
-\author{Nikita Marshalkin}
-\affiliation{%
-\institution{JetBrains Research}
-  %streetaddress{P.O. Box 1212}
-  \city{St. Petersburg} 
-  \country{Russia}
-}
-\email{marnikitta@gmail.com}
-
-\author{Boris Novikov}
-\affiliation{%
-\institution{JetBrains Research}
-  %streetaddress{P.O. Box 1212}
-  \city{St. Petersburg} 
-  \country{Russia}
-}
-\email{borisnov@acm.org}
-
-
-%\author{Artem Trofimov, Nikita Marshalkin, Boris Novikov}
-%  \authornote{}
-%\affiliation{%
-%  \institution{St. Petersburg state University}
-%  \streetaddress{Universitetskaya nab. 7/9}
-%  \city{St. Petersburg} 
-%  \postcode{199034}
-% \country{Russia}
-%}
-%\email{trofimov9artem@gmail.com, marnikitta@gmail.com, borisnov@acm.org}
-
+\author{Igor E. Kuralenok, Artem Trofimov, Nikita Marshalkin, \and Boris Novikov}
+\institute{JetBrains Research, St. Petersburg, Russia}
+\email{ikuralenok@gmail.com, trofimov9artem@gmail.com, marnikitta@gmail.com, borisnov@acm.org}
 
 \begin{abstract}
-\end {abstract}
+\end{abstract}
 
 \maketitle
 
@@ -160,7 +106,7 @@ Show that our prototype outperforms Flink with at least once/exactly once mode o
 
 \section {Conclusion and future work}
 
-\bibliographystyle{ACM-Reference-Format}
+\bibliographystyle{splncs}
 \bibliography{../../bibliography/flame-stream}
 \end {document}
 
