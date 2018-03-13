@@ -106,6 +106,9 @@ Therefore, the contributions of this paper are the following:
 
 The rest of the paper is structured as follows: ...
 
+\section {Related work}
+Micro-batching. Flink's async snapshots + 2PC. Both provide high overhead. 
+
 \section{Preliminaries}
 Stream processing system is considered as
 a shared-nothing distributed runtime.
@@ -125,8 +128,8 @@ There are stateless and stateful operations.
 \subsection{Guarantees}
 Define at most once, at least once, and exactly once guarantees. Describe why careful state management is a crucial task for providing these guarantees.
 
-\section {Drifting state model}
-This section contains the high-level view of our model without implementation details.
+\section {Efficient deterministic model}
+This section contains the high-level view of our model and a few implementation details.
 
 \subsection{Ordering assumptions}
 The main idea: we define a total ordering on items to achieve determinism.
@@ -140,17 +143,8 @@ Map/grouping and their properties.
 \subsection{Stateful transformations}
 Pipeline for any stateful transformation using only map and grouping. 
 
-\section {Implementation}
-In this section we describe how proposed model can be efficiently implemented.
-
-\subsection{Optimistic approach}
-We handle out-of-order items optimistically.
-
-\subsection{Ordering model}
-The structure of meta-information.
-
-\subsection{Minimal time within stream}
-Define acker and its logic.
+\subsection{Implementation notes}
+In this section we describe how proposed model can be efficiently implemented without diving into details.
 
 \section{Guarantees}
 
@@ -174,8 +168,6 @@ Show that our model is scalable and provides low overhead.
 
 \subsection{Comparison against Apache Flink}
 Show that our prototype outperforms Flink with at least once/exactly once mode on. Explain such behavior.
-
-\section {Related work}
 
 \section {Conclusion and future work}
 
