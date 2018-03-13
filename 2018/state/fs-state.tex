@@ -110,33 +110,20 @@ The rest of the paper is structured as follows: ...
 \section {Related work}
 Micro-batching. Flink's async snapshots + 2PC. Both provide high overhead. 
 
-\section{Preliminaries}
-Stream processing system is considered as
-a shared-nothing distributed runtime.
+\section {Efficient deterministic model}
+This section contains the high-level view of our model and a few implementation details.
 
 \subsection{Data flow}
 Define stream and data items.
 
-\subsection{Computation flow}
+\subsection{Computational flow}
 Flow is represented in the form of a graph.
-
-\subsection{Deployment and partitioning}
-How partitioning is usually implemented in stream processing systems.
-
-\subsection{Operations}
-There are stateless and stateful operations.
-
-\subsection{Guarantees}
-Define at most once, at least once, and exactly once guarantees. Describe why careful state management is a crucial task for providing these guarantees.
-
-\section {Efficient deterministic model}
-This section contains the high-level view of our model and a few implementation details.
 
 \subsection{Ordering assumptions}
 The main idea: we define a total ordering on items to achieve determinism.
 
 \subsection{Physical deployment}
-The graph is deployed on each node.
+The graph is deployed on each node. Hash-units, partitioning, etc.
 
 \subsection{Supported operations}
 Map/grouping and their properties.
@@ -147,20 +134,21 @@ Pipeline for any stateful transformation using only map and grouping.
 \subsection{Implementation notes}
 In this section we describe how proposed model can be efficiently implemented without diving into details.
 
-\section{Guarantees}
+\section{Consistency guarantees}
 
-All existing industrial stream processing systems provide high overhead for end-to-end guarantees, especially for exactly once. Our deterministic model is able to naturally provide such guarantees.
+Our deterministic model is able to naturally provide some consistency guarantees. We can handle package loss and node failure. Network partitioning is out of scope of stream processing.
 
-Define requirements on fronts and rears.
+\subsection{Package loss}
+Acker determines.
 
-\subsection{At most once}
-Processing without replay.
+\subsection{Node failure}
+State can be restored.
 
-\subsection{At least once}
-Loosing of barrier state do not influence on guarantees.
+\subsection{Barrier failure}
+Barrier's state must be carefully stored.
 
-\subsection{Exactly once}
-Releasing items form the system and saving barrier state must be done atomically.
+\subsection{Contracts between system and user}
+Contracts are different for at least once and exactly once. Requirements on fronts and rears.
 
 \section {Experiments}
 
