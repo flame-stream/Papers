@@ -1,0 +1,26 @@
+%%% fs-state-consistency - Fault tolerance
+
+\label {fs-consistency-seciton}
+
+Our deterministic model is able to naturally provide some consistency guarantees. There are three main techniques: input replay, barrier flushing, and state snapshotting.
+
+\subsection{Input replay}
+Fronts should replay in terms of our meta-information.
+
+\subsection{Barrier flushing}
+To achieve exactly once, we should know which elements have been released. Because of the deterministic model, we should know only the meta-information of the last released item. Therefore, we require that user is able to return last received item. Contracts with rear are different for at least once and exactly once. Flushing process is independent from main processing.
+
+\subsection{State snapshotting}
+Snapshotting is needed to not replay all input. Acker starts snapshotting. All nodes store snapshot asynchronously.
+
+\subsection{Recovery protocols}
+We can handle package loss and node failure. Network partitioning is out of the scope of stream processing.
+
+\subsubsection{Package loss}
+Acker determines. Replay.
+
+\subsubsection{Node failure}
+State can be restored. Replay.
+
+\subsubsection{Barrier failure}
+Barrier's state can be restored. Replay.

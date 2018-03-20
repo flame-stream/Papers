@@ -1,0 +1,29 @@
+%%% fs-state-model - Model
+
+\label {fs-model-seciton}
+
+This section contains the high-level view of our model and a few implementation details.
+
+\subsection{Data flow}
+Define stream and data items.
+
+\subsection{Computational flow}
+Flow is represented in the form of a graph.
+
+\subsection{Ordering assumptions}
+The main idea: we define a total ordering on items to achieve determinism.
+
+\subsection{Physical deployment}
+The graph is deployed on each node. Hash-units, partitioning, etc.
+
+\subsection{Supported operations}
+Map/grouping and their properties.
+
+\subsection{Stateful transformations}
+Pipeline for any stateful transformation using only map and grouping. 
+
+\subsection{Implementation notes}
+In this section we describe how proposed model can be efficiently implemented without diving into details.
+
+\subsection{Consistency guarantees}
+At most once, at least once, exactly once. Exactly once is achieved if failures do not occur.
