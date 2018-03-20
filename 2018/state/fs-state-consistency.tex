@@ -2,13 +2,23 @@
 
 \label {fs-consistency-seciton}
 
-Our deterministic model is able to naturally provide some consistency guarantees. There are three main techniques: input replay, barrier flushing, and state snapshotting.
+In this section we describe how consistency guarantees can be satisfied within the proposed model in case of failures. Initially, we define three mechanisms which are necessary both for consistent processing and for fast and reliable recovery. After that, we demonstrate how they behave in recovery processes and why consistency semantics is preserved.
 
 \subsection{Input replay}
-Fronts should replay in terms of our meta-information.
+Input replay functionality is commonly used to restore computations after a failure. The key idea here is that in case of failure, input data can be replayed not from the beginning, but from some determined point. Like other stream processing solutions, our system requires from producers an ability to replay input data. The only difference is that the initial point of replay is defined in terms of the global time. Practically, the role of global times can be played by any monotonically increasing sequence, e.g. offsets in Apache Kafka or the values of a logical clock. Therefore, this requirement is not a strong limitation for real-life deployments.
 
 \subsection{Barrier flushing}
-To achieve exactly once, we should know which elements have been released. Because of the deterministic model, we should know only the meta-information of the last released item. Therefore, we require that user is able to return last received item. Contracts with rear are different for at least once and exactly once. Flushing process is independent from main processing.
+Notifications of the new minimal time within the stream are sent by the acker with monotonically increasing global times. Barrier receives these notifications and releases output items, according to the same order. Hence, if barrier knows the global time of the last released item $GT_{last}$, it can process data in idempotent fashion simply by filtering out any items with a global time less than or equal to $GT_{last}$. 
+
+Therefore, the barrier has its own state - $GT_{last}$, and this state is responsible for avoiding duplicates in case of failure and subsequent input replay. Exactly-once semantics is possible only if there are no any inconsistencies between released items and $GT_{last}$, so there is a need to atomically output items and update $GT_{last}$. To solve this problem, we require the following output protocol with data consumer:
+
+\begin{itemize}
+    \item When minimal time is received, barrier send special output entity to the data consumer. This entity contains all corresponding output items and $GT_{last}$. The consumer must acknowledge that it received the entity
+    \item Barrier does not send new output entity until the previous one is not acknowledged
+    \item Consumer must return last received entity on barrier's request 
+\end{itemize}
+
+This protocol guarantees that $GT_{last}$ and released items are always consistent with each other. It implies that barrier can request the last released entity and fetch $GT_{last}$ after recovery to avoid duplicates and preserve exactly-once semantics. It should be noted that for at least once semantics, contract with the consumer can be relaxed: it is not required to store the last received entity. In this case, $GT_{last}$ can be saved within our system, e.g. it can be written to Zookeeper.
 
 \subsection{State snapshotting}
 Snapshotting is needed to not replay all input. Acker starts snapshotting. All nodes store snapshot asynchronously.
@@ -20,7 +30,7 @@ We can handle package loss and node failure. Network partitioning is out of the 
 Acker determines. Replay.
 
 \subsubsection{Node failure}
-State can be restored. Replay.
+The state can be restored. Replay.
 
 \subsubsection{Barrier failure}
 Barrier's state can be restored. Replay.
