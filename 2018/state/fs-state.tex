@@ -82,21 +82,33 @@ Pipeline for any stateful transformation using only map and grouping.
 \subsection{Implementation notes}
 In this section we describe how proposed model can be efficiently implemented without diving into details.
 
-\section{Consistency guarantees}
+\subsection{Consistency guarantees}
+At most once, at least once, exactly once. Exactly once is achieved if failures do not occur.
 
-Our deterministic model is able to naturally provide some consistency guarantees. We can handle package loss and node failure. Network partitioning is out of the scope of stream processing.
+\section{Fault tolerance}
 
-\subsection{Package loss}
-Acker determines.
+Our deterministic model is able to naturally provide some consistency guarantees. There are three main techniques: input replay, barrier flushing, and state snapshotting.
 
-\subsection{Node failure}
-State can be restored.
+\subsection{Input replay}
+Fronts should replay in terms of our meta-information.
 
-\subsection{Barrier failure}
-Barrier's state must be carefully stored.
+\subsection{Barrier flushing}
+To achieve exactly once, we should know which elements have been released. Because of the deterministic model, we should know only the meta-information of the last released item. Therefore, we require that user is able to return last received item. Contracts with rear are different for at least once and exactly once. Flushing process is independent from main processing.
 
-\subsection{Contracts between system and user}
-Contracts are different for at least once and exactly once. Requirements on fronts and rears.
+\subsection{State snapshotting}
+Snapshotting is needed to not replay all input. Acker starts snapshotting. All nodes store snapshot asynchronously.
+
+\subsection{Recovery protocols}
+We can handle package loss and node failure. Network partitioning is out of the scope of stream processing.
+
+\subsubsection{Package loss}
+Acker determines. Replay.
+
+\subsubsection{Node failure}
+State can be restored. Replay.
+
+\subsubsection{Barrier failure}
+Barrier's state can be restored. Replay.
 
 \section {Experiments}
 
