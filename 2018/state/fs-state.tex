@@ -6,6 +6,7 @@
 \usepackage{algpseudocode}
 
 \usepackage{booktabs} % For formal tables
+\usepackage{cite} %for multiple refs
 
 %\usepackage{amsthm} % For claims
 %\theoremstyle{remark}
@@ -24,19 +25,19 @@
 
 \maketitle
 
-\email{\{ikuralenok, trofimov9artem, marnikitta\}@gmail.com, borisnov@acm.org}
+\email{\string{ikuralenok, trofimov9artem, marnikitta\string}@gmail.com, borisnov@acm.org}
 
 \begin{abstract}
 \end{abstract}
 
 \section {Introduction}
-Distributed batch processing systems, such as Google's MapReduce~\cite{Dean:2008:MSD:1327452.1327492} and Apache Hadoop~\cite{hadoop2009hadoop}, addresses a need to process huge amounts of data (e.g. Internet scale). The key idea behind them is to process data blocks that have already been stored over a period of time. These systems are able to run in a massively parallel fashion on clusters consisting of thousands of commodity computational units. The main advantages of this approach are consistency, fault-recovery, and practically unlimited scalability.
+Distributed batch processing systems, such as Google's MapReduce~\cite{Dean:2008:MSD:1327452.1327492} and Apache Hadoop~\cite{hadoop2009hadoop}, address a need to process huge amounts of data (e.g. Internet scale). The key idea behind them is to process data blocks that have already been stored over a period of time. These systems are able to run in a massively parallel fashion on clusters consisting of thousands of commodity computational units. The main advantages of this approach are consistency, fault-recovery, and practically unlimited scalability.
 
-However, there are a lot of scenarios where data is most valuable at its time of arrival, for example, news processing, financial analysis, network monitoring, etc. Therefore, there is a need for systems that provide low latency between event occurrence and its processing under a fixed load. Micro-batching technique, that is used in Apache Spark~\cite{Zaharia:2012:DSE:2342763.2342773} and in Storm Trident~\cite{apache:storm:trident}, inherits strong consistency properties from batch systems. It is possible to achieve the latency of several second using such systems, but it is still too high for many applications~\cite{?}.
+However, there are a lot of scenarios where data is most valuable at its time of arrival, for example, news processing, financial analysis, network monitoring, etc. Therefore, there is a need for systems that provide low latency between event occurrence and its processing under a fixed load. Micro-batching technique, that is used in Apache Spark~\cite{Zaharia:2012:DSE:2342763.2342773} and in Storm Trident~\cite{apache:storm:trident}, inherits strong consistency properties from batch systems. More precisely, input items are collected or divided at systems' entry into small data blocks called {\it micro-batches} and then these blocks are processed as ordinary batches. It is possible to achieve the latency of several second using this approach~\cite{7530084, 7474816}, but it is still too high for many applications.
 
-State-of-the-art industrial distributed stream processing systems, such as Flink \cite{carbone2015apache}, Samza \cite{Noghabi:2017:SSS:3137765.3137770}, Storm \cite{apache:storm}, address this issue by providing {\it record-at-a-time} processing model. According to this model, computational units receive each record, update internal state if any, and send out new records. 
+State-of-the-art industrial distributed stream processing systems, such as Flink \cite{carbone2015apache}, Samza \cite{Noghabi:2017:SSS:3137765.3137770}, Storm \cite{apache:storm}, address this issue by providing {\it record-at-a-time} processing model. According to this model, computational units receive each record, update internal state if any, and send out new records. This technique avoids buffering data items before processing and allows to achieve significantly lower latency than micro-batching~\cite{7530084}.
 
-The main difficulty that stream processing systems experience is providing strong consistency. Regarding stream processing, the strongest consistency semantics is {\it exactly once}. Exactly once semantics requires that every input data item is processed only once, with or without the existence of failures. Although, such behavior is natural for batch processing systems, it is challenging for streaming systems. For instance, Samza and Storm do not support such guarantee at all, while Flink requires a complex protocol that can lead to significant latency increasing.
+The main difficulty, that stream processing systems experience, is providing strong consistency. Regarding stream processing, the strongest consistency semantics is {\it exactly once}. Exactly once semantics requires that every input data item is processed only once, with or without the existence of failures. Although, such behavior is natural for batch processing systems, it is challenging for streaming systems. For instance, Samza and Storm do not support such guarantee at all, while Flink requires a complex protocol that can lead to latency increasing.
 
 The key problem here is that unlike batch processing, stream processing is inherently non-deterministic. Particularly, there is no guarantee that the messages will be processed in the same order between any two runs. Therefore, it can be unclear how to determine which elements have been already released from the system after recovery to avoid duplicates. Finding the right resuming input point can be tricky as well. Additionally, if the states of operations are replicated, there is a need to determine that they are in a consistent state at the moment of taking the snapshot. 
 
@@ -83,7 +84,7 @@ In this section we describe how proposed model can be efficiently implemented wi
 
 \section{Consistency guarantees}
 
-Our deterministic model is able to naturally provide some consistency guarantees. We can handle package loss and node failure. Network partitioning is out of scope of stream processing.
+Our deterministic model is able to naturally provide some consistency guarantees. We can handle package loss and node failure. Network partitioning is out of the scope of stream processing.
 
 \subsection{Package loss}
 Acker determines.
@@ -107,7 +108,7 @@ Show that our prototype outperforms Flink with at least once/exactly once mode o
 
 \section {Conclusion and future work}
 
-\bibliographystyle{splncs}
+\bibliographystyle{splncs03}
 \bibliography{../../bibliography/flame-stream}
 \end {document}
 

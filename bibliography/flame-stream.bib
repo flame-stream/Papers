@@ -932,3 +932,31 @@ Applications that require real-time processing of high-volume data steams are pu
 }
 Many popular database management systems implement a multiversion concurrency control algorithm called snapshot isolation rather than providing full serializability based on locking. There are well-known anomalies permitted by snapshot isolation that can lead to violations of data consistency by interleaving transactions that would maintain consistency if run serially. Until now, the only way to prevent these anomalies was to modify the applications by introducing explicit locking or artificial update conflicts, following careful analysis of conflicts between all pairs of transactions.
 This article describes a modification to the concurrency control algorithm of a database management system that automatically detects and prevents snapshot isolation anomalies at runtime for arbitrary applications, thus providing serializable isolation. The new algorithm preserves the properties that make snapshot isolation attractive, including that readers do not block writers and vice versa. An implementation of the algorithm in a relational DBMS is described, along with a benchmark and performance study, showing that the throughput approaches that of snapshot isolation in most cases.
+
+@INPROCEEDINGS{7530084, 
+author={S. Chintapalli and D. Dagit and B. Evans and R. Farivar and T. Graves and M. Holderbaugh and Z. Liu and K. Nusbaum and K. Patil and B. J. Peng and P. Poulosky}, 
+booktitle={2016 IEEE International Parallel and Distributed Processing Symposium Workshops (IPDPSW)}, 
+title={Benchmarking Streaming Computation Engines: Storm, Flink and Spark Streaming}, 
+year={2016}, 
+volume={}, 
+number={}, 
+pages={1789-1792}, 
+abstract={Streaming data processing has been gaining attention due to its application into a wide range of scenarios. To serve the booming demands of streaming data processing, many computation engines have been developed. However, there is still a lack of real-world benchmarks that would be helpful when choosing the most appropriate platform for serving real-time streaming needs. In order to address this problem, we developed a streaming benchmark for three representative computation engines: Flink, Storm and Spark Streaming. Instead of testing speed-of-light event processing, we construct a full data pipeline using Kafka and Redis in order to more closely mimic the real-world production scenarios. Based on our experiments, we provide a performance comparison of the three data engines in terms of 99th percentile latency and throughput for various configurations.}, 
+keywords={data analysis;pipeline processing;Flink streaming;Kafka;Redis;Spark streaming;Storm streaming;computation engines;data engines;data pipeline;streaming data processing;Benchmark testing;Data processing;Engines;Pipelines;Sparks;Storms;Throughput;Benchmark;Flink;Low Latency;Spark;Storm;Streaming processing}, 
+doi={10.1109/IPDPSW.2016.138}, 
+ISSN={}, 
+month={May},}
+
+@INPROCEEDINGS{7474816, 
+author={S. Qian and G. Wu and J. Huang and T. Das}, 
+booktitle={2016 IEEE International Conference on Industrial Technology (ICIT)}, 
+title={Benchmarking modern distributed streaming platforms}, 
+year={2016}, 
+volume={}, 
+number={}, 
+pages={592-598}, 
+abstract={The prevalence of big data technology has generated increasing demands in large-scale streaming data processing. However, for certain tasks it is still challenging to appropriately select a platform due to the diversity of choices and the complexity of configurations. This paper focuses on benchmarking some principal streaming platforms. We achieve our goals on StreamBench, a streaming benchmark tool based on which we introduce proper modifications and extensions. We then accomplish performance comparisons among different big data platforms, including Apache Spark, Apache Storm and Apache Samza. In terms of performance criteria, we consider both computational capability and fault-tolerance ability. Finally, we give a summary on some key knobs for performance tuning as well as on hardware utilization.}, 
+keywords={Big Data;distributed processing;Apache Samza;Apache Spark;Apache Storm;Big Data technology;StreamBench tool;distributed streaming platforms;large-scale streaming data processing;Benchmark testing;Fault tolerance;Fault tolerant systems;Hardware;Sparks;Storms;Throughput;benchmark;big data;distributed streaming computing;spark streaming;storm}, 
+doi={10.1109/ICIT.2016.7474816}, 
+ISSN={}, 
+month={March},}
