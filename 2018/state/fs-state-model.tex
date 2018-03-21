@@ -13,17 +13,20 @@ Flow is represented in the form of a graph.
 \subsection{Ordering assumptions}
 The main idea: we define a total ordering on items to achieve determinism.
 
-\subsection{Physical deployment}
-The graph is deployed on each node. Hash-units, partitioning, etc.
-
 \subsection{Supported operations}
 Map/grouping and their properties.
 
 \subsection{Stateful transformations}
 Pipeline for any stateful transformation using only map and grouping. 
 
-\subsection{Implementation notes}
-In this section we describe how proposed model can be efficiently implemented without diving into details.
-
 \subsection{Consistency guarantees}
 At most once, at least once, exactly once. Exactly once is achieved if failures do not occur.
+
+\subsection{Implementation notes}
+
+\begin{itemize}
+    \item Physical operations and hash units: state is identified by hash unit
+    \item Fronts and rears
+    \item Deterministic model is real! There are extra items, they can be cleared at the barrier, if we know min time  %<-- Here we introduce the barrier!
+    \item Acker - min time provider. Acker observes progress of the full system. Can play the role of the master %<-- Here we introduce min time notifications
+\end{itemize}

@@ -4,42 +4,41 @@
 
 In this section we describe how consistency guarantees can be satisfied within the proposed model in case of failures. Initially, we define three mechanisms which are necessary both for consistent processing and for fast and reliable recovery. After that, we demonstrate how they behave in recovery processes and why consistency semantics is preserved.
 
-It is worth to mention that we rely strongly on the deterministic properties of the proposed model. Particularly, we expect that several independent runs with the same input data produce exactly the same result. This property is guaranteed by the fact that all supported operations produce deterministic results up to the order of input items. Furthermore, barrier releases items according to the minimal time notifications, which are generated with monotonically increasing global times. Thus, the barrier is deterministic as well. These features allow us to build efficient techniques for barrier flushing and operations' state management, which almost do not depend on each other.  
+It is worth to mention that we rely strongly on the deterministic properties of the proposed model. Particularly, we expect that several independent runs with the same input data produce exactly the same result. This property is guaranteed by the fact that all supported operations produce deterministic results up to the order of input items. These features allow us to build efficient techniques for barrier flushing and operations' state management, which almost do not depend on each other.  
 
 \subsection{Input replay}
-Input replay functionality is commonly used to restore computations after a failure. The key idea here is that in case of failure, input data can be replayed not from the beginning, but from some determined point. Like other stream processing solutions, our system requires from producers an ability to replay input data. The only difference is that the initial point of replay is defined in terms of the global time. Practically, the role of global times can be played by any monotonically increasing sequence, e.g. offsets in Apache Kafka or the values of a logical clock. Therefore, this requirement is not a strong limitation for real-life deployments.
+Input replay functionality is commonly used to restore computational process after a failure. The key idea here is that in case of failure, input data can be replayed not from the beginning, but from some determined point. Like other stream processing solutions, our system requires from producers an ability to replay input data. The only difference is that the initial point of replay is defined in terms of the global time. Practically, the role of global times can be played by any monotonically increasing sequence, e.g. offsets in Apache Kafka or the values of a logical clock. Therefore, this requirement is not a strong limitation for real-life deployments.
 
 \subsection{Barrier flushing}
-Notifications of the new minimal time within the stream are sent by the acker with monotonically increasing global times. Barrier receives these notifications and releases output items, according to the same order. Hence, if barrier knows the global time of the last released item $GT_{last}$, it can process data in idempotent fashion simply by filtering out any items with a global time less than or equal to $GT_{last}$. 
+Notifications of the new minimal time within the stream are sent by the Acker with monotonically increasing global times. Barrier receives these notifications and releases output items, according to the same order. Hence, if barrier knows the global time of the last released item $GT_{last}$, it can process data in idempotent fashion simply by filtering out any items with a global time less than or equal to $GT_{last}$. 
 
 Therefore, the barrier has its own state - $GT_{last}$, and this state is responsible for avoiding duplicates in case of failure and subsequent input replay. Exactly-once semantics is possible only if there are no any inconsistencies between released items and $GT_{last}$, so there is a need to atomically output items and update $GT_{last}$. To solve this problem, we require the following output protocol with data consumer:
 
 \begin{itemize}
-    \item When minimal time is received, barrier send special output entity to the data consumer. This entity contains all corresponding output items and $GT_{last}$. The consumer must acknowledge that it received the entity
-    \item Barrier does not send new output entity until the previous one is not acknowledged
-    \item Consumer must return last received entity on barrier's request 
+    \item When minimal time is received, barrier send special output bundle to the data consumer. This bundle contains all corresponding output items and $GT_{last}$. The consumer must acknowledge that it received the bundle
+    \item Barrier does not send new output bundle until the previous one is not acknowledged
+    \item Consumer must return last received bundle on barrier's request 
 \end{itemize}
 
-This protocol guarantees that $GT_{last}$ and released items are always consistent with each other. It implies that barrier can request the last released entity and fetch $GT_{last}$ after recovery to avoid duplicates and preserve exactly-once semantics. It should be noted that for at least once semantics, contract with the consumer can be relaxed: it is not required to store the last received entity. In this case, $GT_{last}$ can be saved within our system, e.g. it can be written to Zookeeper.
+This protocol guarantees that $GT_{last}$ and released items are always consistent with each other. It implies that barrier can request the last released bundle and fetch $GT_{last}$ after recovery to avoid duplicates and preserve exactly-once semantics. It should be noted that for at least once semantics, contract with the consumer can be relaxed: it is not required to store the last received bundle.
 
 \subsection{State snapshotting}
-Input data can be replayed from some global time after recovery, only if operations are able to restore consistent state for this global time. Therefore, there is a need to periodically snapshot operations' state. The global time for regular snapshot requires that there are no in-flight items with such global time, and they cannot be generated. Acker's notifications of the minimal time within the stream guarantee exact this condition, so some of these notifications can trigger state saving. 
+Actually, in case of failures, all previously sent data items can be replayed without loss of exactly-once semantics, because processing results are deterministic and all possible duplicates are filtered out at the barrier. However, there are two main problems. Firstly, data producer must store all input data during processing, that can be memory-demanding. Secondly, the recovery process can take a lot of time. Therefore, there is a need to periodically take a snapshot of operations' state. Input data can be replayed from some global time after recovery, only if operations are able to restore consistent state for this global time. The global time for regular snapshot requires that there are no in-flight items with such global time, and they cannot be generated. Acker's notifications of the minimal time within the stream guarantee exact this condition, so some of these notifications can trigger state saving. 
 
-Regarding the structure of the state, it can be noted that grouping's buckets are actually sorted lists. Because of the guarantees provided by minimal time notification, these lists cannot be changed at any point before the item that corresponds to the received minimal time. Thereby, state snapshotting can be applied asynchronously not only with state snapshotting of other grouping operations but even with the computational process of the current operation. 
+Regarding the structure of the state, it can be noted that grouping's buckets are actually lists sorted by global time. Because of the guarantees provided by minimal time notification, these lists cannot be changed at any position before the item that corresponds to the received minimal time. Thereby, state snapshotting can be done asynchronously not only with state snapshotting of other operations but even with the computational process of the current operation. 
 
 Considering the properties mentioned above, the protocol of state snapshotting is the following:
 
 \begin{itemize}
-    \item Acker chooses one of the minimal time notifications by its internal logic, i.e. by the elapsed time since the last checkpoint, and sends a request on the new snapshot along it
-    \item Grouping operations and barriers receive these notifications
-    \item Grouping operations asynchronously save their states and send back the acknowledgments
-    \item Barrier releases corresponding entity. When consumer confirms receiving it, barrier send back to acker the acknowledgment
-    \item When acker receives all acknowledgments, it writes the global time of the snapshot to Zookeeper 
+    \item On some minimal time event, Acker decides to initiate state snapshotting. The decision is made by its internal logic, i.e. by the elapsed time since the last snapshot. Acker sends a request for the new snapshot along with minimal time notification
+    \item When grouping operation receives the request, it asynchronously saves the state and sends back the acceptance message
+    \item When barrier receives the request, it waits until producer acknowledges all in-flight bundles, and then sends back the acceptance message to Acker
+    \item When Acker receives all acceptance messages, it writes the global time of the snapshot to ZooKeeper 
 \end{itemize}
 
-This protocol guarantees that every time after recovery, global time of some consistent snapshot can be fetched from Zookeeper. This global time can be used as a resuming point in fronts. 
+This protocol guarantees that on recovery, global time of some consistent snapshot can be fetched from ZooKeeper. This global time is used as a resuming point in fronts. 
 
-Acker must wait until barrier sends out items for the checkpoint time because it is possible to lose output items after recovery if barrier fails at the moment when this time has been already written to Zookeeper. It is the only dependency between state snapshotting and barrier flushing mechanisms. 
+Acker must wait until barrier sends out items for the checkpoint time because it is possible to lose output items after recovery if barrier fails at the moment when this time has been already written to ZooKeeper. It is the only dependency between state snapshotting and barrier flushing mechanisms, that does not influence end-to-end processing latency. 
 
 \subsection{Recovery protocols}
 We can handle package loss and node failure. Network partitioning is out of the scope of stream processing.
