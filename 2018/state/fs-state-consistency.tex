@@ -2,7 +2,7 @@
 
 \label {fs-consistency-seciton}
 
-In this section we describe how consistency guarantees can be satisfied within the proposed model in case of failures. Initially, we define three mechanisms which are necessary both for consistent processing and for fast and reliable recovery. After that, we demonstrate how they behave in recovery processes and why consistency semantics is preserved.
+In this section we describe how consistency guarantees can be provided within the proposed model in case of failures. Initially, we define three mechanisms which are necessary both for consistent processing and for fast and reliable recovery. After that, we demonstrate how they behave in recovery processes and why consistency semantics is preserved.
 
 It is worth to mention that we rely strongly on the deterministic properties of the proposed model. Particularly, we expect that several independent runs with the same input data produce exactly the same result. This property is guaranteed by the fact that all supported operations produce deterministic results up to the order of input items. These features allow us to build efficient techniques for barrier flushing and operations' state management, which almost do not depend on each other.  
 
