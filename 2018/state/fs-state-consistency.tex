@@ -42,18 +42,27 @@ Considering the properties mentioned above, the protocol of state snapshotting i
     \item When acker receives all acceptance messages, it writes the global time of the snapshot to ZooKeeper 
 \end{itemize}
 
-It is worth to note that any persistent key-value storage can be applied as a storage for a state. Hash unit of the corresponding grouping operation concatenated with received minimal time can be used as a key. Waiting until barrier sends out all in-flight bundles is the only dependency between state snapshotting and barrier flushing mechanisms, that does not practically influence end-to-end processing latency. 
+It is worth to note that any persistent key-value storage can be applied as a storage for the state. Hash unit of the corresponding grouping operation concatenated with received minimal time can be used as a key. Waiting until barrier sends out all in-flight bundles is the only dependency between state snapshotting and barrier flushing mechanisms, that does not practically influence end-to-end processing latency. 
 
 This protocol satisfies two proposed above conditions regarding the global time that is written to ZooKeeper. Hence, this global time can be safely used as a resuming point after recovery.
 
-\subsection{Recovery protocols}
-We can handle package loss and node failure. Network partitioning is out of the scope of stream processing.
+\subsection{Failure detection and recovery}
+Typically, distributed systems take into consideration the following types of failures:
+\begin{itemize}
+    \item Packet loss
+    \item Node failure
+    \item Network partitioning
+\end{itemize}
 
-\subsubsection{Package loss}
-Acker determines. Replay.
+However, support of network partitioning tolerance is not planned because it leads to an unavoidable loss of data. We believe that in this case, stream processing does not make sense. To the best of our knowledge, there are no open-source stream processing systems that tolerate network partitioning.
 
-\subsubsection{Node failure}
-The state can be restored. Replay.
+Packet loss and node failure can be determined by the acker because it traces data items and periodically pings all nodes. In case of failure, acker fully restarts the system. The failure of the acker itself requires the manual restart. Restart protocol includes the following steps:
 
-\subsubsection{Barrier failure}
-Barrier's state can be restored. Replay.
+\begin{itemize}
+    \item Acker reads the global time of the last snapshot from ZooKeeper. After that, it sends this global time to all grouping operations
+    \item Grouping operations fetch their states from state backend using the corresponding hash unit and received global time as a key. They acknowledge acker that they are ready for processing after it is done 
+    \item Barriers request the last released bundle from data consumers and acknowledges acker that they are ready for processing
+    \item When acker is sure that all groupings and barriers are ready to start, it sends the global time of the last snapshot to data producer, and the processing begins 
+\end{itemize}
+
+Proposed protocol guarantees that processing does not restart until all grouping operations obtain consistent states. The consistency of these states is guaranteed by the state snapshotting protocol. Additionally, this protocol avoids producing duplicates, because, at the moment when processing is restarted, it is ensured that barrier has obtained the last released global time and is able to filter out extra items. Moreover, state snapshotting protocol guarantees that the last released global time cannot be less than the global time of the last snapshot, therefore, data cannot be lost and exactly-once semantics is preserved. Regarding at least once semantics, all protocol actions are the same, except waiting until the barriers are ready.
