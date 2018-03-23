@@ -960,3 +960,46 @@ keywords={Big Data;distributed processing;Apache Samza;Apache Spark;Apache Storm
 doi={10.1109/ICIT.2016.7474816}, 
 ISSN={}, 
 month={March},}
+
+@inproceedings{abadi2005design,
+  title={The Design of the Borealis Stream Processing Engine.},
+  author={Abadi, Daniel J and Ahmad, Yanif and Balazinska, Magdalena and Cetintemel, Ugur and Cherniack, Mitch and Hwang, Jeong-Hyon and Lindner, Wolfgang and Maskey, Anurag and Rasin, Alex and Ryvkina, Esther and others},
+  booktitle={Cidr},
+  volume={5},
+  number={2005},
+  pages={277--289},
+  year={2005}
+}
+Borealis is a second-generation distributed stream processing engine that is being developed at Brandeis University, Brown University, and MIT. Borealis inherits core stream processing functionality from Aurora [14] and distribution functionality from Medusa [51]. Borealis modifies and extends both systems in non-trivial and critical ways to provide advanced capabilities that are commonly required by newly-emerging stream processing applications. In this paper, we outline the basic design and functionality of Borealis. Through sample real-world applications, we motivate the need for dynamically revising query results and modifying query specifications. We then describe how Borealis addresses these challenges through an innovative set of features, including revision records, time travel, and control lines. Finally, we present a highly flexible and scalable QoS-based optimization model that operates across server and sensor networks and a new fault-tolerance model with flexible consistency-availability trade-offs.
+
+@article{Chandy:1985:DSD:214451.214456,
+ author = {Chandy, K. Mani and Lamport, Leslie},
+ title = {Distributed Snapshots: Determining Global States of Distributed Systems},
+ journal = {ACM Trans. Comput. Syst.},
+ issue_date = {Feb. 1985},
+ volume = {3},
+ number = {1},
+ month = feb,
+ year = {1985},
+ issn = {0734-2071},
+ pages = {63--75},
+ numpages = {13},
+ url = {http://doi.acm.org/10.1145/214451.214456},
+ doi = {10.1145/214451.214456},
+ acmid = {214456},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+} 
+This paper presents an algorithm by which a process in a distributed system determines a global state of the system during a computation. Many problems in distributed systems can be cast in terms of the problem of detecting global states. For instance, the global state detection algorithm helps to solve an important class of problems: stable property detection. A stable property is one that persists: once a stable property becomes true it remains true thereafter. Examples of stable properties are “computation has terminated,” “ the system is deadlocked” and “all tokens in a token ring have disappeared.” The stable property detection problem is that of devising algorithms to detect a given stable property. Global state detection can also be used for checkpointing.
+
+@article{jacques2016consistent,
+  title={Consistent regions: Guaranteed tuple processing in ibm streams},
+  author={Jacques-Silva, Gabriela and Zheng, Fang and Debrunner, Daniel and Wu, Kun-Lung and Dogaru, Victor and Johnson, Eric and Spicer, Michael and Sariy{\"u}ce, Ahmet Erdem},
+  journal={Proceedings of the VLDB Endowment},
+  volume={9},
+  number={13},
+  pages={1341--1352},
+  year={2016},
+  publisher={VLDB Endowment}
+}
+Guaranteed tuple processing has become critically important for many streaming applications. This paper describes how we enabled IBM Streams, an enterprise-grade stream processing system, to provide data processing guarantees. Our solution goes from language-level abstractions to a runtime protocol. As a result, with a couple of simple annotations at the source code level, IBM Streams developers can define consistent regions, allowing any subgraph of their streaming application to achieve guaranteed tuple processing. At runtime, a consistent region periodically executes a variation of the Chandy-Lamport snapshot algorithm to establish a consistent global state for that region. The coupling of consistent states with data replay enables guaranteed tuple processing.
