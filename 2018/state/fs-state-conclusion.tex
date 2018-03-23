@@ -2,10 +2,10 @@
 
 \label {fs-conclusion-seciton}
 
-We recognized that the lack of determinism in state-of-the-art stream processing systems makes consistency guarantees extremely hard to provide. Most of the systems use one of the following approaches: 
+We recognized that the lack of determinism in state-of-the-art stream processing systems makes consistency guarantees extremely hard to provide without the heavy overhead. Most of the systems use one of the following approaches: 
 \begin{itemize}
-    \item Micro-batching technique
-    \item Complex protocols that connect state snapshotting and data releasing in a transactional fashion
+    \item Enforcing determinism by micro-batching
+    \item Applying protocols that connect state snapshotting and data releasing in a transactional fashion
 \end{itemize}
 
 As it was shown, both methods are not suitable for latency-sensitive tasks. 
@@ -13,7 +13,7 @@ As it was shown, both methods are not suitable for latency-sensitive tasks.
 In this work, we introduced the deterministic model for distributed stream processing and demonstrated how properties of this model can be applied for providing strong consistency and fault tolerance. More precisely, we designed protocols, which allow to provide the following features:
 
 \begin{itemize}
-    \item The processes of business-logic computations, taking state snapshots and releasing output items work asynchronously and independently
+    \item The processes of business-logic computations, state snapshotting and releasing output items work asynchronously and independently
     \item At least once or exactly-once semantics is preserved even in the presence of failures
 \end{itemize}
 
