@@ -2,21 +2,21 @@
 
 \label {fs-conclusion-seciton}
 
-We recognized that the lack of determinism in state-of-the-art stream processing systems makes consistency guarantees extremely hard to provide without the heavy overhead. Most of the systems use one of the following approaches: 
+We recognized that the lack of a low-cost mechanism for deterministic computations within stream processing makes consistency guarantees extremely hard to provide without the heavy overhead. Most of the state-of-the-art stream processing systems use one of the following approaches: 
 \begin{itemize}
     \item Enforcing determinism by micro-batching or buffering before each stateful operation
     \item Applying protocols that connect state snapshotting and data releasing in a transactional fashion
 \end{itemize}
 
-As it was shown, both methods are not suitable for latency-sensitive tasks. 
+However, both methods can experience difficulties with working under low-latency requirements (less than second). This issue is explained by the high cost of extra buffering and distributed transactions.
 
-In this work, we introduced the deterministic model for distributed stream processing and demonstrated how properties of this model can be applied for providing strong consistency and fault tolerance. More precisely, we designed protocols, which allow to provide the following features:
+In this work, we introduced the deterministic model for distributed stream processing. The proposed model provides low overhead for determinism, because of its optimistic nature. We demonstrated how properties of this model can be applied for providing strong consistency and fault tolerance. More precisely, we designed protocols, which allow to provide the following features:
 
 \begin{itemize}
     \item The processes of business-logic computations, state snapshotting and releasing output items work asynchronously and independently
     \item At least once or exactly-once semantics is preserved even in the presence of failures
 \end{itemize}
 
-We implemented the prototype of the proposed model to examine its performance and scalability. Our experiments demonstrated that the introduced protocols for fault tolerance are scalable and provides remarkably low overhead within different computational layouts. Furthermore, the comparison with industrial stream processing solution indicated that our prototype can provide significantly lower latency.
+We implemented the prototype of the proposed model to examine its performance and scalability. Our experiments demonstrated that the introduced protocols for fault tolerance are scalable and provides remarkably low overhead within different computational layouts. Furthermore, the comparison with industrial stream processing solution indicated that our prototype can provide significantly lower latency in case of exactly once semantics.
 
-Regarding future work, we plan to implement mechanisms for periodically rebuilding and redeploying execution graphs. This functionality can be used for graph generation based on some declarative language.
+Regarding future work, we plan to implement mechanisms for collaborative usage of the system. Particularly, we aim to build convenient tools for reusing of execution graphs. An additional task, that we intend to work on, is the generation of execution graphs based on some declarative language.
