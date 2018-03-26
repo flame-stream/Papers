@@ -60,7 +60,7 @@ Typically, distributed systems take into consideration the following types of fa
 
 Network partitioning is the special case of failure because it leads to an unavoidable loss of data. We believe that in this case, stream processing does not make sense. To the best of our knowledge, there are no open-source stream processing systems that tolerate network partitioning.
 
-As it was described above, acker traces data items using the table of XORs grouped by global time. Therefore, packet loss can be determined by the acker because in this case, the corresponding value in acker's table will not be nullified. Node failure can be also observed by the acker because it waits until all barriers accept that corresponding bundles have been sent and acknowledged. In fact, each node contains a barrier, so if an acceptance is not received during some user-defined timeout, the node can be declared as down. 
+As it was described above, acker traces data items using the table of XORs grouped by global time. Therefore, packet loss can be determined by the acker because in this case, the corresponding value in acker's table will not be nullified. Node failure can be also observed by the acker because state snapshotting protocol requires waiting until all barriers accept that corresponding bundles have been sent and acknowledged. In fact, each node contains a barrier, so if an acceptance is not received during some user-defined timeout, the node can be declared as down. 
 
 In case of packet loss or node failure, acker fully restarts the system. The failure of the acker itself can be detected by special scripts, that trigger the same restart protocol. Restart protocol includes the following steps after all healthy nodes are restarted:
 
