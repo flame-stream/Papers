@@ -4,7 +4,7 @@
 
 We recognized that the lack of determinism in state-of-the-art stream processing systems makes consistency guarantees extremely hard to provide without the heavy overhead. Most of the systems use one of the following approaches: 
 \begin{itemize}
-    \item Enforcing determinism by micro-batching
+    \item Enforcing determinism by micro-batching or buffering before each stateful operation
     \item Applying protocols that connect state snapshotting and data releasing in a transactional fashion
 \end{itemize}
 
