@@ -58,15 +58,25 @@ Typically, distributed systems take into consideration the following types of fa
     \item Network partitioning
 \end{itemize}
 
-However, support of network partitioning tolerance is not planned because it leads to an unavoidable loss of data. We believe that in this case, stream processing does not make sense. To the best of our knowledge, there are no open-source stream processing systems that tolerate network partitioning.
+Network partitioning is the special case of failure because it leads to an unavoidable loss of data. We believe that in this case, stream processing does not make sense. To the best of our knowledge, there are no open-source stream processing systems that tolerate network partitioning.
 
-Packet loss and node failure can be determined by the acker because it traces data items and periodically pings all nodes. In case of failure, acker fully restarts the system. The failure of the acker itself requires the manual restart. Restart protocol includes the following steps:
+As it was described above, acker traces data items using the table of XORs grouped by global time. Therefore, packet loss can be determined by the acker because in this case, the corresponding value in acker's table will not be nullified. Node failure can be also observed by the acker because it waits until all barriers accept that corresponding bundles have been sent and acknowledged. In fact, each node contains a barrier, so if an acceptance is not received during some user-defined timeout, the node can be declared as down. 
+
+In case of packet loss or node failure, acker fully restarts the system. The failure of the acker itself can be detected by special scripts, that trigger the same restart protocol. Restart protocol includes the following steps after all healthy nodes are restarted:
 
 \begin{itemize}
     \item Acker reads the global time of the last snapshot from ZooKeeper. After that, it sends this global time to all grouping operations
-    \item Grouping operations fetch their states from state backend using the corresponding hash unit and received global time as a key. They acknowledge acker that they are ready for processing after it is done 
+    \item Grouping operations fetch their states from state backend using the corresponding hash unit and received global time as a key. After that, grouping operations acknowledge acker that they are ready for processing 
     \item Barriers request the last released bundle from data consumers and acknowledges acker that they are ready for processing
-    \item When acker is sure that all groupings and barriers are ready to start, it sends the global time of the last snapshot to data producer, and the processing begins 
+    \item When acker receives all acknowledgments from groupings and barriers, it sends the global time of the last snapshot to data producer, and the processing begins 
 \end{itemize}
 
-Proposed protocol guarantees that processing does not restart until all grouping operations obtain consistent states. The consistency of these states is guaranteed by the state snapshotting protocol. Additionally, this protocol avoids producing duplicates, because, at the moment when processing is restarted, it is ensured that barrier has obtained the last released global time and is able to filter out extra items. Moreover, state snapshotting protocol guarantees that the last released global time cannot be less than the global time of the last snapshot, therefore, data cannot be lost and exactly-once semantics is preserved. Regarding at least once semantics, all protocol actions are the same, except waiting until the barriers are ready.
+Proposed protocol guarantees the following properties:
+
+\begin{itemize}
+    \item Processing does not restart until all grouping operations obtain consistent states. The consistency of these states is guaranteed by the state snapshotting protocol
+    \item Producing duplicates is avoided, because, at the moment when processing is restarted, it is ensured that barrier has obtained the last released global time and is able to filter out extra items
+    \item The last released global time cannot be less than the global time of the last snapshot, therefore, data cannot be lost. This property is guaranteed in conjunction with state snapshotting protocol
+\end{itemize}
+
+Therefore, the proposed protocol can be used for system restart without loss of exactly once semantics. Regarding at least once semantics, all protocol actions are the same, except waiting until the barriers are ready.
