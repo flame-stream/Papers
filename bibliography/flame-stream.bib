@@ -1003,3 +1003,13 @@ This paper presents an algorithm by which a process in a distributed system dete
   publisher={VLDB Endowment}
 }
 Guaranteed tuple processing has become critically important for many streaming applications. This paper describes how we enabled IBM Streams, an enterprise-grade stream processing system, to provide data processing guarantees. Our solution goes from language-level abstractions to a runtime protocol. As a result, with a couple of simple annotations at the source code level, IBM Streams developers can define consistent regions, allowing any subgraph of their streaming application to achieve guaranteed tuple processing. At runtime, a consistent region periodically executes a variation of the Chandy-Lamport snapshot algorithm to establish a consistent global state for that region. The coupling of consistent states with data replay enables guaranteed tuple processing.
+
+@inproceedings{borthakur2011apache,
+  title={Apache Hadoop goes realtime at Facebook},
+  author={Borthakur, Dhruba and Gray, Jonathan and Sarma, Joydeep Sen and Muthukkaruppan, Kannan and Spiegelberg, Nicolas and Kuang, Hairong and Ranganathan, Karthik and Molkov, Dmytro and Menon, Aravind and Rash, Samuel and others},
+  booktitle={Proceedings of the 2011 ACM SIGMOD International Conference on Management of data},
+  pages={1071--1080},
+  year={2011},
+  organization={ACM}
+}
+Facebook recently deployed Facebook Messages, its first ever user-facing application built on the Apache Hadoop platform. Apache HBase is a database-like layer built on Hadoop designed to support billions of messages per day. This paper describes the reasons why Facebook chose Hadoop and HBase over other systems such as Apache Cassandra and Voldemort and discusses the application's requirements for consistency, availability, partition tolerance, data model and scalability. We explore the enhancements made to Hadoop to make it a more effective realtime system, the tradeoffs we made while configuring the system, and how this solution has significant advantages over the sharded MySQL database scheme used in other applications at Facebook and many other web-scale companies. We discuss the motivations behind our design choices, the challenges that we face in day-to-day operations, and future capabilities and improvements still under development. We offer these observations on the deployment as a model for other companies who are contemplating a Hadoop-based solution over traditional sharded RDBMS deployments.
