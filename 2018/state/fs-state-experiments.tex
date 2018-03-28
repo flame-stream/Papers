@@ -1,6 +1,34 @@
 %%% fs-state-experiments - Experiments
 
 \label {fs-experiments-seciton}
+The series of experiments were performed in order to analyze the overall performance of the system's prototype. We apply building an inverted index as stream processing task for the evaluation because it satisfies the following properties:
+
+\begin{itemize}
+    \item The computational pipeline of the task contains network shuffle that can violate the ordering constraints. Therefore, this task is able to fairly estimate the performance of the proposed deterministic model
+    \item Consistency guarantees are strongly required because the inconsistent index does not make sense for many applications
+\end{itemize}
+
+Building inverted index can be implemented as a MapReduce transformation: 
+
+\begin{itemize}
+    \item Map phase includes conversion of input documents into the key-value pairs {\it (word; word positions within the page)}
+    \item Reduce phase consists of combining word positions for the corresponding word into the single index structure 
+\end{itemize}
+
+We assume that reduce phase outputs the change records of the inverted index structure, to make this algorithm suitable for stream processing systems. It implies that each input page triggers the output of the corresponding change records of the full index. 
+
+Notably, building an inverted index in a streaming manner can be the halfway task between the generation of documents and consuming index updates by search infrastructure. In the real-world, such scenario can be found in freshness-aware systems, e.g., news processing engines.
+ 
+In \FlameStream\ this algorithm is implemented as the typical conversion of MapReduce transformation, which is shown in section~\ref{fs-model-section}. Inverted index structure plays the role of an accumulator, and the accumulator map produces the most recent changes of this structure if any.
+
+By the notion of {\it latency} we assume the time between two events: 
+
+\begin{enumerate}
+    \item Input page is taken into the stream
+    \item All the change records for the page leave the stream
+\end{enumerate}
+
+Our experiments were performed on the cluster of Amazon EC2 micro instances with 1GB RAM and 1 core CPU. We used 10000 Wikipedia articles as a dataset. 
 
 \subsection{Overhead and scalability}
 Show that our model is scalable and provides low overhead.
