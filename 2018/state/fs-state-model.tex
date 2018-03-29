@@ -17,7 +17,7 @@ A high-level view of a stream is shown in Figure~\ref{stream}.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.48\textwidth]{pics/stream.pdf}
+  \includegraphics[width=0.48\textwidth]{pics/stream}
   \caption{The basic components of data flow}
   \label {stream}
 \end{figure}
@@ -76,9 +76,27 @@ There are three main types of consistency guarantees relating to stream processi
 
 \subsection{Implementation notes}
 
-\begin{itemize}
-    \item Physical operations and hash units: the state is identified by hash unit
-    \item Fronts and rears
-    \item Deterministic model is real! There are extra items, they can be cleared at the barrier, if we know min time  %<-- Here we introduce the barrier!
-    \item Acker - min time provider. Acker observes the progress of the full system. Can play the role of the master %<-- Here we introduce min time notifications
-\end{itemize}
+As it was defined previously, only the grouping operation maintains a state and the state depends on the order of incoming items. Therefore, there is a need to enforce the right order to achieve deterministic processing. However, conservative methods for the order enforcing are based on buffering~\cite{Li:2008:OPN:1453856.1453890} and can imply high latency overhead. The main difficulty here is that items can be easily reordered within stream processing systems because of asynchrony and the possible existence of multiple paths between two nodes. 
+
+In~\cite{we2018seim} we proposed an optimistic approach to handle out-of-order items. The key idea behind it is that grouping can produce invalid results, but they must be filtered out at the barrier. Therefore, there is a need to buffer output items at the barrier before it is ensured that there are no in-flight invalid items and the cannot be generated. In order to minimize latency, it is convenient to release items by global times.
+
+To track the global time of in-flight items we adopt an idea of {\it acker task} inspired by Apache Storm~\cite{apache:storm}. Acker tracks data items using a checksum hash. When the item is sent or received by an operation, its global time and checksum are sent to the acker. This message is called {\it ack}. Acker groups acks by a global time into the structure called {\it ack table}. Once acker receives an ack message with global time {\it GT} and {\it XOR} it updates {\it GT} entry in the table by xoring {\it XOR} with the current value. When an item is sent and later received by the next operation, xoring corresponding {\it XOR}s would yield zero.
+
+Acks are overlapped to nullify table's entry only when an item arrives at the barrier. That is, ack for receive is sent only after both processing and the ack sending for the transformed item, as illustrated in Figure~\ref{acker}. Different shapes of items mean different payloads. The ack for the sending of the triangular element is sent before the rectangular one. We expect the channel between the acker and each operation to be FIFO, so ack for the triangular item would be xored before the rectangular. So the two equal values are separated by distinct one. 
+
+This technique guarantees that the {\it XOR} for some global time is equal to zero only if there are no in-flight elements with such global time.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[scale=0.6]{pics/acker}
+  \caption{The example of tracking minimal time using acker}
+  \label {acker}
+\end{figure}
+
+The minimal time within a stream is the minimal global time with non-zero {\it XOR}. On minimal time changes, acker broadcasts new minimal time to the barrier and operations. Therefore, the barrier can release elements with global time {\it GT} once it received notification from acker that the minimal time within the stream is greater than {\it GT}.
+
+To ensure that no fronts can generate item with the specific timestamp, each front periodically sends to acker special message called {\it report}, which promises that front will not generate items with a timestamp lower than the reported. The value in the ack table can become zero only after the corresponding report arrives.
+
+It must be noted that acker can play the role of worker's coordinator because it observes the progress of the full system. This property is used further in the implementation of mechanisms for fault tolerance. 
+
+\FlameStream\ is implemented in Java, using Akka framework for messaging and applies Apache Zookeeper as a {\it cluster manager}. The usage of Zookeeper mitigates the need for the dedicated master node.
