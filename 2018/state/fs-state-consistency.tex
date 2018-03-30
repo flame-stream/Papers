@@ -37,7 +37,7 @@ Considering the properties mentioned above, the protocol of state snapshotting i
     \item On minimal time event, acker sends a request for the new snapshot along with minimal time notification
     \item When grouping operation receives the request, it asynchronously saves the state and sends back the acceptance message   
     \item When barrier receives the request, it waits until producer acknowledges all in-flight bundles, and then sends back the acceptance message to acker
-    \item When acker receives all acceptance messages, it writes the global time of the snapshot to cluster manager (ZooKeeper) 
+    \item When acker receives all acceptance messages, it writes the global time of the snapshot to cluster state manager (ZooKeeper) 
 \end{itemize}
 
 This protocol is shown in Algorithm~\ref{state-snapshoting}
@@ -106,7 +106,7 @@ Acker can send requests for the new snapshot not for each minimal time event, e.
 
 It is worth to note that any persistent key-value storage can be used as a storage for the state. Hash unit of the corresponding grouping operation concatenated with received minimal time can be used as a key. Waiting until barrier sends out all in-flight bundles is the only dependency between state snapshotting and barrier flushing mechanisms, that does not practically influence end-to-end processing latency. 
 
-This protocol satisfies the following conditions regarding the global time $GT$ that is written to cluster manager:
+This protocol satisfies the following conditions regarding the global time $GT$ that is written to cluster state manager:
 \begin{enumerate}
     \item All stateful operations can restore the state that could be reached after consuming all data items with global times in range $[0..GT)$ 
     \item All bundles that contain items with global times in range $[0..GT)$ have been already acknowledged by data consumer 
@@ -129,7 +129,7 @@ As it was described above, acker traces data items using the table of XORs group
 In case of packet loss or node failure, acker fully restarts the computations. The failure of the acker itself can be detected by special scripts, that trigger the same restart protocol. Restart protocol includes the following steps:
 
 \begin{itemize}
-    \item Acker reads the global time of the last snapshot from cluster manager. After that, it sends this global time to all grouping operations
+    \item Acker reads the global time of the last snapshot from cluster state manager. After that, it sends this global time to all grouping operations
     \item Grouping operations fetch their states from state backend using the corresponding hash unit and received global time as a key. After that, grouping operations acknowledge acker that they are ready for processing 
     \item Barriers request the last released bundle from data consumers and acknowledges acker that they are ready for processing
     \item When acker receives all acknowledgments from groupings and barriers, it sends the global time of the last snapshot to data producer, and the processing begins 
