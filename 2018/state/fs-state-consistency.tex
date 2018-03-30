@@ -47,7 +47,7 @@ This protocol is shown in Algorithm~\ref{state-snapshoting}
 \label{state-snapshoting}
   \begin{algorithmic}
     \Process {Acker}
-      \State $lastCommitTime = -\infty$ \Comment{kept in persistent storage}
+      \State $lastCommitTime = -\infty$ \Comment{Kept in cluster state manager}
       \State $vertices \gets$ all physical groupings and barrier instances
       \State $committed \gets \varnothing$
       \State $ongoingCommit \gets nil$
@@ -71,7 +71,7 @@ This protocol is shown in Algorithm~\ref{state-snapshoting}
     \EndProcess
 
     \Process {Grouping}
-      \State $bucket[]$ \Comment{list of data items ordered by time}
+      \State $bucket[]$ \Comment{List of data items ordered by time}
       \State
       \Event{$\langle MinTime_{commit}, t\rangle$}
         \State \Call{Save}{t, bucket[0, t]} \Comment{Save substate to persistent storage}
@@ -81,7 +81,7 @@ This protocol is shown in Algorithm~\ref{state-snapshoting}
     \EndProcess
 
     \Process {Barrier}
-      \State $lastAcknowledgedTime \gets -\infty$ \Comment{time of the last acknowledged bundle}
+      \State $lastAcknowledgedTime \gets -\infty$ \Comment{Time of the last acknowledged bundle}
       \State $postponedCommitTime \gets \infty$
       \State
       \Event{$\langle MinTime_{commit}, t\rangle$}
