@@ -6,7 +6,7 @@ In this section we describe how consistency guarantees can be provided within th
 
 It is worth to mention that we rely strongly on the properties of the proposed model and its implementation. Firstly, we expect that processing is deterministic, i.e. several independent runs with the same input data produce exactly the same result. This property is guaranteed by the fact that all supported operations produce deterministic results up to the order of input items. Secondly, we suppose that there is a single per cluster agent that can coordinate protocols for fault tolerance. The role of such coordinator is played by the acker. Thirdly, we use the fact that acker broadcasts minimal time notifications when it is guaranteed that there are no in-flight data items with particular global time and such items cannot be generated further. Additionally, we exploit the simple structure of the grouping's state, which is actually a list sorted by the global time. These features allow us to build efficient techniques for barrier flushing and operations' state management, which preserve exactly-once semantics and almost do not depend on each other.
 
-It is important to notice that at most once semantics is preserved even in case of failures without any additional logic. Such behavior is achieved because we assume that data producers do not replay input data if it is not requested and within our system data can only be lost, but not duplicated. Therefore, we mainly focus on providing at least once and exactly-once semantics.
+It is important to notice that at most once semantics is preserved even in case of failures without any additional logic. Such behavior is achieved because we assume that data producers do not replay input data if it is not requested and within our system, data can only be lost, but not duplicated. Therefore, we mainly focus on providing at least once and exactly-once semantics.
 
 \subsection{Input replay}
 Input replay functionality is commonly used to restore computational process after a failure in stream processing systems [?]. The key idea here is that in case of failure, previously released input data can be retrieved again. Usually, replay is started not from the beginning, but from some determined point. Like other stream processing solutions, our system requires from producers an ability to replay input data. The only difference is that the initial point of replay is defined in terms of the global time. Practically, the role of global times can be played by any monotonically increasing sequence, e.g. offsets in Apache Kafka or the values of a logical clock. Therefore, this requirement is not a strong limitation for real-life deployments.
@@ -97,14 +97,14 @@ Considering the properties mentioned above, the protocol of state snapshotting i
     \item On minimal time event, acker sends a request for the new snapshot along with minimal time notification
     \item When grouping operation receives the request, it asynchronously saves the state and sends back the acceptance message   
     \item When barrier receives the request, it waits until producer acknowledges all in-flight bundles, and then sends back the acceptance message to acker
-    \item When acker receives all acceptance messages, it writes the global time of the snapshot to ZooKeeper 
+    \item When acker receives all acceptance messages, it writes the global time of the snapshot to cluster manager (ZooKeeper) 
 \end{itemize}
 
 Acker can send requests for the new snapshot not for each minimal time event, e.g. it can skip request if the elapsed time since the last snapshot is less than some threshold. Parameters that influence the frequency of snapshots are in user's scope.
 
 It is worth to note that any persistent key-value storage can be used as a storage for the state. Hash unit of the corresponding grouping operation concatenated with received minimal time can be used as a key. Waiting until barrier sends out all in-flight bundles is the only dependency between state snapshotting and barrier flushing mechanisms, that does not practically influence end-to-end processing latency. 
 
-This protocol satisfies the following conditions regarding the global time $GT$ that is written to ZooKeeper:
+This protocol satisfies the following conditions regarding the global time $GT$ that is written to cluster manager:
 \begin{enumerate}
     \item All stateful operations can restore the state that could be reached after consuming all data items with global times in range $[0..GT)$ 
     \item All bundles that contain items with global times in range $[0..GT)$ have been already acknowledged by data consumer 
@@ -124,10 +124,10 @@ Network partitioning is the special case of failure because it leads to an unavo
 
 As it was described above, acker traces data items using the table of XORs grouped by global time. Therefore, packet loss can be determined by the acker because in this case, the corresponding value in acker's table will not be nullified. Node failure can be also observed by the acker because state snapshotting protocol requires waiting until all barriers accept that corresponding bundles have been sent and acknowledged. In fact, each node contains a barrier, so if an acceptance is not received during some user-defined timeout, the node can be declared as down. 
 
-In case of packet loss or node failure, acker fully restarts the system. The failure of the acker itself can be detected by special scripts, that trigger the same restart protocol. Restart protocol includes the following steps after all healthy nodes are restarted:
+In case of packet loss or node failure, acker fully restarts the computations. The failure of the acker itself can be detected by special scripts, that trigger the same restart protocol. Restart protocol includes the following steps:
 
 \begin{itemize}
-    \item Acker reads the global time of the last snapshot from ZooKeeper. After that, it sends this global time to all grouping operations
+    \item Acker reads the global time of the last snapshot from cluster manager. After that, it sends this global time to all grouping operations
     \item Grouping operations fetch their states from state backend using the corresponding hash unit and received global time as a key. After that, grouping operations acknowledge acker that they are ready for processing 
     \item Barriers request the last released bundle from data consumers and acknowledges acker that they are ready for processing
     \item When acker receives all acknowledgments from groupings and barriers, it sends the global time of the last snapshot to data producer, and the processing begins 
