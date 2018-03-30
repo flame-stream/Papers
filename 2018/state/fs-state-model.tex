@@ -99,4 +99,4 @@ To ensure that no fronts can generate item with the specific timestamp, each fro
 
 It must be noted that acker can play the role of worker's coordinator because it observes the progress of the full system. This property is used further in the implementation of mechanisms for fault tolerance. 
 
-\FlameStream\ is implemented in Java, using Akka framework for messaging and applies Apache Zookeeper as a {\it cluster manager}. The usage of Zookeeper mitigates the need for the dedicated master node. An overview of the \FlameStream\ system model and architecture is shown in Figure[NEED FOR PIC].
+\FlameStream\ is implemented in Java, using Akka framework for messaging and applies Apache Zookeeper as a {\it cluster state manager}. The usage of Zookeeper mitigates the need for the dedicated master node. An overview of the \FlameStream\ system model and architecture is shown in Figure[NEED FOR PIC].
