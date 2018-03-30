@@ -48,21 +48,21 @@ This protocol is shown in Algorithm~\ref{state-snapshoting}
   \begin{algorithmic}
     \Process {Acker}
       \State $lastCommitTime = -\infty$ \Comment{kept in persistent storage}
-      \State $verteces \gets$ all physical groupings and barrier instances
+      \State $vertices \gets$ all physical groupings and barrier instances
       \State $committed \gets \varnothing$
       \State $ongoingCommit \gets nil$
       \State
       \Event{$\langle MinTime, t \rangle$}
         \If {$\neg ongoingCommit$} \Comment{There is no unfinished commit}
-          \For{{\bf all $v$} $\in verteces$}
+          \For{{\bf all $v$} $\in vertices$}
             \State \Call{Send}{$v, \langle MinTime_{commit}, t\rangle$}
           \EndFor
           \State $ongoingCommit \gets t$
         \EndIf
       \EndEvent
-      \Event{$\langle Committed, v$}
+      \Event{$\langle Committed, v\rangle$}
         \State $committed \gets committed \cup v$
-        \If {$committed = verteces$}
+        \If {$committed = vertices$}
           \State $lastCommitTime \gets ongoingCommit$
           \State $committed \gets \varnothing$
           \State $ongoingCommit = nil$
