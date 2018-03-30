@@ -33,9 +33,6 @@ Hence, the global time for taking snapshot must be periodically chosen. It is co
 
 Considering the properties mentioned above, the protocol of state snapshotting is the following:
 
-\algblockdefx[Process]{Process}{EndProcess}[2][Unknown]{{\bf Process} {\it #2}}{}
-\algblockdefx[Event]{Event}{EndEvent}[2][Unknown]{{\bf upon event #2 do}}{}
-
 \begin{algorithm}
 \caption{Snapshotting}
 \label{consumer-contract}
@@ -46,7 +43,7 @@ Considering the properties mentioned above, the protocol of state snapshotting i
       \State $committed \gets \varnothing$
       \State
       \Event{$\langle MinTime, t \rangle$}
-        \If {$committed \neq verteces$} \Comment{There are no unfinnished commits}
+        \If {$committed \neq verteces$} \Comment{There are no unfinished commits}
           \For{{\bf all $v$} $\in verteces$}
             \State \Call{Send}{$v, \langle MinTime_{commit}, t\rangle$}
           \EndFor
