@@ -48,7 +48,7 @@ Considering the properties mentioned above, the protocol of state snapshotting i
       \Event{$\langle MinTime, t \rangle$}
         \If {$committed \neq verteces$} \Comment{There are no unfinnished commits}
           \For{{\bf all $v$} $\in verteces$}
-            \State \Call{Send}{$v, \langle MinTime, t, Commit \rangle$}
+            \State \Call{Send}{$v, \langle MinTime_{commit}, t\rangle$}
           \EndFor
         \EndIf
       \EndEvent
@@ -64,7 +64,7 @@ Considering the properties mentioned above, the protocol of state snapshotting i
     \Process {Grouping}
       \State $bucket[]$ \Comment{list of data items ordered by time}
       \State
-      \Event{$\langle MinTime, t, Commit \rangle$}
+      \Event{$\langle MinTime_{commit}, t\rangle$}
         \State \Call{Save}{t, bucket[0, t]} \Comment{Save substate to persistent storage}
         \State \Call{ClearRange}{bucket, 0, t}
         \State \Call{Send}{$acker, \langle Committed, self, t \rangle$}
@@ -75,7 +75,7 @@ Considering the properties mentioned above, the protocol of state snapshotting i
       \State $lastAcknowledged \gets -\infty$ \Comment{time of the last acknowledged bundle}
       \State $postponedCommit \gets \infty$
       \State
-      \Event{$\langle MinTime, t, Commit\rangle$}
+      \Event{$\langle MinTime_{commit}, t\rangle$}
         \If{$lastAcknowledged \geq t$}
           \State \Call{Send}{$acker, \langle Committed, self, t \rangle$}
         \Else
