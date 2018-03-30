@@ -69,7 +69,7 @@ The following example illustrates the semantics of the operation. The grouping a
 There are two important properties of the grouping operation: the output tuple is identified by its last element, the results among items with different values of a hash function are independent.
 
 \subsection{Stateful transformations}
-The given set of operations jointly with cyclic execution graphs is enough to implement any stateful operation, i.e. reduce in terms of MapReduce model. The scheme of such transformations is out of the scope of this paper, however, it is deeply detailed in~\cite{we2018seim}.
+The given set of operations jointly with cyclic execution graphs is enough to implement any stateful operation, i.e. reduce in terms of MapReduce model. The scheme of such transformations is out of scope within this paper, however, it is deeply detailed in~\cite{we2018seim}.
 
 \subsection{Consistency guarantees}
 There are three main types of consistency guarantees relating to stream processing. {\it At most once} semantics states that each input event is processed once or not processed at all. {\it At least once} guarantees that each input item is processed, but possibly multiple times, that can lead to result duplication. {\it Exactly once} semantics guarantee that each input event is processed exactly one time. The techniques to achieve these guarantees in the presence of failures are detailed in the next section.
@@ -99,4 +99,4 @@ To ensure that no fronts can generate item with the specific timestamp, each fro
 
 It must be noted that acker can play the role of worker's coordinator because it observes the progress of the full system. This property is used further in the implementation of mechanisms for fault tolerance. 
 
-\FlameStream\ is implemented in Java, using Akka framework for messaging and applies Apache Zookeeper as a {\it cluster manager}. The usage of Zookeeper mitigates the need for the dedicated master node.
+\FlameStream\ is implemented in Java, using Akka framework for messaging and applies Apache Zookeeper as a {\it cluster manager}. The usage of Zookeeper mitigates the need for the dedicated master node. An overview of the \FlameStream\ system model and architecture is shown in Figure[NEED FOR PIC].

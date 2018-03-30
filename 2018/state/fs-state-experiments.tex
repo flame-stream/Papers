@@ -37,19 +37,19 @@ The performance of the proposed deterministic model within the same stream proce
 
 Figure~\ref{performance} shows the latencies of \FlameStream\ within distinct times between checkpoints, and at most once, at least once, and exactly once consistency semantics. As expected, the overhead on at least once and exactly once semantics is low (less than 10 ms) and it does not depend on the time between checkpoints. Slight overhead can be explained by the fact that asynchronous state snapshotting is executed on single-core nodes. The time between checkpoints does not influence latency because barrier flushing and state snapshotting mechanisms are no connected in our model. The latencies under at least once and exactly once semantics are the same because the only difference between them regarding our model is in contract with data consumer.
 
-System's behavior in case of failure and recovery is demonstrated in Figure~\ref{recovery}. It is shown that the system is able to perform recovery processes in an adequate time. Existing latency fluctuations are caused by replay process, JVM restart, etc.
+System's behavior in case of failures and recoveries is demonstrated in Figure~\ref{recovery}. It is shown that the system is able to perform recovery processes in an adequate time. Existing latency fluctuations are caused by replay process, JVM restart, etc.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.58\textwidth]{pics/comparison}
-  \caption{The latencies of \FlameStream\ during failure and recovery}
+  \includegraphics[width=0.58\textwidth]{pics/blink}
+  \caption{The latencies of \FlameStream\ during three failures and recoveries}
   \label {recovery}
 \end{figure}
 
 \subsection{Comparison against Apache Flink}
 One of the most important goals of the experiments is the performance comparison with an industrial solution regarding latency. Apache Flink has been chosen for evaluation because it is state-of-the-art stream processing system that provides similar functionality and achieves low latency in the real-world scenarios~\cite{S7530084}. 
 
-For Apache Flink, the algorithm for building the inverted index is adopted by the usage of {\it FlatMapFunction} for map step and stateful {\it RichMapFunction} for reduce step and for producing the change records. Order enforcing before reduce is implemented using custom {\it ProcessFunction} that buffers all input until corresponding low watermark is received. Watermarks are sent after each document. The network buffer timeout is set to 0 to minimize latency.
+For Apache Flink, the algorithm for building the inverted index is adopted by the usage of {\it FlatMapFunction} for map step and stateful {\it RichMapFunction} for reduce step and for producing the change records. Order enforcing before reduce is implemented using custom {\it ProcessFunction} that buffers all input until corresponding low watermark is received. Watermarks are sent after each document. The network buffer timeout is set to 0 to minimize latency. Custom {\it TwoPhaseCommitSinkFunction}, that buffers output items in memory until transaction is committed, is used for experiments that require exactly-once semantics. 
 
 {\it FsStateBackend} with the local file system is used for storing the state, because {\it RocksDBStateBackend} requires saving state to RocksDB on each update that leads to an additional overhead. {\it FsStateBackend} stores state on the disk only on checkpoints and do not provide an additional overhead against RocksDB storage in \FlameStream, so it is fairer to use it rather than {\it RocksDBStateBackend} for comparison purposes.
 
