@@ -41,22 +41,25 @@ Considering the properties mentioned above, the protocol of state snapshotting i
 \label{consumer-contract}
   \begin{algorithmic}
     \Process {Acker}
-      \State $lastCommit = -\infty$ \Comment{kept in persistent storage}
+      \State $lastCommitTime = -\infty$ \Comment{kept in persistent storage}
       \State $verteces \gets$ all physical groupings and barrier instances
       \State $committed \gets \varnothing$
+      \State $ongoingCommit \gets false$
       \State
       \Event{$\langle MinTime, t \rangle$}
-        \If {$committed \neq verteces$} \Comment{There are no unfinnished commits}
+        \If {$\neg ongoingCommit$} \Comment{There is no unfinnished commit}
           \For{{\bf all $v$} $\in verteces$}
             \State \Call{Send}{$v, \langle MinTime_{commit}, t\rangle$}
           \EndFor
+          \State $ongoingCommit \gets true$
         \EndIf
       \EndEvent
       \Event{$\langle Committed, v, t\rangle$}
         \State $committed \gets committed \cup v$
         \If {$committed = verteces$}
+          \State $lastCommitTime \gets t$
           \State $committed \gets \varnothing$
-          \State $lastCommit \gets t$
+          \State $ongoingCommit = false$
         \EndIf
       \EndEvent
     \EndProcess
@@ -72,21 +75,21 @@ Considering the properties mentioned above, the protocol of state snapshotting i
     \EndProcess
 
     \Process {Barrier}
-      \State $lastAcknowledged \gets -\infty$ \Comment{time of the last acknowledged bundle}
-      \State $postponedCommit \gets \infty$
+      \State $lastAcknowledgedTime \gets -\infty$ \Comment{time of the last acknowledged bundle}
+      \State $postponedCommitTime \gets \infty$
       \State
       \Event{$\langle MinTime_{commit}, t\rangle$}
-        \If{$lastAcknowledged \geq t$}
+        \If{$lastAcknowledgedTime \geq t$}
           \State \Call{Send}{$acker, \langle Committed, self, t \rangle$}
         \Else
-          \State $postponedCommit \gets t$
+          \State $postponedCommitTime \gets t$
         \EndIf
       \EndEvent
       \Event{$\langle Ack, t\rangle$}
-        \State $lastAcknowledged \gets t$
-        \If {$postponedCommit < lastAcknowledged$}
-          \State \Call{Send}{$acker, \langle Committed, self, postponedCommit \rangle$}
-          \State $postponedCommit \gets \infty$
+        \State $lastAcknowledgedTime \gets t$
+        \If {$postponedCommitTime < lastAcknowledgedTime$}
+          \State \Call{Send}{$acker, \langle Committed, self, postponedCommitTime \rangle$}
+          \State $postponedCommitTime \gets \infty$
         \EndIf
       \EndEvent
     \EndProcess
