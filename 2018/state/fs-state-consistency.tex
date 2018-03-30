@@ -53,7 +53,7 @@ This protocol is shown in Algorithm~\ref{state-snapshoting}
       \State $ongoingCommit \gets nil$
       \State
       \Event{$\langle MinTime, t \rangle$}
-        \If {$\neg ongoingCommit$} \Comment{There is no unfinished commit}
+        \If {$ongoingCommit = nil$} \Comment{There is no unfinished commit}
           \For{{\bf all $v$} $\in vertices$}
             \State \Call{Send}{$v, \langle MinTime_{commit}, t\rangle$}
           \EndFor
