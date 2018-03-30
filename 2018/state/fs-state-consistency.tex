@@ -47,7 +47,6 @@ This protocol is shown in Algorithm~\ref{state-snapshoting}
 \label{state-snapshoting}
   \begin{algorithmic}
     \Process {Acker}
-      \State $lastCommitTime = -\infty$ \Comment{Kept in cluster state manager}
       \State $vertices \gets$ all physical groupings and barrier instances
       \State $committed \gets \varnothing$
       \State $ongoingCommit \gets nil$
@@ -63,7 +62,7 @@ This protocol is shown in Algorithm~\ref{state-snapshoting}
       \Event{$\langle Committed, v\rangle$}
         \State $committed \gets committed \cup v$
         \If {$committed = vertices$}
-          \State $lastCommitTime \gets ongoingCommit$
+          \State \Call{Save}{$ongoingCommit$} \Comment{Save time to cluster state manager}
           \State $committed \gets \varnothing$
           \State $ongoingCommit = nil$
         \EndIf
