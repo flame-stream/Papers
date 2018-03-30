@@ -17,11 +17,9 @@ Building inverted index can be implemented as a MapReduce transformation:
     \item Reduce phase consists of combining word positions for the corresponding word into the single index structure 
 \end{itemize}
 
-We assume that reduce phase outputs the change records of the inverted index structure, to make this algorithm suitable for stream processing systems. It implies that each input page triggers the output of the corresponding change records of the full index. 
+We assume that reduce phase outputs the change records of the inverted index structure, to make this algorithm suitable for stream processing systems. It implies that each input page triggers the output of the corresponding change records of the full index. In \FlameStream\ this algorithm is implemented as the typical conversion of MapReduce transformation, which is shown in~\cite{we2018seim}.
 
 Notably, building an inverted index in a streaming manner can be the halfway task between the generation of documents and consuming index updates by search infrastructure. In the real-world, such scenario can be found in freshness-aware systems, e.g., news processing engines.
- 
-In \FlameStream\ this algorithm is implemented as the typical conversion of MapReduce transformation, which is shown in section~\ref{fs-model-section}. Inverted index structure plays the role of an accumulator, and the accumulator map produces the most recent changes of this structure if any.
 
 By the notion of {\it latency} we assume the time between two events: 
 
@@ -41,7 +39,7 @@ System's behavior in case of failures and recoveries is demonstrated in Figure~\
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.58\textwidth]{pics/blink}
+  \includegraphics[width=0.68\textwidth]{pics/blink}
   \caption{The latencies of \FlameStream\ during three failures and recoveries}
   \label {recovery}
 \end{figure}
