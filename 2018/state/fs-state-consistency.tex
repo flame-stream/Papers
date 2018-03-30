@@ -35,7 +35,7 @@ Considering the properties mentioned above, the protocol of state snapshotting i
 
 \begin{itemize}
     \item On minimal time event, acker sends a request for the new snapshot along with minimal time notification
-    \item When grouping operation receives the request, it asynchronously saves the state and sends back the acceptance message   
+    \item When grouping operation receives the request, it asynchronously saves the state and sends back the acceptance message. The local state can be cleared after saving
     \item When barrier receives the request, it waits until producer acknowledges all in-flight bundles, and then sends back the acceptance message to acker
     \item When acker receives all acceptance messages, it writes the global time of the snapshot to cluster state manager (ZooKeeper) 
 \end{itemize}
@@ -121,11 +121,11 @@ Typically, distributed systems take into consideration the following types of fa
     \item Network partitioning
 \end{itemize}
 
-Network partitioning is the special case of failure because it leads to an unavoidable loss of data. We believe that in this case, stream processing does not make sense. To the best of our knowledge, there are no open-source stream processing systems that tolerate network partitioning.
+Network partitioning is the special case of failure because in this case computations cannot be restarted. We believe that in this case, stream processing does not make sense. To the best of our knowledge, there are no open-source stream processing systems that tolerate network partitioning.
 
 As it was described above, acker traces data items using the table of XORs grouped by global time. Therefore, packet loss can be determined by the acker because in this case, the corresponding value in acker's table will not be nullified. Node failure can be also observed by the acker because state snapshotting protocol requires waiting until all barriers accept that corresponding bundles have been sent and acknowledged. In fact, each node contains a barrier, so if an acceptance is not received during some user-defined timeout, the node can be declared as down. 
 
-In case of packet loss or node failure, acker fully restarts the computations. The failure of the acker itself can be detected by special scripts, that trigger the same restart protocol. Restart protocol includes the following steps:
+In case of packet loss or node failure, acker fully restarts the computations. The failure of the acker itself can be detected by cluster state manager, that triggers the same restart protocol. Restart protocol includes the following steps:
 
 \begin{itemize}
     \item Acker reads the global time of the last snapshot from cluster state manager. After that, it sends this global time to all grouping operations

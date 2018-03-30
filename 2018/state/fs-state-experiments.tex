@@ -28,7 +28,7 @@ By the notion of {\it latency} we assume the time between two events:
     \item All the change records for the page leave the stream
 \end{enumerate}
 
-Our experiments were performed on the cluster of 10 Amazon EC2 micro instances with 1GB RAM and 1 core CPU. We used 10000 Wikipedia articles as a dataset. Documents per second input rate is 50. RocksDB~\cite{rocksdb} is used as a storage for the state.
+Our experiments were performed on the cluster of 10 Amazon EC2 micro instances with 1GB RAM and 1 core CPU. We used 10000 Wikipedia articles as a dataset. Documents per second input rate is 50. RocksDB~\cite{rocksdb} is used as a storage for the state. The role of data producer and data consumer is played by custom server application that sends and receives data through socket and measure the latency.
 
 \subsection{Overhead and recovery}
 The performance of the proposed deterministic model within the same stream processing task is deeply analyzed in~\cite{we2018seim}. In this paper we aim to evaluate the overhead on providing consistency guarantees and the time needed for the full recovery.
@@ -57,7 +57,7 @@ Figure~\ref{performance} demonstrates the comparison of latencies between \Flame
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.58\textwidth]{pics/comparison}
+  \includegraphics[width=0.98\textwidth]{pics/comparison}
   \caption{The comparison in latencies between FlameStream and Flink regarding different consistency semantics within 10 nodes, 50 documents per second rate, and distinct delays between checkpoints}
   \label {performance}
 \end{figure}

@@ -28,7 +28,7 @@ We assume that there is a total order on data items. Ordering is preserved when 
 The concept of ordering is shown in Figure~\ref{ordering}. Data item with payload $1'$ is the derivative of the item with payload $1$, according to operation $F$. The same is for items with payloads $2'$ and $2$. After union operation, the order between $1$ and $2$ is preserved. Furthermore, $1'$ follows $1$, and $2'$ follows $2$.  
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.5\textwidth]{pics/ordering}
+  \includegraphics[width=0.6\textwidth]{pics/ordering}
   \caption{The concept of ordering model}
   \label {ordering}
 \end{figure}
@@ -83,7 +83,7 @@ To ensure that no fronts can generate item with the specific timestamp, each fro
 
 It must be noted that acker can play the role of worker's coordinator because it observes the progress of the whole system. This property is used further in the implementation of mechanisms for fault tolerance. 
 
-\FlameStream\ is implemented in Java, using Akka framework for messaging and applies Apache ZooKeeper as a {\it cluster state manager}. The usage of ZooKeeper mitigates the need for the dedicated master node. An overview of the \FlameStream\ system model and architecture is shown in Figure~\ref{arch}
+\FlameStream\ is implemented in Java, using Akka framework for messaging and applies Apache ZooKeeper as a {\it cluster state manager}. The usage of ZooKeeper mitigates the need for the dedicated master node. Some persistent storage is needed for reliable state saving. An overview of the \FlameStream\ system model and architecture is shown in Figure~\ref{arch}.
 
 \begin{figure}[htbp]
   \centering
