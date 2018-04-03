@@ -20,7 +20,8 @@ Despite this fact, an invalid element and the corresponding tombstone go along t
 
 To match tombstone with proper item, there is {\it Trace} value stored in the meta-information. Trace encodes the path that item have traversed. The unique random 64-bit identifier is assigned to each physical operation. The trace is a xor of all operations' ids visited by item so far.
 
-\[Trace := \bigoplus_{op \in \text{visited}} Id(op)\]
+%TODO: uncomment
+%\[Trace := \bigoplus_{op \in \text{visited}} Id(op)\]
 
 Metas are compared lexicographically: firstly global times are compared, then child ids, then traces. Notably, this order is in line with the \FlameStream's ordering model.
 
