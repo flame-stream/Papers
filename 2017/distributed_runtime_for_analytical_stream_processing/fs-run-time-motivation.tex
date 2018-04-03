@@ -1,0 +1,20 @@
+%%%% fs-run-time-motivation  FlameStream motivation
+
+Typically, a user of modern stream processing system deals with the state in the following way:
+
+\begin{lstlisting}
+public class StatefulTask {
+  private final State state = new StateImpl();
+
+  public Aggregation process(KeyValueItem input) {
+    final Aggregation aggregation = state.get(input.getKey());
+    aggregation.update(input.getValue());
+    state.update(input.getKey(), aggregation);
+    return aggregation;
+  }
+}
+\end{lstlisting}
+
+Regarding the code above, each input item of the stateful operation triggers the update of some aggregation that is then sent out down the stream. Although this code looks very simple, there are several pitfalls here. Usually, streaming systems provide a variety of implementations for the state functionality, e.g. Flink has 6 basic implementations~\cite{apache:flink:state}, and more than 30 internal. This is explained by the fact that the knowledge of the internal structure of the state can improve the performance of the overall state management. However, the choice among such diversity of state models can be misleading and require careful investigation. Moreover, if a user wants to use state backend, that is not supported by the system, they must implement logic for all state models. This process requires the implementation of many internal interfaces that can be time demanding. Moreover, complex contracts also can cause the huge difference in logic between state implementations for distinct backends. For instance, Flink's state implementation for RocksDB writes each update to disk, while state adapter for file system uses memory caching. Therefore, the choice of the most appropriate state model within the specified state backend is a complex problem that influences the performance of data processing.
+
+
