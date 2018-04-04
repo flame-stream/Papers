@@ -4,8 +4,8 @@ all:
 	pdflatex fs-run-time.tex
 	pdflatex fs-run-time.tex
 	pdflatex fs-run-time.tex
-	evince fs-run-time.pdf
+	okular fs-run-time.pdf
 
 clean:
-	rm -rf *.{pdf,ps,log,aux,out,dvi,bbl,blg}
+	bash -c 'rm -rf *.{pdf,ps,log,aux,out,dvi,bbl,blg}'
 
