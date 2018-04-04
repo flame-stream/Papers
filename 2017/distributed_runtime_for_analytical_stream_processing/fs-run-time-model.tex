@@ -5,9 +5,7 @@ In this section we outline the model of our system. We focus on the core concept
 
 \subsection{Data flow}
 
-The basic data flow abstraction is a {\it stream}. The stream is represented by an infinite heterogeneous sequence of data items. Data item is a {\it payload} and a {\it meta-information} associated with it. 
-
-\[DataItem := (Payload, Meta)\]
+The basic data flow abstraction is a {\it stream}. The stream is represented by an infinite heterogeneous sequence of data items. Data item is a {\it payload} and a {\it meta-information} associated with it, $DataItem := (Payload, Meta)$.
 
 The payload is an arbitrary user-provided data. Meta is structured system-assigned information. The primary purpose of the meta-information is to impose the total order on data items. 
 
@@ -35,11 +33,20 @@ Data flow graph is distributed among computational units. Each unit runs a proce
 Each operation input has a user-provided hash function called {\it balancing function}. This function is applied to the payload of data items and determines partitioning before each operation. After that, the data items are sent to the worker, which is responsible for the associated hash range. Therefore, load balancing explicitly depends on the user-defined balancing functions. This allows the developer to determine optimal balancing which requires the knowledge of the payload distribution. The system optimizes the hash ranges assignment according to the processing statistics. 
 % Possible partitioning of this graph onto two nodes is shown in Figure~\ref{physical-graph-figure}. In this case, the first partition has the $[A, B)$ hash range and the second has the $[C, D)$. This example demonstrates the extreme case when the data item is shuffled between partitions after each operation.
 
-\begin{figure}[htbp]
+\begin{figure}[ht]
   \centering
-  \includegraphics[width=0.48\textwidth]{pics/logical-graph}
-  \caption{An example of the data flow graph}
-  \label {logical-graph-figure}
+  \begin{minipage}[b]{.5\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{pics/logical-graph}
+    \caption{An example of the data flow graph}
+    \label{logical-graph-figure}
+  \end{minipage}%
+  \begin{minipage}[b]{.5\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{pics/ordering}
+    \caption{The concept of ordering model}
+    \label{ordering}
+  \end{minipage}
 \end{figure}
 
 % \begin{figure}[htbp]
@@ -54,13 +61,6 @@ Each operation input has a user-provided hash function called {\it balancing fun
 We assume that there is a total order on data items. Ordering is preserved when an item is going through the operations. More precisely, the order of output items is the same as the order of corresponding input items. If more than one item is generated, they are inserted in output stream sequentially. Moreover, the output follows corresponding input but precedes the next item. Without diving into details, it should be noted that the order of items is maintained across different fronts.
 
 The concept of ordering is shown in Figure~\ref{ordering}. Data item with payload $1'$ is the derivative of the item with payload $1$, according to operation $F$. The same is for items with payloads $2'$ and $2$. After union operation, the order between $1$ and $2$ is preserved. Furthermore, $1'$ follows $1$, and $2'$ follows $2$.  
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.5\textwidth]{pics/ordering}
-  \caption{The concept of ordering model}
-  \label {ordering}
-\end{figure}
 
 We assume that input items of the operations are strictly ordered.
 

@@ -27,7 +27,7 @@ Metas are compared lexicographically: firstly global times are compared, then ch
 
 Figure~\ref{logical-graph-ops-figure} shows the topology of each operation and how it affects the meta. Grouping and merge operations update trace of the data item by xoring initial trace with its physical id. Map and broadcast apply the same update, but also append child id for each output item.
 
-\begin{figure}[htbp]
+\begin{figure}[htp]
   \centering
   \includegraphics[scale=0.5]{pics/operations}
   \caption{The topology of each operation and how it affects the meta}
@@ -70,9 +70,9 @@ Acks are overlapped to nullify table's entry only when an item arrives at the ba
 
 This technique guarantees that the {\it XOR} for some global time is equal to zero only if there are no in-flight elements with such global time.
 
-\begin{figure}[htbp]
+\begin{figure}[ht]
   \centering
-  \includegraphics[scale=0.6]{pics/acker}
+  \includegraphics[width=0.5\textwidth]{pics/acker}
   \caption{The example of tracking minimal time using acker}
   \label {acker}
 \end{figure}

@@ -30,9 +30,9 @@ Map stage of MapReduce can be formulated directly in terms of our map operation.
 
 To implement reduce stage we apply the drifting state technique and make the accumulator value a part of the stream. Figure~\ref{mapreduce-graph-figure} shows a generic graph for MapReduce transformation. Map and reduce stages are highlighted with a dashed line. 
 
-\begin{figure}[htb]
+\begin{figure}[ht]
   \centering
-  \includegraphics[scale=0.5]{pics/mapreduce}
+  \includegraphics[width=.5\textwidth]{pics/mapreduce}
   \caption{Logical graph for MapReduce transformations}
   \label {mapreduce-graph-figure}
 \end{figure}
@@ -61,7 +61,7 @@ The example of input/output items, which are generated/ transformed by the part 
     \item New accumulator item arrives at grouping through the cycle, but new generated tuple is not accepted by combine map, as well as in step 2.
 \end{enumerate}
 
-\begin{figure}[htb]
+\begin{figure}[ht]
   \centering
   \includegraphics[scale=0.5]{pics/wordcount}
   \caption{The example of input/output items, which are generated/ transformed by the part of the logical graph for word counting}
