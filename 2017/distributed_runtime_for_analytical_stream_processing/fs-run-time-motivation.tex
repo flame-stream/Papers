@@ -1,6 +1,8 @@
 %%%% fs-run-time-motivation  FlameStream motivation
 
-Typically, a user of modern stream processing system deals with the state in the following way:
+\subsection{State management}
+
+A user of a typical modern stream processing system deals with the state in the following way:
 
 \begin{lstlisting}
 public class StatefulTask {
@@ -15,6 +17,20 @@ public class StatefulTask {
 }
 \end{lstlisting}
 
-Regarding the code above, each input item of the stateful operation triggers the update of some aggregation that is then sent out down the stream. Although this code looks very simple, there are several pitfalls here. Usually, streaming systems provide a variety of implementations for the state functionality, e.g. Flink has 6 basic implementations~\cite{apache:flink:state}, and more than 30 internal. This is explained by the fact that the knowledge of the internal structure of the state can improve the performance of the overall state management. However, the choice among such diversity of state models can be misleading and require careful investigation. Moreover, if a user wants to use state backend, that is not supported by the system, they must implement logic for all state models. This process requires the implementation of many internal interfaces that can be time demanding. Moreover, complex contracts also can cause the huge difference in logic between state implementations for distinct backends. For instance, Flink's state implementation for RocksDB writes each update to disk, while state adapter for file system uses memory caching. Therefore, the choice of the most appropriate state model within the specified state backend is a complex problem that influences the performance of data processing.
+Regarding the code above, each input item of the stateful operation triggers the update of some aggregation that is then sent out down the stream. Although this code looks very simple, there are several pitfalls here. Usually, streaming systems provide a variety of implementations for the state functionality. For instance, Flink has 6 basic implementations~\cite{apache:flink:state}, and more than 30 internal. Storm and Samza provide the only key-value model of the state~\cite{apache:storm:state, samza:state}, but it is assumed that user should implement its own model if they need. This is explained by the fact that the knowledge of the internal structure of the state can improve the performance of the overall state management. However, the choice among such diversity of state models can be misleading and require careful investigation. Moreover, if a user wants to use state backend, that is not supported by the system, they must implement logic for all state models. This process requires the implementation of many internal interfaces that can be time demanding. Moreover, complex contracts also can cause the huge difference in logic between state implementations for distinct backends. For instance, Flink's state implementation for RocksDB writes each update to disk, while state adapter for file system uses memory caching. Therefore, the choice of the most appropriate state model within the specified state backend is a complex problem that influences the performance of data processing.
 
+Concerning this issue, we have a purpose to implement stream processing model that avoids direct state handling. We suppose that the way of working with stateful operations can be the following:
+
+\begin{lstlisting}
+public class StatefulTask {
+  public Aggregation process(Aggregation aggregation, KeyValueItem input) {
+    aggregation.update(input.getValue());
+    return aggregation;
+  }
+}
+\end{lstlisting}
+
+In this case, a user does not have to work with state manually, all internal work and optimizations are done by the system. Such approach makes the system more convenient for users and can help them to avoid sophisticated bugs. Unfortunately, existing solutions cannot be easily switched to this model, because their architectures were designed for supporting the first approach of state management. Therefore, we introduce the model that naturally maintains the proposed approach, that is detailed in further sections.
+
+\subsection{Deterministic computations}
 
