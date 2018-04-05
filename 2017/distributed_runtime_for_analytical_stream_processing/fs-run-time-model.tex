@@ -64,9 +64,9 @@ The list of available operations includes:
 
 \item [Broadcast] replicates an input item to the specified number of operations.
 
-\item [ Merge] operation is initialized with the specified number of input nodes. It sends all incoming data to the output.
+\item [Merge] operation is initialized with the specified number of input nodes. It sends all incoming data to the output.
 
-\item [ Grouping]  constructs a single item containing a set of consequtive items assigned to the same worker. The maximem nuber of items that can be grouped is specified as a parameter and is called window size. 
+\item [Grouping] constructs a single item containing a set of consequtive items that have the same value of load balancing function. The maximum number of items that can be grouped is specified as a parameter and is called window size. 
 \end {description}
 
 Grouping is the only operation that has a state.
@@ -75,7 +75,7 @@ Grouping is the only operation that has a state.
 
 The following example illustrates the semantics of the operation. The grouping accepts items with payload represented as natural numbers: 1,2,3, etc. The load balancing function returns 1 if the number is even and 0 otherwise. If the window is set to 3, the output is: \[(1), (2), (1|3), (2|4), (1|3|5), (2|4|6), (3|5|7), (4|6|8)...\]
 
-The grouping operation has  two important properties: the output tuple is identified by its last element, the results among items with different values of a hash function are independent.
+The grouping operation has two important properties: the output tuple is identified by its last element, the results among items with different values of a load balancing function are independent.
 
 % \subsection{User-defined parameters}
 
