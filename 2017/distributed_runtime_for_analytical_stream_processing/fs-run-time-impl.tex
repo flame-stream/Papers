@@ -27,9 +27,9 @@ Metas are compared lexicographically: firstly global times are compared, then ch
 
 Figure~\ref{logical-graph-ops-figure} shows the topology of each operation and how it affects the meta. Grouping and merge operations update trace of the data item by xoring initial trace with its physical id. Map and broadcast apply the same update, but also append child id for each output item.
 
-\begin{figure}[htp]
+\begin{figure}[ht]
   \centering
-  \includegraphics[scale=0.5]{pics/operations}
+  \includegraphics[width=\linewidth]{pics/operations}
   \caption{The topology of each operation and how it affects the meta}
   \label {logical-graph-ops-figure}
 \end{figure}
