@@ -29,7 +29,7 @@ Each operation input has a user-provided hash function called {\it balancing fun
   \centering
   \begin{minipage}[b]{.5\textwidth}
     \centering
-    \includegraphics[width=\linewidth]{pics/logical-graph}
+    \includegraphics[width=0.9\linewidth]{pics/logical-graph}
     \caption{A logical execution  graph}
     \label{logical-graph-figure}
   \end{minipage}%
@@ -41,47 +41,53 @@ Each operation input has a user-provided hash function called {\it balancing fun
   \end{minipage}
 \end{figure}
 
-\subsection{Ordering model}
+% мм\subsection{Ordering model}
 
-We assume that there is a total order on data items. 
-Ordering is preserved when an item is going through the operations. 
-More precisely, the order of output items is the same as the order of corresponding input items. 
-If more than one item is generated, they are inserted in output stream sequentially. 
-Moreover, the output follows corresponding input but precedes the next item. 
-Without diving into details, it should be noted that the order of items is maintained across different fronts.
+Data items are totally ordered according to lables assigned to events at the entry as a part of meta-information. All operations preserve this order. Any additional items produced by an operation are placed between the item being processed and the next item. The ordering labels are dropped when items are delivered from the barrier. 
+
+% We assume that there is a total order on data items. 
+% Ordering is preserved when an item is going through the operations. 
+% More precisely, the order of output items is the same as the order of corresponding input items. 
+% If more than one item is generated, they are inserted in output stream sequentially. 
+% Moreover, the output follows corresponding input but precedes the next item. 
+% Without diving into details, it should be noted that the order of items is maintained across different fronts.
 
 The ordering is illustrated  in Figure~\ref{ordering}. Data item with payload $1'$ is the derivative of the item with payload $1$, according to operation $F$. The same is for items with payloads $2'$ and $2$. After merge operation, the order between $1$ and $2$ is preserved. Furthermore, $1'$ follows $1$, and $2'$ follows $2$.  
 
 %  We assume that input items of the operations are strictly ordered.
 
-\subsection{Operations}
+%  \subsection{Operations}
 
 The list of available operations includes:
+\begin {description}
+\item [Map] applies a user-defined function to the payload of an input item and returns a (possibly empty) sequence of data items with transformed payloads. 
 
-{\bf Map} applies a user-defined function to the payload of an input item. This function returns a sequence of data items with transformed payloads. An output sequence can be empty.
+\item [Broadcast] replicates an input item to the specified number of operations.
 
-{\bf Broadcast} replicates an input item to the specified number of operations.
+\item [ Merge] operation is initialized with the specified number of input nodes. It sends all incoming data to the output.
 
-{\bf Merge} operation is initialized with the specified number of input nodes. It sends all incoming data to the output.
+\item [ Grouping]  constructs a single item containing a set of consequtive items assigned to the same worker. The maximem nuber of items that can be grouped is specified as a parameter and is called window size. 
+\end {description}
 
-{\bf Grouping} has a {\it window size} parameter. Grouping stores input items into distinct buckets by the value of the input balancing function applied to the payload. When the next item arrives at the grouping, it is appended to the corresponding bucket. Each time the grouping outputs window-sized {\it tuple item}, which consists of the most recent (in terms of the meta-information) items of this bucket. If the size of the bucket is less than the window, all items of the bucket are taken. Grouping is the only operation that has a state.
+Grouping is the only operation that has a state.
 
-The following example illustrates the semantics of the operation. The grouping accepts items with payload represented as natural numbers: 1,2,3, etc. The hash function returns 1 if the number is even and 0 otherwise. If the window is set to 3, the output is:
+%has a {\it window size} parameter. Grouping stores input items into distinct buckets by the value of the input balancing function applied to the payload. When the next item arrives at the grouping, it is appended to the corresponding bucket. Each time the grouping outputs window-sized {\it tuple item}, which consists of the most recent (in terms of the meta-information) items of this bucket. If the size of the bucket is less than the window, all items of the bucket are taken. 
 
-\[(1), (2), (1|3), (2|4), (1|3|5), (2|4|6), (3|5|7), (4|6|8)...\]
+The following example illustrates the semantics of the operation. The grouping accepts items with payload represented as natural numbers: 1,2,3, etc. The load balancing function returns 1 if the number is even and 0 otherwise. If the window is set to 3, the output is: \[(1), (2), (1|3), (2|4), (1|3|5), (2|4|6), (3|5|7), (4|6|8)...\]
 
-There are two important properties of the grouping operation: the output tuple is identified by its last element, the results among items with different values of a hash function are independent.
+The grouping operation has  two important properties: the output tuple is identified by its last element, the results among items with different values of a hash function are independent.
 
-\subsection{User-defined parameters}
+% \subsection{User-defined parameters}
 
-A user can set up the following parameters:
+% A user can set up the following parameters:
 
-\begin{enumerate}
-  \item{Computational flow}
-  \item{Balancing functions of the inputs}
-  \item{Map functions}
-  \item{Grouping windows}
-\end{enumerate}
+% \begin{enumerate}
+%  \item{Computational flow}
+%  \item{Balancing functions of the inputs}
+%  \item{Map functions}
+%  \item{Grouping windows}
+%\end{enumerate}
 
-These parameters can produce more than one graph, which can yield equivalent results. Choosing among them is a performance optimization problem that relies on the system.
-It is important to mention that there are no parameters for state-management. Therefore, business-logic is stateless. Nevertheless, the operations set is enough to implement any MapReduce transformation as shown in the next section.
+%These parameters can produce more than one graph, which can yield equivalent results. Choosing among them is a performance optimization problem that relies on the system.
+%It is important to mention that there are no parameters for state-management. 
+%Therefore, business-logic is stateless. Nevertheless, the operations set is enough to implement any MapReduce transformation as shown in the next section.
