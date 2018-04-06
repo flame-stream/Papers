@@ -384,14 +384,16 @@ Amazon Kinesis makes it easy to collect, process, and analyze real-time, streami
   month = feb,
   year = {2018},
   title = {Apache Flink documentation, Working with State},
-  url = {https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/stream/state/state.html}
+  url = {https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/stream/state/state.html},
+  key = {flink-state}
 }
 
 @online{apache:storm:state,
   month = feb,
   year = {2018},
   title = {Apache Storm documentation, Storm State Management},
-  url = {http://storm.apache.org/releases/1.2.1/State-checkpointing.html}
+  url = {http://storm.apache.org/releases/1.2.1/State-checkpointing.html},
+  key={storm-site}
 }
 
 @online{samza:state,
@@ -901,7 +903,6 @@ Distributed stateful stream processing enables the deployment and execution of l
  author = {Stonebraker, Michael and \c{C}etintemel, U\v{g}ur and Zdonik, Stan},
  title = {The 8 Requirements of Real-time Stream Processing},
  journal = {SIGMOD Rec.},
- issue_date = {December 2005},
  volume = {34},
  number = {4},
  month = dec,
@@ -909,12 +910,14 @@ Distributed stateful stream processing enables the deployment and execution of l
  issn = {0163-5808},
  pages = {42--47},
  numpages = {6},
- url = {http://doi.acm.org/10.1145/1107499.1107504},
  doi = {10.1145/1107499.1107504},
  acmid = {1107504},
  publisher = {ACM},
  address = {New York, NY, USA},
-} 
+}
+ url = {http://doi.acm.org/10.1145/1107499.1107504},
+issue_date = {December 2005},
+ 
 Applications that require real-time processing of high-volume data steams are pushing the limits of traditional data processing infrastructures. These stream-based applications include market feed processing and electronic trading on Wall Street, network and infrastructure monitoring, fraud detection, and command and control in military environments. Furthermore, as the "sea change" caused by cheap micro-sensor technology takes hold, we expect to see everything of material significance on the planet get "sensor-tagged" and report its state or location in real time. This sensorization of the real world will lead to a "green field" of novel monitoring and control applications with high-volume and low-latency processing requirements.Recently, several technologies have emerged---including off-the-shelf stream processing engines---specifically to address the challenges of processing high-volume, real-time data without requiring the use of custom code. At the same time, some existing software technologies, such as main memory DBMSs and rule engines, are also being "repurposed" by marketing departments to address these applications.In this paper, we outline eight requirements that a system software should meet to excel at a variety of real-time stream processing applications. Our goal is to provide high-level guidance to information technologists so that they will know what to look for when evaluation alternative stream processing solutions. As such, this paper serves a purpose comparable to the requirements papers in relational DBMSs and on-line analytical processing. We also briefly review alternative system software technologies in the context of our requirements.The paper attempts to be vendor neutral, so no specific commercial products are mentioned.
 
 @article{Cahill:2009:SIS:1620585.1620587,
