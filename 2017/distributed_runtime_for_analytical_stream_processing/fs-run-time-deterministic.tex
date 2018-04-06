@@ -73,8 +73,10 @@ The output consists of the new valid items  $(1, 2) and (2, 3)$  and the tombsto
 
 %In the case of the right order of input items, there are no redundant items produced.
 
-The barrier filters out invalid elements, when corresponding tombstones arrive. 
-It is partially flushed for some meta-information interval when there is a guarantee that there are no any out-of-order items and tombstones further up the stream for this range.
+The barrier  keeps outgoing items on hold and filters out invalid elements, when corresponding tombstones arrive. 
+As soon as no tombstones preceding certain point cannot arrive any more, items are delivered  up to this point. 
+%
+%It is partially flushed for some meta-information interval when there is a guarantee that there are no any out-of-order items and tombstones further up the stream for this range.
 More details can be found  in section~\ref{fs-impl}.
 
 % \subsection{Advantages and limitations}
