@@ -5,21 +5,21 @@ Unlike batch and micro-batch processing, stream processing is inherently non-det
 \begin{itemize}
     \item It is natural for the user of a software system to assume that two independent runs within the same input data produce exactly the same result. The fact that this contract can be violated is able to cause misleadings and complicates the usage of the system
     \item The lack of determinism leads to the loss of reproducibility of the results, that in turn makes the processes of testing and verification excessively complicated
-    \item The ability to reproduce predictable results is extremely useful for providing consistency guarantees~\cite{Stonebraker:2005:RRS:1107499.1107504}. The absence of this property forces the usage of heavy transactional protocols to achieve exactly-once semantics~\cite{Carbone:2017:SMA:3137765.3137777, jacques2016consistent} 
+    \item The ability to reproduce predictable results is extremely useful for providing consistency guarantees~\cite{Stonebraker:2005:RRS:1107499.1107504}. The absence of this property forces the usage of heavy transactional protocols to achieve exactly-once semantics~\cite{Carbone:2017:SMA:3137765.3137777, jacques2016consistent}
 \end{itemize}
 
-Implementation of deterministic processing is tightly connected to system state management: if user defined operations are stateless pure functions and the total order is preserved, the processing becomes deterministic.
+Implementation of deterministic processing is tightly connected to system state management: if user defined operations are pure functions and the total order is preserved, the processing becomes deterministic.
 
-The first step to fulfill these conditions is already done by the most of existing stream processing systems. Instead of providing the handler for external storage they give user operation the state snapshot, provide it with interface to change the state and finally store resulting state snapshot after operation completes.
+The first step to fulfill these conditions is already done by the most of existing stream processing systems. Instead of providing the handler for external storage they give user operation the state object, provide it with interface to change the state and finally store resulting state snapshot after operation completes.
 \begin{equation}
 \label{flink-contract}
 Y = B(x, h) \Rightarrow (Y, s_t) = B(x, s_{t-1}) 
 \end{equation}
-If $B$ is business-logic operation, $x \in \mathbb{E}, Y \subset \mathbb{E}$ are input and output items, $h$---state handler and $s_t$---state snapshots at time $t$this change in contract could be illustrated in (\ref{flink-contract}). In modern setting $B$ becomes stateless and state management is done on the system side. This change allows the system to implement fault tolerance mechanisms, but it also opens the opportunity to implement deterministic processing. 
+If $B$ is business-logic operation, $x \in \mathbb{E}, Y \subset \mathbb{E}$ are input and output items, $h$---state handler and $s_t$---state snapshots at time $t$this change in contract could be illustrated in (\ref{flink-contract}). In modern setting $B$ becomes stateless and state management is done on the system side. This change allows the system to implement fault tolerance mechanisms, but it also opens the opportunity to implement deterministic processing.{WRITE!!!}  
 
-The only difference of state snapshot $s_t$ from the other items in the stream is that these items produced, updated and consumed by the same operation. If system allows cyclic execution graphs~\cite{Murray:2013:NTD:2517349.2522738} this difference becomes obsolete. We treat state snapshot as a part of the stream and in this state of aggregation we call it {\it drifting state}. Drifting state allows to move tolerance logic from user defined operations to common stream consistency mechanisms.
+The only difference of a state object $s_t$ from the other items in the stream is that state objects are produced, updated and consumed by the same operation. If system allows cyclic execution graphs~\cite{Murray:2013:NTD:2517349.2522738} this difference becomes obsolete, as we can transfer state object from operations output to its input. We treat state object as a part of the stream and we call it {\it drifting state}. Drifting state allows to move fault tolerance logic from user defined operations to common stream consistency mechanisms.
 
-The second property of the system needed for deterministic processing is total order preservation. This one is quite challenging due to asynchronous nature of computation node connections. On the other hand we need to care about the order only in the operations that are order dependant. All stateless operations are tolerant to the order and the more stateless operation we have the easier the task becomes. Another important note is that calculations are partitioned and order between partitions does not influence the result. Partition could be calculated at single computation unit, which allows us to implement single node ordering instead of system wide.
+The second property of the system needed for deterministic processing is total order preservation. This one is quite challenging due to asynchronous nature of network. On the other hand we need to care about the order only in the operations that are order-sensitive. All stateless operations are tolerant to the out-of-order items. The more stateless operation we have, the easier the task becomes. Another important note is that calculations are partitioned and order between items from different partitions does not influence the result. Partition could be calculated at single compute unit, which allows us to implement ordering within single unit instead of system wide.
 
 Taking into account above considerations we think that modern stream processing problem setup allows us to build a system that is able to provide deterministic processing with low performance overhead. The desired system properties are:
 \begin{itemize}
@@ -28,8 +28,8 @@ Taking into account above considerations we think that modern stream processing 
 \end{itemize}
 We will use the following principles for our system:
 \begin{itemize}
-    \item Support cyclic execution graph.
-    \item Minimize stateful operations set.
-    \item Localize partition calculation to single node.
+    \item Support cyclic execution graph
+    \item Localize state management in terms of system operation type
+    \item A data partition must be processed on a single node
     \item Map/Reduce completeness
 \end{itemize}
