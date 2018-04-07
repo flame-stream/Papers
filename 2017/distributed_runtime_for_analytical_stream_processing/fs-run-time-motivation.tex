@@ -11,11 +11,13 @@ Unlike batch and micro-batch processing, stream processing is inherently non-det
 Implementation of deterministic processing is tightly connected to system state management: if user defined operations are pure functions and the total order is preserved, the processing becomes deterministic.
 
 The first step to fulfill these conditions is already done by the most of existing stream processing systems. Instead of providing the handler for external storage they give user operation the state object, provide it with interface to change the state and finally store resulting state snapshot after operation completes.
+
+If $B$ is business-logic operation, $x \in \mathbb{E}, Y \subset \mathbb{E}$ are input and output items, $h$---state handler and $s_t$---state object at time $t$ this change in contract could be illustrated in (\ref{flink-contract}). In modern setting $B$ becomes stateless and state management is done on the system side. This change allows the system to implement fault tolerance mechanisms, but it also opens the opportunity to implement deterministic processing.
+
 \begin{equation}
 \label{flink-contract}
 Y = B(x, h) \Rightarrow (Y, s_t) = B(x, s_{t-1}) 
 \end{equation}
-If $B$ is business-logic operation, $x \in \mathbb{E}, Y \subset \mathbb{E}$ are input and output items, $h$---state handler and $s_t$---state snapshots at time $t$this change in contract could be illustrated in (\ref{flink-contract}). In modern setting $B$ becomes stateless and state management is done on the system side. This change allows the system to implement fault tolerance mechanisms, but it also opens the opportunity to implement deterministic processing.{WRITE!!!}  
 
 The only difference of a state object $s_t$ from the other items in the stream is that state objects are produced, updated and consumed by the same operation. If system allows cyclic execution graphs~\cite{Murray:2013:NTD:2517349.2522738} this difference becomes obsolete, as we can transfer state object from operations output to its input. We treat state object as a part of the stream and we call it {\it drifting state}. Drifting state allows to move fault tolerance logic from user defined operations to common stream consistency mechanisms.
 
