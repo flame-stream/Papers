@@ -14,7 +14,7 @@ Global times are compared by front timestamp if they coincide - by front id. It 
 
 Each map operation can produce multiple items from one. To differentiate them the ordinal number, {\it child id}, is stored in the meta information. The {\it ChildIds } is an array of child ids, that corresponds to the all visited map operations.
 
-The global time and child ids are enough to uniquely identify data item within stream if all processing is done without replays. If there are any replays happened during processing, multiple items with the same global time and child ids exist in the stream. Multiple tombstones with the same global time and child ids can exist as well. They can take different paths in computational flow and travel within them with different speeds. 
+The global time and child ids are enough to uniquely identify data item within stream if all processing is done without out-of-order items. If there are any repairs happened during processing, multiple items with the same global time and child ids exist in the stream. Multiple tombstones with the same global time and child ids can exist as well. They can take different paths in computational flow and travel within them with different speeds. 
 
 Despite this fact, an invalid element and the corresponding tombstone go along the same path, because they have the same payload and the balancing functions are deterministic. Moreover, the tombstone visits operations strictly after corresponding item, as links between operation are expected to be FIFO. 
 
@@ -57,7 +57,7 @@ To release the item from the barrier we need to ensure that there are no in-flig
 \begin{proof}
   Let $D_{tomb}$ be an in-flight tombstone for {\it D}. According to the definition of the tombstone item, $D_{tomb}$ and {\it D} has the same global time {\it GT}. We assumed that there are no in-flight element with the global time equal to {\it GT}. Contradiction.
   
-  New tombstones for {\it D} cannot be generated because items with global time greater than {\it GT} cannot trigger replay that affects {\it D}.
+  New tombstones for {\it D} cannot be generated because items with global time greater than {\it GT} cannot trigger repair that affects {\it D}.
 
   This implies that if the stream does not contain items with the global time less than or equal to {\it GT}, then all tombstones for {\it D} had already arrived at the barrier. 
 \end{proof}
