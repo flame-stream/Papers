@@ -66,16 +66,20 @@ The list of available operations includes:
 
 \item [Merge] operation is initialized with the specified number of input nodes. It sends all incoming data to the output.
 
-\item [Grouping] constructs a single item containing a set of consequtive items that have the same value of load balancing function. The maximum number of items that can be grouped is specified as a parameter and is called window size. 
+\item [Grouping] constructs a single item containing a set of consecutive items that have the same value of partition function. The maximum number of items that can be grouped is specified as a parameter  $Window Size.$ 
 \end {description}
 
+The output item of the grouping has the same ordering label as the first item in the input window. 
+Groupings of different partitions are independent. 
 Grouping is the only operation that has a state.
 
 %has a {\it window size} parameter. Grouping stores input items into distinct buckets by the value of the input balancing function applied to the payload. When the next item arrives at the grouping, it is appended to the corresponding bucket. Each time the grouping outputs window-sized {\it tuple item}, which consists of the most recent (in terms of the meta-information) items of this bucket. If the size of the bucket is less than the window, all items of the bucket are taken. 
 
-The following example illustrates the semantics of the operation. The grouping accepts items with payload represented as natural numbers: 1,2,3, etc. The load balancing function returns 1 if the number is even and 0 otherwise. If the window is set to 3, the output is: \[(1), (2), (1|3), (2|4), (1|3|5), (2|4|6), (3|5|7), (4|6|8)...\]
+The following example illustrates  the grouping operation. 
+Let the input stream be a series of ingegers: $ 1,2,3, \ldots.$ and the  partition function returns for even numbers and 0 otherwise. If the window is set to 3, the output is 
+$$ [(1), (2), (1|3), (2|4), (1|3|5), (2|4|6), (3|5|7), (4|6|8), \ldots$$
 
-The grouping operation has two important properties: the output tuple is identified by its last element, the results among items with different values of a load balancing function are independent.
+%The grouping operation has two important properties: the output tuple is identified by its last element, the results among items with different values of a partition function are independent.
 
 % \subsection{User-defined parameters}
 
@@ -92,11 +96,20 @@ The grouping operation has two important properties: the output tuple is identif
 %It is important to mention that there are no parameters for state-management. 
 %Therefore, business-logic is stateless. Nevertheless, the operations set is enough to implement any MapReduce transformation as shown in the next section.
 
-\subsection{Drifting state}
+An important special case of grouping with $Window Size = 2$  provides for realization of stateful calculations with drifting state techniques manifested in section~\ref{motivation-section}.  
+Indeed, consider a map operation that follows the grouping and send its output to the grouping input. This map operation receives a pair of its previos output considered as the state, and new incoming item from the source stream. The map operation calculates new state and sends it back as the grouping input. 
+More details are provided in the appendix~\ref{fs-drifting}.
 
-Most of the computational pipelines require state carrying between consecutive data items. For example, moving average calculation needs partial sums to be stored. The state management in distributed systems is a complicated topic that requires delicate treatment. Some systems forces that all state management is put in business-logic: making state persistent, replication, ensuring state consistency, etc. Others shifts some difficulties to the system's concern, e.g., Flink provides a state API that guarantees consistency in case of failures \cite{Carbone:2017:SMA:3137765.3137777}.
+% \subsection{Drifting state}
 
-The core idea of {\it drifting state} is to fully integrate state management into the system internals by making a state a part of the heterogeneous data flow. In order to do state updates, the drifting state is grouped with new elements, combined, and the new state is emitted. The limited number of such combines can be implemented with DAG by repetition of grouping and map operations. As stream processing is aimed to infinite sequences, there is a need for a cycle in the computational pipeline. The exact structure of such cycle is described in appendix~\ref{fs-drifting} with an example of typical stateful transformation, MapReduce.
+% Most of the computational pipelines require state carrying between consecutive data items. For example, moving average calculation needs partial sums to be stored. The state management in distributed systems is a complicated topic that requires delicate treatment. Some systems forces that all state management is put in business-logic: making state persistent, replication, ensuring state consistency, etc. Others shifts some difficulties to the system's concern, e.g., Flink provides a state API that guarantees consistency in case of failures \cite{Carbone:2017:SMA:3137765.3137777}.
 
-The complex graph with multiple stateful operators can be constructed using a cycle for each stateful component. It is important to say that such tangled structures may not be exposed to the end-user and can be hidden by some high-level API.
+%The core idea of {\it drifting state} is to fully integrate state management into the system internals by making a state a part of the heterogeneous data flow. 
+% In order to do state updates, the drifting state is grouped with new elements, combined, and the new state is emitted. 
+% WRONG!!!  The limited number of such combines can be implemented with DAG by repetition of grouping and map operations. 
+%As stream processing is aimed to infinite sequences, there is a need for a cycle in the computational pipeline. 
+%The exact structure of such cycle is described in appendix~\ref{fs-drifting} with an example of typical stateful transformation, MapReduce.
+
+%The complex graph with multiple stateful operators can be constructed using a cycle for each stateful component. 
+%It is important to say that such tangled structures may not be exposed to the end-user and can be hidden by some high-level API.
 
