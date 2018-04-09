@@ -4,7 +4,7 @@
 
 The key concept of \FlameStream\ model is a datastream. It is a sequence of discrete events described by data items, internally represented as 
 $(Payload, Meta).$
-The $payload$ is processed by a  user-defined code, while $Meta$ is handled with \FlameStream\ engine. In particular
+The $Payload$ is processed by a user-defined code, while $Meta$ is handled with \FlameStream\ engine. In particular
 the primary purpose of the meta-information is to impose the total order on data items. 
 The  $Meta$ is assigned at the entry (called {\em  front}) and is discared at the {\em barrier} just before the exit. 
 
@@ -69,7 +69,7 @@ The list of available operations includes:
 \item [Grouping] constructs a single item containing a set of consecutive items that have the same value of partition function. The maximum number of items that can be grouped is specified as a parameter  $Window Size.$ 
 \end {description}
 
-The output item of the grouping has the same ordering label as the first item in the input window. 
+The output item of the grouping has the same ordering label as the last item in the output group. 
 Groupings of different partitions are independent. 
 Grouping is the only operation that has a state.
 
@@ -97,7 +97,7 @@ $$ [(1), (2), (1|3), (2|4), (1|3|5), (2|4|6), (3|5|7), (4|6|8), \ldots$$
 %Therefore, business-logic is stateless. Nevertheless, the operations set is enough to implement any MapReduce transformation as shown in the next section.
 
 An important special case of grouping with $Window Size = 2$  provides for realization of stateful calculations with drifting state techniques manifested in section~\ref{motivation-section}.  
-Indeed, consider a map operation that follows the grouping and send its output to the grouping input. This map operation receives a pair of its previos output considered as the state, and new incoming item from the source stream. The map operation calculates new state and sends it back as the grouping input. 
+Indeed, consider a map operation that follows the grouping and send its output to the grouping input. This map operation receives a pair of its previous output considered as the state, and new incoming item from the source stream. The map operation calculates new state and sends it back as the grouping input. 
 More details are provided in the appendix~\ref{fs-drifting}.
 
 % \subsection{Drifting state}

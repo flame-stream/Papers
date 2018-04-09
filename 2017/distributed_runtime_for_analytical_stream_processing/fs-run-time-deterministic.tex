@@ -28,11 +28,11 @@ Only the grouping operation maintains a state depending on the order of incoming
 %Therefore, there is a need to enforce the right order to achieve deterministic processing.
 %
 %As it was mentioned above, conservative methods for order enforcing can imply high latency overhead. 
-Within the  optimistic approach, we accept the fact that grouping can produce incorrect output, but  all correct groups  are eventually produced. 
+Within the  optimistic approach, we accept the fact that grouping can produce incorrect output, but we guarantee that all correct groups are eventually produced. 
 %The correctness of tuple means that this tuple would be generated if the order assumption was satisfied.
 To eventually produce all correct tuples, we use an approach called {\it repair}. 
 If an item preceeing already processing items arrives to the grouping operation, all items starting the just arriving onw are re-processed and {\em tombstones} (invalidator) are generated for all items produced earlier for all input items processed before new one. 
-A tombstones for an item is the same item marked with a flag in its meta-information, hence it traverse over the same path in the logial graph as the item being invalidated. 
+A tombstones for an item is the same item marked with a flag in its meta-information, hence it traverse over the same path in the logial graph as the invalidated item.
 
 %If an item arrives the grouping operation, according to the meta-information order, nothing is replayed, and only the most recent window is produced. 
 %However, if an item is out-of-order, it is inserted in the bucket at the correct location, and all tuples, which contain this element, are reproduced. 
@@ -45,12 +45,12 @@ A tombstones for an item is the same item marked with a flag in its meta-informa
 
 An example of grouping repair is shown in Figure~\ref{grouping-replaying}, 
 The green item is out-of-order. 
-The output consists of the new valid items  $(1, 2) and (2, 3)$  and the tombstone {\it (1, 3)} for the previously generated item.
+The output consists of the new valid items  $(1, 2)$ and $(2, 3)$  and the tombstone $(1, 3)$ for the previously generated item.
 
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.6\textwidth]{pics/grouping-replaying}
-  \caption{The repair in grouping with window = 2. % New items are generated on insertion
+  \caption{The repair in grouping with $WindowSize = 2$. % New items are generated on insertion
   }
   \label {grouping-replaying}
 \end{figure}
