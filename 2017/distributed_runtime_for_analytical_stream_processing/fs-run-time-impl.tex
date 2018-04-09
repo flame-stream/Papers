@@ -8,9 +8,9 @@ The meta-information of data item is implemented as a tuple of a {\it global tim
 
 \[Meta := (GlobalTime, ChildIds[], Trace, IsTombstone)\]
 
-Global time is assigned to data item once the item enters the system. It is a pair of logical time and the identifier of the front. The identifier is used to resolve time collisions within different fronts. It is important to notice that we do not rely on any clock synchronization between nodes. The only implication of the clock skew is the system degradation regarding latency: 1ms of the nodes clock difference appends 1 ms to minimal latency.
+Global time is assigned to data item once the item enters the system. It is a pair of logical time and the identifier of the front. The identifier is used to resolve time collisions within different fronts. It is important to notice that we do not rely on any clock synchronization between nodes. The only implication of the clock skew is the system degradation regarding latency: 1 ms of the fronts clock difference appends 1 ms to minimal latency.
 
-Each map operation can produce multiple items from one. To differentiate them an ordinal number, {\it child id}, is stored in the meta information. {\it ChildIds} is an array of child ids, that corresponds to all visited map operations.
+Each map operation can produce multiple items from one.  An ordinal number, {\it child id}, is stored in the meta information to differentiate them. {\it ChildIds} is an array of child ids, that corresponds to all visited map operations.
 
 The global time and child ids are enough to uniquely identify data item within stream if all processing is done in-order. If there are any grouping repairs happened during processing, multiple items with the same global time and child ids exist in the stream. 
 
