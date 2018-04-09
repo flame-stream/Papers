@@ -118,7 +118,7 @@ A growing wealth of digital information is being generated on a daily basis in s
 @article{Carbone:2017:SMA:3137765.3137777,
  author = {Carbone, Paris and Ewen, Stephan and F\'{o}ra, Gyula and Haridi, Seif and Richter, Stefan and Tzoumas, Kostas},
  title = {State Management in Apache Flink\&Reg;: Consistent Stateful Distributed Stream Processing},
- journal = {Proc. VLDB Endow.},
+ journal = {Proc. VLDB},
  issue_date = {August 2017},
  volume = {10},
  number = {12},
@@ -127,10 +127,11 @@ A growing wealth of digital information is being generated on a daily basis in s
  issn = {2150-8097},
  pages = {1718--1729},
  numpages = {12},
- doi = {10.14778/3137765.3137777},
  acmid = {3137777},
  publisher = {VLDB Endowment},
 } 
+ doi = {10.14778/3137765.3137777},
+
 Stream processors are emerging in industry as an apparatus that drives analytical but also mission critical services handling the core of persistent application logic. Thus, apart from scalability and low-latency, a rising system need is first-class support for application state together with strong consistency guarantees, and adaptivity to cluster reconfigurations, software patches and partial failures. Although prior systems research has addressed some of these specific problems, the practical challenge lies on how such guarantees can be materialized in a transparent, non-intrusive manner that relieves the user from unnecessary constraints. Such needs served as the main design principles of state management in Apache Flink, an open source, scalable stream processor.
 
 We present Flink's core pipelined, in-flight mechanism which guarantees the creation of lightweight, consistent, distributed snapshots of application state, progressively, without impacting continuous execution. Consistent snapshots cover all needs for system reconfiguration, fault tolerance and version management through coarse grained rollback recovery. Application state is declared explicitly to the system, allowing efficient partitioning and transparent commits to persistent storage. We further present Flink's backend implementations and mechanisms for high availability, external state queries and output commit. Finally, we demonstrate how these mechanisms behave in practice with metrics and large-deployment insights exhibiting the low performance trade-offs of our approach and the general benefits of exploiting asynchrony in continuous, yet sustainable system deployments.
@@ -166,20 +167,21 @@ Sanjeev Kulkarni, Nikunj Bhagat, Maosong Fu, Vikas Kedigehalli, Christopher Kell
 @inproceedings{Kulkarni:2015:THS:2723372.2742788,
  author = {Kulkarni, Sanjeev and Bhagat, Nikunj and Fu, Maosong and Kedigehalli, Vikas and Kellogg, Christopher and Mittal, Sailesh and Patel, Jignesh M. and Ramasamy, Karthik and Taneja, Siddarth},
  title = {Twitter Heron: Stream Processing at Scale},
- booktitle = {Proceedings of the 2015 ACM SIGMOD International Conference on Management of Data},
+ booktitle = {Proc. of the 2015 ACM SIGMOD Intnl. Conf. on Management of Data},
  series = {SIGMOD '15},
  year = {2015},
  isbn = {978-1-4503-2758-9},
  location = {Melbourne, Victoria, Australia},
  pages = {239--250},
  numpages = {12},
- url = {http://doi.acm.org/10.1145/2723372.2742788},
  doi = {10.1145/2723372.2742788},
  acmid = {2742788},
  publisher = {ACM},
  address = {New York, NY, USA},
  keywords = {real-time data processing., stream data processing systems},
 } 
+ url = {http://doi.acm.org/10.1145/2723372.2742788},
+
 Storm has long served as the main platform for real-time analytics at Twitter. However, as the scale of data being processed in real-time at Twitter has increased, along with an increase in the diversity and the number of use cases, many limitations of Storm have become apparent. We need a system that scales better, has better debug-ability, has better performance, and is easier to manage -- all while working in a shared cluster infrastructure. We considered various alternatives to meet these needs, and in the end concluded that we needed to build a new real-time stream data processing system. This paper presents the design and implementation of this new system, called Heron. Heron is now the de facto stream data processing engine inside Twitter, and in this paper we also share our experiences from running Heron in production. In this paper, we also provide empirical evidence demonstrating the efficiency and scalability of Heron.
 
 
@@ -206,7 +208,7 @@ Tyler Akidau, Robert Bradshaw, Craig Chambers, Slava Chernyak, Rafael J. Fernán
 @article{Akidau:2015:DMP:2824032.2824076,
  author = {Akidau, Tyler and Bradshaw, Robert and Chambers, Craig and Chernyak, Slava and Fern\'{a}ndez-Moctezuma, Rafael J. and Lax, Reuven and McVeety, Sam and Mills, Daniel and Perry, Frances and Schmidt, Eric and Whittle, Sam},
  title = {The Dataflow Model: A Practical Approach to Balancing Correctness, Latency, and Cost in Massive-scale, Unbounded, Out-of-order Data Processing},
- journal = {Proc. VLDB Endow.},
+ journal = {Proc. VLDB },
  issue_date = {August 2015},
  volume = {8},
  number = {12},
@@ -215,11 +217,12 @@ Tyler Akidau, Robert Bradshaw, Craig Chambers, Slava Chernyak, Rafael J. Fernán
  issn = {2150-8097},
  pages = {1792--1803},
  numpages = {12},
- url = {http://dx.doi.org/10.14778/2824032.2824076},
  doi = {10.14778/2824032.2824076},
  acmid = {2824076},
  publisher = {VLDB Endowment},
 } 
+ url = {http://dx.doi.org/10.14778/2824032.2824076},
+
 Unbounded, unordered, global-scale datasets are increasingly common in day-to-day business (e.g. Web logs, mobile usage statistics, and sensor networks). At the same time, consumers of these datasets have evolved sophisticated requirements, such as event-time ordering and windowing by features of the data themselves, in addition to an insatiable hunger for faster answers. Meanwhile, practicality dictates that one can never fully optimize along all dimensions of correctness, latency, and cost for these types of input. As a result, data processing practitioners are left with the quandary of how to reconcile the tensions between these seemingly competing propositions, often resulting in disparate implementations and systems.
 
 We propose that a fundamental shift of approach is necessary to deal with these evolved requirements in modern data processing. We as a field must stop trying to groom unbounded datasets into finite pools of information that eventually become complete, and instead live and breathe under the assumption that we will never know if or when we have seen all of our data, only that new data will arrive, old data may be retracted, and the only way to make this problem tractable is via principled abstractions that allow the practitioner the choice of appropriate tradeoffs along the axes of interest: correctness, latency, and cost.
@@ -232,7 +235,7 @@ Tyler Akidau, Alex Balikov, Kaya Bekiroğlu, Slava Chernyak, Josh Haberman, Reuv
 @article{Akidau:2013:MFS:2536222.2536229,
  author = {Akidau, Tyler and Balikov, Alex and Bekiro\u{g}lu, Kaya and Chernyak, Slava and Haberman, Josh and Lax, Reuven and McVeety, Sam and Mills, Daniel and Nordstrom, Paul and Whittle, Sam},
  title = {MillWheel: Fault-tolerant Stream Processing at Internet Scale},
- journal = {Proc. VLDB Endow.},
+ journal = {Proc. VLDB},
  issue_date = {August 2013},
  volume = {6},
  number = {11},
@@ -378,7 +381,7 @@ Amazon Kinesis makes it easy to collect, process, and analyze real-time, streami
   month = feb,
   year = {2018},
   title = {Apache Flink documentation, Working with State},
-  url = {https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/stream/state/state.html},
+  url = {https: //ci.apache.org/projects/flink/flink-docs-release-1.4/dev/stream/state/state.html},
   key = {flink-state}
 }
 
@@ -547,20 +550,21 @@ Complex event processing has become increasingly important in modern application
 @inproceedings{Wei:2009:SSO:1559845.1559973,
  author = {Wei, Mingzhu and Liu, Mo and Li, Ming and Golovnya, Denis and Rundensteiner, Elke A. and Claypool, Kajal},
  title = {Supporting a Spectrum of Out-of-order Event Processing Technologies: From Aggressive to Conservative Methodologies},
- booktitle = {Proceedings of the 2009 ACM SIGMOD International Conference on Management of Data},
+ booktitle = {Proc. of the 2009 ACM SIGMOD Intnl. Conf. on Management of Data},
  series = {SIGMOD '09},
  year = {2009},
  isbn = {978-1-60558-551-2},
  location = {Providence, Rhode Island, USA},
  pages = {1031--1034},
  numpages = {4},
- url = {http://doi.acm.org/10.1145/1559845.1559973},
  doi = {10.1145/1559845.1559973},
  acmid = {1559973},
  publisher = {ACM},
  address = {New York, NY, USA},
  keywords = {complex event processing, out-of-order data, stream processing},
 } 
+ url = {http://doi.acm.org/10.1145/1559845.1559973},
+
 This demonstration presents a complex event processing system which focuses on out-of-order handling. State-of-the-art event stream processing technology experiences significant challenges when faced with out-of-order data arrival including huge system latencies, missing results, and incorrect result generation. We propose two out-of-order handling techniques, conservative and aggressive strategies. We will show the efficiency of our techniques and how they can satisfy various QoS requirements of different applications.
 
 @article{Mutschler:2014:ASP:2659232.2633686,
@@ -679,7 +683,7 @@ As most current query processing architectures are already pipelined, it seems l
 @inproceedings{Srivastava:2004:FTM:1055558.1055596,
  author = {Srivastava, Utkarsh and Widom, Jennifer},
  title = {Flexible Time Management in Data Stream Systems},
- booktitle = {Proceedings of the Twenty-third ACM SIGMOD-SIGACT-SIGART Symposium on Principles of Database Systems},
+ booktitle = {Proc. PODS},
  series = {PODS '04},
  year = {2004},
  isbn = {158113858X},
@@ -692,6 +696,8 @@ As most current query processing architectures are already pipelined, it seems l
  publisher = {ACM},
  address = {New York, NY, USA},
 } 
+ booktitle = {Proceedings of the Twenty-third ACM SIGMOD-SIGACT-SIGART Symposium on Principles of Database Systems},
+
 Continuous queries in a Data Stream Management System (DSMS) rely on time as a basis for windows on streams and for defining a consistent semantics for multiple streams and updatable relations. The system clock in a centralized DSMS provides a convenient and well-behaved notion of time, but often it is more appropriate for a DSMS application to define its own notion of time---its own clock(s), sequence numbers, or other forms of ordering and times-tamping. Flexible application-defined time poses challenges to the DSMS, since streams may be out of order and uncoordinated with each other, they may incur latency reaching the DSMS, and they may pause or stop. We formalize these challenges and specify how to generate heartbeats so that queries can be evaluated correctly and continuously in an application-defined time domain. Our heartbeat generation algorithm is based on parameters capturing skew between streams, unordering within streams, and latency in streams reaching the DSMS. We also describe how to estimate these parameters at run-time, and we discuss how heartbeats can be used for processing continuous queries.
 
 @article{Babu:2004:EKC:1016028.1016032,
@@ -846,7 +852,7 @@ In recent years, there has been a growing need for complex event processing (CEP
 
 @INPROCEEDINGS{S7530084, 
 author={S. Chintapalli and D. Dagit and B. Evans and R. Farivar and T. Graves and M. Holderbaugh and Z. Liu and K. Nusbaum and K. Patil and B. J. Peng and P. Poulosky}, 
-booktitle={2016 IEEE International Parallel and Distributed Processing Symposium Workshops (IPDPSW)}, 
+booktitle={2016 IEEE International Parallel and Distributed Processing Symp. Workshops (IPDPSW)}, 
 title={Benchmarking Streaming Computation Engines: Storm, Flink and Spark Streaming}, 
 year={2016}, 
 volume={}, 
@@ -1013,7 +1019,7 @@ Guaranteed tuple processing has become critically important for many streaming a
 @inproceedings{borthakur2011apache,
   title={Apache Hadoop goes realtime at Facebook},
   author={Borthakur, Dhruba and Gray, Jonathan and Sarma, Joydeep Sen and Muthukkaruppan, Kannan and Spiegelberg, Nicolas and Kuang, Hairong and Ranganathan, Karthik and Molkov, Dmytro and Menon, Aravind and Rash, Samuel and others},
-  booktitle={Proceedings of the 2011 ACM SIGMOD International Conference on Management of data},
+  booktitle={Proc. of the 2011 ACM SIGMOD Intnl. Conf. on Management of data},
   pages={1071--1080},
   year={2011},
   organization={ACM}
