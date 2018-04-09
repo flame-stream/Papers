@@ -2,26 +2,17 @@
 
 \label {fs-conclusions}
 
-We recognized two issues that can increase the complexity of stream processing workflows:
+We recognized that the lack of determinism implies serious difficulties within the usage of stream processing systems. In this paper, we presented stream processing model that resolves this issue. Particularly, it has the following properties:
 
 \begin{itemize}
-    \item Direct state handling can distract from the main task and is error-prone 
-    \item The lack of determinism implies insufficient ability of verification and composition
+    \item Novel optimistic approach for handling out-of-order items is applied to achieve determinism.
+    \item State management is implemented using drifting state technique, which allows the state to be the part of the stream in the form of an ordinary data item. Such approach relieves the user from the direct state handling.
 \end{itemize}
 
-In this paper, we presented stream processing model that resolves these problems. Particularly, it has the following properties:
-
-\begin{itemize}
-    \item State management is implemented using drifting state technique, which allows the state to be the part of the stream in the form of an ordinary data item. Such approach relieves user from the direct state handling
-    \item Novel optimistic approach for handling out-of-order items is designed to achieve determinism
-\end{itemize}
-
-Both features are able to significantly simplify the development of stream processing workflows because the system addresses problems, which were previously forwarded to a software developer.
-
-Besides, we implemented the prototype of the proposed model and deeply analyzed its performance and imposed overhead. The series of benchmarks within different computational layouts demonstrated the scalability of the proposed framework. These experiments also showed that our system can outperform the alternative.
+We implemented the prototype of the proposed model and deeply analyzed its performance and imposed overhead. The series of benchmarks within different computational layouts demonstrated the scalability of the proposed framework. These experiments also showed that our system can outperform the alternative.
 
 In the future, the following features are planned to be implemented:
 \begin{itemize}
-    \item Fault tolerance, and, hence, at least once and exactly once guarantees
-    \item Acker can be isolated by hash range. This change allows us releasing from barrier independently also known as early key availability
+    \item Fault tolerance, and, hence, at least once and exactly once guarantees. As it was mentioned above, the property of determinism can simplify the implementation of consistency guarantees, so this is a top-priority task for us.
+    \item Acker can be isolated by hash range. This change allows us releasing from barrier independently also known as early key availability.
 \end{itemize}
