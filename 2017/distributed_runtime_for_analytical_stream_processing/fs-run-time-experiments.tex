@@ -39,7 +39,7 @@ The relation between the number of workers, the input document's average rate, a
     \centering
     \includegraphics[width=\linewidth]{pics/fs-index-quantiles}
     \caption{FlameStream latency distribution. Left - the whole distribution, right - high quantiles}
-    \label{fs-index-quantiles}
+    \label{fs-scalability}
   \end{minipage}%
   \begin{minipage}[b]{.40\textwidth}
     \centering
@@ -49,7 +49,7 @@ The relation between the number of workers, the input document's average rate, a
   \end{minipage}%
 \end{figure}
 
-The latencies of \FlameStream\ across multiple workers for the fixed document rate of 70 ms are shown in Figure~\ref{fs-index-quantiles}. This figure demonstrates that latency is not significantly increased with the growth of the number of workers. 
+The latencies of \FlameStream\ across multiple workers for the fixed document rate of 15 rps are shown in Figure~\ref{fs-scalability}. This figure demonstrates that latency is not significantly increased with the growth of the number of workers.
 
 Therefore, the most important conclusions of these experiments are: the proposed method is scalable, the overhead could be optimized by system setup.
 
