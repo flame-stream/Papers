@@ -4,23 +4,37 @@
 \label{fs-drifting}
 
 %\subsection{MapReduce transformation}
-Map stage of MapReduce can be formulated directly in terms of our map operation. The algorithm~\ref{reduce} shows a generic reduce stage. The {\it accumulator} is an explicit state that should be kept between subsequent iterations.
+The  stage of MapReduce can be used  directly in  our map operation. 
+The algorithm~\ref{reduce} shows a 
+The generic reduce stage can be presented as
 
-\begin{algorithm}
-\caption{Generic reduce stage}
-\label{reduce}
-\begin{algorithmic}
-  \Function{reduce}{$key$, $values$}
-    \State $accumulator$ \Comment{reduce's state}
-    \ForAll{$v \in values$} 
-      \State \Call{combine}{$v$, $accumulator$}
-    \EndFor
-    \State \Return \Call{map}{$accumulator$}
-  \EndFunction
-\end{algorithmic}
-\end{algorithm}
+\begin {tabbing}
+1234\=1234\= \kill
+{\bf for} $mapped \in values$ {\bf do}   \\
+\>$accumulator$ := combine ($mapped$, $accumulator$); \\
+\> {\bf end for} \\
+{\bf return } $accumulator$;
+\end {tabbing}
 
-To implement reduce stage we apply the drifting state technique and make the accumulator value a part of the stream. Figure~\ref{mapreduce-graph-figure} shows a generic graph for MapReduce transformation. Map and reduce stages are highlighted with a dashed line. 
+The {\it accumulator} is an explicit state that should be kept between subsequent iterations.
+%
+%\begin{algorithm}
+%\caption{Generic reduce stage}
+%\label{reduce}
+%\begin{algorithmic}
+%  \Function{reduce}{$key$, $values$}
+%    \State $accumulator$ \Comment{reduce's state}
+%    \ForAll{$v \in values$} 
+%      \State \Call{combine}{$v$, $accumulator$}
+%    \EndFor
+%    \State \Return \Call{map}{$accumulator$}
+%  \EndFunction
+%\%\end{algorithmic}
+%\end{algorithm}
+%
+To implement reduce stage we apply the drifting state technique and make the accumulator value a part of the stream. 
+Figure~\ref{mapreduce-graph-figure} shows a generic graph for MapReduce transformation. 
+Map and reduce stages are highlighted with a dashed line. 
 
 \begin{figure}[ht]
   \centering
@@ -29,16 +43,31 @@ To implement reduce stage we apply the drifting state technique and make the acc
   \label {mapreduce-graph-figure}
 \end{figure}
 
-There are four types of data items in this stream: {\it input}, {\it mapped}, {\it accumulator}, {\it and reduced} items. Mapped, accumulator and reduced items have the key-value structure of a payload. The operations of the stream have the following purposes:
+There are four types of data items in this stream: {\it input,} {\it mapped,}   {\it accumulator,} and {\it  reduced.} 
+% Mapped, accumulator and reduced items have the key-value structure of a payload. 
+The operations of the stream have the following purposes:
 
 \begin{itemize}
-  \item The first map operation accepts input items, and outputs mapped items according to map stage of MapReduce model
-  \item The window of grouping is set to 2. It is used to group current accumulator with next data item to combine them further. The hash function is designed to return distinct values for payloads with distinct keys
-  \item The second map implements the actual combining. It accepts inputs that have a form of: \textit{(mapped item)} or \textit{(accumulator item, mapped item)}. The first kind is transformed into some initial value. The second one is combined into the new accumulator item as specified by reduce stage of MapReduce. The tuples with structure \textit{(mapped item, accumulator item)} are filtered out
-  \item The third map is the accumulator map. It accepts accumulator items and applies the final map transformation to them
+  \item The first map operation outputs mapped items according to map stage of MapReduce model
+  
+  \item The grouping with $WindowSize=2$ groups the $accumulator$  with next $mapped$  item. 
+  % The hash function is designed to return distinct values for payloads with distinct keys
+  
+  \item The combine map  produces new state of $accumulator$ to be sent  to grouping.
+  
+  %The second map implements the actual combining. It accepts inputs that have a form of: \textit{(mapped item)} or \textit{(accumulator item, mapped item)}. The first kind is transformed into some initial value. 
+%  The second one is combined into the new accumulator item as specified by reduce stage of MapReduce. 
+ % The tuples with structure \textit{(mapped item, accumulator item)} are filtered out
+  \item The final map converts $accumulator$ into final reduce output.
 \end{itemize}
 
-The fundamental idea is that ordering assumptions about data items guarantees that each accumulator item always arrives at the grouping right after previous mapped item and before a new one. Hence, each mapped item that has not been combined yet would be grouped with the right accumulator item. Additionally, when combine map accepts tuple {\it (mapped item, accumulator item)}, then it means that mapped item was generated before accumulator item, and therefore, it had been already combined. The cycle gives the ability for new accumulator items to get back in the grouping operation. The accumulator map transforms the accumulator item into the final reduced item right before sink. Thereby, the stream reacts to each input item by generating new reduced item, which contains the actual value of the reduce stage.
+Ordering rules  guarantee that each $accumulator$  item always arrives at the grouping  before next not yet combined mapped item.
+%Hence, each mapped item that has not been combined yet would be grouped with the right accumulator item. 
+%Additionally, when combine map accepts tuple {\it (mapped item, accumulator item)}, 
+%then it means that mapped item was generated before accumulator item, and therefore, it had been already combined. 
+The cycle gives the ability for new accumulator items to get back in the grouping operation. 
+%The accumulator map transforms the accumulator item into the final reduced item right before sink. 
+Thereby, the stream reacts to each input item by generating new reduced item, which contains the actual value of the reduce stage.
 
 % \subsection{Example: word count}
 
