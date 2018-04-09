@@ -2,7 +2,7 @@
 
 \label{motivation-section}
 
-Implementation of deterministic processing is tightly connected to system state management: if user defined operations are pure functions and the total order is preserved, the processing becomes deterministic. The first step to fulfill these conditions is already done by the most of existing stream processing systems. Instead of providing the handler for external storage they give user operation the state object, provide it with interface to change the state and finally store resulting state snapshot after operation completes~\cite{carbone2015apache, apache:storm, Noghabi:2017:SSS:3137765.3137770}.
+Implementation of deterministic processing is tightly connected to system state management: if user defined operations are pure functions and the total order is preserved, the processing becomes deterministic. The first step to fulfill these conditions is already done by the most of existing stream processing systems. Instead of providing the handler for external storage they give user operation the state object, provide it with interface to change the state and finally store resulting state object after operation completes~\cite{carbone2015apache, apache:storm, Noghabi:2017:SSS:3137765.3137770}.
 
 If $B$ is business-logic operation, $x \in \mathbb{E}, Y \subset \mathbb{E}$ are input and output items, $h$---state handler and $s_t$---state object at time $t$ this change in contract could be illustrated in (\ref{flink-contract}). In modern setting $B$ becomes stateless and state management is done on the system side. This change allows the system to implement fault tolerance mechanisms, but it also opens the opportunity to implement deterministic processing.
 
