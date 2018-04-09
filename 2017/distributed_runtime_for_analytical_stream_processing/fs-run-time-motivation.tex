@@ -2,17 +2,7 @@
 
 \label{motivation-section}
 
-Unlike batch and micro-batch processing, stream processing is inherently non-deterministic~\cite{Zaharia:2012:DSE:2342763.2342773}. Particularly, there is no guarantee that the messages will be processed in the same order and the system produces the same result between any two runs. Although such behavior is observed in most state-of-the-art stream processing systems, it has several significant pitfalls:
-
-\begin{itemize}
-    \item It is natural for the user of a software system to assume that two independent runs within the same input data produce exactly the same result. The fact that this contract can be violated is able to cause misleadings and complicates the usage of the system
-    \item The lack of determinism leads to the loss of reproducibility of the results, that in turn makes the processes of testing and verification excessively complicated
-    \item The ability to reproduce predictable results is extremely useful for providing consistency guarantees~\cite{Stonebraker:2005:RRS:1107499.1107504}. The absence of this property forces the usage of heavy transactional protocols to achieve exactly-once semantics~\cite{Carbone:2017:SMA:3137765.3137777, jacques2016consistent}
-\end{itemize}
-
-Implementation of deterministic processing is tightly connected to system state management: if user defined operations are pure functions and the total order is preserved, the processing becomes deterministic.
-
-The first step to fulfill these conditions is already done by the most of existing stream processing systems. Instead of providing the handler for external storage they give user operation the state object, provide it with interface to change the state and finally store resulting state snapshot after operation completes~\cite{carbone2015apache, apache:storm, Noghabi:2017:SSS:3137765.3137770}.
+Implementation of deterministic processing is tightly connected to system state management: if user defined operations are pure functions and the total order is preserved, the processing becomes deterministic. The first step to fulfill these conditions is already done by the most of existing stream processing systems. Instead of providing the handler for external storage they give user operation the state object, provide it with interface to change the state and finally store resulting state snapshot after operation completes~\cite{carbone2015apache, apache:storm, Noghabi:2017:SSS:3137765.3137770}.
 
 If $B$ is business-logic operation, $x \in \mathbb{E}, Y \subset \mathbb{E}$ are input and output items, $h$---state handler and $s_t$---state object at time $t$ this change in contract could be illustrated in (\ref{flink-contract}). In modern setting $B$ becomes stateless and state management is done on the system side. This change allows the system to implement fault tolerance mechanisms, but it also opens the opportunity to implement deterministic processing.
 
