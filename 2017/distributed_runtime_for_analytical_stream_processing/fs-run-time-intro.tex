@@ -2,15 +2,35 @@
 
 \label {fs-intro-seciton}
 
-Nowadays, a lot of real-life applications use stream processing for network monitoring, financial analytics, training machine learning models, etc. State-of-the-art industrial stream processing systems, such as Flink \cite{carbone2015apache}, Samza \cite{Noghabi:2017:SSS:3137765.3137770}, Storm \cite{apache:storm}, are able to provide low-latency and high-throughput in distributed environment for this kind of problems. However, unlike batch and micro-batch processing, stream processing is inherently non-deterministic~\cite{Zaharia:2012:DSE:2342763.2342773}. Particularly, there is no guarantee that the messages will be processed in the same order and the system produces the same result between any two runs, even if messages are fed to the system with the same monotonically increasing timestamps. Although such behavior is observed in most state-of-the-art stream processing systems, it has several significant pitfalls:
+Nowadays, a lot of  
+% real-life 
+applications use stream processing for network monitoring, financial analytics, training machine learning models, etc. 
+State-of-the-art industrial stream processing systems, such as Flink \cite{carbone2015apache}, Samza \cite{Noghabi:2017:SSS:3137765.3137770}, Storm \cite{apache:storm}, are able to provide low-latency and high-throughput in distributed environment for this kind of problems. 
+However, unlike batch and micro-batch processing, stream processing is inherently non-deterministic~\cite{Zaharia:2012:DSE:2342763.2342773}. 
+Particularly, there is no guarantee that the messages will be processed in the same order and the system produces the same result between any two runs, even if messages are fed to the system with the same monotonically increasing timestamps. 
+Although such behavior is observed in most state-of-the-art stream processing systems, it has several 
+%significant 
+pitfalls:
 
 \begin{itemize}
-    \item It is natural for the user of a software system to assume that two independent runs within the same input data produce exactly the same result. The fact that this contract can be violated is able to cause misleadings and complicates the usage of the system
-    \item The lack of determinism leads to the loss of reproducibility of the results, that in turn makes the processes of testing and verification excessively complicated~\cite{Zacheilas:2017:MDS:3093742.3093921}
-    \item The ability to reproduce predictable results is extremely useful for providing consistency guarantees~\cite{Stonebraker:2005:RRS:1107499.1107504}. The absence of this property forces the usage of heavy transactional protocols to achieve exactly-once semantics~\cite{Carbone:2017:SMA:3137765.3137777, jacques2016consistent}
+ \item 
+It is natural for the user of a software system to expect  that two independent runs within the same input data produce exactly the same result. The fact that this contract can be violated is able to cause misleadings and complicates the usage of the system.
+
+    \item 
+    The lack of determinism leads to the loss of reproducibility of the results, that in turn makes
+    % the processes of 
+    testing and verification excessively complicated~\cite{Zacheilas:2017:MDS:3093742.3093921}.
+    \item 
+    The ability to reproduce predictable results is extremely useful for providing consistency guarantees~\cite{Stonebraker:2005:RRS:1107499.1107504}. 
+    The absence of this property forces the usage of heavy transactional protocols to achieve exactly-once semantics~\cite{Carbone:2017:SMA:3137765.3137777, jacques2016consistent}.
 \end{itemize}
 
-In this work, we introduce \FlameStream\ - stream processing model that is deterministic by design. This property is achieved using strong ordering. The typical way to perform in-order processing is to set up a special buffer in front of each order-sensitive operation~\cite{Li:2008:OPN:1453856.1453890}. However, extra buffering can lead to latency growth~\cite{Zacheilas:2017:MDS:3093742.3093921}, especially if the processing pipeline contains several operations that require ordered input. We introduce an optimistic approach to handle out-of-order items to avoid this issue. Our approach is based on the idea that state can go along the stream as an ordinary element. Such approach allows us to generalize speculative computations on the arbitrary MapReduce task. Additionally, it makes the model stateless from the business-logic point of view. Our evaluation demonstrates that our method has low overhead and can outperform alternative industrial solution under normal load conditions.
+In this work, we introduce \FlameStream\ - stream processing model that is deterministic by design. This property is achieved using strong ordering. 
+The typical way to perform in-order processing is to set up a special buffer in front of each order-sensitive operation~\cite{Li:2008:OPN:1453856.1453890}. 
+However, extra buffering can lead to latency growth~\cite{Zacheilas:2017:MDS:3093742.3093921}, especially if the processing pipeline contains several operations that require ordered input. We introduce an optimistic approach to handle out-of-order items to avoid this issue. 
+Our approach is based on the idea that state can go along the stream as an ordinary element. 
+Such approach allows us to generalize speculative computations on the arbitrary MapReduce task. 
+Additionally, it makes the model stateless from the business-logic point of view. Our evaluation demonstrates that our method has low overhead and can outperform alternative industrial solution under normal load conditions.
 
 Therefore, the contributions of this paper are the following:
 
