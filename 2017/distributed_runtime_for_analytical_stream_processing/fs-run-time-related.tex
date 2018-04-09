@@ -2,31 +2,12 @@
 
 \label {fs-related-section}
 
-{\bf Data flow:}
-One specific detail of our computational model is cyclic data flow graph support. Naiad~\cite{Murray:2013:NTD:2517349.2522738} by Microsoft Research provides an implementation of this idea. Nevertheless, Naiad applies cycles only for iterative computations and allows for each operation to have its own state. 
-
-Another similar concept of Naiad is the usage of logical timestamps to monitor progress. However, to propagate the latest timestamp the pessimistic approach of notifications broadcasting is defined. Therefore, with the assumption of infrequent out-of-order items, our optimistic behavior is more relevant.
-
-In our model, map and group operations are used as core processing primitives. Google Dataflow~\cite{Akidau:2015:DMP:2824032.2824076} provides the same idea. The primary distinction is that Google Dataflow has different state model which is not applicable to real-world MapReduce stream processing tasks. Additionally, this model provides different window types for grouping. FlameStream grouping is aligned with fixed-sized sliding window, but it is possible to implement other kinds of windows by using cycle and grouping with window-affiliation hash.
-
-{\bf State:}
-The common approach to state management is to give a user the ability to handle a state of almost any supported operations. Such behavior is implemented, for instance, in Apache Flink~\cite{carbone2015apache}, Storm~\cite{apache:storm}, Samza~\cite{Noghabi:2017:SSS:3137765.3137770}, Naiad~\cite{Murray:2013:NTD:2517349.2522738}.
-To the best of our knowledge, FlameStream is the only open-source stream processing system that:
-\begin{itemize}
-    \item Stateless in terms of business-logic
-    \item Supports any MapReduce transformations 
-\end{itemize}
-
 {\bf Deterministic processing and handling out-of-order items:}
-Research works on this topic analyze different methods, but most of them are based on buffering.
-
-K-slack technique can be applied, if network delay is predictable \cite{Babu:2004:EKC:1016028.1016032}. The key idea of the method is the assumption that an event can be delayed for at most K time units. Such assumption can reduce the size of the buffer. However, in the real-life applications, it is very uncommon to have any reliable predictions about the network delay.
-
-IOP and OOP architectures are popular within research works and industrial applications. IOP architecture is applied in \cite{Cranor:2003:GSD:872757.872838, Arasu:2006:CCQ:1146461.1146463}. OOP approach is introduced in \cite{Li:2008:OPN:1453856.1453890} and it is widely used in the industrial stream processing systems, for instance, Flink \cite{carbone2015apache} and Millwheel \cite{Akidau:2013:MFS:2536222.2536229}. However, these methods require buffering all input items before each order-sensitive operation.
-
-In~\cite{Zacheilas:2017:MDS:3093742.3093921}, the mechanism to control the trade-off between determinism and low latency is proposed. However, such approach only provides for relaxing determinism properties to achieve low latency if needed.
+Research works on this topic analyze different methods, but most of them are based on buffering. K-slack technique can be applied, if network delay is predictable \cite{Babu:2004:EKC:1016028.1016032}. The key idea of the method is the assumption that an event can be delayed for at most K time units. Such assumption can reduce the size of the buffer. However, in the real-life applications, it is very uncommon to have any reliable predictions about the network delay. IOP and OOP architectures are popular within research works~\cite{Cranor:2003:GSD:872757.872838, Arasu:2006:CCQ:1146461.1146463, Li:2008:OPN:1453856.1453890} and industrial applications~\cite{carbone2015apache, Akidau:2013:MFS:2536222.2536229}. Their properties are analyzed in section~\ref{fs-collision}. In~\cite{Zacheilas:2017:MDS:3093742.3093921}, the mechanism to control the trade-off between determinism and low latency is proposed. However, such approach only provides for relaxing determinism properties to achieve low latency if needed.
 
 Regarding optimistic techniques, there is less scientific and industrial activity. In \cite{Wei:2009:SSO:1559845.1559973} so-called {\it aggressive} approach is proposed. They introduced an idea of deletion messages that is very similar to our tombstone items. However, authors describe their idea in an abstract way and do not provide any techniques to apply their method for the arbitrary operations. Another optimistic strategy is detailed in \cite{Li2011}. This method is probabilistic: it guarantees the right order with some probability. Besides, it supports only the limited number of query operators.
 
-{\bf Tracking mechanisms within stream:}
-One important task that FlameStream faces is handling of the minimal global time. In Apache Storm~\cite{apache:storm} acker is used for items tracking. We use acker to track the least global time of in-flight items and to detect package losses.
+{\bf Data flow:}
+One specific detail of our computational model is cyclic data flow graph support. Naiad~\cite{Murray:2013:NTD:2517349.2522738} by Microsoft Research provides an implementation of this idea. Nevertheless, Naiad applies cycles only for iterative computations and allows for each operation to have its own state. Another similar concept of Naiad is the usage of logical timestamps to monitor progress. However, to propagate the latest timestamp the pessimistic approach of notifications broadcasting is defined. Therefore, with the assumption of infrequent out-of-order items, our optimistic behavior is more relevant.
+
+In our model, map and group operations are used as core processing primitives. Google Dataflow~\cite{Akidau:2015:DMP:2824032.2824076} provides the same idea. The primary distinction is that Google Dataflow has different state model which does not support MapReduce stream processing tasks. Additionally, this model provides different window types for grouping. FlameStream grouping is aligned with fixed-sized sliding window, but it is possible to implement other kinds of windows by using cycle and grouping with window-affiliation hash.
