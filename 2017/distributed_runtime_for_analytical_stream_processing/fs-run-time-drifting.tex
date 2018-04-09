@@ -4,15 +4,14 @@
 \label{fs-drifting}
 
 %\subsection{MapReduce transformation}
-The  stage of MapReduce can be used  directly in  our map operation. 
-The algorithm~\ref{reduce} shows a 
+The map stage of MapReduce can be expressed in terms of our map operation. 
 The generic reduce stage can be presented as
 
 \begin {tabbing}
 1234\=1234\= \kill
 {\bf for} $mapped \in values$ {\bf do}   \\
 \>$accumulator$ := combine ($mapped$, $accumulator$); \\
-\> {\bf end for} \\
+{\bf end for} \\
 {\bf return } $accumulator$;
 \end {tabbing}
 
@@ -38,7 +37,7 @@ Map and reduce stages are highlighted with a dashed line.
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=.5\textwidth]{pics/mapreduce}
+  \includegraphics[width=1\textwidth]{pics/mapreduce}
   \caption{Logical graph for MapReduce transformations}
   \label {mapreduce-graph-figure}
 \end{figure}
@@ -48,7 +47,7 @@ There are four types of data items in this stream: {\it input,} {\it mapped,}   
 The operations of the stream have the following purposes:
 
 \begin{itemize}
-  \item The first map operation outputs mapped items according to map stage of MapReduce model
+  \item The first map operation outputs mapped items according to map stage of MapReduce model.
   
   \item The grouping with $WindowSize=2$ groups the $accumulator$  with next $mapped$  item. 
   % The hash function is designed to return distinct values for payloads with distinct keys
@@ -61,7 +60,7 @@ The operations of the stream have the following purposes:
   \item The final map converts $accumulator$ into final reduce output.
 \end{itemize}
 
-Ordering rules  guarantee that each $accumulator$  item always arrives at the grouping  before next not yet combined mapped item.
+Ordering rules  guarantee that each $accumulator$  item always arrives at the grouping right before next not yet combined mapped item.
 %Hence, each mapped item that has not been combined yet would be grouped with the right accumulator item. 
 %Additionally, when combine map accepts tuple {\it (mapped item, accumulator item)}, 
 %then it means that mapped item was generated before accumulator item, and therefore, it had been already combined. 
