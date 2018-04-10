@@ -40,16 +40,19 @@ To release an item from the barrier we need to ensure that there are no in-fligh
 \end{minimal-time-claim}
 
 \begin{proof}
-  Let $D_{tomb}$ be an in-flight tombstone for {\it D}. According to the definition of the tombstone item, $D_{tomb}$ and {\it D} has the same global time {\it GT}. We assumed that there are no in-flight element with the global time equal to {\it GT}. Contradiction.
+  Let $D_{tomb}$ be an in-flight tombstone for {\it D}. According to the definition of the tombstone item, $D_{tomb}$ and {\it D} has the same global time {\it GT}. 
+ We assumed that there are no in-flight element with the global time equal to {\it GT}. Contradiction.
   
   New tombstones for {\it D} cannot be generated because items with global time greater than {\it GT} cannot trigger repair that affects {\it D}.
 
-  This implies that if the stream does not contain items with the global time less than or equal to {\it GT}, then all tombstones for {\it D} had already arrived at the barrier. 
+  This implies that if the stream does not contain items with the global time less $ \le $ {\it GT}, then all tombstones for {\it D} had already arrived at the barrier. 
 \end{proof}
 
 Therefore, to output an item from the barrier, we should ensure that there are no items in the stream with the global time less than or equal to the global time of this item.
 
-To track the global time of in-flight items we adopt an idea of {\it acker task} inspired by Apache Storm~\cite{apache:storm}. Acker tracks data items using a checksum hash, called {\it XOR}. When the item is sent or received by an operation, its global time and checksum are sent to the acker. This message is called {\it ack}. Acker groups acks by a global time and xors received checksum hashes. When an item is sent and later received by the next operation, xoring corresponding {\it XOR}s would yield zero.
+To track the global time of in-flight items we adopt an idea of {\it acker task} inspired by Apache Storm~\cite{apache:storm}. Acker tracks data items using a checksum hash, called {\it XOR}. When the item is sent or received by an operation, its global time and checksum are sent to the acker. This message is called {\it ack}.
+ Acker groups acks by a global time and xors received checksum hashes. 
+When an item is sent and later received by the next operation, xoring corresponding {\it XOR}s would yield zero.
 
 Acks are overlapped to nullify {\it XOR} only when an item arrives at the barrier. That is, ack for receive is sent only after both processing and the ack sending for the transformed item, as illustrated in Figure~\ref{acker}. This technique guarantees that the {\it XOR} for some global time is equal to zero only if there are no in-flight elements with such global time.
 
@@ -62,6 +65,7 @@ Acks are overlapped to nullify {\it XOR} only when an item arrives at the barrie
 
 The minimal time within a stream is the minimal global time with non-zero {\it XOR}. On minimal time changes, acker broadcasts the {\it new minimal time notification}. Therefore, the barrier can release elements with global time {\it GT} once it received notification with time greater than {\it GT}.
 
-To ensure that no fronts can generate item with the specific timestamp, each front periodically sends to acker special message called {\it heartbeat}, which promises that front will not generate items with a timestamp lower than the reported. The value in the ack table can become zero only after the corresponding heartbeat arrives.
+To ensure that no fronts can generate item with the specific timestamp, each front periodically sends to acker special message called {\it heartbeat} indicating that front will not issue items with a timestamp lower than the reported. The value in the ack table can become zero only after the corresponding heartbeat arrives.
 
 The proposed mechanism could be isolated by hash range. This change allows us releasing from barriers on different workers independently. This feature is also known as early key availability.
+
