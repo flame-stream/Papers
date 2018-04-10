@@ -7,7 +7,7 @@ We used a problem of building an incremental inverted index as a stream processi
 %% This task is chosen because it has the following properties:
 
 \begin{itemize}
-    \item It requires stateful operations and provides for evaluation of the performance of the  stateful pipeline
+    \item It requires stateful operations that may cause overheads
     \item Computational flow contains network shuffle that can violate the ordering constraints %of some operations 
     enabling evaluation of our optimistic techniques.
     %Therefore, inverted index task can verify the performance of our optimistic approach
@@ -72,7 +72,7 @@ These results confirm that the ratio does not increase with the growth of the nu
 
 The latencies of \FlameStream\ across multiple workers for the fixed document rate of 15 rps are shown in Figure~\ref{fs-scalability}. 
 This experiment demonstrates that latency is stable  under  the growth in f the number of workers.
-
+%
 %Therefore, the most important conclusions of 
 These experiments show that  the our method is scalable with proper  optimization of  the system setup.
 
@@ -93,10 +93,11 @@ We compare $50^{th}$, $75^{th}$, $95^{th}$, and $99^{th}$ percentile of distribu
 The comparison of latencies between \FlameStream\ and Flink within 10 nodes and distinct document rates is shown in the (a) plot in Figure~\ref{fs-index-quantiles}. 
 In this case, \FlameStream\ provides better  latency even under high load. 
 These results confirm that optimistic approach for deterministic processing is able to yield  lower  latency than conservative techniques. 
-Firstly, the reason for better performance can be the fact that Flink starts to update index only after the buffer before reduce stage is flushed. 
-In contrast, \FlameStream\ flushes its barrier right before data is sent to a user, according to its optimistic nature. 
+The  reason for that  can be that Flink starts to update index only after the buffer before reduce stage is flushed, 
+while  \FlameStream\ flushes its barrier right before data are delivered.
+%is sent to a user, according to its optimistic nature. 
 % At this moment, all corresponding computations have been already done. 
-Secondly, low watermarks go along the stream and can be delayed by long-running operations, while acker processes ack messages independently. It is confirmed by (c) plot in Figure~\ref{fs-index-quantiles}, which compares  waiting time in Flink buffer and \FlameStream\ barrier.
+Low watermarks go along the stream and can be delayed by long-running operations, while acker processes ack messages independently. It is confirmed by (c) plot in Figure~\ref{fs-index-quantiles}, which compares  waiting time in Flink buffer and \FlameStream\ barrier.
 
 \begin{figure}[ht]
   \centering
@@ -105,7 +106,15 @@ Secondly, low watermarks go along the stream and can be delayed by long-running 
   \label {fs-index-quantiles}
 \end{figure}
 
-However, there are conditions, which are not suitable for the optimistic approach. The (b) plot in Figure~\ref{fs-index-quantiles} shows the comparison of latencies between \FlameStream\ and Flink within 5 nodes and distinct document rates. Flink outperforms \FlameStream\ under extreme load. Such behavior follows from the fact that \FlameStream\ provides significant overhead under very high pressure within a few computational units. This result evidently corresponds with measurements of the overhead in Figure~\ref{overhead}. Nevertheless, it should be noted that \FlameStream\ demonstrates better latency under non-extreme load.
+%However, there are conditions, which are not suitable for the optimistic approach. 
+
+The (b) plot in Figure~\ref{fs-index-quantiles} 
+compares  latencies between \FlameStream\ and Flink within 5 nodes and distinct document rates. 
+Flink outperforms \FlameStream\ under extreme load. 
+Such behavior follows from the fact that \FlameStream\ creates significant overhead under very high load.
+% within a few computational units. 
+This result evidently is in line with measurements of the overhead in Figure~\ref{overhead}. 
+Nevertheless,  \FlameStream\ demonstrates better latency if the load is moderatee.
 
 Thus, Flink can be more appropriate if there is a need to optimize computational resources under a fixed load, but the demands on latency are not very strict, or determinism is not required. \FlameStream\ is more relevant for cases when low latency and determinism are strict requirements, but an allocation of additional resources is not a problem.  
 
