@@ -74,8 +74,8 @@ Grouping is the only operation that has a state.
 %has a {\it window size} parameter. Grouping stores input items into distinct buckets by the value of the input balancing function applied to the payload. When the next item arrives at the grouping, it is appended to the corresponding bucket. Each time the grouping outputs window-sized {\it tuple item}, which consists of the most recent (in terms of the meta-information) items of this bucket. If the size of the bucket is less than the window, all items of the bucket are taken. 
 
 The following example illustrates  the grouping operation. 
-Let the input stream be a series of ingegers: $ 1,2,3, \ldots.$ and the  partition function returns for even numbers and 0 otherwise. If the window is set to 3, the output is 
-$$ [(1), (2), (1|3), (2|4), (1|3|5), (2|4|6), (3|5|7), (4|6|8), \ldots$$
+Let the input stream be a series of ingegers: $ 1,2,3, \ldots$. and the  partition function returns for even numbers and 0 otherwise. If the window is set to 3, the output is 
+$$(1), (2), (1|3), (2|4), (1|3|5), (2|4|6), (3|5|7), (4|6|8), \ldots$$
 
 %The grouping operation has two important properties: the output tuple is identified by its last element, the results among items with different values of a partition function are independent.
 

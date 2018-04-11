@@ -16,7 +16,7 @@ We used a problem of building an incremental inverted index as a stream processi
 %It is worthwhile to mention that building inverted index can be considered as the halfway task between documents generation and searching. 
 In the real-world, such scenario can be found in freshness-aware systems, e.g., news processing engines.
 
-Building of inverted index % is implemented in terms of MapReduce transformations. 
+Building of an inverted index % is implemented in terms of MapReduce transformations. 
 %We 
 starts with page mapping into the pairs {\it (word; word positions within the page)}, then  word positions are reduced by word into the single index update. 
 %We assume the output of the stream to be change records of the inverted index structure, i.e., 
@@ -71,10 +71,10 @@ These results confirm that the ratio does not increase with the growth of the nu
 \end{figure}
 
 The latencies of \FlameStream\ across multiple workers for the fixed document rate of 15 rps are shown in Figure~\ref{fs-scalability}. 
-This experiment demonstrates that latency is stable  under  the growth in f the number of workers.
+This experiment demonstrates that latency is stable  under  the growth in the number of workers.
 %
 %Therefore, the most important conclusions of 
-These experiments show that  the our method is scalable with proper  optimization of  the system setup.
+These experiments show that our method is scalable with proper  optimization of  the system setup.
 
 \subsection{Performance Comparison with an Industrial Solution}
 

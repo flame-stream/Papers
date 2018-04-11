@@ -36,17 +36,17 @@ To release an item from the barrier we need to ensure that there are no in-fligh
 \newtheorem{minimal-time-claim}{Lemma}
 
 \begin{minimal-time-claim}
-For any data item $D$ let  $ \cal {G} (D) $ be its global time. 
-  If data item $D$  has global time $ \cal {G} (D)  > \cal {G} (F)$  for  each in-flight element $F,$ 
-  then all tombstones  for that item had already arrived at the barrier.
+For any data item $D$ let $\mathcal{G} (D)$ be its global time. 
+  If data item $D$ has global time $\mathcal{G} (D) > \mathcal{G} (F)$ for each in-flight element $F$, 
+  then all tombstones for that item had already arrived at the barrier.
 \end{minimal-time-claim}
 
 \begin{proof}
-  Let    $D_{tomb}$ be an  tombstone for {\it D}. 
-  According to the definition of the tombstone item, $\cal{G} (D_{tomb}) = \cal {G} (D),$   hence $D_{tomb}$ is not in-flight.
+  Let $D_{tomb}$ be a tombstone for {\it D}. 
+  According to the definition of the tombstone item, $\mathcal{G} (D_{tomb}) = \mathcal{G} (D)$, hence $D_{tomb}$ is not in-flight.
   
-  New tombstones for $D$ cannot be generated because items with global time greater than $\cal{G} (D)$ cannot trigger repair that affects  $D.$
-  This implies that if the stream does not contain items $D\prime$ such that $ \cal{G} (D\prime \le \cal{G} (D) ,$ then all tombstones for $D$ had already arrived at the barrier. 
+  New tombstones for $D$ cannot be generated because items with global time greater than $\mathcal{G} (D)$ cannot trigger repair that affects $D$,
+  This implies that if the stream does not contain items $D\prime$ such that $\mathcal{G} (D\prime) \le \mathcal{G} (D)$, then all tombstones for $D$ had already arrived at the barrier. 
 \end{proof}
 
 Therefore, to output an item from the barrier, we should ensure that there are no items in the stream with the global time less than or equal to the global time of this item.
@@ -65,10 +65,10 @@ Acks are overlapped to nullify {\it XOR} only when an item arrives at the barrie
 \end{figure}
 
 The minimal time within a stream is the minimal global time with non-zero {\it XOR}. On minimal time changes, acker broadcasts the {\it new minimal time notification}. 
-Therefore, the barrier can release elements with global time $\cal{G} (D)$ 
-once it received notification with time greater than $\cal{G} (D).$
+Therefore, the barrier can release elements with global time $\mathcal{G} (D)$ 
+once it received notification with time greater than $\mathcal{G} (D)$.
 
-To ensure that no fronts can generate item with the specific timestamp, each front periodically sends to acker special message called {\it heartbeat} indicating that front will not issue items with a timestamp lower than the reported. The value in the ack table can become zero only after the corresponding heartbeat arrives.
+To ensure that no fronts can generate item with the specific timestamp, each front periodically sends to acker a special message called {\it heartbeat} indicating that front will not issue items with a timestamp lower than the reported. The value in the ack table can become zero only after the corresponding heartbeat arrives.
 
 The proposed mechanism could be isolated by hash range. This change allows us releasing from barriers on different workers independently. This feature is also known as early key availability.
 
