@@ -7,7 +7,7 @@ We used a problem of building an incremental inverted index as a stream processi
 %% This task is chosen because it has the following properties:
 
 \begin{itemize}
-    \item It requires stateful operations that may cause overheads
+    \item It requires stateful operations
     \item Computational flow contains network shuffle that can violate the ordering constraints %of some operations 
     enabling evaluation of our optimistic techniques.
     %Therefore, inverted index task can verify the performance of our optimistic approach
