@@ -11,16 +11,16 @@ The stream processing is specified by a logical execution graph.
 Each node of the graph represents a single operation on data items, and edges describe the routing of data items between operations.  
 Our model allows cycles in the graph while such graphs are commonly assumed to be acyclic (DAGs) 
 ~\cite{Zaharia:2016:ASU:3013530.2934664, Carbone:2017:SMA:3137765.3137777}. 
-The cycles are required for specification of certain computations (e.g MapReduce-based) with our spartan set of operation types (outlined below).
+The cycles are required for specification of certain computations (e.g MapReduce-based) with our set of operation types (outlined below).
 %Moreover, as we show further, there are cases when cycles are required, e.g., for MapReduce-based algorithms. 
 Figure~\ref{logical-graph-figure} shows the example of logical execution graph.
 
 % \subsection{Physical deployment and partitioning}
 A distributed hardware environment is modelled as a set of {\em worker} processes. 
-Each the workers executes logical execution graph and has an assigned range of hash values used for physical routing of data items to workers. 
+Each worker executes logical execution graph and has an assigned range of hash values used for physical routing of data items to workers. 
 %An integer interval (hash range) is assigned to every worker. Intervals are not intersected and cover the range of 32-bit signed integer.
 %
-Each operation input has a user-provided hash function called {\it balancing function}. This function is applied to the payload of data items and determines partitioning before each operation. After that, the data items are sent to the worker, which is responsible for the associated hash range. Therefore, load balancing explicitly depends on the user-defined balancing functions. 
+Each operation entry has a user-provided hash function called {\it balancing function}. This function is applied to the payload of data items and determines partitioning before each operation. After that, the data items are sent to the worker, which is responsible for the associated hash range. Therefore, load balancing explicitly depends on the user-defined balancing functions. 
 %This allows the developer to determine optimal balancing which requires the knowledge of the payload distribution. The system optimizes the hash ranges assignment according to the processing statistics. 
 
 \begin{figure}[ht]
@@ -65,16 +65,17 @@ The list of available operations includes:
 \item [Merge] operation is initialized with the specified number of input nodes. It sends all incoming data to the output.
 
 \item [Grouping] constructs a single item containing a set of consecutive items that have the same value of partition function. The maximum number of items that can be grouped is specified as a parameter  $Window Size.$ 
-\end {description}
 
 The output item of the grouping has the same ordering label as the last item in the output group. 
 Groupings of different partitions are independent. 
 Grouping is the only operation that has a state.
 
+\end {description}
+
 %has a {\it window size} parameter. Grouping stores input items into distinct buckets by the value of the input balancing function applied to the payload. When the next item arrives at the grouping, it is appended to the corresponding bucket. Each time the grouping outputs window-sized {\it tuple item}, which consists of the most recent (in terms of the meta-information) items of this bucket. If the size of the bucket is less than the window, all items of the bucket are taken. 
 
 The following example illustrates  the grouping operation. 
-Let the input stream be a series of ingegers: $ 1,2,3, \ldots$. and the  partition function returns for even numbers and 0 otherwise. If the window is set to 3, the output is 
+Let the input stream be a series of integers: $ 1,2,3, \ldots$. and the  partition function returns for even numbers and 0 otherwise. If the window is set to 3, the output is 
 $$(1), (2), (1|3), (2|4), (1|3|5), (2|4|6), (3|5|7), (4|6|8), \ldots$$
 
 %The grouping operation has two important properties: the output tuple is identified by its last element, the results among items with different values of a partition function are independent.
