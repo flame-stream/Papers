@@ -12,7 +12,7 @@ Global time is assigned to data item once the item enters the system. It is a pa
 
 Each map operation can produce multiple items from one.  An ordinal number, child id, is stored in the meta information to differentiate them. {\it ChildIds} is an array of child ids, that corresponds to all visited map operations.
 
-The global time and child ids are enough to uniquely identify data item within a stream if all processing is done in-order. If there are any grouping repairs happened during processing, multiple items with the same global time and child ids exist in the stream. 
+The global time and child ids are enough to uniquely identify data item within a stream if all processing is done in-order. If any grouping repairs happened during processing, multiple items with the same global time and child ids exist in the stream. 
 
 To match tombstone item with an invalidated item, there is {\it Trace} value stored in the meta-information. The unique random 64-bit identifier is assigned to each physical operation. The trace is a xor of all operations' ids visited by item so far. Invalid item and the corresponding tombstone go along the same path, because they have the same payload and the balancing functions are deterministic, so they have the same trace values.
 

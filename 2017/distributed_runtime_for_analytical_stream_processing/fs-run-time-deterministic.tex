@@ -11,7 +11,7 @@ To restrict outputs to only one possible result, we impose the following  restri
   \item We impose a strict ordering requirement on the grouping  input
 \end{itemize}
 
-The former   can be  satisfied by moderating the  business-logic, 
+The former   can be  satisfied by moderating the  business logic, 
 the latter  is foreign to the distributed systems: 
 it is hard to ensure  the right order of delivery due to  asynchrony inherent for a distributed system. 
 % In this section we review common approaches for the order enforcement, then we introduce our approach.
@@ -24,7 +24,7 @@ Some state-of-the-art stream processing systems adopt OOP~\cite{Carbone:2017:SMA
 %
 %As it was defined previously, 
 
-Only the grouping operation maintains a state depending on the order of incoming items. 
+Only the grouping operation retains a dependency on the order of incoming items. 
 %Therefore, there is a need to enforce the right order to achieve deterministic processing.
 %
 %As it was mentioned above, conservative methods for order enforcing can imply high latency overhead. 

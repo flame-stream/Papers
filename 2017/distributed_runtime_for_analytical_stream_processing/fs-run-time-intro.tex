@@ -2,12 +2,12 @@
 
 \label {fs-intro-seciton}
 
-Nowadays, a lot of  
+Currently, many  
 % real-life 
 applications use stream processing for network monitoring, financial analytics, training machine learning models, etc. 
 State-of-the-art industrial stream processing systems, such as Flink \cite{carbone2015apache}, Samza \cite{Noghabi:2017:SSS:3137765.3137770}, Storm \cite{apache:storm}, are able to provide low-latency and high-throughput in distributed environment for this kind of problems. 
 However, unlike batch and micro-batch processing, stream processing is inherently non-deterministic~\cite{Zaharia:2012:DSE:2342763.2342773}. 
-Particularly, there is no guarantee that the messages will be processed in the same order and the system produces the same result between any two runs, even if messages are fed to the system with the same monotonically increasing timestamps. 
+In particular, there is no guarantee that the messages will be processed in the same order and the system produces the same result between any two runs, even if messages are fed to the system with the same monotonically increasing timestamps. 
 Although such behavior is observed in most state-of-the-art stream processing systems, it has several 
 %significant 
 pitfalls:
@@ -28,17 +28,17 @@ It is natural for the user of a software system to expect  that two independent 
 In this work, we introduce \FlameStream\ - stream processing model that is deterministic by design. This property is achieved using strong ordering. 
 The typical way to perform in-order processing is to set up a special buffer in front of each order-sensitive operation~\cite{Li:2008:OPN:1453856.1453890}. 
 However, extra buffering can lead to latency growth~\cite{Zacheilas:2017:MDS:3093742.3093921}, especially if the processing pipeline contains several operations that require ordered input. We introduce an optimistic approach to handle out-of-order items to avoid this issue. 
-Our approach is based on the idea that state can go along the stream as an ordinary element. 
+Our approach is based on the idea that state can be streamed as an ordinary element. 
 Such approach allows us to generalize speculative computations on the arbitrary MapReduce task. 
-Additionally, it makes the model stateless from the business-logic point of view. Our evaluation demonstrates that our method has low overhead and can outperform alternative industrial solution under normal load conditions.
+Additionally, it makes the model stateless from the business logic point of view. Our evaluation demonstrates that our method has low overhead and can outperform alternative industrial solution under normal load conditions.
 
 Therefore, the contributions of this paper are the following:
 
 \begin {itemize}
-\item Definition of a stateful computational model that does not require state handling from user
-\item The optimistic schema for deterministic processing and demonstrate its performance competitiveness
+\item Definition of a stateful computational model that does not require state handling from the user
+\item The optimistic schema for deterministic processing and the demonstration of its performance competitiveness
 \end {itemize}
 
-The rest of the paper is structured as follows: in section~\ref{fs-model} we introduce the proposed model and the optimistic approach for handling out-of-order items, the implementation details of the prototype are discussed in~\ref{fs-impl} and its performance is demonstrated in~\ref{fs-experiments-section}, the relevant research works are mentioned in~\ref{fs-related-section}, finally we discuss the results and our plans in~\ref{fs-conclusions}.
+The rest of the paper is structured as follows: in section~\ref{fs-model} we introduce the proposed model and the optimistic approach for handling out-of-order items, the implementation details of the prototype are discussed in~\ref{fs-impl} and its performance is demonstrated in~\ref{fs-experiments-section}, the relevant prior research is mentioned in~\ref{fs-related-section}, finally we discuss the results and our plans in~\ref{fs-conclusions}.
 
 \endinput
