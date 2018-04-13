@@ -6,7 +6,7 @@
 \subsection{Ordering model}
 The meta-information of data item is implemented as a tuple of a {\it global time}, a {\it trace}, {\it child ids} and a {\it tombstone flag}.
 
-\[Meta := (GlobalTime, ChildIds[], Trace, IsTombstone)\]
+\[Meta := (GlobalTime, ChildIds[\:], Trace, IsTombstone)\]
 
 Global time is assigned to data item once the item enters the system. It is a pair of logical time and the identifier of the front. The identifier is used to resolve time collisions within different fronts. It is important to notice that we do not rely on any clock synchronization between nodes. The only implication of the clock skew is the system degradation regarding latency: 1 ms of the fronts clock difference appends 1 ms to minimal latency.
 
