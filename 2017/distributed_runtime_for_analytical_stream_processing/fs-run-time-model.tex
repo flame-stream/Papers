@@ -65,11 +65,12 @@ The list of available operations includes:
 \item [Merge] operation is initialized with the specified number of input nodes. It sends all incoming data to the output.
 
 \item [Grouping] constructs a single item containing a set of consecutive items that have the same value of partition function. The maximum number of items that can be grouped is specified as a parameter  $Window Size.$ 
-\end {description}
 
 The output item of the grouping has the same ordering label as the last item in the output group. 
 Groupings of different partitions are independent. 
 Grouping is the only operation that has a state.
+
+\end {description}
 
 %has a {\it window size} parameter. Grouping stores input items into distinct buckets by the value of the input balancing function applied to the payload. When the next item arrives at the grouping, it is appended to the corresponding bucket. Each time the grouping outputs window-sized {\it tuple item}, which consists of the most recent (in terms of the meta-information) items of this bucket. If the size of the bucket is less than the window, all items of the bucket are taken. 
 
