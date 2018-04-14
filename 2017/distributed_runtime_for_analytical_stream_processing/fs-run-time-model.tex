@@ -1,22 +1,22 @@
 %%%% fs-run-time-data-flow  FlameStream data flow
 
-The key concept of \FlameStream\ model is a datastream. It is a sequence of discrete events described by data items, internally represented as 
+The key concept of \FlameStream\ model is a data stream. It is a sequence of discrete events described by data items, internally represented as 
 $(Payload, Meta).$
-The $Payload$ is processed by a user-defined code, while $Meta$ is handled with \FlameStream\ engine. In particular
+The $Payload$ is processed by a user-defined code, while $Meta$ is handled with \FlameStream\ engine. In particular,
 the primary purpose of the meta-information is to impose the total order on data items. 
-The  $Meta$ is assigned at the entry (called {\em  front}) and is discared at the {\em barrier} just before the exit. 
+The  $Meta$ is assigned at the entry (called {\em  front}) and is discarded at the {\em barrier} just before the exit. 
 
 % \subsection{Computational flow}
 The stream processing is specified by a logical execution graph. 
 Each node of the graph represents a single operation on data items, and edges describe the routing of data items between operations.  
 Our model allows cycles in the graph while such graphs are commonly assumed to be acyclic (DAGs) 
 ~\cite{Zaharia:2016:ASU:3013530.2934664, Carbone:2017:SMA:3137765.3137777}. 
-The cycles are required for specification of certain computations (e.g MapReduce-based) with our set of operation types (outlined below).
+The cycles are required for specification of certain computations (e.g. MapReduce-based) with our set of operation types (outlined below).
 %Moreover, as we show further, there are cases when cycles are required, e.g., for MapReduce-based algorithms. 
 Figure~\ref{logical-graph-figure} shows the example of logical execution graph.
 
 % \subsection{Physical deployment and partitioning}
-A distributed hardware environment is modelled as a set of {\em worker} processes. 
+A distributed hardware environment is modeled as a set of {\em worker} processes. 
 Each worker executes logical execution graph and has an assigned range of hash values used for physical routing of data items to workers. 
 %An integer interval (hash range) is assigned to every worker. Intervals are not intersected and cover the range of 32-bit signed integer.
 %
@@ -41,7 +41,7 @@ Each operation entry has a user-provided hash function called {\it balancing fun
 
 % мм\subsection{Ordering model}
 
-Data items are totally ordered according to lables assigned to events at the entry as a part of meta-information. All operations preserve this order. Any additional items produced by an operation are placed between the item being processed and the next item. The ordering labels are dropped when items are delivered from the barrier. 
+Data items are totally ordered according to labeles assigned to events at the entry as a part of meta-information. All operations preserve this order. Any additional items produced by an operation are placed between the item being processed and the next item. The ordering labels are dropped when items are delivered from the barrier. 
 
 % We assume that there is a total order on data items. 
 % Ordering is preserved when an item is going through the operations. 
@@ -75,7 +75,7 @@ Grouping is the only operation that has a state.
 %has a {\it window size} parameter. Grouping stores input items into distinct buckets by the value of the input balancing function applied to the payload. When the next item arrives at the grouping, it is appended to the corresponding bucket. Each time the grouping outputs window-sized {\it tuple item}, which consists of the most recent (in terms of the meta-information) items of this bucket. If the size of the bucket is less than the window, all items of the bucket are taken. 
 
 The following example illustrates  the grouping operation. 
-Let the input stream be a series of integers: $ 1,2,3, \ldots$. and the  partition function returns for even numbers and 0 otherwise. If the window is set to 3, the output is 
+Let the input stream be a series of integers: $ 1,2,3, \ldots$, and the  partition function returns for even numbers and 0 otherwise. If the window is set to 3, the output is 
 $$(1), (2), (1|3), (2|4), (1|3|5), (2|4|6), (3|5|7), (4|6|8), \ldots$$
 
 %The grouping operation has two important properties: the output tuple is identified by its last element, the results among items with different values of a partition function are independent.
@@ -96,7 +96,7 @@ $$(1), (2), (1|3), (2|4), (1|3|5), (2|4|6), (3|5|7), (4|6|8), \ldots$$
 %Therefore, business-logic is stateless. Nevertheless, the operations set is enough to implement any MapReduce transformation as shown in the next section.
 
 An important special case of grouping with $Window Size = 2$  provides for realization of stateful calculations with drifting state techniques manifested in section~\ref{motivation-section}.  
-Indeed, consider a map operation that follows the grouping and send its output to the grouping input. This map operation receives a pair of its previous output considered as the state object, and new incoming item from the source stream. The map operation calculates new state object and sends it back as the grouping input. 
+Indeed, consider a map operation that follows the grouping and sends its output to the grouping input. This map operation receives a pair of its previous output considered as the state object, and new incoming item from the source stream. The map operation calculates new state object and sends it back as the grouping input. 
 More details are provided in the appendix~\ref{fs-drifting}.
 
 % \subsection{Drifting state}

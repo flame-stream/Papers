@@ -16,7 +16,7 @@ We used a problem of building an incremental inverted index as a stream processi
 %It is worthwhile to mention that building inverted index can be considered as the halfway task between documents generation and searching. 
 In the real-world, such scenario can be found in freshness-aware systems, e.g., news processing engines.
 
-Building of an inverted index % is implemented in terms of MapReduce transformations. 
+A building of an inverted index % is implemented in terms of MapReduce transformations. 
 %We 
 starts with page mapping into the pairs {\it (word; word positions within the page)}, then  word positions are reduced by word into the single index update. 
 %We assume the output of the stream to be change records of the inverted index structure, i.e., 
@@ -30,7 +30,7 @@ outlined in  section~\ref{fs-drifting}.
 The index update record plays the role of an accumulator. 
 %, and the final map produces the most recent changes of this structure if any.
 
-The latency is defined as a (negated) time difference between entry of incoming data item and delivery of all output items generated in response to the incoming one.
+The latency is defined as a (negated) time difference between the entry of incoming data item and the delivery of all output items generated in response to the incoming one.
 
 %By the notion of {\it latency} we assume the time between two events: 
 
@@ -86,7 +86,7 @@ and achieves low latency in the real-world scenarios~\cite{S7530084}.
 For Apache Flink, the algorithm for building the inverted index is 
 adopted 
 by the usage of {\it FlatMapFunction} for map step and stateful {\it RichMapFunction} for reduce step and for producing the change records. 
-Order enforcing before reduce is implemented using custom {\it ProcessFunction} that buffers all input until corresponding low watermark is received. Watermarks are sent after each document. The network buffer timeout is set to 0 to minimize latency.
+An order enforcing before reduce is implemented using custom {\it ProcessFunction} that buffers all input until corresponding low watermark is received. Watermarks are sent after each document. The network buffer timeout is set to 0 to minimize latency.
 
 % In this paper, 
 We compare $50^{th}$, $75^{th}$, $95^{th}$, and $99^{th}$ percentile of distributions, which clearly represent the performance from the perspective of the users' experience.
@@ -115,7 +115,7 @@ Flink outperforms \FlameStream\ under extreme load.
 Such behavior follows from the fact that \FlameStream\ creates significant overhead under very high load.
 % within a few computational units. 
 This result evidently is in line with measurements of the overhead in Figure~\ref{overhead}. 
-Nevertheless,  \FlameStream\ demonstrates better latency if the load is moderatee.
+Nevertheless,  \FlameStream\ demonstrates better latency if the load is moderate.
 
 Thus, Flink can be more appropriate if there is a need to optimize computational resources under a fixed load, but the demands on latency are not very strict, or determinism is not required. \FlameStream\ is more relevant for cases when low latency and determinism are strict requirements, but an allocation of additional resources is not a problem.  
 
