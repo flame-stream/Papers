@@ -14,9 +14,9 @@ Each map operation can produce multiple items from one.  An ordinal number, chil
 
 The global time and child ids are enough to uniquely identify data item within a stream if all processing is done in-order. If any grouping repairs happened during processing, multiple items with the same global time and child ids exist in the stream. 
 
-To match tombstone item with an invalidated item, there is {\it Trace} value stored in the meta-information. The unique random 64-bit identifier is assigned to each physical operation. The trace is a xor of all operations' ids visited by item so far. Invalid item and the corresponding tombstone go along the same path, because they have the same payload and the balancing functions are deterministic, so they have the same trace values.
+To match tombstone item with an invalidated item, there is {\it Trace} value stored in the meta-information. The unique random 64-bit identifier is assigned to each physical operation. The trace is a xor of all operations' ids visited by item so far. Invalid item and the corresponding tombstone go along the same path because they have the same payload and the balancing functions are deterministic, so they have the same trace values.
 
-Metas are compared lexicographically and this order is in line with the \FlameStream's ordering model.
+Metas are compared lexicographically, and this order is in line with the \FlameStream's ordering model.
 
 Figure~\ref{logical-graph-ops-figure} shows the topology of each operation and how it affects the meta. Grouping and merge operations update trace of the data item by xoring initial trace with its physical id. Map and broadcast apply the same update, but also append child id for each output item.
 
@@ -55,7 +55,7 @@ To track the global time of in-flight items we adopt an idea of {\it acker task}
  Acker groups acks by a global time and xors received checksum hashes. 
 When an item is sent and later received by the next operation, xoring corresponding {\it XOR}s would yield 0.
 
-Acks are overlapped to nullify {\it XOR} only when an item arrives at the barrier. That is, ack for receive is sent only after both processing and the ack sending for the transformed item are done, as illustrated in Figure~\ref{acker}. This technique guarantees that the {\it XOR} for some global time is equal to zero only if there are no in-flight elements with such global time.
+Acks are overlapped to nullify {\it XOR} only when an item arrives at the barrier. That is, ack for receive is sent just after both processing and the ack sending for the transformed item are done, as illustrated in Figure~\ref{acker}. This technique guarantees that the {\it XOR} for some global time is equal to zero only if there are no in-flight elements with such global time.
 
 \begin{figure}[ht]
   \centering
@@ -66,7 +66,7 @@ Acks are overlapped to nullify {\it XOR} only when an item arrives at the barrie
 
 The minimal time within a stream is the minimal global time with non-zero {\it XOR}. On minimal time changes, acker broadcasts the {\it new minimal time notification}. 
 Therefore, the barrier can release elements with global time $\mathcal{G} (D)$ 
-once it received notification with time greater than $\mathcal{G} (D)$.
+once it received a notification with time greater than $\mathcal{G} (D)$.
 
 To ensure that no fronts can generate item with the specific timestamp, each front periodically sends to acker a special message called {\it heartbeat} indicating that front will not issue items with a timestamp lower than the reported. The value in the ack table can become zero only after the corresponding heartbeat arrives.
 
