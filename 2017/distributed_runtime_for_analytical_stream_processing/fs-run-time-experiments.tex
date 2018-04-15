@@ -30,7 +30,7 @@ outlined in  section~\ref{fs-drifting}.
 The index update record plays the role of an accumulator. 
 %, and the final map produces the most recent changes of this structure if any.
 
-The latency is defined as a (negated) time difference between entry of incoming data item and delivery of all output items generated in response to the incoming one.
+The latency is defined as a (negated) time difference between the entry of incoming data item and the delivery of all output items generated in response to the incoming one.
 
 %By the notion of {\it latency} we assume the time between two events: 
 
@@ -115,7 +115,7 @@ Flink outperforms \FlameStream\ under extreme load.
 Such behavior follows from the fact that \FlameStream\ creates significant overhead under very high load.
 % within a few computational units. 
 This result evidently is in line with measurements of the overhead in Figure~\ref{overhead}. 
-Nevertheless,  \FlameStream\ demonstrates better latency if the load is moderatee.
+Nevertheless,  \FlameStream\ demonstrates better latency if the load is moderate.
 
 Thus, Flink can be more appropriate if there is a need to optimize computational resources under a fixed load, but the demands on latency are not very strict, or determinism is not required. \FlameStream\ is more relevant for cases when low latency and determinism are strict requirements, but an allocation of additional resources is not a problem.  
 

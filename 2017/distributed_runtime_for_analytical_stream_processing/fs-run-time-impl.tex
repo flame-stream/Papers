@@ -16,7 +16,7 @@ The global time and child ids are enough to uniquely identify data item within a
 
 To match tombstone item with an invalidated item, there is {\it Trace} value stored in the meta-information. The unique random 64-bit identifier is assigned to each physical operation. The trace is a xor of all operations' ids visited by item so far. Invalid item and the corresponding tombstone go along the same path, because they have the same payload and the balancing functions are deterministic, so they have the same trace values.
 
-Metas are compared lexicographically and this order is in line with the \FlameStream's ordering model.
+Metas are compared lexicographically, and this order is in line with the \FlameStream's ordering model.
 
 Figure~\ref{logical-graph-ops-figure} shows the topology of each operation and how it affects the meta. Grouping and merge operations update trace of the data item by xoring initial trace with its physical id. Map and broadcast apply the same update, but also append child id for each output item.
 
