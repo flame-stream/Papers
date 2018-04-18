@@ -1,25 +1,23 @@
 \label {fs-short-model}
 
-We found that only two operations are required to implement any stateful transformation:
+\FlameStream\ computational model shares common building blocks with other stream processing systems: logical and physicl graph, hash partitioning of load between multiple workers, FIFO channels between operations etc. In this section we descibe only core differences that allows as to achieve the goals defined in the introduction.
+
+We found that any stateful transformation can be expressed in terms of two operations:
 
 \begin {description}
   \item [Map] applies a user-defined function to the payload of an input item and returns a sequence of data items with transformed payloads. 
   \item [Grouping] constructs a single item containing a set of consecutive items that have the same value of load-balancing function. The maximum number of items is defined by parameter $Window Size$. 
 \end {description}
 
-The stream processing is specified by a logical execution graph. Each vertex of the graph represents a single operation on data items, and edges describe the order between operations. Our model allows cycles in the graph while such graphs are commonly assumed to be acyclic (DAGs). As our reduced set of operations doesn't allows arbitrary stateful operations, cycles are used to implement common stateful transformations is a form of $(In, State) \rightarrow (Out, NewState)$.
+In addition to this reduced set of operations, \FlameStream\ model allows cycles in a logical graph while such graphs are commonly assumed to be acyclic (DAGs).
 
-Distributed environment consists of multiple workers. The whole logical graph is executed on each worker. Each worker is assigned with a hash range to define the data items, which would be processed on the worker. Edges of logical graph are marked with load-balancing function. It is applied to data items and depending on the result routes data items to the corresponding worker.
+If the stateful operation is expressed in a form of $(In, State) \rightarrow (Out, NewState)$ it can be implemented by grouping with $WindowSize = 2$ which groups two consecutive items: $In$ and $State$ into a signle tuple and the following map operation combines them together into a $NewState$. The $NewState$ is then is returned into a grouping via a cycle. The outline of the proposed method is shown on Figure 123321.
 
-Date items consist of user-defined $Payload$, which is processed by business-logic, and $Meta$ which is handled with \FlameStream\ engine. $Meta$ is assigned to input events on system's entry. The main purpose of $Meta$ is to impose the total order on data items. All operations preserve this order. Any additional items produced by an operation are placed between the item being processed and the next item.
+While actual cycles in physical graph can cause spikes in throughput they can be optimized out by preprocessor. The whole cycle can be computed localy an collapsed into a single function call.
 
+{\bf TODO:}
 
-The output item of the grouping is assignd with the same $Meta$ as the last item in the output group. It is important to notice that grouping is the only operation that maintaines a state.
-
-An important special case of grouping with $Window Size = 2$  provides for realization of stateful calculations with drifting state techniques.  
-
-Indeed, consider a map operation that follows the grouping and sends its output to the grouping input. This map operation receives a pair of its previous output considered as the state object, and new incoming item from the source stream. The map operation calculates new state object and sends it back as the grouping input. 
-
-{\bf Detail drifting state}
-
-More details are provided in the optimistic aproach analysis paper~\cite{we2018seim}.
+\begin{itemize}
+  \item State management can be move down the stream.
+  \item Optimizm, tombstones see ~\cite{we2018seim}.
+\end{itemize}
