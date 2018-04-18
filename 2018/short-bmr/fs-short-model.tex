@@ -1,6 +1,6 @@
 \label {fs-short-model}
 
-\FlameStream\ computational model shares common building blocks with other stream processing systems: logical and physicl graph, hash partitioning of load between multiple workers, FIFO channels between operations etc. In this section we descibe only core differences that allows as to achieve the goals defined in the introduction.
+\FlameStream\ computational model shares common building blocks with other stream processing systems: logical and physical graph, hash partitioning of load between multiple workers, FIFO channels between operations etc. In this section we describe only core differences that allows us to achieve the goals defined in the introduction.
 
 We found that any stateful transformation can be expressed in terms of two operations:
 
@@ -11,13 +11,13 @@ We found that any stateful transformation can be expressed in terms of two opera
 
 In addition to this reduced set of operations, \FlameStream\ model allows cycles in a logical graph while such graphs are commonly assumed to be acyclic (DAGs).
 
-If the stateful operation is expressed in a form of $(In, State) \rightarrow (Out, NewState)$ it can be implemented by grouping with $WindowSize = 2$ which groups two consecutive items: $In$ and $State$ into a signle tuple and the following map operation combines them together into a $NewState$. The $NewState$ is then is returned into a grouping via a cycle. The outline of the proposed method is shown on Figure 123321.
+If the stateful operation is expressed in a form of $(In, State) \rightarrow (Out, NewState)$ it can be implemented by grouping with $WindowSize = 2$ which groups two consecutive items: $In$ and $State$ into a single tuple and the following map operation combines them together into a $NewState$. The $NewState$ is then is returned into a grouping via a cycle. The outline of the proposed method is shown on Figure 123321.
 
-While actual cycles in physical graph can cause spikes in throughput they can be optimized out by preprocessor. The whole cycle can be computed localy an collapsed into a single function call.
+While actual cycles in physical graph can cause spikes in throughput they can be optimized out by preprocessor. The whole cycle can be computed locally an collapsed into a single function call.
 
 {\bf TODO:}
 
 \begin{itemize}
   \item State management can be move down the stream.
-  \item Optimizm, tombstones see ~\cite{we2018seim}.
+  \item Optimism, tombstones see ~\cite{we2018seim}.
 \end{itemize}

@@ -1,5 +1,5 @@
 \label {fs-short-discussion}
 
-An important property of the proposed model is that it preserves the order between input and output items within the full system, therefore it is deterministic. This property can be simply transformed into idempotence by persistently saving the meta-information of the last consumed output item and filtering out all items with less meta-information on recovery. Such approach almost do not provide overhead on exactly-once processing, that is shown in the next section. 
+An important property of the proposed model is that it preserves the order between input and output items within the full system, therefore it is deterministic. This property can be simply transformed into idempotence by persistently saving the meta-information of the last released item in the barrier and filtering out all items with less meta-information on recovery. Such approach almost do not provide overhead on exactly-once processing, that is shown in the next section. 
 
-Therefore, we presented the architecture that achieves exactly-once semantics using strong ordering property, that implies determinism and idempotence. These features are obtained using lightweight speculative technique that require single buffer per computational pipeline. 
+Therefore, we presented the architecture that achieves exactly-once semantics using strong ordering property, that implies determinism and idempotence. These features are obtained using lightweight speculative technique that require single buffer per computational pipeline.
