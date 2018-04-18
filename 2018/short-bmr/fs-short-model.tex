@@ -1,6 +1,3 @@
-\newpage
-Hi
-\newpage
 \label {fs-short-model}
 
 The stream processing is specified by a logical execution graph. Each vertex of the graph represents a single operation on data items, and edges describe the order between operations. Our model allows cycles in the graph while such graphs are commonly assumed to be acyclic (DAGs). As our reduced set of operations doesn't allows arbitrary stateful operations, cycles are used to implement common stateful transformations is a form of $(In, State) \rightarrow (Out, NewState)$.
