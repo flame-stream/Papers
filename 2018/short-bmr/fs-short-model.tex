@@ -5,21 +5,20 @@ Hi
 
 The stream processing is specified by a logical execution graph. Each vertex of the graph represents a single operation on data items, and edges describe the order between operations. Our model allows cycles in the graph while such graphs are commonly assumed to be acyclic (DAGs). As our reduced set of operations doesn't allows arbitrary stateful operations, cycles are used to implement common stateful transformations is a form of $(In, State) \rightarrow (Out, NewState)$.
 
-Distributed environment consists of multiple workers, each is assigned with a hash range, which is used for load-balancing.
+Distributed environment consists of multiple workers. The whole logical graph is executed on each worker. Each worker is assigned with a hash range to define the data items, which would be processed on the worker. Edges of logical graph are marked with load-balancing function. It is applied to data items and depending on the result routes data items to the corresponding worker.
 
 Date items consist of user-defined $Payload$, which is processed by business-logic, and $Meta$ which is handled with \FlameStream\ engine. $Meta$ is assigned to input events on system's entry. The main purpose of $Meta$ is to impose the total order on data items. All operations preserve this order. Any additional items produced by an operation are placed between the item being processed and the next item.
 
 The list of available operations includes:
+
 \begin {description}
   \item [Map] applies a user-defined function to the payload of an input item and returns a sequence of data items with transformed payloads. 
   \item [Broadcast] replicates an input item to the specified number of operations.
   \item [Merge] operation is initialized with the specified number of input nodes. It sends all incoming data to the output.
-  \item [Grouping] constructs a single item containing a set of consecutive items. The maximum number of items is defined by parameter $Window Size$. 
+  \item [Grouping] constructs a single item containing a set of consecutive items that have the same value of load-balancing function. The maximum number of items is defined by parameter $Window Size$. 
 \end {description}
 
 The output item of the grouping is assignd with the same $Meta$ as the last item in the output group. It is important to notice that grouping is the only operation that maintaines a state.
-
-{\bf Say something about hash functions}
 
 The following example illustrates the grouping operation. 
 
