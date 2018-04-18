@@ -1,1 +1,35 @@
+\newpage
+Hi
+\newpage
 \label {fs-short-model}
+
+The stream processing is specified by a logical execution graph. Each vertex of the graph represents a single operation on data items, and edges describe the order between operations. Our model allows cycles in the graph while such graphs are commonly assumed to be acyclic (DAGs). As our reduced set of operations doesn't allows arbitrary stateful operations, cycles are used to implement common stateful transformations is a form of $(In, State) \rightarrow (Out, NewState)$.
+
+Distributed environment consists of multiple workers, each is assigned with a hash range, which is used for load-balancing.
+
+Date items consist of user-defined $Payload$, which is processed by business-logic, and $Meta$ which is handled with \FlameStream\ engine. $Meta$ is assigned to input events on system's entry. The main purpose of $Meta$ is to impose the total order on data items. All operations preserve this order. Any additional items produced by an operation are placed between the item being processed and the next item.
+
+The list of available operations includes:
+\begin {description}
+  \item [Map] applies a user-defined function to the payload of an input item and returns a sequence of data items with transformed payloads. 
+  \item [Broadcast] replicates an input item to the specified number of operations.
+  \item [Merge] operation is initialized with the specified number of input nodes. It sends all incoming data to the output.
+  \item [Grouping] constructs a single item containing a set of consecutive items. The maximum number of items is defined by parameter $Window Size$. 
+\end {description}
+
+The output item of the grouping is assignd with the same $Meta$ as the last item in the output group. It is important to notice that grouping is the only operation that maintaines a state.
+
+{\bf Say something about hash functions}
+
+The following example illustrates the grouping operation. 
+
+Let the input stream be a series of integers: $ 1,2,3, \ldots$, and the  partition function returns for even numbers and 0 otherwise. If the window is set to 3, the output is 
+$$(1), (2), (1|3), (2|4), (1|3|5), (2|4|6), (3|5|7), (4|6|8), \ldots$$
+
+An important special case of grouping with $Window Size = 2$  provides for realization of stateful calculations with drifting state techniques.  
+
+Indeed, consider a map operation that follows the grouping and sends its output to the grouping input. This map operation receives a pair of its previous output considered as the state object, and new incoming item from the source stream. The map operation calculates new state object and sends it back as the grouping input. 
+
+{\bf Detail drifting state}
+
+More details are provided in the optimistic aproach analysis paper~\cite{we2018seim}.
