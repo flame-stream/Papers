@@ -1,0 +1,80 @@
+\documentclass[sigconf]{acmart}
+
+\usepackage{graphicx}
+\usepackage{algorithm} % for algorithms
+\usepackage{algpseudocode}
+\usepackage{booktabs} % For formal tables
+\usepackage{amsthm} % For claims
+
+\theoremstyle{remark}
+
+\settopmatter{printacmref=false, printccs=false, printfolios=false}
+\pagestyle{plain} % removes running headers
+
+\newcommand{\PicScale}{0.5}
+\newcommand {\FlameStream} {FlameStream}
+\begin{document}
+
+\title {\FlameStream: Model and Runtime for Distributed Analytical Stream Processing}
+
+\author{Igor E. Kuralenok}
+\affiliation{%
+  \institution{JetBrains Research}
+  \city{St. Petersburg} 
+  \country{Russia}
+}
+\email{ikuralenok@gmail.com}
+
+\author{Artem Trofimov}
+\affiliation{%
+  \institution{JetBrains Research}
+  \city{St. Petersburg} 
+  \country{Russia}
+}
+\email{trofimov9artem@gmail.com}
+
+\author{Nikita Marshalkin}
+\affiliation{%
+\institution{JetBrains Research}
+  \city{St. Petersburg} 
+  \country{Russia}
+}
+\email{marnikitta@gmail.com}
+
+\author{Boris Novikov}
+\affiliation{%
+\institution{JetBrains Research}
+  \city{St. Petersburg} 
+  \country{Russia}
+}
+\email{borisnov@acm.org}
+
+\begin{abstract}
+
+\end {abstract}
+
+\maketitle
+
+\section {Introduction}
+\input {fs-short-intro.tex}
+
+\section {Model}
+\input {fs-short-model.tex}
+
+\section {Discussion}
+\input {fs-short-discussion.tex}
+
+\section {Experiments}
+\input {fs-short-experiments.tex}
+
+\section {Conclusion and future work}
+\input {fs-short-conclusion.tex}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{../../bibliography/flame-stream}
+
+\end {document}
+
+
+\endinput
+you can put whatever here
