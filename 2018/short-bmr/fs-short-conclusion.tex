@@ -1,3 +1,3 @@
 \label {fs-short-conclusion}
 
-We proposed a novel architecture based on speculative stateful model that allows to achieve exactly-once semantics with low overhead. Experiments demonstrated that our approach can significantly outperform an alternative solution under exactly-once requirement.
+We presented the architecture that achieves exactly-once semantics using strong ordering property, that implies determinism and idempotence. These features are obtained using lightweight speculative technique that require single buffer per computational pipeline. Experiments demonstrated that our approach provides extremely low overhead for exactly-once semantics (under 20\%) and can outperform an alternative solution.
