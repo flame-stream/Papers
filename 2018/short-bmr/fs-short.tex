@@ -8,7 +8,7 @@
 
 \theoremstyle{remark}
 
-\settopmatter{printacmref=false, printccs=false, printfolios=false}
+\settopmatter{printacmref=false, printccs=true, printfolios=true}
 \pagestyle{empty} % removes running headers
 
 \newcommand{\PicScale}{0.5}
@@ -24,7 +24,7 @@
 \acmDOI{10.1145/3206333.3209273}
 \acmISBN{978-1-4503-5703-6/18/06}
 
-\title {\FlameStream: Model and Runtime for Distributed Stream Processing (extended abstract)}
+\title {\FlameStream: Model and Runtime for Distributed Stream Processing (Extended Abstract)}
 
 \author{  Igor E. Kuralenok,$^1$     Artem Trofimov,$^ {1,2}$    Nikita Marshalkin,$^ {1,2}$   and  Boris Novikov$^ {1,2}$ }
 \affiliation{%
@@ -33,7 +33,7 @@
   \country{Russia}
 }
 \affiliation{%
-\institution{$^2$Saint Petersburg state Univercity}
+\institution{$^2$Saint Petersburg State University}
   \city{St. Petersburg} 
   \country{Russia}
 }
@@ -42,6 +42,8 @@
 \begin{abstract}
 Exactly-once semantics without high latency overhead is still hardly  possible to achieve within state-of-the-art stream processing systems. We introduce  a model   providing  for exactly-once using lightweight optimistic approach for obtaining determinism and idempotence, and show its feasibility with a prototype.
 \end {abstract}
+
+\keywords{Data streams, exactly once, drifting state, deterministic processing}
 
 \maketitle
 
@@ -65,6 +67,4 @@ Exactly-once semantics without high latency overhead is still hardly  possible t
 
 \end {document}
 
-
 \endinput
-you can put whatever here
