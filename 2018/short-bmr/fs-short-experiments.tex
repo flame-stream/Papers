@@ -1,1 +1,11 @@
 \label {fs-short-experiments}
+
+We conducted a  series of experiments to estimate the performance of our  prototype. We used a problem of building an incremental inverted index as a stream processing benchmark  for the following reasons:
+
+\begin{itemize}
+    \item It requires stateful operations
+    \item Computational flow contains network shuffle that can violate the ordering constraints 
+    enabling evaluation of our optimistic techniques.
+\end{itemize}
+
+In the real-world, such scenario can be found in freshness-aware systems, e.g., news processing engines.
