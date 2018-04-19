@@ -11,13 +11,8 @@ We found that any stateful transformation can be expressed in terms of two opera
 
 In addition to this reduced set of operations, \FlameStream\ model allows cycles in a logical graph while such graphs are commonly assumed to be acyclic (DAGs).
 
-If the stateful operation is expressed in a form of $(In, State) \rightarrow (Out, NewState)$ it can be implemented by grouping with $WindowSize = 2$ which groups two consecutive items: $In$ and $State$ into a single tuple and the following map operation combines them together into a $NewState$. The $NewState$ is then is returned into a grouping via a cycle. The outline of the proposed method is shown on Figure 123321.
+If an arbitrary stateful transformation is expressed in a form of $(In, State) \rightarrow (Out, NewState)$ it can be implemented by grouping with $WindowSize = 2$ and a map operation. Groups collects two consecutive items, $In$ and $State$, into a single tuple and then the following map operation combines them into the $NewState$. The $NewState$ is then is returned back into the grouping via a cycle. We call this technique a {\it drifting state}, because business-logic state is made a part of heterogeneous data flow.
 
-While actual cycles in physical graph can cause spikes in throughput they can be optimized out by preprocessor. The whole cycle can be computed locally an collapsed into a single function call.
+While actual cycles in physical graph can cause spikes in throughput they can be optimized by preprocessor. The whole cycle can be computed locally and compressed into a single function call.
 
-{\bf TODO:}
-
-\begin{itemize}
-  \item State management can be move down the stream.
-  \item Optimism, tombstones see ~\cite{we2018seim}.
-\end{itemize}
+Grouping is a stateful operation, though its output depends on the input order. We organize processing in an optimistic nature. Instead of buffering, grouping produces output tuples as if there are no reorderings. In case of out-of-order item, grouping sends tombstones for the previously generated tuples that miss newly arrived item and then produces the correct ones. All valid items and tombstones are collected in the barrier, the only buffer in a processing pipeline, that is located right before the data consumer. When there is a guarantee that there is no tombstones up the stream barrier releases a part of items. The progress indicators used in OOP approach~\cite{Li:2008:OPN:1453856.1453890} can play the role of such guarantee.
