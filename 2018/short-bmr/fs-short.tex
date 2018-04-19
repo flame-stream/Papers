@@ -9,11 +9,20 @@
 \theoremstyle{remark}
 
 \settopmatter{printacmref=false, printccs=false, printfolios=false}
-\pagestyle{plain} % removes running headers
+\pagestyle{empty} % removes running headers
 
 \newcommand{\PicScale}{0.5}
 \newcommand {\FlameStream} {FlameStream}
 \begin{document}
+
+\copyrightyear{2018} 
+\acmYear{2018} 
+\setcopyright{acmcopyright}
+\acmConference[BeyondMR'18]{Algorithms and Systems for MapReduce and Beyond }{June 15, 2018}{Houston, TX, USA}
+\acmBooktitle{BeyondMR'18: Algorithms and Systems for MapReduce and Beyond , June 15, 2018, Houston, TX, USA}
+\acmPrice{15.00}
+\acmDOI{10.1145/3206333.3209273}
+\acmISBN{978-1-4503-5703-6/18/06}
 
 \title {\FlameStream: Model and Runtime for Distributed Stream Processing (extended abstract)}
 
@@ -50,7 +59,7 @@
 \email{borisnov@acm.org}
 
 \begin{abstract}
-
+Exactly-once semantics without high latency overhead is still impossible to achieve within state-of-the-art stream processing systems. In this paper we propose an architecture that provides for exactly-once using lightweight optimistic approach for obtaining determinism and idempotence.
 \end {abstract}
 
 \maketitle
@@ -67,7 +76,7 @@
 \section {Experiments}
 \input {fs-short-experiments.tex}
 
-\section {Conclusion and future work}
+\section {Conclusion}
 \input {fs-short-conclusion.tex}
 
 \bibliographystyle{ACM-Reference-Format}
