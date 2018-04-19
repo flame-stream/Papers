@@ -1,11 +1,16 @@
 \label {fs-short-experiments}
 
-We conducted a  series of experiments to estimate the performance of our  prototype. We used a problem of building an incremental inverted index as a stream processing benchmark  for the following reasons:
+We conducted a  series of experiments to estimate the performance of our  prototype. We used a problem of building an incremental inverted index as a stream processing benchmark, because this task requires stateful operations and its computational flow contains network shuffle that can violate the ordering constraints enabling evaluation of our optimistic techniques. In the real-world, such scenario can be found in freshness-aware systems, e.g., news processing engines.
 
-\begin{itemize}
-    \item It requires stateful operations
-    \item Computational flow contains network shuffle that can violate the ordering constraints 
-    enabling evaluation of our optimistic techniques.
-\end{itemize}
+Our experiments were performed on the cluster of 10 Amazon EC2 micro instances with 1GB RAM and 1 core CPU with 10000 Wikipedia articles as a dataset. RocksDB~\cite{rocksdb} is used as a storage for the state. The role of data producer and data consumer is played by custom server application that sends and receives data through socket and measure the latency.
 
-In the real-world, such scenario can be found in freshness-aware systems, e.g., news processing engines.
+For Apache Flink, the algorithm for building the inverted index is adopted by the usage of {\it FlatMapFunction} for map step and stateful {\it RichMapFunction} for reduce step and for producing the change records. Order enforcing before reduce is implemented using custom {\it ProcessFunction} that buffers all input until corresponding low watermark is received. Watermarks are sent after each document. The network buffer timeout is set to 0 to minimize latency. Custom {\it TwoPhaseCommitSinkFunction}, that buffers output items in memory until transaction is committed, is used for experiments that require exactly-once semantics. {\it FsStateBackend} with the local file system is used for storing the state.
+
+Figure~\ref{performance} demonstrates the comparison of latencies between \FlameStream\ and Flink within distinct times between checkpoints, different consistency semantics, within 50 documents per second input rate. At the initial point, \FlameStream\ provides lower latency for at most once semantics. Such behavior is explained by the features of the optimistic approach for handling out-of-order items and is investigated in details in~\cite{we2018seim}. The latencies of both \FlameStream\ and Flink are slightly higher under at least once semantics. As it was mentioned above, it can be explained by the single-core configuration of the nodes. For at most once and at least once semantics, the latencies of \FlameStream\ and Flink do not vary a lot because both systems do not buffer output items for a long time before releasing. However, for exactly once semantics, Flink's latency is dramatically higher and it directly depends on the time between checkpoints. Such behavior is expected, because unlike \FlameStream, Flink needs to take state snapshot and release output items within a single transaction in order to preserve exactly once semantics.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.47\textwidth]{pics/comparison}
+  \caption{The comparison in latencies between FlameStream and Flink for different consistency semantics within 10 nodes, 50 documents per second rate, and delays between checkpoints of 100, 500, and 1000 ms}
+  \label {performance}
+\end{figure}
