@@ -8,11 +8,11 @@ Our experiments were performed on the cluster of 10 Amazon EC2 micro instances w
 
 Figure~\ref{performance} shows the latencies distributions of \FlameStream\ and Flink within distinct times between checkpoints and different consistency guarantees. The input rate is fixed at 50 documents per second.
 
-At the initial point, \FlameStream\ provides the similar latencies for {\it at most once} semantics. However, for {\it exactly once semantics}, Flink's latency is dramatically higher and it directly depends on the time between checkpoints. Such behavior is expected, because unlike \FlameStream, Flink needs to take state snapshot and release output items within a single transaction in order to preserve exactly once semantics.
+At the initial point, \FlameStream\ provides the similar latencies for {\it at most once} semantics and this behavior is deeply analyzed in~\cite{we2018seim}. However, for {\it exactly once semantics}, Flink's latency is dramatically higher and it directly depends on the time between checkpoints. Such behavior is expected, because unlike \FlameStream, Flink needs to take state snapshot and release output items within a single transaction in order to preserve exactly once semantics.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.47\textwidth]{pics/comparison}
-  \caption{The comparison in latencies between FlameStream and Flink for different consistency semantics within 10 nodes, 50 documents per second rate, and delays between checkpoints of 100, 500, and 1000 ms}
+  \caption{The comparison in latencies between FlameStream and Flink for different consistency semantics within 10 nodes and 50 documents per second input rate}
   \label {performance}
 \end{figure}
