@@ -6,7 +6,9 @@ We used an industrial solution, Apache Flink, for the comparison. The computatio
 
 Our experiments were performed on the cluster of 10 Amazon EC2 micro instances with 1GB RAM and 1 core CPU with 10000 Wikipedia articles as a dataset.
 
-Figure~\ref{performance} demonstrates the comparison of latencies between \FlameStream\ and Flink within distinct times between checkpoints, different consistency semantics, within 50 documents per second input rate. At the initial point, \FlameStream\ provides lower latency for at most once semantics. Such behavior is explained by the features of the optimistic approach for handling out-of-order items and is investigated in details in~\cite{we2018seim}. The latencies of both \FlameStream\ and Flink are slightly higher under at least once semantics. As it was mentioned above, it can be explained by the single-core configuration of the nodes. For at most once and at least once semantics, the latencies of \FlameStream\ and Flink do not vary a lot because both systems do not buffer output items for a long time before releasing. However, for exactly once semantics, Flink's latency is dramatically higher and it directly depends on the time between checkpoints. Such behavior is expected, because unlike \FlameStream, Flink needs to take state snapshot and release output items within a single transaction in order to preserve exactly once semantics.
+Figure~\ref{performance} shows the latencies distributions of \FlameStream\ and Flink within distinct times between checkpoints and different consistency guarantees. The input rate is fixed at 50 documents per second.
+
+At the initial point, \FlameStream\ provides the similar latencies for {\it at most once} semantics. However, for {\it exactly once semantics}, Flink's latency is dramatically higher and it directly depends on the time between checkpoints. Such behavior is expected, because unlike \FlameStream, Flink needs to take state snapshot and release output items within a single transaction in order to preserve exactly once semantics.
 
 \begin{figure}[htbp]
   \centering
