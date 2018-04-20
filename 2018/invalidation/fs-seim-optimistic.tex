@@ -45,7 +45,7 @@ The pseudocode is presented in Algorithm~\ref{group-semantics}. {\it Emit} funct
       \State \Call{Append}{$bucket, item$}
       \State $left \gets max(0, bucket_{length} - window)$
       \State $right \gets bucket_{length}$
-      \State \Call{Emit}{$DataItem(bucket[left, right])$}
+      \State \Call{Emit}{$new\ DataItem(bucket[left, right])$}
     \EndFunction
   \end{algorithmic}
 \end{algorithm}
@@ -113,14 +113,14 @@ The pseudocode of the grouping is shown in Algorithm \ref{group-insert}. The fun
       \State $cleanPosition \gets lowerBound(item, bucket)$
       \ForAll{$group: group \cap cleanPosition \neq \emptyset$}
         \LineComment{Send tombstones for invalid groups}
-        \State \Call{Emit}{$DataItem_{tomb}(group)$}
+        \State \Call{Emit}{$new\ DataItem_{tomb}(group)$}
       \EndFor
 
       \State \Call{Remove}{$bucket, cleanPosition$}
 
       \ForAll{$group: group \cap cleanPosition \neq \emptyset$} 
         \LineComment{Emit new groups that appeared after collapse}
-        \State \Call{Emit}{$DataItem(group)$} 
+        \State \Call{Emit}{$new\ DataItem(group)$} 
       \EndFor
     \EndFunction
 
@@ -131,14 +131,14 @@ The pseudocode of the grouping is shown in Algorithm \ref{group-insert}. The fun
       \ForAll{$group: group \cap insertPosition \neq \emptyset$} 
         \LineComment{Send tombstones for groups that would disappear}
         \LineComment{after insert}
-        \State \Call{Emit}{$DataItem_{tomb}(group)$} 
+        \State \Call{Emit}{$new\ DataItem_{tomb}(group)$} 
       \EndFor
       
       \State \Call{Insert}{$bucket, insertPosition$}
 
       \ForAll{$group: group \cap insertPosition \neq \emptyset$} 
         \LineComment{Emit new groups}
-        \State \Call{Emit}{$DataItem(group)$} 
+        \State \Call{Emit}{$new\ DataItem(group)$} 
       \EndFor
     \EndFunction
   \end{algorithmic}
