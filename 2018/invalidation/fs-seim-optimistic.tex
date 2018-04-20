@@ -54,6 +54,8 @@ The following example illustrates the semantics of the windowed grouping operati
 
 \[(1), (2), (1|3), (2|4), (1|3|5), (2|4|6), (3|5|7), (4|6|8)...\]
 
+The special case of grouping with $window = 2$ in conjunction with a stateless map is used to implement arbitrary stateful transformation.
+
 \subsection{Stateful transformations using defined operations}
 Figure~\ref{stateful-schema} shows the part of the logical pipeline, that can be used for stateful transformation. The input of windowed grouping operation is supposed to be ordered. There are several functional steps to produce output and update state. There are two cases of these steps:
 
@@ -144,7 +146,7 @@ The pseudocode of the grouping is shown in Algorithm \ref{group-insert}. The fun
 
 This technique guarantees that all correct tuples are eventually produced. However, invalid ones are also generated. Therefore, there is a need for {\it barrier} at the pipeline's sink, that filters invalid items when corresponding tombstones arrive. The barrier is partially flushed for some meta-information interval when there is a guarantee that there are no any out-of-order items and tombstones further up the stream for this range. This guarantee can be provided by punctuations or low watermarks, as it is implemented in the most stream processing systems. The fundamental idea behind this approach is to shift blocking as far as possible down the stream. Notably, this is the only buffer in the whole system, unlike existing solutions.
 
-The pseudocode for the barrier is shown in Algorithm~\ref{barrier-insert}. The function {\it Insert} is called upon new item's arrival, {\it Punctuation} - on punctuation's. 
+The pseudocode for the barrier is shown in Algorithm~\ref{barrier-insert}. The function $Insert$ is called by the system on the new item's arrival. $Punctuation$ is called when there is a guarantee that there are no tombostones up the stream with the specified time. The OOP architecture~\cite{Li:2008:OPN:1453856.1453890} can be employed to provide such guarantee.
 
 \begin{algorithm}
 \caption{Barrier}
