@@ -6,7 +6,7 @@ We used an industrial solution, Apache Flink, for the comparison. The computatio
 
 Our experiments were performed on the cluster of 10 Amazon EC2 micro instances with 1GB RAM and 1 core CPU with Wikipedia articles as a dataset.
 
-Figure~\ref{performance} shows the latency distributions of \FlameStream\ and Flink within distinct times between checkpoints and different consistency guarantees. The input rate is fixed at 50 documents per second.
+Figure~\ref{performance} shows the inverted index update latency distributions of \FlameStream\ and Flink within distinct times between checkpoints and different consistency guarantees. The input rate is fixed at 50 documents per second.
 
 At the initial point, \FlameStream\ provides the similar latencies for {\em at-most-once} semantics and this behavior is deeply analyzed in~\cite{we2018seim}. However, for exactly-once semantics, Flink's latency is dramatically higher and it directly depends on the time between checkpoints. Such behavior is expected, because unlike \FlameStream, Flink needs to take state snapshot and release output items within a single transaction in order to preserve exactly-once semantics.
 
