@@ -1,18 +1,18 @@
 \label {fs-short-model}
 
-\FlameStream\ computational model shares common building blocks with other stream processing systems: logical and physical graph, hash partitioning of load between multiple workers, FIFO channels between operations etc. In this section we describe only core differences that allows us to achieve the goals defined in the introduction, while details are provided in~\cite{we2018seim}.
+\FlameStream\ computational model shares common building blocks with other stream processing systems: logical and physical graph, hash partitioning of load between multiple workers, FIFO channels between operations, etc. In this section, we describe only core differences that allow us to achieve the goals defined in the introduction, while details are provided in~\cite{we2018seim}.
 
 We found that any stateful transformation can be expressed in terms of two operations:
 
 \begin {description}
   \item [Map] applies a user-defined function to the payload of an input item and returns a sequence of data items with transformed payloads. 
-  \item [Grouping] constructs a single item containing a list of consecutive items that have the same value of load-balancing function. The maximum number of items is defined by parameter $Window Size$. 
+  \item [Grouping] constructs a single item containing a list of consecutive items that have the same value of the load-balancing function. The maximum number of items is defined by parameter $Window Size$. 
 \end {description}
 
 In addition to this reduced set of operations, \FlameStream\ model allows cycles in a logical graph while such graphs are commonly assumed to be acyclic (DAGs).
 
-If an arbitrary stateful transformation is expressed in a form of $(In, State) \rightarrow (Out, NewState)$ it can be implemented by grouping with $WindowSize = 2$ and a map operation. Grouping collects two consecutive items, $In$ and $State$, into a single tuple and then the following map operation combines them into the $NewState$. The $NewState$ is then is returned back into the grouping via a cycle. We call this technique a {\it drifting state}, because business-logic state is made a part of a heterogeneous data flow.
+If an arbitrary stateful transformation is expressed in the form of $(In, State) \rightarrow (Out, NewState)$ it can be implemented by grouping with $WindowSize = 2$ and a map operation. Grouping collects two consecutive items, $In$ and $State$, into a single tuple and then the following map operation combines them into the $NewState$. The $NewState$ is then is returned into the grouping via a cycle. We call this technique a {\it drifting state} because the business-logic state is made a part of a heterogeneous data flow.
 
-While actual cycles in physical graph can cause spikes in throughput they can be optimized by preprocessor. The whole cycle can be computed locally and compressed into a single function chain call.
+While actual cycles in a physical graph can cause spikes in throughput, they can be optimized by the preprocessor. The whole cycle can be computed locally and compressed into a single function chain call.
 
-Grouping is a stateful operation, though its output depends on the input order. We organize processing in an optimistic manner. Instead of buffering, grouping produces output tuples as if there are no reorderings. In case of out-of-order item, grouping sends tombstones for the previously generated tuples that miss newly arrived item and then produces the correct ones. All valid items and tombstones are collected in the barrier, the only buffer in a processing pipeline that is located right before the data consumer. When there is a guarantee that there are no tombstones up the stream, barrier releases a portion of items. The progress indicators used in OOP approach~\cite{Li:2008:OPN:1453856.1453890} can play the role of such guarantee.
+Grouping is a stateful operation, though its output depends on the input order. We organize processing in an optimistic manner. Instead of buffering, grouping produces output tuples as if there are no reorderings. In case of an out-of-order item, grouping sends tombstones for the previously generated tuples that miss newly arrived item and then produces the correct ones. All valid items and tombstones are collected in the barrier, the only buffer in a processing pipeline that is located right before the data consumer. When there is a guarantee that there are no tombstones up the stream, barrier releases a portion of items. The progress indicators used in OOP approach~\cite{Li:2008:OPN:1453856.1453890} can play the role of such guarantee.

@@ -1,14 +1,14 @@
 \label {fs-short-experiments}
 
-We conducted a series of experiments to estimate the performance of our prototype. We used a problem of building an incremental inverted index as a stream processing benchmark, because this task requires stateful operations and its computational flow contains network shuffle that can violate the ordering constraints enabling evaluation of our optimistic techniques. Notably, the load distribution is skewed, because of Zipf's law. In the real-world, such scenario can be found in freshness-aware systems, e.g., news processing engines.
+We conducted a series of experiments to estimate the performance of our prototype. We used a problem of building an incremental inverted index as a stream processing benchmark because this task requires stateful operations and its computational flow contains network shuffle that can violate the ordering constraints enabling evaluation of our optimistic techniques. Notably, the load distribution is skewed, because of Zipf's law. In the real-world, such scenario can be found in freshness-aware systems, e.g., news processing engines.
 
-We used an industrial solution, Apache Flink, for the comparison. The computational pipeline is expressed as typical MapReduce-like transformation. Map is used for splitting document into postings. Reduce groups them by word and combines into the posting lists. We employ an optimistic approach to impose order before reduce stage, while in Apach Flink we set a buffer that were flushed on punctuations.
+We used an industrial solution, Apache Flink, for the comparison. The computational pipeline is expressed as typical MapReduce-like transformation. The map is used for splitting a document into postings. The reduce groups them by word and combines into the posting lists. We employ an optimistic approach to impose order before reduce stage, while in Apache Flink we set a buffer that was flushed on punctuations.
 
 Our experiments were performed on the cluster of 10 Amazon EC2 micro instances with 1GB RAM and 1 core CPU with Wikipedia articles as a dataset.
 
 Figure~\ref{performance} shows the inverted index update latency distributions of \FlameStream\ and Flink within distinct times between checkpoints and different consistency guarantees. The input rate is fixed at 50 documents per second.
 
-At the initial point, \FlameStream\ provides the similar latencies for {\em at-most-once} semantics and this behavior is deeply analyzed in~\cite{we2018seim}. However, for exactly-once semantics, Flink's latency is dramatically higher and it directly depends on the time between checkpoints. Such behavior is expected, because unlike \FlameStream, Flink needs to take state snapshot and release output items within a single transaction in order to preserve exactly-once semantics.
+At the initial point, \FlameStream\ provides the similar latencies for {\em at-most-once} semantics, and this behavior is deeply analyzed in~\cite{we2018seim}. However, for exactly-once semantics, Flink's latency is dramatically higher, and it directly depends on the time between checkpoints. Such behavior is expected, because unlike \FlameStream, Flink needs to take state snapshot and release output items within a single transaction to preserve exactly-once semantics.
 
 \begin{figure}[htbp]
   \centering

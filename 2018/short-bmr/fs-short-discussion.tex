@@ -1,5 +1,5 @@
 \label {fs-short-discussion}
 
-An important property of the proposed model is that it preserves the order between input and output items within the full system, therefore it is deterministic. This property can be simply transformed into idempotence by persistently saving the meta-information of the last released item in the barrier and filtering out all items with less meta-information on recovery. Such approach has almost no overhead on exactly-once processing, that is shown in the next section. 
+An essential property of the proposed model is that it preserves the order between input and output items within the full system. Therefore it is deterministic. This property can be simply transformed into idempotence by persistently saving the meta-information of the last released item in the barrier and filtering out all items with less meta-information on recovery. Such approach has almost no overhead on exactly-once processing, that is shown in the next section. 
 
-Our optimistic OOP is tightly connected with the deterministic nature of processing. Tombstones go the same route as the original item, therefore all consequent improper items will be cleaned up.
+Our optimistic OOP is tightly connected with the deterministic nature of the processing. Tombstones go the same route as the original item. Thus all consequent improper items will be cleaned up.
