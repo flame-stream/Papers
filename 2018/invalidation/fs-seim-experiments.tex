@@ -2,6 +2,8 @@
 
 \label {fs-experiments}
 
+\subsection{Setup}
+
 In order to estimate the performance, we implemented a prototype based on the proposed approach. As a stream processing task, we apply the computation of inverted index for 1000 Wikipedia documents. The logical pipeline of this computation is shown in Figure ~\ref{inverted-index}. First map operation accepts Wikipedia documents and outputs pairs of words and corresponding positions. The next part of the pipeline accepts pairs of word and positions and computes updated posting list and the actual changelog. 
 
 This stateful transformation is implemented in the form of groping and map operation with a cycle, as it was shown in the previous section. Regarding the physical deployment, the full logical graph is deployed on each computational unit or worker. Documents are randomly shuffled before the first map operation. Word positions are partitioned by word before grouping. The other links are implemented as simple chain calls.
@@ -13,7 +15,9 @@ This stateful transformation is implemented in the form of groping and map opera
   \label {inverted-index}
 \end{figure}
 
-Our experiments were performed on clusters of 4, 5, 6, 7, 8, 9, and 10 nodes. Each node is an AWS EC2 micro instance with 1GB RAM and 1 core CPU.
+Our experiments were performed on clusters of 10 nodes. Each node is an AWS EC2 micro instance with 1GB RAM and 1 core CPU.
+
+\subsection{Overhead and scalability}
 
 As a key metric in our experiment, we take the ratio of arrived at the barrier items count to the number of the valid items among them. This value clearly represents the overhead of our approach, as it was mentioned at the end of the previous section. 
 
@@ -28,3 +32,8 @@ Therefore, the most important conclusions of the experiments are: the proposed m
   \caption{The relation between the number of workers, the delay between input documents and the replay ratio}
   \label {experiment}
 \end{figure}
+
+\subsection{Comparison against Apache Flink}
+
+
+

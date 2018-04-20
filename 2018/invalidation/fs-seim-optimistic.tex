@@ -9,7 +9,7 @@ Following our approach, we make some assumptions about stream processing system,
 The ordering model of data items is defined at the beginning of this section. Then, we show that any stateful transformation can be implemented using the combination of windowed grouping and map operations. After that, we demonstrate an optimistic approach to handle out-of-order items within these operations. At the end of the section, the limitations of such technique are discussed.
 
 \subsection{Ordering model}
-We assume that there is a total order on data items. Ordering is preserved when an item is going through the operations. More precisely, the order of output items is the same as the order of corresponding input items. If more than one item is generated, they are inserted in output stream sequentially. Moreover, the output follows corresponding input but precedes the next item. The ordering model is shown in Figure ~\ref{ordering}.
+We assume that there is a total order on data items. Ordering is preserved when an item is going through the operations. More precisely, the order of output items is the same as the order of corresponding input items. If more than one item is generated, they are inserted in output stream sequentially. Moreover, the output follows corresponding input but precedes the next item. The ordering model is shown in Figure ~\ref{ordering}. $F(x)$ is an arbitrary transformation. Replication and union are used to inject original unmodified items into the resulting stream to show the order between items. 
 
 %% TODO: split and merge
 
@@ -25,12 +25,8 @@ We assume that there is a total order on data items. Ordering is preserved when 
 \subsubsection{Map}
 Map transforms input item into a sequence of its derivatives, according to a user-provided function $f$. This sequence can consist of any number of items or even be empty.
 
-\[Map(f: T \rightarrow List[V])\]
-
 \subsubsection{Windowed grouping}
 Windowed grouping is a stateful operation with a numeric parameter {\it window}. It is supposed that payloads of input items of grouping operation have key-value form. The state of this operation is represented by a set of buckets, one for each key. 
-
-\[Grouping(window: Integer)\]
 
 Windowed grouping has the following semantics:
 
