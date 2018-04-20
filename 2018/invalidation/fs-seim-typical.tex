@@ -19,7 +19,7 @@ OOP is an approach that does not require order maintenance if it is not needed. 
 
 A timed window operation can be mentioned as an example of OOP approach. A window operation buffers partial results until a progress indicator arrives. After that, the window flushes corresponding buffers and propagates the indicator to the next operation down the stream.
 
-OOP addresses the downsides of the IOP, but it has flaws too. Even if the input stream is totally ordered, the operation must wait for the progress indicator. Figure~\ref{oop} illustrates such case. Bottom window is complete but must be blocked until the indicator for the item 11 arrives. Another issue of OOP is that periodical flushes can result in load bursts and an increase in latency. 
+OOP addresses the downsides of the IOP, but the direct implementation has flaws too. Even if the input stream is totally ordered, the operation must wait for the progress indicator. Figure~\ref{oop} illustrates such case. Bottom window is complete but must be blocked until the indicator for the item 11 arrives. Another issue of OOP is that periodical flushes can result in load bursts and an increase in latency. 
 
 \begin{figure}[htbp]
   \centering
