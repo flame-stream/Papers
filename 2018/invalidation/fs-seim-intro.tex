@@ -11,14 +11,14 @@ Nowadays, a lot of real-life applications use stream processing for network moni
   \label {break-order-dataflow}
 \end{figure}
 
-The typical way to achieve in-order processing is to set up a special buffer in front of operation. This buffer collects all input items until some user-provided condition is satisfied. Then the contents of the buffer are sorted and fed to the operation. The main disadvantage of such technique is latency growth. This issue becomes even more significant if the processing pipeline contains several operations that require ordered input. 
+The typical way to achieve in-order processing is to set up a special buffer in front of operation. This buffer collects all input items until some user-provided condition is satisfied. Then the contents of the buffer are sorted and fed to the operation. The main disadvantage of such technique is latency growth. This issue becomes even more significant if the processing pipeline contains several operations that require ordered input. The problem here is that each buffer increases latency, because of the additional waiting time.
 
 The alternative is to develop business logic tolerant to out-of-order items. However, this approach is suitable only for a limited set of tasks. Moreover, it may dramatically complicate the business-logic, which can lead to the maintenance cost increase and is error-prone.
 
 In this paper we introduce an optimistic approach to handle out-of-order items. Our evaluation demonstrates the low overhead of our method. The contributions of this paper are the following: 
 
 \begin {itemize}
-  \item Definition of new optimistic technique to handle out-of-order items in stateful operations
+  \item Definition of new optimistic technique to handle out-of-order items in stateful operations that requires single buffer per computational pipeline
   \item Analysis of properties of this approach
   \item Demonstration of working example that applies proposed method
 \end {itemize}

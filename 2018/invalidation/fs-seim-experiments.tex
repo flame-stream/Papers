@@ -3,7 +3,15 @@
 \label {fs-experiments}
 
 \subsection{Setup}
-We conducted a series of experiments to estimate the performance of our prototype. We used a problem of building an incremental inverted index as a stream processing benchmark because this task requires stateful operations and its computational flow contains network shuffle that can violate the ordering constraints enabling evaluation of our optimistic techniques. Notably, the load distribution is skewed, because of Zipf's law. In the real-world, such scenario can be found in freshness-aware systems, e.g., news processing engines.
+We performed the series of experiments to estimate the performance of our system's prototype. As a stream processing task, we apply building an inverted index. This task is chosen because it has the following properties:
+
+\begin{enumerate}
+    \item Task requires stateful operations. It allows us to check the performance of the proposed stateful pipeline
+    \item Computational flow of the task contains network shuffle that can violate the ordering constraints of some operations. Therefore, inverted index task can verify the performance of our optimistic approach
+    \item The load distribution is skewed, because of Zipf's law
+\end{enumerate}
+
+These properties make the task sufficient to comprehensively analyze the performance of the proposed solution. Building inverted index can be considered as the halfway task between documents generation and searching. In the real-world, such scenario can be found in freshness-aware systems, e.g., news processing engines.
 
 The logical pipeline of this computation is shown in Figure ~\ref{inverted-index}. First map operation accepts Wikipedia documents and outputs pairs of words and corresponding positions. The next part of the pipeline accepts pairs of word and positions and computes updated posting list and the actual changelog. 
 
@@ -51,7 +59,7 @@ The comparison of latencies between \FlameStream\ and Flink within 10 nodes and 
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.25\textwidth]{pics/buffer-vs-barrier}
+  \includegraphics[width=0.20\textwidth]{pics/buffer-vs-barrier}
   \caption{Comparison between waiting time in Flink's buffer and FlameStream's barrier}
   \label {buffer-vs-barrier}
 \end{figure}
