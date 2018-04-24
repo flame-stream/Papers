@@ -1,0 +1,69 @@
+\documentclass{llncs}
+% packages should be added as needed 
+\usepackage{graphicx}
+
+\usepackage{algorithm} % for algorithms
+%\usepackage{mathtools}
+
+\usepackage{algpseudocode}
+\algblockdefx[Process]{Process}{EndProcess}[2][Unknown]{{\bf Process} {\it #2}}{}
+\algblockdefx[Event]{Event}{EndEvent}[2][Unknown]{{\bf upon event #2 do}}{}
+
+\usepackage{booktabs} % For formal tables
+\usepackage{cite} %for multiple refs
+
+\usepackage{amssymb} %for nice emptyset
+
+\usepackage[T1]{fontenc}
+\usepackage{inconsolata}
+
+\pagestyle{plain} % removes running headers
+
+\newcommand{\PicScale}{0.5}
+\newcommand {\FlameStream} {FlameStream}
+
+\begin{document}
+
+\title {Consistency maintenance in distributed stream processing}
+\author{Artem Trofimov}
+\institute{JetBrains Research, St. Petersburg, Russia \\
+\and Saint Petersburg State University, St. Petersburg, Russia \\
+\email{trofimov9artem@gmail.com}}
+
+\maketitle
+
+\begin{abstract}
+
+\end {abstract}
+
+\section {Introduction}
+What is stream processing and what is consistency in terms of stream processing.
+
+\section {Motivation}
+Why consistency within stream processing is so important.
+
+\section {Related work}
+Existing solutions, their pros and cons~\cite{Carbone:2017:SMA:3137765.3137777, Zaharia:2012:DSE:2342763.2342773}. 
+
+\section {Contributions}
+Explain our way to achieve exactly-once.
+
+\subsection{Optimistic strong ordering model}
+Buffering is too expensive, we propose another approach.
+
+\subsection{Lightweight protocols based on determinism}
+Lightweight exactly-once using determinism is possible. 
+
+\subsection{Current results}
+Some experiments data?
+
+\section {Summary and future work}
+Consistency within stream processing is an important problem. We analyzed existing solutions and started to design a novel approach.
+
+\bibliographystyle{splncs03}
+\bibliography{../../bibliography/flame-stream}
+
+\end {document}
+
+\endinput
+you can put whatever here
