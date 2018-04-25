@@ -38,14 +38,16 @@
 
 \section {Introduction}
 What is stream processing and what is consistency in terms of stream processing.
+Как соотносятся разные модели согласованности со стоимостью их достижения. Достоверность.
+Задача анализа потоков. На сегодняшних системах оборудования - распределенные. Ослабленные, низкоуровневые гарантии согласованности. План всего, что будет дальше. Хотим эффективно делать низкоуровневые гарантии, чтобы получать стабильные, достоверные результаты (протаскивать на верхний уровень).
 
 \section {Motivation}
 Why consistency within stream processing is so important.
 
-\section {Related work}
+\section {State-of-the-art}
 Existing solutions, their pros and cons~\cite{Carbone:2017:SMA:3137765.3137777, Zaharia:2012:DSE:2342763.2342773}. 
 
-\section {Contributions and future work}
+\section {Optimistic low-level consistency}
 Explain our way to achieve exactly-once.
 
 \subsection{Optimistic strong ordering model}
@@ -54,8 +56,8 @@ Buffering is too expensive, we propose another approach.
 \subsection{Lightweight protocols based on determinism}
 Lightweight exactly-once using determinism is possible. 
 
-\subsection{Current results}
-Some experiments data?
+\section{Providing reliable analytics}
+Аналитики. Хотим декларативный подход.
 
 \section {Summary}
 Consistency within stream processing is an important problem. We analyzed existing solutions and started to design a novel approach.
