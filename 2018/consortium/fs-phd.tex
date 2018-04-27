@@ -24,7 +24,7 @@
 
 \begin{document}
 
-\title {Consistency maintenance in distributed stream processing}
+\title {Consistency maintenance in distributed analytical stream processing}
 \author{Artem Trofimov}
 \institute{JetBrains Research, St. Petersburg, Russia \\
 \and Saint Petersburg State University, St. Petersburg, Russia \\
@@ -36,15 +36,21 @@
 
 \end {abstract}
 
-\section {Introduction}
+\section {Introduction and motivation}
+Currently, we can observe two important trends regarding data analytics~\cite{Zou:2010:SRQ:1920841.1921012}. Firstly, the amount of data generated and stored by business applications has been significantly increased due to better instrumentation and storage capabilities. Secondly, such amount of data has become sufficient for modern statistical and machine learning approaches to provide valuable insights. Therefore, large-scale data analytics is a hot area of research and a crucial task for industrial applications.
+
+State-of-the-art batch processing systems, i.e. Google MapReduce ~\cite{Dean:2008:MSD:1327452.1327492} and Apache Hadoop~\cite{hadoop2009hadoop}, can provide exact results for analytical tasks while being fault-tolerant and strong consistent on the low level. The typical use case of this kind of systems is to regularly process all collected for the period input data. This approach is designed for providing high-throughput without any latency constraints. However, there are scenarios where data is most valuable at the time of its arrival. These tasks include news processing, financial analytics, short-term personalization, etc.
+
+Winning this competition can influence the overall efficiency of the business. 
+
 What is stream processing and what is consistency in terms of stream processing.
-Как соотносятся разные модели согласованности со стоимостью их достижения. Достоверность.
-Задача анализа потоков. На сегодняшних системах оборудования - распределенные. Ослабленные, низкоуровневые гарантии согласованности. План всего, что будет дальше. Хотим эффективно делать низкоуровневые гарантии, чтобы получать стабильные, достоверные результаты (протаскивать на верхний уровень).
+%Как соотносятся разные модели согласованности со стоимостью их достижения. Достоверность.
+%Задача анализа потоков. На сегодняшних системах оборудования - распределенные. Ослабленные, низкоуровневые гарантии согласованности. План всего, что будет дальше. Хотим эффективно делать низкоуровневые гарантии, чтобы получать стабильные, достоверные результаты (протаскивать на верхний уровень).
 
 \section {Motivation}
 Why consistency within stream processing is so important.
 
-\section {State-of-the-art}
+\section {State of the art}
 Existing solutions, their pros and cons~\cite{Carbone:2017:SMA:3137765.3137777, Zaharia:2012:DSE:2342763.2342773}. 
 
 \section {Optimistic low-level consistency}
@@ -57,7 +63,7 @@ Buffering is too expensive, we propose another approach.
 Lightweight exactly-once using determinism is possible. 
 
 \section{Providing reliable analytics}
-Аналитики. Хотим декларативный подход.
+%Аналитики. Хотим декларативный подход.
 
 \section {Summary}
 Consistency within stream processing is an important problem. We analyzed existing solutions and started to design a novel approach.
