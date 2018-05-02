@@ -37,31 +37,14 @@
 \end {abstract}
 
 \section {Introduction}
-In recent years large-scale data analytics has become a hot area of research and a crucial task for industrial applications~\cite{Zou:2010:SRQ:1920841.1921012}. The main reasons behind this fact are the continuous growth of the amount of the data available for analysis and the lack of the appropriate tools. Distributed batch processing systems, i.e. Google MapReduce ~\cite{Dean:2008:MSD:1327452.1327492} and Apache Hadoop~\cite{hadoop2009hadoop}, addresses some issues of large-scale data analytics. They can provide high throughput while being fault-tolerant and strong consistent in some sense. However, several issues still remain. Particularly, MapReduce model suffers from high latency between event arrival and its processing, the lack of iterative processing, the lack of early termination~\cite{Doulkeridis:2014:SLA:2628707.2628782}, etc. Nevertheless, there are scenarios which require one more of the mentioned properties. These tasks include news processing, fraud detection, short-term personalization, etc.
-
-Distributed stream processing systems were designed to address proposed issues with prevention of some consistency guarantees. Typically, stream processing system is a shared-nothing distributed runtime, that handles input items and processes them one-by-one according to user-provided logic. The sequence of input items is potentially unlimited. Flink \cite{carbone2015apache}, Samza \cite{Noghabi:2017:SSS:3137765.3137770}, and Storm \cite{apache:storm} are the examples of modern stream processing engines. There are three main types of consistency guarantees regarding stream processing, which is considered in the literature. {\em At most once} semantics guarantees that each input event is processed once or not processed at all. {\em At least once} states that each input item is processed, but possibly multiple times. {\em Exactly once} semantics guarantee that each input event is processed exactly one time. In this work we will treat these guarantees as a {\em low-level}. 
-
-Generally, the main purpose of the users of stream processing systems is to retrieve valuable insights from input data. However, the processing result can be consistent in terms of low-level consistency, but, at the same time, be absolutely incorrect from the business problem point of view. Therefore, it would be extremely useful for users of stream processing systems to have a mechanism that allows to define some custom consistency semantics. The system should maintain such user-defined consistency or alarm if it is not possible. We will call this kind of consistency {\em high-level}. As an example of high-level consistency semantics, we can mention requirements for the particular statistical criteria or a suitability of data for making reasonable decisions. Although this concept can influence the overall efficiency of the business, to the best of our knowledge, there are no open source stream processing systems, which support high-level consistency.
-
-The main purpose of our research work is to design and evaluate mechanisms for high-level consistency within distributed stream processing in order to make large-scale data analytics more stable and reliable. However, high-level consistency is not possible to implement without strong guarantees on the low level. Hence, such mechanisms should be based on an efficient implementation of low-level consistency guarantees in order to be applicable for tasks with strong performance requirements. Our work can be divided into the following steps:
-
-\begin{enumerate}
-    \item Analyze modern approaches for achieving low-level consistency
-    \item Introduce more efficient approach for low-level guarantees if existing are not suitable
-    \item Implement high-level consistency on the top of an efficient implementation of low-level guarantees
-\end{enumerate}
-
-Currently, we have some results for the first two steps, while the third is under development. Therefore, the rest of the paper is organized as follows: in section~\ref{related} we discuss existing approaches for low-level consistency and analyze their applicability, the results that have been already obtained are detailed in~\ref{optimistic}, our plans and prospects regarding high-level consistency are mentioned in~\ref{reliable}, and we summarize the full research in~\ref{summary}.
-
-%Как соотносятся разные модели согласованности со стоимостью их достижения. Достоверность.
-%Задача анализа потоков. На сегодняшних системах оборудования - распределенные. Ослабленные, низкоуровневые гарантии согласованности. План всего, что будет дальше. Хотим эффективно делать низкоуровневые гарантии, чтобы получать стабильные, достоверные результаты (протаскивать на верхний уровень).
+\input {fs-phd-intro.tex}
 
 \section {State of the art}
-\label{related}
+\label{fs-phd-related}
 Existing solutions, their pros and cons~\cite{Carbone:2017:SMA:3137765.3137777, Zaharia:2012:DSE:2342763.2342773}. 
 
 \section {Optimistic low-level consistency}
-\label{optimistic}
+\label{fs-phd-optimistic}
 Explain our way to achieve exactly-once.
 
 \subsection{Optimistic strong ordering model}
@@ -71,11 +54,11 @@ Buffering is too expensive, we propose another approach.
 Lightweight exactly-once using determinism is possible. 
 
 \section{Providing reliable analytics}
-\label{reliable}
+\label{fs-phd-reliable}
 %Аналитики. Хотим декларативный подход.
 
 \section {Summary}
-\label{summary}
+\label{fs-phd-summary}
 Consistency within stream processing is an important problem. We analyzed existing solutions and started to design a novel approach.
 
 \bibliographystyle{splncs03}
