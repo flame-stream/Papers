@@ -1,0 +1,27 @@
+%%% fs-phd-related - State of the art
+\label{fs-phd-reliable}
+
+The typical user of data processing system desire to fetch reliable results with minimal effort. Therefore, we believe that computational pipelines should be defined in a declarative fashion. However, existing declarative approaches, e.g. SQL, do not allow to set up custom high-level consistency requirements. 
+
+It is convenient to think about data streams in terms of {\em semantical types} rather than particular operations and constraints. For example, we can describe the stream as "test data for experiment number 3" or "users of mobile application". Each semantical type or just type can also require some high-level consistency constraints, e.g. the percent of users with an empty profile is less than 10 or all items satisfy some particular schema. Therefore, the semantical type is a set of data streams with some high-level consistency requirements. A correspondence between input data streams and semantical types is defined by a user and stored in system meta-information.
+
+Administrators of the system can define conversions between types. As it was mentioned below, each arbitrary stateful operation can be expressed in the form of the sequence of the map and windowed grouping operations. Therefore, each conversion can consist of map or grouping operation. Drifting state technique allows states of operations to go along the stream as ordinary items, so states can be considered as ordinary semantical types. This property allows different conversions with the same state types to reuse state objects in case of failure.
+
+We assume that semantical types are homogeneous, hence, the high-level consistent requirements can be checked on each partition, where the data items belonging to the particular type are processed. The logic for the case when high-level consistency is not satisfied can vary. For instance, the system can try to enforce it, or just stop the computations for this type.
+
+Each type is able to require different high-level consistency that can be based on different low-level consistency semantics. Therefore, we can process different semantical types within distinct parts of the computational pipeline that can potentially support distinct low-level consistency. For instance, exactly-once can be applied only to the types that really need it.  
+
+The desired goal for us is to implement mechanisms that automatically derive some defined semantical type from existing if it is possible. Furthermore, the plan of conversion must satisfy the following conditions regarding other possible plans:
+
+\begin{itemize}
+    \item CPU and network usage is minimal
+    \item The time needed for detection of inconsistencies is minimal
+\end{itemize}
+
+To achieve this purposes, the system must provide for the following features:
+
+\begin{itemize}
+    \item The applicability of alternative plans is automatically estimated
+    \item The performance results of existing plans are used for preparing new plans
+    \item Plans can be changed in case of system reconfiguration
+\end{itemize}
