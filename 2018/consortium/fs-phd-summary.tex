@@ -1,13 +1,13 @@
 %%% fs-phd-summary - Summary
 \label{fs-phd-summary}
 
-In this work we discussed a problem that we are working on - providing reliable, efficient, and convenient high-level consistency guarantees within distributes stream processing. Currently, state-of-the-art stream processing systems concentrate only on proving low-level consistency guarantees. However, it was realized that providing high-level guarantees on the top of low-level can significantly improve the efficiency of stream analytics. 
+Currently, state-of-the-art stream processing systems concentrate only on proving low-level consistency guarantees. However, it was realized that providing high-level guarantees on the top of low-level can significantly improve the efficiency of stream analytics. Therefore, our objective is to fill this gap and to provide reliable, efficient, and convenient mechanisms for high-level consistency maintenance within distributes stream processing.
 
 We recognized the following main problems on the way of achieving our goal:
 
 \begin{itemize}
     \item Design low-overhead approach for achieving low-level consistency in order to use it as a building block for high-level guarantees  
-    \item Invent convenient and reliable mechanisms to declaratively define high-level guarantees in terms of semantical types
+    \item Invent convenient and reliable mechanisms to declaratively define high-level guarantees in terms of semantic types
     \item Realize the correspondence between distinct high-level and low-level consistency requirements
     \item Efficiently implement meta-stream processing for handling complex high-level guarantees
     \item Bind data management and statistics in order to obtain reliable and valuable results  
