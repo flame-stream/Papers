@@ -1,4 +1,5 @@
-\documentclass[sigconf]{acmart}
+\documentclass[14pt]{matmex-diploma-custom}
+
 % packages should be added as needed 
 \usepackage{graphicx}
 
@@ -15,67 +16,47 @@
 
 \newcommand{\PicScale}{0.5}
 \newcommand {\FlameStream} {FlameStream}
+
 \begin{document}
-
-\title {\FlameStream: Model and Runtime for Distributed Analytical Stream Processing}
-% \titlenote{Produces the permission block, and   copyright information}
-%\subtitle{Extended Abstract}
-% \subtitlenote{The full version of the author's guide is available as   \texttt{acmart.pdf} document}
-
-% \author {Igor E. Kuralenok \and Nikita Marshalkin \and Artem Trofimov \and Boris Novikov}
-
-\author{Igor E. Kuralenok}
-%\authornote{Dr.~Trovato insisted his name be first.}
-%\orcid{1234-5678-9012}
-\affiliation{%
-  \institution{JetBrains Research}
-%streetaddress{P.O. Box 1212}
-  \city{St. Petersburg} 
-%  \state{Ohio} 
-%  \postcode{190000}
-  \country{Russia}
+% Год, город, название университета и факультета предопределены,
+% но можно и поменять.
+% Если англоязычная титульная страница не нужна, то ее можно просто удалить.
+\filltitle{ru}{
+    chair              = {Направление Смысла Жизни\\ Профиль тщеты всего сущего},
+    title              = {Пустое подмножество как замкнутое множество},
+    % Здесь указывается тип работы. Возможные значения:
+    %   coursework - Курсовая работа
+    %   diploma - Диплом специалиста
+    %   master - Диплом магистра
+    %   bachelor - Диплом бакалавра
+    type               = {diploma},
+    position           = {студента},
+    group              = 666,
+    author             = {Машкин Эдельвейс Захарович},
+    supervisorPosition = {д.\,ф.-м.\,н., профессор},
+    supervisor         = {Выбегалло А.\,А.},
+    reviewerPosition   = {ст. преп.},
+    reviewer           = {Привалов А.\,И.},
+    chairHeadPosition  = {д.\,ф.-м.\,н., профессор},
+    chairHead          = {Хунта К.\,Х.},
+%   university         = {Санкт-Петербургский Государственный Университет},
+%   faculty            = {Математико-механический факультет},
+%   city               = {Санкт-Петербург},
+%   year               = {2013}
 }
-\email{ikuralenok@gmail.com}
-
-\author{Artem Trofimov}
-\affiliation{%
-  \institution{JetBrains Research}
-  %streetaddress{P.O. Box 1212}
-  \city{St. Petersburg} 
-  \country{Russia}
+\filltitle{en}{
+    chair              = {The Meaning of Life \\ Uselessness of Everything},
+    title              = {Empty subset as closed set},
+    author             = {Edelweis Mashkin},
+    supervisorPosition = {professor},
+    supervisor         = {Amvrosy Vibegallo},
+    reviewerPosition   = {assistant},
+    reviewer           = {Alexander Privalov},
+    chairHeadPosition  = {professor},
+    chairHead          = {Christobal Junta},
 }
-\email{trofimov9artem@gmail.com}
-
-\author{Nikita Marshalkin}
-\affiliation{%
-\institution{JetBrains Research}
-  %streetaddress{P.O. Box 1212}
-  \city{St. Petersburg} 
-  \country{Russia}
-}
-\email{marnikitta@gmail.com}
-
-\author{Boris Novikov}
-\affiliation{%
-\institution{JetBrains Research}
-  %streetaddress{P.O. Box 1212}
-  \city{St. Petersburg} 
-  \country{Russia}
-}
-\email{borisnov@acm.org}
-
-
-%\author{Artem Trofimov, Nikita Marshalkin, Boris Novikov}
-%  \authornote{}
-%\affiliation{%
-%  \institution{St. Petersburg state University}
-%  \streetaddress{Universitetskaya nab. 7/9}
-%  \city{St. Petersburg} 
-%  \postcode{199034}
-% \country{Russia}
-%}
-%\email{trofimov9artem@gmail.com, marnikitta@gmail.com, borisnov@acm.org}
-
+\maketitle
+\tableofcontents
 
 \begin{abstract}
 In recent years, there has been a growth in research and industrial solutions in the field of distributed stream processing. However, even state-of-the-art stream processing systems are inconvenient to work with in some ways. Firstly, existing solutions suppose that the state of operations should be managed directly by a user, and that can be confusingly for inexperienced users of analytical processing systems. Secondly, these systems do not provide for deterministic processing by default. Furthermore, the most common approach for this feature is buffering. Its main problem is the extra cost for blocking before each order-sensitive operation. The goal of this paper is to propose a model, which addresses both recognized issues. On the one hand, our model stateless from the business logic perspective. Such behavior is obtained by the technique that allows a state to be a part of a stream. On the other hand, it is deterministic by design. We introduce an optimistic method that avoids buffering before each operation to achieve determinism with low overhead. The experiments show that prototype of our system requires a low extra cost for supporting proposed features and is able to outperform alternative industrial solutions in certain conditions.

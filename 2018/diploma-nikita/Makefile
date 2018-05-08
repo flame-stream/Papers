@@ -1,9 +1,9 @@
 all:
-	pdflatex fs-run-time.tex
+	xelatex fs-run-time.tex
 	bibtex fs-run-time.aux
-	pdflatex fs-run-time.tex
-	pdflatex fs-run-time.tex
-	pdflatex fs-run-time.tex
+	xelatex fs-run-time.tex
+	xelatex fs-run-time.tex
+	xelatex fs-run-time.tex
 	evince fs-run-time.pdf
 
 clean:
