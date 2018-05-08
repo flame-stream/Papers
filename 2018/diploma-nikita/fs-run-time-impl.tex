@@ -4,7 +4,7 @@
 \subsection{Ordering model}
 The meta-information of data item is a tuple of a {\it global time}, a {\it trace}, {\it child ids} and a tombstone flag.
 
-\[Meta := (GlobalTime, ChildIds[], Trace, IsTombstone)\]
+\[Meta := (GlobalTime, ChildIds[\,], Trace, IsTombstone)\]
 
 Global time is assigned to data item once the item enters the system. It is a pair of milliseconds since the epoch start and the identifier of the front. The identifier is used to assign different global times to different items, even in case of wall-clock collisions. 
 
@@ -28,7 +28,7 @@ Figure~\ref{logical-graph-ops-figure} shows the topology of each operation and h
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[scale=0.5]{pics/operations}
+  \includegraphics[scale=0.7]{pics/operations}
   \caption{The topology of each operation and how it affects the meta}
   \label {logical-graph-ops-figure}
 \end{figure}
@@ -71,7 +71,7 @@ This technique guarantees that the {\it XOR} for some global time is equal to ze
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[scale=0.6]{pics/acker}
+  \includegraphics[scale=0.7]{pics/acker}
   \caption{The example of tracking minimal time using acker}
   \label {acker}
 \end{figure}
