@@ -40,15 +40,15 @@
 \maketitle
 \tableofcontents
 
-\begin{abstract}
-Распределенные потоковые вычисления - актуальная тема как в исследовательских, так и в промышленных системах. Но даже у современных систем потоковой обработки данных есть проблемы. Во-первых, существующие решения предполагают, что непосредственно пользователь должен управлять состоянием операций, это может сбивать с толку неопытных пользователей. Во-вторых, по умолчанию эти системы не детерминированы, а самый популярный способ для внесения детерминированности в обработку, буферизация, сопряжен с увеличением задержки и всплесками нагрузки на сеть. Целью данной работы является создание модели, которая решает обе проблемы. Эксперименты демонстрирует что прототип системы не привносит дополнительной нагрузки и может показать меньшую задержку чем промышленная система.
-\end {abstract}
+% \begin{abstract}
+% Распределенные потоковые вычисления - актуальная тема как в исследовательских, так и в промышленных системах. Но даже у современных систем потоковой обработки данных есть проблемы. Во-первых, существующие решения предполагают, что непосредственно пользователь должен управлять состоянием операций, это может сбивать с толку неопытных пользователей. Во-вторых, по умолчанию эти системы не детерминированы, а самый популярный способ для внесения детерминированности в обработку, буферизация, сопряжен с увеличением задержки и всплесками нагрузки на сеть. Целью данной работы является создание модели, которая решает обе проблемы. Эксперименты демонстрирует что прототип системы не привносит дополнительной нагрузки и может показать меньшую задержку чем промышленная система.
+% \end {abstract}
 
-\newpage
+% \newpage
 
-\begin{abstract}
-In recent years, there has been a growth in research and industrial solutions in the field of distributed stream processing. However, even state-of-the-art stream processing systems are inconvenient to work with in some ways. Firstly, existing solutions suppose that the state of operations should be managed directly by a user, and that can be confusingly for inexperienced users of analytical processing systems. Secondly, these systems do not provide for deterministic processing by default. Furthermore, the most common approach for this feature is buffering. Its main problem is the extra cost for blocking before each order-sensitive operation. The goal of this paper is to propose a model, which addresses both recognized issues. On the one hand, our model stateless from the business logic perspective. Such behavior is obtained by the technique that allows a state to be a part of a stream. On the other hand, it is deterministic by design. We introduce an optimistic method that avoids buffering before each operation to achieve determinism with low overhead. The experiments show that prototype of our system requires a low extra cost for supporting proposed features and is able to outperform alternative industrial solutions in certain conditions.
-\end {abstract}
+% \begin{abstract}
+% In recent years, there has been a growth in research and industrial solutions in the field of distributed stream processing. However, even state-of-the-art stream processing systems are inconvenient to work with in some ways. Firstly, existing solutions suppose that the state of operations should be managed directly by a user, and that can be confusingly for inexperienced users of analytical processing systems. Secondly, these systems do not provide for deterministic processing by default. Furthermore, the most common approach for this feature is buffering. Its main problem is the extra cost for blocking before each order-sensitive operation. The goal of this paper is to propose a model, which addresses both recognized issues. On the one hand, our model stateless from the business logic perspective. Such behavior is obtained by the technique that allows a state to be a part of a stream. On the other hand, it is deterministic by design. We introduce an optimistic method that avoids buffering before each operation to achieve determinism with low overhead. The experiments show that prototype of our system requires a low extra cost for supporting proposed features and is able to outperform alternative industrial solutions in certain conditions.
+% \end {abstract}
 
 \section* {Introduction}
 \input {fs-run-time-intro.tex}
