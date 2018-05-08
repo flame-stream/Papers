@@ -17,12 +17,11 @@ In this paper we propose a technique to provide consistency guarantees for~\Flam
 The order between data items is provided by meta-information that is assigned to each item. Because of the fact that processing model is deterministic, meta-information allows us to uniquely identify which data items have already left the system, from which point computations should start after recovery, and which version of the operations' state should be loaded. Furthermore, the properties of the proposed model allow the process of releasing output items to be independent from other processes. These features make exactly once semantics low-cost in terms of performance, that is shown in our experiments.
 
 Therefore, the contributions of this paper are the following: 
-
-\begin {itemize}
-\item Definition of deterministic stateful streaming computational model 
-\item Description of method for providing strong consistency properties within proposed model 
-\item Demonstration the competitiveness of this technique
-\end {itemize}
+\begin{itemize}
+    \item Definition of deterministic stateful streaming computational model 
+    \item Description of method for providing strong consistency properties within proposed model 
+    \item Demonstration the competitiveness of this technique
+\end{itemize}
 
 The rest of the paper is structured as follows: ...
 
