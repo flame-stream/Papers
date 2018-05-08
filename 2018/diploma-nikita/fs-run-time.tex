@@ -1,4 +1,4 @@
-\documentclass[14pt]{matmex-diploma-custom}
+\documentclass[14pt]{matmex-diploma}
 
 % packages should be added as needed 
 \usepackage{graphicx}
@@ -10,10 +10,6 @@
 
 \usepackage{amsthm} % For claims
 \theoremstyle{remark}
-
-\settopmatter{printacmref=false, printccs=false, printfolios=false}
-\pagestyle{plain} % removes running headers
-
 \newcommand{\PicScale}{0.5}
 \newcommand {\FlameStream} {FlameStream}
 
@@ -62,8 +58,6 @@
 In recent years, there has been a growth in research and industrial solutions in the field of distributed stream processing. However, even state-of-the-art stream processing systems are inconvenient to work with in some ways. Firstly, existing solutions suppose that the state of operations should be managed directly by a user, and that can be confusingly for inexperienced users of analytical processing systems. Secondly, these systems do not provide for deterministic processing by default. Furthermore, the most common approach for this feature is buffering. Its main problem is the extra cost for blocking before each order-sensitive operation. The goal of this paper is to propose a model, which addresses both recognized issues. On the one hand, our model stateless from the business logic perspective. Such behavior is obtained by the technique that allows a state to be a part of a stream. On the other hand, it is deterministic by design. We introduce an optimistic method that avoids buffering before each operation to achieve determinism with low overhead. The experiments show that prototype of our system requires a low extra cost for supporting proposed features and is able to outperform alternative industrial solutions in certain conditions.
 \end {abstract}
 
-\maketitle
-
 \section {Introduction}
 \input {fs-run-time-intro.tex}
 
@@ -88,7 +82,8 @@ In recent years, there has been a growth in research and industrial solutions in
 \section {Conclusion and future work}
 \input {fs-run-time-conclu.tex}
 
-\bibliographystyle{ACM-Reference-Format}
+\setmonofont[Mapping=tex-text]{CMU Typewriter Text}
+\bibliographystyle{ugost2008ls}
 \bibliography{../../bibliography/flame-stream}
 \end {document}
 
