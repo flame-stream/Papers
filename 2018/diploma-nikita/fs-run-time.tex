@@ -1,4 +1,4 @@
-\documentclass[14pt]{matmex-diploma}
+\documentclass[14pt]{matmex-diploma-custom}
 
 % packages should be added as needed 
 \usepackage{graphicx}
@@ -17,26 +17,25 @@
 
 \filltitle{ru}{
     chair              = {Математическое обеспечение и администрирование информационных систем\\Кафедра информационно-аналитических систем},
-    title              = {Управление состоянием в системах потоковой обработки данных},
+    title              = {Управление Состоянием в Системах Потоковой Обработки Данных},
     type               = {diploma},
-    position           = {студента},
-    group              = 441,
     author             = {Маршалкин Никита Евгеньевич},
     supervisorPosition = {д.\,ф.-м.\,н., профессор},
     supervisor         = {Новиков Б.\,А.},
-    reviewerPosition   = {к.ф.-м.н.},
+    reviewerPosition   = {к.\,ф.-м.\,н.},
     reviewer           = {Кураленок И.\,Е.},
     year               = {2018}
 }
 \filltitle{en}{
     chair              = {Software and Administration of Information Systems},
-    title              = {State management in stream processing systems},
+    title              = {State Management in Stream Processing Systems},
     author             = {Marshalkin Nikita},
     supervisorPosition = {professor},
     supervisor         = {Boris Novikov},
-    reviewerPosition   = {assistant},
+    supervisorPosition = {assistant professor},
     reviewer           = {Igor Kuralenok}
 }
+
 \maketitle
 \tableofcontents
 
@@ -44,7 +43,7 @@
 In recent years, there has been a growth in research and industrial solutions in the field of distributed stream processing. However, even state-of-the-art stream processing systems are inconvenient to work with in some ways. Firstly, existing solutions suppose that the state of operations should be managed directly by a user, and that can be confusingly for inexperienced users of analytical processing systems. Secondly, these systems do not provide for deterministic processing by default. Furthermore, the most common approach for this feature is buffering. Its main problem is the extra cost for blocking before each order-sensitive operation. The goal of this paper is to propose a model, which addresses both recognized issues. On the one hand, our model stateless from the business logic perspective. Such behavior is obtained by the technique that allows a state to be a part of a stream. On the other hand, it is deterministic by design. We introduce an optimistic method that avoids buffering before each operation to achieve determinism with low overhead. The experiments show that prototype of our system requires a low extra cost for supporting proposed features and is able to outperform alternative industrial solutions in certain conditions.
 \end {abstract}
 
-\section {Introduction}
+\section* {Introduction}
 \input {fs-run-time-intro.tex}
 
 \section {Computational model}
