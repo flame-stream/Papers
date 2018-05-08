@@ -1,0 +1,20 @@
+%%% fs-run-time-intro - Introduction
+
+\label {fs-intro-seciton}
+
+Nowadays, a lot of real-life applications use stream processing for network monitoring, financial analytics, training machine learning models, etc. State-of-the-art industrial stream processing systems, such as Flink \cite{carbone2015apache}, Samza \cite{Noghabi:2017:SSS:3137765.3137770}, Storm \cite{apache:storm}, are able to provide low-latency and high-throughput in distributed environment for this kind of problems. However, users of these systems still experience a variety of difficulties during the process of their adaptation to custom tasks. Firstly, implementation of stateful operations requires explicit state handling~\cite{apache:flink:state, apache:storm:state}. Such paradigm is flexible but can complicate business logic that in turn can lead to sophisticated bugs. Secondly, the current generation of stream processing systems requires high overhead for the property of determinism~\cite{Zacheilas:2017:MDS:3093742.3093921}. This property implies that processing results are repeatable up to input order. Most of the modern systems assume that events are fed to the system with monotonically increasing timestamps or with minor inversions~\cite{Wei:2009:SSO:1559845.1559973}. Often, such timestamps can be assigned at system's entry. Nevertheless, even if input items arrive monotonically, they can be reordered because of the subsequent parallel and asynchronous processing that leads to losing the determinism property. The lack of determinism causes complex processes of workflow verification and limits the applicability of such systems~\cite{Stonebraker:2005:RRS:1107499.1107504, Zacheilas:2017:MDS:3093742.3093921}.
+
+In this work, we introduce \FlameStream\ - stream processing model that addresses both mentioned issues. We define {\it drifting state} technique to make computations stateless from the business-logic point of view. This approach is based on the idea that state can go along the stream as an ordinary element. 
+
+The deterministic processing is achieved in our model using strong ordering. The typical way to perform in-order processing is to set up a special buffer in front of operation~\cite{Li:2008:OPN:1453856.1453890}. This buffer collects all input items until some user-provided condition is satisfied. Then the contents of the buffer are sorted and fed to the operation. The main disadvantage of such technique is latency growth~\cite{Zacheilas:2017:MDS:3093742.3093921}. This issue becomes even more significant if the processing pipeline contains several operations that require ordered input. We introduce an optimistic approach to handle out-of-order items to avoid this issue. Our evaluation demonstrates that our method has low overhead and can outperform alternative industrial solution under normal load conditions.
+
+Therefore, the contributions of this paper are the following:
+
+\begin {itemize}
+\item Definition of stateful computational model that does not require state handling from user
+\item Introduce the optimistic schema for deterministic processing and demonstrate its performance competitiveness
+\end {itemize}
+
+The rest of the paper is structured as follows: in section~\ref{fs-model} we introduce the basics of the proposed model, state management is detailed in section~\ref{fs-drifting}, optimistic schema for deterministic processing is described in section~\ref{fs-collision}, the implementation details of the prototype are discussed in~\ref{fs-impl} and its performance is demonstrated in~\ref{fs-experiments-section}, the main differences of our system from the existing are shown in~\ref{fs-related-section}, finally we discuss the results and our plans in~\ref{fs-conclusions}.
+
+\endinput
