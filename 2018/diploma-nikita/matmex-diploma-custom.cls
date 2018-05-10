@@ -179,7 +179,7 @@
     \ifthenelse{\equal{\my@title@type@ru}{coursework}}
     {Курсовая работа}
     {\ifthenelse{\equal{\my@title@type@ru}{diploma}}
-    {Выпуская квалификационная работа}
+    {Выпускная квалификационная работа}
     {\ifthenelse{\equal{\my@title@type@ru}{master}}
     {Магистерская диссертация}
     {\ifthenelse{\equal{\my@title@type@ru}{bachelor}}
@@ -234,7 +234,7 @@
     \ifthenelse{\equal{\my@title@type@en}{coursework}}
     {Course Work}
     {\ifthenelse{\equal{\my@title@type@en}{diploma}}
-    {Graduation Thesis}
+    {Graduation Project}
     {\ifthenelse{\equal{\my@title@type@en}{master}}
     {Master's Thesis}
     {\ifthenelse{\equal{\my@title@type@en}{bachelor}}
