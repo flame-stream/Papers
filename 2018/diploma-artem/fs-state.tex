@@ -1,0 +1,74 @@
+\documentclass[14pt]{matmex-diploma-custom}
+\setdefaultlanguage{english}
+
+
+\usepackage{graphicx}
+\usepackage{algorithm} % for algorithms
+\usepackage{algpseudocode}
+\algblockdefx[Process]{Process}{EndProcess}[2][Unknown]{{\bf Process} {\it #2}}{}
+\algblockdefx[Event]{Event}{EndEvent}[2][Unknown]{{\bf upon event #2 do}}{}
+
+\usepackage{booktabs} % For formal tables
+%\usepackage{cite} %for multiple refs
+
+%\usepackage{amssymb} %for nice emptyset
+\usepackage{amsthm} % For claims
+\theoremstyle{remark}
+
+
+\newcommand{\PicScale}{0.5}
+\newcommand {\FlameStream} {FlameStream}
+
+\begin{document}
+
+\filltitle{ru}{
+    chair              = {Математическое обеспечение и администрирование информационных систем\\Кафедра информационно-аналитических систем},
+    title              = {Поддержка согласованности в системах потоковой обработки данных},
+    type               = {diploma},
+    author             = {Трофимов Артем Владимирович},
+    supervisorPosition = {д.\,ф.-м.\,н., профессор},
+    supervisor         = {Новиков Б.\,А.},
+    reviewerPosition   = {к.\,ф.-м.\,н.},
+    reviewer           = {Кураленок И.\,Е.},
+    year               = {2018}
+}
+\filltitle{en}{
+    chair              = {Software and Administration of Information Systems\\Chair of Analytical Information Systems},
+    title              = {Consistency maintenance in stream processing systems},
+    author             = {Trofimov Artem},
+    supervisorPosition = {professor},
+    supervisor         = {Boris Novikov},
+    supervisorPosition = {professor},
+    reviewer           = {Igor Kuralenok}
+}
+
+\maketitle
+\tableofcontents
+
+\section* {Introduction}
+\input {fs-state-intro.tex}
+
+\section {Related work}
+\input {fs-state-related.tex}
+
+\section {Efficient deterministic model}
+\input {fs-state-model.tex}
+
+\section{Fault tolerance}
+\input {fs-state-consistency.tex}
+
+\section {Experiments}
+\input {fs-state-experiments.tex}
+
+\section* {Conclusion and future work}
+\input {fs-state-conclusion.tex}
+
+\setmonofont[Mapping=tex-text]{CMU Typewriter Text}
+\bibliographystyle{ugost2008ls}
+\bibliography{../../bibliography/flame-stream}
+\end {document}
+
+
+\endinput
+you can put whatever here
+
