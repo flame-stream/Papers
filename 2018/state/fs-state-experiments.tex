@@ -10,7 +10,7 @@ The series of experiments were performed in order to analyze the overall perform
     \item Consistency guarantees are strongly required because the inconsistent index does not make sense for many applications
 \end{itemize}
 
-Building inverted index can be implemented as a MapReduce transformation: 
+Building inverted index can be implemented as a MapReduce transformation which is showh in figure~\ref{index}: 
 
 \begin{itemize}
     \item Map phase includes conversion of input documents into the key-value pairs {\it (word; word positions within the page)}
@@ -27,6 +27,13 @@ By the notion of {\it latency} we assume the time between two events:
     \item Input page is taken into the stream
     \item All the change records for the page leave the stream
 \end{enumerate}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.50\textwidth]{pics/index}
+  \caption{The inverted index pipeline}
+  \label {index}
+\end{figure}
 
 Our experiments were performed on the cluster of 10 Amazon EC2 micro instances with 1GB RAM and 1 core CPU. We used 10000 Wikipedia articles as a dataset. Documents per second input rate is 50. RocksDB~\cite{rocksdb} is used as a storage for the state. The role of data producer and data consumer is played by custom server application that sends and receives data through socket and measures the latency.
 
