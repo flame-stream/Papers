@@ -10,7 +10,7 @@ We recognized that the lack of a low-cost mechanism for deterministic computatio
 
 However, both methods can experience difficulties with working under low-latency requirements (less than a second). This issue is explained by the high cost of extra buffering and distributed transactions.
 
-In this work, we introduced the deterministic model for distributed stream processing. The proposed model provides low overhead for determinism, because of its optimistic nature. We demonstrated how properties of this model can be applied for providing strong consistency and fault tolerance. More precisely, we designed protocols, which allow to provide the following features:
+In this work, we introduced the deterministic model for distributed stream processing. The proposed model provides low overhead for determinism, because of its optimistic nature. We demonstrated how properties of this model can be applied to providing strong consistency and fault tolerance. More precisely, we designed protocols, which allow to provide the following features:
 
 \begin{itemize}
     \item The processes of business-logic computations, state snapshotting and releasing output items work asynchronously and independently
@@ -19,4 +19,4 @@ In this work, we introduced the deterministic model for distributed stream proce
 
 We implemented the prototype of the proposed model to examine its performance and scalability. Our experiments demonstrated that the introduced protocols for fault tolerance are scalable and provides remarkably low overhead within different computational layouts. Furthermore, the comparison with industrial stream processing solution indicated that our prototype can provide significantly lower latency in case of exactly once semantics.
 
-Regarding future work, we plan to implement mechanisms for collaborative usage of the system. Particularly, we aim to build convenient tools for partial reusing of execution graphs. An additional task, that we intend to work on, is the generation of execution graphs based on some declarative language.
+Regarding future work, we plan to implement mechanisms for collaborative usage of the system. In particular, we aim to build convenient tools for partial reusing of execution graphs. An additional task that we intend to work on is the generation of execution graphs based on some declarative language.
