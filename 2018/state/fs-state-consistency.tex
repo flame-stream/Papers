@@ -48,23 +48,23 @@ This protocol is shown in Algorithm~\ref{state-snapshoting}.
   \begin{algorithmic}
     \Process {Acker}
       \State $vertices \gets$ all physical groupings and barrier instances
-      \State $committed \gets \varnothing$
-      \State $ongoingCommit \gets nil$
+      \State $snapshotted \gets \varnothing$
+      \State $ongoingSnapshot \gets nil$
       \State
       \Event{$\langle MinTime, t \rangle$}
-        \If {$ongoingCommit = nil$} \Comment{There is no unfinished commit}
+        \If {$ongoingSnapshot = nil$} \Comment{There is no unfinished snapshot}
           \For{{\bf all $v$} $\in vertices$}
-            \State \Call{Send}{$v, \langle MinTime_{commit}, t\rangle$}
+            \State \Call{Send}{$v, \langle MinTime_{snap}, t\rangle$}
           \EndFor
-          \State $ongoingCommit \gets t$
+          \State $ongoingSnapshot \gets t$
         \EndIf
       \EndEvent
-      \Event{$\langle Committed, v\rangle$}
-        \State $committed \gets committed \cup v$
-        \If {$committed = vertices$}
-          \State \Call{Save}{$ongoingCommit$} \Comment{Save time to cluster state manager}
-          \State $committed \gets \varnothing$
-          \State $ongoingCommit = nil$
+      \Event{$\langle Snapshotted, v\rangle$}
+        \State $snapshotted \gets snapshotted \cup v$
+        \If {$snapshotted = vertices$}
+          \State \Call{Save}{$ongoingSnapshot$} \Comment{Save time to cluster state manager}
+          \State $snapshotted \gets \varnothing$
+          \State $ongoingSnapshot = nil$
         \EndIf
       \EndEvent
     \EndProcess
@@ -72,29 +72,29 @@ This protocol is shown in Algorithm~\ref{state-snapshoting}.
     \Process {Grouping}
       \State $bucket[]$ \Comment{List of data items ordered by time}
       \State
-      \Event{$\langle MinTime_{commit}, t\rangle$}
+      \Event{$\langle MinTime_{snap}, t\rangle$}
         \State \Call{Save}{t, bucket[0, t]} \Comment{Save substate to persistent storage}
         \State \Call{ClearRange}{bucket, 0, t}
-        \State \Call{Send}{$acker, \langle Committed, self\rangle$}
+        \State \Call{Send}{$acker, \langle Snapshotted, self\rangle$}
       \EndEvent
     \EndProcess
 
     \Process {Barrier}
-      \State $lastAcknowledgedTime \gets -\infty$ \Comment{Time of the last acknowledged bundle}
-      \State $postponedCommitTime \gets \infty$
+      \State $lastAcknowledgedTime \gets -\infty$ \Comment{Time of the last acknowledged bundle by consumer}
+      \State $postponedSnapshotTime \gets \infty$
       \State
-      \Event{$\langle MinTime_{commit}, t\rangle$}
+      \Event{$\langle MinTime_{snap}, t\rangle$}
         \If{$lastAcknowledgedTime \geq t$}
-          \State \Call{Send}{$acker, \langle Committed, self\rangle$}
+          \State \Call{Send}{$acker, \langle Snapshotted, self\rangle$}
         \Else
-          \State $postponedCommitTime \gets t$
+          \State $postponedSnapshotTime \gets t$
         \EndIf
       \EndEvent
       \Event{$\langle Ack, t\rangle$}
         \State $lastAcknowledgedTime \gets t$
-        \If {$postponedCommitTime < lastAcknowledgedTime$}
-          \State \Call{Send}{$acker, \langle Committed, self\rangle$}
-          \State $postponedCommitTime \gets \infty$
+        \If {$postponedSnapshotTime < lastAcknowledgedTime$}
+          \State \Call{Send}{$acker, \langle Snapshotted, self\rangle$}
+          \State $postponedSnapshotTime \gets \infty$
         \EndIf
       \EndEvent
     \EndProcess
