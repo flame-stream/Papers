@@ -17,7 +17,7 @@ Building inverted index can be implemented as a MapReduce transformation:
     \item Reduce phase consists of combining word positions for the corresponding word into the single index structure 
 \end{itemize}
 
-We assume that reduce phase outputs the change records of the inverted index structure, to make this algorithm suitable for stream processing systems. It implies that each input page triggers the output of the corresponding change records of the full index. In \FlameStream\ this algorithm is implemented as the typical conversion of MapReduce transformation, which is shown in~\cite{we2018seim}.
+Reduce phase outputs the change records of the inverted index structure, to make this algorithm suitable for stream processing systems. It implies that each input page triggers the output of the corresponding change records of the full index. In \FlameStream\ this algorithm is implemented as the typical conversion of MapReduce transformation, which is shown in~\cite{we2018seim}.
 
 Notably, building an inverted index in a streaming manner can be the halfway task between the generation of documents and consuming index updates by search infrastructure. In the real-world, such scenario can be found in freshness-aware systems, e.g., news processing engines.
 
@@ -28,14 +28,14 @@ By the notion of {\it latency} we assume the time between two events:
     \item All the change records for the page leave the stream
 \end{enumerate}
 
-Our experiments were performed on the cluster of 10 Amazon EC2 micro instances with 1GB RAM and 1 core CPU. We used 10000 Wikipedia articles as a dataset. Documents per second input rate is 50. RocksDB~\cite{rocksdb} is used as a storage for the state. The role of data producer and data consumer is played by custom server application that sends and receives data through socket and measure the latency.
+Our experiments were performed on the cluster of 10 Amazon EC2 micro instances with 1GB RAM and 1 core CPU. We used 10000 Wikipedia articles as a dataset. Documents per second input rate is 50. RocksDB~\cite{rocksdb} is used as a storage for the state. The role of data producer and data consumer is played by custom server application that sends and receives data through socket and measures the latency.
 
 \subsection{Overhead and recovery}
 The performance of the proposed deterministic model within the same stream processing task is deeply analyzed in~\cite{we2018seim}. In this paper we aim to evaluate the overhead on providing consistency guarantees and the time needed for the full recovery.
 
-Figure~\ref{performance} shows the latencies of \FlameStream\ within distinct times between checkpoints, and at most once, at least once, and exactly once consistency semantics. As expected, the overhead on at least once and exactly once semantics is low (less than 10 ms) and it does not depend on the time between checkpoints. Slight overhead can be explained by the fact that asynchronous state snapshotting is executed on single-core nodes. The time between checkpoints does not influence latency because barrier flushing and state snapshotting mechanisms are no connected in our model. The latencies under at least once and exactly once semantics are the same because the only difference between them regarding our model is in contract with data consumer.
+Figure~\ref{performance} shows the latencies of \FlameStream\ within distinct times between checkpoints, and at most once, at least once, and exactly once consistency semantics. As expected, the overhead on at least once and exactly once semantics is low (less than 10 ms) and it does not depend on the time between checkpoints. Slight overhead can be explained by the fact that asynchronous state snapshotting is executed on single-core nodes. The time between checkpoints does not influence latency because barrier flushing and state snapshotting mechanisms are independent in our model. The latencies under at least once and exactly once semantics are the same because the only difference between them regarding our model is in contract with data consumer.
 
-System's behavior in case of failures and recoveries is demonstrated in Figure~\ref{recovery}. It is shown that the system is able to perform recovery processes in an adequate time. Existing latency fluctuations are caused by replay process, JVM restart, etc.
+System's behavior in case of failures and recoveries is demonstrated in Figure~\ref{recovery}. It is shown that the system is able to perform recovery processes in an adequate time. Existing latency spikes are caused by replay process, JVM restart, etc.
 
 \begin{figure}[htbp]
   \centering
