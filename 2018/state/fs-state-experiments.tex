@@ -33,7 +33,7 @@ Our experiments were performed on the cluster of 10 Amazon EC2 micro instances w
 \subsection{Overhead and recovery}
 The performance of the proposed deterministic model within the same stream processing task is deeply analyzed in~\cite{we2018seim}. In this paper we aim to evaluate the overhead on providing consistency guarantees and the time needed for the full recovery.
 
-Figure~\ref{performance} shows the latencies of \FlameStream\ within distinct times between checkpoints, and at most once, at least once, and exactly once consistency semantics. As expected, the overhead on at least once and exactly once semantics is low (less than 10 ms) and it does not depend on the time between checkpoints. Slight overhead can be explained by the fact that asynchronous state snapshotting is executed on single-core nodes. The time between checkpoints does not influence latency because barrier flushing and state snapshotting mechanisms are independent in our model. The latencies under at least once and exactly once semantics are the same because the only difference between them regarding our model is in contract with data consumer.
+Figures~\ref{comparison50}, ~\ref{comparison500}, and ~\ref{comparison1000} shows the latencies of \FlameStream\ within distinct times between checkpoints, and at most once, at least once, and exactly once consistency semantics. As expected, the overhead on at least once and exactly once semantics is low (less than 10 ms) and it does not depend on the time between checkpoints. Slight overhead can be explained by the fact that asynchronous state snapshotting is executed on single-core nodes. The time between checkpoints does not influence latency because barrier flushing and state snapshotting mechanisms are independent in our model. The latencies under at least once and exactly once semantics are the same because the only difference between them regarding our model is in contract with data consumer.
 
 System's behavior in case of failures and recoveries is demonstrated in Figure~\ref{recovery}. It is shown that the system is able to perform recovery processes in an adequate time. Existing latency spikes are caused by replay process, JVM restart, etc.
 
@@ -53,11 +53,25 @@ For Apache Flink, the algorithm for building the inverted index is adopted by th
 
 In this paper, we compare $50^{th}$, $75^{th}$, $95^{th}$, and $99^{th}$ percentile of distributions, which clearly represent the performance from the perspective of the users' experience.
 
-Figure~\ref{performance} demonstrates the comparison of latencies between \FlameStream\ and Flink within distinct times between checkpoints, and different consistency semantics. At the initial point, \FlameStream\ provides lower latency for at most once semantics. Such behavior is explained by the features of the optimistic approach for handling out-of-order items and is investigated in details in~\cite{we2018seim}. The latencies of both \FlameStream\ and Flink are slightly higher under at least once semantics. As it was mentioned above, it can be explained by the single-core configuration of the nodes. For at most once and at least once semantics, the latencies of \FlameStream\ and Flink do not vary a lot because both systems do not buffer output items for a long time before releasing. However, for exactly once semantics, Flink's latency is dramatically higher and it directly depends on the time between checkpoints. Nevertheless, such behavior is expected, because unlike \FlameStream, Flink needs to take state snapshot and release output items within a single transaction in order to preserve exactly once semantics. As it was discussed above, it is the consequence of the lack of determinism in the computational model. Therefore, output items cannot be released until the transaction is committed and this fact significantly increases the latency. 
+Figures~\ref{comparison50}, ~\ref{comparison500}, and ~\ref{comparison1000} demonstrates the comparison of latencies between \FlameStream\ and Flink within distinct times between checkpoints, and different consistency semantics. At the initial point, \FlameStream\ provides lower latency for at most once semantics. Such behavior is explained by the features of the optimistic approach for handling out-of-order items and is investigated in details in~\cite{we2018seim}. The latencies of both \FlameStream\ and Flink are slightly higher under at least once semantics. As it was mentioned above, it can be explained by the single-core configuration of the nodes. For at most once and at least once semantics, the latencies of \FlameStream\ and Flink do not vary a lot because both systems do not buffer output items for a long time before releasing. However, for exactly once semantics, Flink's latency is dramatically higher and it directly depends on the time between checkpoints. Nevertheless, such behavior is expected, because unlike \FlameStream, Flink needs to take state snapshot and release output items within a single transaction in order to preserve exactly once semantics. As it was discussed above, it is the consequence of the lack of determinism in the computational model. Therefore, output items cannot be released until the transaction is committed and this fact significantly increases the latency. 
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.48\textwidth]{pics/comparison}
-  \caption{The comparison in latencies between FlameStream and Flink regarding different consistency semantics within 10 nodes, 50 documents per second rate, and distinct delays between checkpoints}
-  \label {performance}
+  \includegraphics[width=.5\textwidth]{pics/comparison50}
+  \caption{The comparison in latencies between FlameStream and Flink with 50 ms delay between checkpoints}
+  \label {comparison50}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=.5\textwidth]{pics/comparison500}
+  \caption{The comparison in latencies between FlameStream and Flink with 500 ms delay between checkpoints}
+  \label {comparison500}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=.5\textwidth]{pics/comparison1000}
+  \caption{The comparison in latencies between FlameStream and Flink with 1000 ms delay between checkpoints}
+  \label {comparison1000}
 \end{figure}
