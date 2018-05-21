@@ -1159,13 +1159,21 @@ Continuous queries enable alerts, predictions, and early warning in various doma
 Schemas, and more generally metadata specifying structural and semantic constraints, are invaluable in data management. They facilitate conceptual design and enable checking of data consistency. They also play an important role in permitting semantic query optimization, that is, optimization and processing strategies that are often highly effective, but only correct for data conforming to a given schema. While the use of metadata is well-established in relational and XML databases, the same is not true for data streams. The existing work mostly focuses on the specification of dynamic information. In this paper, we consider the specification of static metadata for streams in a model called Stream Schema. We show how Stream Schema can be used to validate the consistency of streams. By explicitly modeling stream constraints, we show that stream queries can be simplified by removing predicates or subqueries that check for consistency. This can greatly enhance pro-grammability of stream processing systems. We also present a set of semantic query optimization strategies that both permit compile-time checking of queries (for example, to detect empty queries) and new runtime processing options, options that would not have been possible without a Stream Schema specification. Case studies on two stream processing platforms (covering different applications and underlying stream models), along with an experimental evaluation, show the benefits of Stream Schema.
 
 @inproceedings{we2018beyondmr,
- author = {Kuralenok, Igor and Trofimov, Artem and Marshalkin, Nikita and Novikov, Boris},
- title = {FlameStream: Model and Runtime for Distributed Stream Processing (Extended Abstract)},
+ author = {Kuralenok, Igor E. and Trofimov, Artem and Marshalkin, Nikita and Novikov, Boris},
+ title = {FlameStream: Model and Runtime for Distributed Stream Processing},
  booktitle = {Proceedings of the 5th ACM SIGMOD Workshop on Algorithms and Systems for MapReduce and Beyond},
- series = {Accepted at BeyondMR'18},
+ series = {BeyondMR'18},
  year = {2018},
+ isbn = {978-1-4503-5703-6},
  location = {Houston, TX, USA},
+ pages = {8:1--8:2},
+ articleno = {8},
+ numpages = {2},
+ url = {http://doi.acm.org/10.1145/3206333.3209273},
+ doi = {10.1145/3206333.3209273},
+ acmid = {3209273},
  publisher = {ACM},
  address = {New York, NY, USA},
- keywords = {ACM proceedings, LATEX, text tagging},
+ keywords = {Data streams, drifting state, exactly-once, optimistic OOP},
 } 
+
