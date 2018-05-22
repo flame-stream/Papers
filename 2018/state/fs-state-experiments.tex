@@ -8,6 +8,7 @@ The series of experiments were performed in order to analyze the overall perform
 \begin{itemize}
     \item The computational pipeline of the task contains network shuffle that can violate the ordering constraints. Therefore, this task is able to estimate the performance of the proposed deterministic model fairly
     \item Consistency guarantees are strongly required because the inconsistent index does not make sense for many applications
+    \item The workload is unbalanced due to Zipf's law
 \end{itemize}
 
 Building inverted index can be implemented as a MapReduce transformation which is shown in figure~\ref{index}: 
