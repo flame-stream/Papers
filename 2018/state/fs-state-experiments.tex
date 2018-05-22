@@ -3,15 +3,7 @@
 \label {fs-experiments-seciton}
 
 \subsection{Setup}
-The series of experiments were performed in order to analyze the overall performance of the system's prototype. We apply building an inverted index as stream processing task for the evaluation because it satisfies the following properties:
-
-\begin{itemize}
-    \item The computational pipeline of the task contains network shuffle that can violate the ordering constraints. Therefore, this task is able to estimate the performance of the proposed deterministic model fairly
-    \item Consistency guarantees are strongly required because the inconsistent index does not make sense for many applications
-    \item The workload is unbalanced due to Zipf's law
-\end{itemize}
-
-Building inverted index can be implemented as a MapReduce transformation which is shown in figure~\ref{index}: 
+The series of experiments were performed in order to analyze the overall performance of the system's prototype. We apply building an inverted index as stream processing task for the evaluation. Building inverted index is implemented as a MapReduce transformation which is shown in Figure~\ref{index}: 
 
 \begin{itemize}
     \item Map phase includes conversion of input documents into the key-value pairs {\it (word; word positions within the page)}
@@ -19,6 +11,21 @@ Building inverted index can be implemented as a MapReduce transformation which i
 \end{itemize}
 
 Reduce phase outputs the change records of the inverted index structure, to make this algorithm suitable for stream processing systems. It implies that each input page triggers the output of the corresponding change records of the full index. In \FlameStream\ this algorithm is implemented as the typical conversion of MapReduce transformation, which is shown in~\cite{we2018seim}.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.50\textwidth]{pics/index}
+  \caption{The inverted index pipeline}
+  \label {index}
+\end{figure}
+
+We chose the task of building inverted index, because it satisfies the following properties:
+
+\begin{itemize}
+    \item The computational pipeline of the task contains network shuffle that can violate the ordering constraints. Therefore, this task is able to estimate the performance of the proposed deterministic model fairly
+    \item Consistency guarantees are strongly required because the inconsistent index does not make sense for many applications
+    \item The workload is unbalanced due to Zipf's law
+\end{itemize}
 
 Notably, building an inverted index in a streaming manner can be the halfway task between the generation of documents and consuming index updates by search infrastructure. In the real-world, such scenario can be found in freshness-aware systems, e.g., news processing engines.
 
@@ -28,13 +35,6 @@ By the notion of {\it latency} we assume the time between two events:
     \item Input page is taken into the stream
     \item All the change records for the page leave the stream
 \end{enumerate}
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.50\textwidth]{pics/index}
-  \caption{The inverted index pipeline}
-  \label {index}
-\end{figure}
 
 Our experiments were performed on the cluster of 10 Amazon EC2 micro instances with 1GB RAM and 1 core CPU. We used 10000 Wikipedia articles as a dataset. Documents per second input rate is 50. RocksDB~\cite{rocksdb} is used as a storage for the state. The role of data producer and data consumer is played by a custom server application that sends and receives data through socket and measures the latency.
 
