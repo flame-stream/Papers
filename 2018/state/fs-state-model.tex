@@ -2,7 +2,7 @@
 
 \label {fs-model-section}
 
-In this section, we outline the model of our system. We focus on the core concepts and definitions to introduce the necessary preliminaries for consistency preserving mechanisms. \FlameStream\ model has much in common with other stream processing systems but has several vital differences that enables the opportunity for efficient implementation of consistency guarantees. Among them are reduced set of operations, strict ordering and cyclic graphs.
+In this section, we outline the model of our system. We focus on the core concepts and definitions to introduce the necessary preliminaries for consistency preserving mechanisms. The \FlameStream\ model has much in common with other stream processing systems but has several vital differences that enable an opportunity for efficient implementation of consistency guarantees. Among them are reduced set of operations, strict ordering, and cyclic graphs.
 
 \subsection{Data flow}
 The basic data flow abstraction is a {\it stream}. The stream is represented by an infinite heterogeneous sequence of data items. Data item is a {\it payload} and a {\it meta-information} associated with it. 
@@ -16,7 +16,7 @@ Inside stream, data items can be dropped or transformed into the new data items.
 \subsection{Boundaries}
 Data producers are external to our system. {\em Front} is a component that acts as a mediator between them and a computational pipeline.
 
-At the end of a pipeline, there is a {\em barrier} that prepares results to be consumed by user. The main role of a barrier is to filter out possible duplicates or invalid results. Another function is to carry out an output protocol between system and data consumers, which is an essential part of providing exactly-once semantics.
+At the end of a pipeline, there is a {\em barrier} that prepares results to be consumed by a user. The main role of a barrier is to filter out possible duplicates or invalid results. Another function is to carry out an output protocol between system and data consumers, which is an essential part of providing exactly-once semantics.
 
 \subsection{Computational flow}
 The stream between front and barrier is handled by a user-provided directed data flow graph. Each node of the graph represents a single operation parameterized by user-defined business-logic. An operation can have multiple inputs and outputs. Edges indicate the order of these operations. Data items are processed one-by-one in a "streaming" manner. Our model allows cycles in the graph while data flow graphs are commonly assumed to be acyclic (DAGs) 
@@ -62,9 +62,9 @@ The given set of operations jointly with cyclic execution graphs is enough to im
 
 \subsection{Implementation notes}
 
-As it was defined previously, in our model only the grouping operation maintains a state and the state depends on the order of incoming items. Therefore, to achieve deterministic processing, there is a need to enforce the right order. However, conservative methods for the order enforcing are based on buffering~\cite{Li:2008:OPN:1453856.1453890} and can imply high latency overhead. The main difficulty here is that items can be easily reordered within stream processing systems because of asynchrony and the possible existence of multiple paths between two nodes. 
+As it was defined previously, in our model, only the grouping operation maintains a state and the state depends on the order of incoming items. Therefore, to achieve deterministic processing, there is a need to enforce the right order. However, conservative methods for the order enforcing are based on buffering~\cite{Li:2008:OPN:1453856.1453890} and can imply high latency overhead. The main difficulty here is that items can be easily reordered within stream processing systems because of asynchrony and the possible existence of multiple paths between two nodes. 
 
-In~\cite{hiddenSeim} an optimistic approach to handle out-of-order items was introduced. The key idea behind it is that grouping can produce invalid results, but they must be filtered out at the barrier. Therefore, there is a need to buffer output items at the barrier before it is ensured that there are no invalid invalid in-flight items and they cannot be generated. It is convenient to release items by global times.
+In~\cite{hiddenSeim} an optimistic approach to handle out-of-order items was introduced. The key idea behind it is that grouping can produce invalid results, but they must be filtered out at the barrier. Therefore, there is a need to buffer output items at the barrier before it is ensured that there are no invalid in-flight items and they cannot be generated. It is convenient to release items by global times.
 
 To track the global time of in-flight items we adopt an idea of {\it acker task} inspired by Apache Storm~\cite{apache:storm}. Acker tracks data items using a checksum hash. When the item is sent or received by an operation, its global time and checksum are sent to the acker. This message is called {\it ack}. Acker groups acks by a global time into the structure called {\it ack table}. Once acker receives an ack message with global time {\it GT} and {\it XOR} it updates {\it GT} entry in the table by xoring {\it XOR} with the current value. When an item is sent and later received by the next operation, xoring corresponding {\it XOR}s would yield zero.
 
@@ -79,7 +79,7 @@ Acks are overlapped to nullify table's entry only when an item arrives at the ba
 
 The minimal time within a stream is the minimal global time with non-zero {\it XOR}. On minimal time changes, acker broadcasts new minimal time to the barrier and operations. Minimal time notifications plays the same role as {\em low-watermarks} in OOP architecture~\cite{Li:2008:OPN:1453856.1453890}. Therefore, the barrier can release elements with global time {\it GT} once it received notification from acker that the minimal time within the stream is greater than {\it GT}.
 
-The important implication of ack-table structure is that items that was generated by a single input event become ready for releasing at the same moment.
+The important implication of ack-table structure is that items that was generated by a single input event become ready for release at the same moment.
 
 To ensure that no fronts can generate item with the specific timestamp, each front periodically sends to acker special message called {\it report}, which promises that front will not generate items with a timestamp lower than the reported. The value in the ack table can become zero only after the corresponding report arrives.
 
@@ -89,7 +89,7 @@ It must be noted that acker can play the role of worker's coordinator because it
 
 {\bf Acker} supervises computation process and play role of coordinator in consistency protocols described in following sections.
 
-{\bf Graph} is deployed on each node and process a partition of data that corresponds to its hash range. The communication within node is done via messaging or direct function calls depending on runtime heuristics, a delivery that crosses node boundaries is performed by means of TCP.
+{\bf Graph} is deployed on each node and process a partition of data that corresponds to its hash range. The communication within a node is done via messaging or direct function calls depending on runtime heuristics, a delivery that crosses node boundaries is performed by means of TCP.
 
 {\bf Barrier} is located at the end of each graph instance. It filters duplicates and invalid data and delivers it to data consumers.
 
@@ -110,4 +110,4 @@ It must be noted that acker can play the role of worker's coordinator because it
 \subsection{Consistency guarantees}
 There are three main types of consistency guarantees relating to stream processing. {\it At most once} semantics states that each input event is processed once or not processed at all. {\it At least once} guarantees that each input item is processed, but possibly multiple times, that can lead to result duplication or state inconsistency. {\it Exactly once} semantics guarantee that each input event is processed exactly one time. 
 
-The properties of the proposed model provide several useful features for achieving exactly-once semantics. The total order directly leads to the property of determinism, while optimistic approach for handling out-of-order items allows to enforce it with low overhead. In turn, as it was mentioned above, determinism is a convenient base for system-wide idempotence. The roadmap of our approach is shown in Figure~\ref{roadmap}. The exact techniques to achieve exactly-once are detailed in the next section. 
+The properties of the proposed model provide several useful features for achieving exactly-once semantics. The total order directly leads to the property of determinism, while the optimistic approach for handling out-of-order items allows o enforce it with low overhead. In turn, as it was mentioned above, determinism is a convenient base for system-wide idempotence. The roadmap of our approach is shown in Figure~\ref{roadmap}. The exact techniques to achieve exactly-once are detailed in the next section. 

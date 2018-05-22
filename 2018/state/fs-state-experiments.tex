@@ -19,7 +19,7 @@ Reduce phase outputs the change records of the inverted index structure, to make
   \label {index}
 \end{figure}
 
-We chose the task of building inverted index, because it satisfies the following properties:
+We chose the task of building an inverted index because it satisfies the following properties:
 
 \begin{itemize}
     \item The computational pipeline of the task contains network shuffle that can violate the ordering constraints. Therefore, this task is able to estimate the performance of the proposed deterministic model fairly
@@ -55,7 +55,7 @@ System's behavior in case of failures and recoveries is demonstrated in Figure~\
 \subsection{Comparison against Apache Flink}
 One of the most important goals of the experiments is the performance comparison with an industrial solution regarding latency. Apache Flink has been chosen for evaluation because it is state-of-the-art stream processing system that provides similar functionality and achieves low latency in the real-world scenarios~\cite{S7530084}. 
 
-For Apache Flink, the algorithm for building the inverted index is adopted by the usage of {\it FlatMapFunction} for map step and stateful {\it RichMapFunction} for reduce step and for producing the change records. Order enforcing before reduce is implemented using custom {\it ProcessFunction} that buffers all input until corresponding low watermark is received. Watermarks are sent after each document. The network buffer timeout is set to 0 to minimize latency. Custom {\it TwoPhaseCommitSinkFunction} that buffers output items in memory until a transaction is committed, is used for experiments that require exactly-once semantics. 
+For Apache Flink, the algorithm for building the inverted index is adopted by the usage of {\it FlatMapFunction} for map step and stateful {\it RichMapFunction} for reduce step and for producing the change records. Order enforcing before reduce is implemented using custom {\it ProcessFunction} that buffers all input until corresponding low watermark is received. Watermarks are sent after each document. The network buffer timeout is set to 0 to minimize latency. Custom {\it TwoPhaseCommitSinkFunction} that buffers output items in memory until a transaction is committed is used for experiments that require exactly-once semantics. 
 
 {\it FsStateBackend} with the local file system is used for storing the state, because {\it RocksDBStateBackend} requires saving state to RocksDB on each update that leads to additional overhead. {\it FsStateBackend} stores state on the disk only on checkpoints and do not provide an additional overhead against RocksDB storage in \FlameStream, so it is fairer to use it rather than {\it RocksDBStateBackend} for comparison purposes.
 

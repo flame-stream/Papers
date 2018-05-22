@@ -2,7 +2,7 @@
 
 \label {fs-consistency-seciton}
 
-In this section, we describe how consistency guarantees can be provided within the proposed model in case of failures. We define three mechanisms which are necessary both for consistent processing and for fast and reliable recovery: {\em input replay}, {\em barrier flushing}, and {\em state snapshotting}. Input replay is used in case of failures for computations restoring. Barrier flushing is responded for filtering out of the extra items. State snapshotting allows to replay input stream from certain points, eliminating the need for storing the full input data. We demonstrate how these mechanisms behave in recovery processes and why consistency semantics is preserved.
+In this section, we describe how consistency guarantees can be provided within the proposed model in case of failures. We define three mechanisms which are necessary both for consistent processing and for fast and reliable recovery: {\em input replay}, {\em barrier flushing}, and {\em state snapshotting}. Input replay is used in case of failures for computations restoring. Barrier flushing is responsible for filtering out of the extra items. State snapshotting allows replaying input stream from certain points, eliminating the need for storing the full input data. We demonstrate how these mechanisms behave in recovery processes and why consistency semantics is preserved.
 
 It is worth to mention that we rely strongly on the properties of the proposed model and its implementation. Firstly, we expect that processing is deterministic, i.e., several independent runs with the same input data produce exactly the same result. This property is guaranteed by the fact that all supported operations produce deterministic results. Secondly, we suppose that there is an agent that can coordinate protocols for fault tolerance. The role of such coordinator is played by the acker. Thirdly, we use the fact that acker broadcasts minimal time notifications when it is guaranteed that there are no in-flight data items with particular global time and such items cannot be generated further. Additionally, we exploit the simple structure of the grouping's state, which is a list sorted by global time. These features allow us to build efficient techniques for barrier flushing and operations' state management, which preserve exactly-once semantics and almost do not depend on each other.
 
@@ -144,7 +144,7 @@ In case of packet loss or node failure, acker restarts the computations from the
 \begin{itemize}
     \item Acker reads the global time of the last snapshot from cluster state manager. After that, it broadcasts this global time to all grouping operations
     \item Grouping operations fetch their states from state storage using the corresponding hash unit and received global time as a key. After that, grouping operations send an acknowledgment that they are ready for processing to the acker 
-    \item Barriers request the last released bundle from data consumers and send an acknowledgements that they are ready for processing to the acker
+    \item Barriers request the last released bundle from data consumers and send an acknowledgments that they are ready for processing to the acker
     \item When acker receives all acknowledgments from groupings and barriers, it requests data producer to replay starting from the global time of the last snapshot  
 \end{itemize}
 
