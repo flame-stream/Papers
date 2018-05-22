@@ -14,9 +14,9 @@ The payload is an arbitrary user-provided data. Meta is structured system-assign
 Inside stream, data items can be dropped or transformed into the new data items.
 
 \subsection{Boundaries}
-Data producers are external to our systems, {\em front} is a component that acts as merdiator between them and a computational pipeline.
+Data producers are external to our system. {\em Front} is a component that acts as a mediator between them and a computational pipeline.
 
-At the end of pipeline, there is a {\em barrier} that prepares results to be consumed by end-user. The main role of a barrier is to filter out possible duplicates or invalid results that can appear due to optimistic mechanisms. Another function is to carry out an output protocol between system and data consumers, which is essensial part of providing exactly-once semantics.
+At the end of a pipeline, there is a {\em barrier} that prepares results to be consumed by user. The main role of a barrier is to filter out possible duplicates or invalid results. Another function is to carry out an output protocol between system and data consumers, which is an essential part of providing exactly-once semantics.
 
 \subsection{Computational flow}
 The stream between front and barrier is handled by a user-provided directed data flow graph. Each node of the graph represents a single operation parameterized by user-defined business-logic. An operation can have multiple inputs and outputs. Edges indicate the order of these operations. Data items are processed one-by-one in a "streaming" manner. Our model allows cycles in the graph while data flow graphs are commonly assumed to be acyclic (DAGs) 
@@ -28,7 +28,7 @@ In order to perform actual computations, data flow graph is distributed among co
 Each operation input has a user-provided hash function called {\it balancing function}. This function is applied to the payload of data items and determines partitioning before each operation. After that, the data items are sent to the worker, which is responsible for the associated hash unit. Therefore, load balancing explicitly depends on the user-defined balancing functions. It allows the developer to determine optimal balancing which requires the knowledge of the payload distribution. The system optimizes the hash ranges assignment according to the processing statistics. 
 
 \subsection{Ordering assumptions}
-We assume that there is a total order on data items. Ordering is preserved when an item is going through the operations. More precisely, the order of output items is the same as the order of corresponding input items. If more than one item is generated, they are inserted in output stream sequentially. Moreover, the output follows corresponding input but precedes the next item. This rule is vital for cycle processing. Without diving into details, it should be noted that the order of items is maintained across different fronts.
+The system enforces a total order on data items. Ordering is preserved when an item is traveling through the operations. More precisely, the order of output items is the same as the order of corresponding input items. If more than one item is generated, they are inserted in output stream sequentially. Moreover, the output follows corresponding input but precedes the next item. This rule is vital for cycle processing. Without diving into details, it should be noted that the order of items is maintained across different fronts.
 
 The concept of ordering is shown in Figure~\ref{ordering}. Data item with payload $1'$ is the derivative of the item with payload $1$, according to operation $F$. The same is for items with payloads $2'$ and $2$. After union operation, the order between $1$ and $2$ is preserved. Furthermore, $1'$ follows $1$, and $2'$ follows $2$.  
 \begin{figure}[htbp]
