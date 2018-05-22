@@ -60,9 +60,6 @@ There are two important properties of the grouping operation: the output tuples 
 \subsection{Stateful transformations}
 The given set of operations jointly with cyclic execution graphs is enough to implement any stateful operation, i.e., reduce in terms of MapReduce model. The scheme of such transformations is out of the scope of this paper. It is deeply detailed in~\cite{we2018seim}.
 
-\subsection{Consistency guarantees}
-There are three main types of consistency guarantees relating to stream processing. {\it At most once} semantics states that each input event is processed once or not processed at all. {\it At least once} guarantees that each input item is processed, but possibly multiple times, that can lead to result duplication or state inconsistency. {\it Exactly once} semantics guarantee that each input event is processed exactly one time. The techniques to achieve these guarantees in the presence of failures are detailed in section~\ref{fs-consistency-seciton}. DISCUSS ROADMAP!!!
-
 \subsection{Implementation notes}
 
 As it was defined previously, in our model only the grouping operation maintains a state and the state depends on the order of incoming items. Therefore, to achieve deterministic processing, there is a need to enforce the right order. However, conservative methods for the order enforcing are based on buffering~\cite{Li:2008:OPN:1453856.1453890} and can imply high latency overhead. The main difficulty here is that items can be easily reordered within stream processing systems because of asynchrony and the possible existence of multiple paths between two nodes. 
@@ -94,3 +91,8 @@ It must be noted that acker can play the role of worker's coordinator because it
   \caption{The overview of FlameStream physical architecture}
   \label {arch}
 \end{figure*}
+
+\subsection{Consistency guarantees}
+There are three main types of consistency guarantees relating to stream processing. {\it At most once} semantics states that each input event is processed once or not processed at all. {\it At least once} guarantees that each input item is processed, but possibly multiple times, that can lead to result duplication or state inconsistency. {\it Exactly once} semantics guarantee that each input event is processed exactly one time. 
+
+The properties of the proposed model provide several useful features for achieving exactly-once semantics. The total order directly leads to the property of determinism, while optimistic approach for handling out-of-order items allows to enforce it with low overhead. In turn, as it was mentioned above, determinism is a convenient base for system-wide idempotence. The roadmap of our approach is shown in Figure~\ref{roadmap}. The exact techniques to achieve exactly-once are detailed in the next section. 
