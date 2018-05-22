@@ -85,7 +85,20 @@ To ensure that no fronts can generate item with the specific timestamp, each fro
 
 It must be noted that acker can play the role of worker's coordinator because it observes the progress of the whole system. This property is used further in the implementation of mechanisms for fault tolerance. 
 
-\FlameStream\ is implemented in Java, using Akka framework for messaging and applies Apache ZooKeeper as a {\it cluster state manager}. The usage of ZooKeeper mitigates the need for the dedicated master node. Some persistent storage is needed for reliable state saving. An overview of the \FlameStream\ system model and architecture is shown in Figure~\ref{arch}.
+\FlameStream\ is implemented in Java, using Akka framework for messaging. An overview of the \FlameStream\ system model and architecture is shown in Figure~\ref{arch}. The main componets are:
+
+{\bf Acker} supervises computation process and play role of coordinator in consistency protocols described in following sections.
+
+{\bf Graph} is deployed on each node and process a partition of data that corresponds to its hash range. The communication within node is done via messaging or direct function calls depending on runtime heuristics, a delivery that crosses node boundaries is performed by means of TCP.
+
+{\bf Barrier} is located at the end of each graph instance. It filters duplicates and invalid data and delivers it to data consumers.
+
+{\bf Data producers and data consumers} are deployed separately and communicate with system via defined protocols
+
+{\bf Apache ZooKeeper} is used as a {\it cluster state manager}. The usage of ZooKeeper mitigates the need for the dedicated master node.
+
+{\bf Persistent storage} is needed for reliable state saving to mitigate failures, in can be a distributed filesystem or database (e.g., HDFS, S3, MongoDB, GFS, HBase, ...)
+
 
 \begin{figure*}[htbp]
   \centering
