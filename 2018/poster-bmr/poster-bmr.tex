@@ -1,0 +1,55 @@
+\documentclass[a0,landscape]{a0poster}
+
+\usepackage{multicol} 
+\columnsep=100pt 
+\columnseprule=2pt 
+
+\usepackage{helvet}
+
+\usepackage[svgnames]{xcolor}
+\usepackage{graphicx} 
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{amsfonts, amsmath, amsthm, amssymb}
+
+\usepackage{algorithm} 
+\usepackage{algpseudocode}
+
+\newcommand {\FlameStream} {FlameStream}
+
+\begin{document}
+
+\begin{minipage}[b]{0.83\linewidth}
+  {\veryHuge \color{NavyBlue} \textbf{\FlameStream: Model and Runtime for Distributed Stream Processing}}\\
+  \bigbreak
+  {\huge \textbf{Igor E. Kuralenok$^1$, Artem Trofimov$^{1,2}$, Nikita Marshalkin$^{1,2}$, and Boris Novikov$^{1,2}$}}\\
+  \bigbreak
+  {\huge $^1$JetBrains Research, $^2$Saint Petersburg State University}
+\end{minipage}
+%
+\begin{minipage}[b]{0.20\linewidth}
+  \includegraphics[width=20cm]{pics/jetbrains.png} 
+\end{minipage}
+
+\vspace{1cm} 
+
+\begin{multicols*}{3}
+
+\begin{abstract}
+Exactly-once semantics without high latency overhead is still hard to achieve within state-of-the-art stream processing systems. We introduce a model providing for exactly-once using lightweight optimistic approach for obtaining determinism and idempotence. We show its feasibility with a prototype.
+\end {abstract}
+
+\section{Lorem}
+
+  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam lobortis sapien ac ex laoreet, et varius ante convallis. Suspendisse potenti. Nunc ultricies mi faucibus diam dignissim, fringilla efficitur diam ornare. Fusce tempus bibendum elit, vel malesuada felis mollis ut. Vestibulum vel iaculis lacus. In non dui sed magna lobortis congue rhoncus at mauris. Quisque dignissim gravida risus, eu fringilla tellus commodo ac.
+
+  Nullam scelerisque, neque non porta consequat, justo ligula vulputate nunc, vitae elementum massa sem ut ex. Cras vitae est id risus blandit congue eget quis justo. Quisque vel lorem maximus, feugiat orci vel, imperdiet nulla. Curabitur ac nunc a velit varius lacinia. Etiam id eros consequat, posuere magna at, eleifend augue. Donec sit amet eros non ipsum volutpat efficitur non non velit. Proin lobortis urna aliquet nibh finibus, at pharetra massa aliquam. Etiam euismod nibh fringilla efficitur sollicitudin. Morbi pellentesque maximus urna eu congue. Vivamus tristique, mi quis euismod maximus, libero lorem bibendum purus, nec placerat enim ligula id nisl. Vivamus rhoncus, massa non gravida luctus, urna ante rhoncus mauris, id blandit arcu tortor quis nisi. Phasellus eget est nulla. Nullam gravida ipsum quis erat eleifend, elementum ullamcorper quam gravida. Etiam vestibulum scelerisque urna vitae pretium.
+
+  Sed faucibus dignissim tempor. Nam eleifend, nisi vitae euismod hendrerit, odio erat mattis ex, hendrerit venenatis purus dui at elit. Integer dictum, lorem sed lobortis mattis, augue sapien mattis erat, eget vestibulum nisl erat nec est. Sed efficitur sed risus ut rutrum. Sed metus diam, convallis nec mi scelerisque, interdum volutpat eros. Mauris vel mi varius tellus tempus rhoncus ac nec erat. Donec quis orci non lorem venenatis pellentesque nec ac elit. Praesent lobortis metus non egestas mollis.
+
+  Proin lacinia mauris tortor, eu tempor ligula finibus sed. Sed a interdum lorem. Aenean pharetra in est non mollis. Integer vitae interdum leo, ac maximus turpis. Aliquam bibendum cursus ante placerat scelerisque. Aliquam cursus ac eros vel blandit. Vestibulum nunc nunc, varius in interdum et, volutpat vel mi. Cras felis nisi, viverra ac ullamcorper suscipit, consectetur sed mauris. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer condimentum in turpis at laoreet. Mauris hendrerit odio neque.
+
+  Nulla id semper ante. Quisque lobortis consequat urna, at aliquam tellus. Nulla ultricies, lectus at porta aliquet, ex sem lacinia odio, sed ullamcorper ante lacus in odio. Donec sed ex tincidunt, molestie ante a, pretium mi. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Curabitur at eleifend arcu. Aliquam et lectus vitae nisi efficitur convallis. Praesent blandit nunc tortor, in accumsan enim eleifend eget. Curabitur vel posuere erat. Aenean semper tortor ac ligula malesuada rhoncus. Nulla in mollis lorem, quis luctus libero. Sed in cursus diam. Nam turpis leo, porta et convallis a, vestibulum sed justo. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Ut interdum rutrum consectetur. Nunc luctus ac quam et auctor.
+
+
+\end{multicols*}
+\end{document}
