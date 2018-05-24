@@ -2,14 +2,13 @@
 
 \usepackage{multicol} 
 \columnsep=100pt 
-\columnseprule=2pt 
-
-\usepackage{helvet}
+\columnseprule=0pt
 
 \usepackage[svgnames]{xcolor}
 \usepackage{graphicx} 
-\usepackage[font=small,labelfont=bf]{caption}
 \usepackage{amsfonts, amsmath, amsthm, amssymb}
+
+\usepackage[font=small,labelfont=bf]{caption}
 
 \usepackage{algorithm} 
 \usepackage{algpseudocode}
@@ -26,7 +25,7 @@
   {\huge $^1$JetBrains Research, $^2$Saint Petersburg State University}
 \end{minipage}
 %
-\begin{minipage}[b]{0.20\linewidth}
+\begin{minipage}[b]{0.17\linewidth}
   \includegraphics[width=20cm]{pics/jetbrains.png} 
 \end{minipage}
 
@@ -38,18 +37,132 @@
 Exactly-once semantics without high latency overhead is still hard to achieve within state-of-the-art stream processing systems. We introduce a model providing for exactly-once using lightweight optimistic approach for obtaining determinism and idempotence. We show its feasibility with a prototype.
 \end {abstract}
 
-\section{Lorem}
+\section*{Motivation}
 
-  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam lobortis sapien ac ex laoreet, et varius ante convallis. Suspendisse potenti. Nunc ultricies mi faucibus diam dignissim, fringilla efficitur diam ornare. Fusce tempus bibendum elit, vel malesuada felis mollis ut. Vestibulum vel iaculis lacus. In non dui sed magna lobortis congue rhoncus at mauris. Quisque dignissim gravida risus, eu fringilla tellus commodo ac.
+\begin{minipage}{\linewidth}
+  \centering
+  \includegraphics[width=\linewidth]{pics/roadmap}
+  \captionof{figure}{The roadmap of approaches for achieving exactly-once and at-least-once guarantees. Green elements indicate the path for our approach}
+\end{minipage}
 
-  Nullam scelerisque, neque non porta consequat, justo ligula vulputate nunc, vitae elementum massa sem ut ex. Cras vitae est id risus blandit congue eget quis justo. Quisque vel lorem maximus, feugiat orci vel, imperdiet nulla. Curabitur ac nunc a velit varius lacinia. Etiam id eros consequat, posuere magna at, eleifend augue. Donec sit amet eros non ipsum volutpat efficitur non non velit. Proin lobortis urna aliquet nibh finibus, at pharetra massa aliquam. Etiam euismod nibh fringilla efficitur sollicitudin. Morbi pellentesque maximus urna eu congue. Vivamus tristique, mi quis euismod maximus, libero lorem bibendum purus, nec placerat enim ligula id nisl. Vivamus rhoncus, massa non gravida luctus, urna ante rhoncus mauris, id blandit arcu tortor quis nisi. Phasellus eget est nulla. Nullam gravida ipsum quis erat eleifend, elementum ullamcorper quam gravida. Etiam vestibulum scelerisque urna vitae pretium.
+The desired system properties are:
 
-  Sed faucibus dignissim tempor. Nam eleifend, nisi vitae euismod hendrerit, odio erat mattis ex, hendrerit venenatis purus dui at elit. Integer dictum, lorem sed lobortis mattis, augue sapien mattis erat, eget vestibulum nisl erat nec est. Sed efficitur sed risus ut rutrum. Sed metus diam, convallis nec mi scelerisque, interdum volutpat eros. Mauris vel mi varius tellus tempus rhoncus ac nec erat. Donec quis orci non lorem venenatis pellentesque nec ac elit. Praesent lobortis metus non egestas mollis.
+\begin{itemize}
+  \item Computational model should be deterministic by design, i.e., it should produce deterministic results for any pipelines and business logic.
+  \item The performance overhead should be low in comparison with the existing systems.
+\end{itemize}
 
-  Proin lacinia mauris tortor, eu tempor ligula finibus sed. Sed a interdum lorem. Aenean pharetra in est non mollis. Integer vitae interdum leo, ac maximus turpis. Aliquam bibendum cursus ante placerat scelerisque. Aliquam cursus ac eros vel blandit. Vestibulum nunc nunc, varius in interdum et, volutpat vel mi. Cras felis nisi, viverra ac ullamcorper suscipit, consectetur sed mauris. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer condimentum in turpis at laoreet. Mauris hendrerit odio neque.
+We will use the following principles for our system:
 
-  Nulla id semper ante. Quisque lobortis consequat urna, at aliquam tellus. Nulla ultricies, lectus at porta aliquet, ex sem lacinia odio, sed ullamcorper ante lacus in odio. Donec sed ex tincidunt, molestie ante a, pretium mi. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Curabitur at eleifend arcu. Aliquam et lectus vitae nisi efficitur convallis. Praesent blandit nunc tortor, in accumsan enim eleifend eget. Curabitur vel posuere erat. Aenean semper tortor ac ligula malesuada rhoncus. Nulla in mollis lorem, quis luctus libero. Sed in cursus diam. Nam turpis leo, porta et convallis a, vestibulum sed justo. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Ut interdum rutrum consectetur. Nunc luctus ac quam et auctor.
+\begin{itemize}
+  \item Support cyclic execution graph
+  \item Localize state management in terms of system operation type
+  \item A data partition must be processed on a single node
+  \item MapReduce completeness
+\end{itemize}
 
+\section{Model}
+
+\begin{minipage}{\linewidth}
+  \includegraphics[width=\linewidth]{pics/logical-graph}
+  \captionof{figure}{A logical execution graph}
+  \label{logical-graph}
+\end{minipage}
+
+\begin{minipage}{\linewidth}
+  \includegraphics[width=\linewidth]{pics/ordering}
+  \captionof{figure}{Ordering model}
+  \label{ordering}
+\end{minipage}
+
+\begin{minipage}{\linewidth}
+  \includegraphics[width=\linewidth]{pics/physical-graph}
+  \captionof{figure}{A physical execution graph}
+  \label{physical-graph}
+\end{minipage}
+
+The list of available operations includes:
+
+\begin{description}
+  \item [Map] applies a user-defined function to the payload of an input item and returns a (possibly empty) sequence of data items with transformed payloads. 
+  \item [Broadcast] replicates an input item to the specified number of operations.
+  \item [Merge] operation is initialized with the specified number of input nodes. It sends all incoming data to the output.
+  \item [Grouping] constructs a single item containing a set of consecutive items that have the same value of partition function. The maximum number of items that can be grouped is specified as a parameter  $Window Size.$ 
+\end{description}
+
+The following example illustrates  the grouping operation. 
+Let the input stream be a series of integers: $ 1,2,3, \ldots$, and the  partition function returns for even numbers and 0 otherwise. If the window is set to 3, the output is 
+$$(1), (2), (1|3), (2|4), (1|3|5), (2|4|6), (3|5|7), (4|6|8), \ldots$$
+
+\section*{Drifting state}
+
+\begin{minipage}{\linewidth}
+  \begin{algorithmic}
+    \Function{reduce}{$key$, $values$}
+      \State $accumulator$ \Comment{reduce's state}
+      \ForAll{$v \in values$} 
+        \State \Call{combine}{$v$, $accumulator$}
+      \EndFor
+      \State \Return \Call{map}{$accumulator$}
+    \EndFunction
+  \end{algorithmic}
+  \captionof{figure}{Generic reduce stage}
+\end{minipage}
+
+\section*{Optimistic}
+
+\begin{minipage}{\linewidth}
+  \includegraphics[width=\linewidth]{pics/grouping-replaying}
+  \captionof{figure}{The repair in grouping with $WindowSize = 2$.}
+  \label {grouping-replaying}
+\end{minipage}
+
+\begin{minipage}{\linewidth}
+  \centering
+  \includegraphics[width=\linewidth]{pics/mapreduce}
+  \captionof{figure}{Logical graph for MapReduce transformations}
+\end{minipage}
+
+\section*{Implementation}
+
+\[DataItem := (payload, Meta)\]
+
+\[Meta := (GlobalTime, childIds[\:], Trace, isTombstone)\]
+
+\[GlobalTime := (frontTs, frontId)\]
+
+\[Trace := \bigoplus_{op \in \text{visited}} Id(op)\]
+
+\begin{minipage}{\linewidth}
+  \centering
+  \includegraphics[width=\linewidth]{pics/acker}
+  \captionof{figure}{The example of tracking minimal time using acker}
+\end{minipage}
+
+\section*{Experiments}
+
+\begin{minipage}{\linewidth}
+  \centering
+  \begin{minipage}[b]{.58\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{pics/fs-index-quantiles}
+    \captionof{figure}{FlameStream latency distribution (left),  high quantiles (right)}
+    \label{fs-scalability}
+  \end{minipage}%
+  \hspace{\fill}
+  \begin{minipage}[b]{.40\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{pics/overhead}
+    \captionof{figure}{The relation between the number of workers, the average input rate, and the repair ratio}
+    \label{overhead}
+  \end{minipage}%
+\end{minipage}
+
+\begin{minipage}{\linewidth}
+  \centering
+  \includegraphics[width=\linewidth]{pics/comparison}
+  \captionof{figure}{The comparison in latencies between FlameStream and Flink for different consistency semantics within 10 nodes and 50 documents per second input rate}
+\end{minipage}
 
 \end{multicols*}
 \end{document}
