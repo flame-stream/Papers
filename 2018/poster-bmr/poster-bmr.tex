@@ -3,6 +3,7 @@
 \usepackage{multicol}
 \columnsep=100pt
 
+\usepackage{wrapfig}
 \usepackage[svgnames]{xcolor}
 \usepackage{graphicx} 
 \usepackage{amsfonts, amsmath, amsthm, amssymb}
@@ -11,6 +12,7 @@
 
 \usepackage{algorithm} 
 \usepackage{algpseudocode}
+\usepackage{wrapfig}
 
 \newcommand{\fspic}[3][1] {
   \begin{center}\vspace{1cm}
@@ -101,7 +103,15 @@
 
 \vspace{3cm}
 
-\begin{minipage}{\linewidth}
-  \fspic[.5]{comparison}{Comparison}
-\end{minipage}
+\begin{flushright}
+  \begin{minipage}{.66\linewidth}
+    \fspic[1]{comparison}{Comparison}
+  \end{minipage}
+\end{flushright}
+
+% \begin{minipage}{\linewidth}
+%   \begin{center}
+%     \includegraphics[width=.03\linewidth]{pics/qr-code}
+%   \end{center}
+% \end{minipage}
 \end{document}
