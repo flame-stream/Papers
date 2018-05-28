@@ -1,8 +1,7 @@
-\documentclass[a0,landscape]{a0poster}
+\documentclass[a0,portrait]{a0poster}
 
-\usepackage{multicol} 
-\columnsep=100pt 
-\columnseprule=0pt
+\usepackage{multicol}
+\columnsep=100pt
 
 \usepackage[svgnames]{xcolor}
 \usepackage{graphicx} 
@@ -13,156 +12,96 @@
 \usepackage{algorithm} 
 \usepackage{algpseudocode}
 
+\newcommand{\fspic}[3][1] {
+  \begin{center}\vspace{1cm}
+    \includegraphics[width=#1\linewidth]{pics/#2}
+    \captionof{figure}{#3}
+    \label{#1}
+  \end{center}\vspace{1cm}
+}
+
 \newcommand {\FlameStream} {FlameStream}
 
 \begin{document}
 
-\begin{minipage}[b]{0.83\linewidth}
-  {\veryHuge \color{NavyBlue} \textbf{\FlameStream: Model and Runtime for Distributed Stream Processing}}\\
+\begin{minipage}[b]{0.86\linewidth}
+  {\huge \textbf{\FlameStream: Model and Runtime for Distributed Stream Processing}}\\
   \bigbreak
-  {\huge \textbf{Igor E. Kuralenok$^1$, Artem Trofimov$^{1,2}$, Nikita Marshalkin$^{1,2}$, and Boris Novikov$^{1,2}$}}\\
+  {\large \textbf{Igor E. Kuralenok$^1$, Artem Trofimov$^{1,2}$, Nikita Marshalkin$^{1,2}$, and Boris Novikov$^{1,2}$}}\\
   \bigbreak
-  {\huge $^1$JetBrains Research, $^2$Saint Petersburg State University}
+  {\large $^1$JetBrains Research, $^2$Saint Petersburg State University}
 \end{minipage}
 %
-\begin{minipage}[b]{0.17\linewidth}
-  \includegraphics[width=20cm]{pics/jetbrains.png} 
+\begin{minipage}[b]{0.33\linewidth}
+  \includegraphics[width=10cm]{pics/jetbrains.png} 
 \end{minipage}
 
-\vspace{1cm} 
+\vspace{3cm}
 
-\begin{multicols*}{3}
-
-\begin{abstract}
-Exactly-once semantics without high latency overhead is still hard to achieve within state-of-the-art stream processing systems. We introduce a model providing for exactly-once using lightweight optimistic approach for obtaining determinism and idempotence. We show its feasibility with a prototype.
-\end {abstract}
-
-\section*{Motivation}
-
-\begin{minipage}{\linewidth}
+\begin{minipage}{.66\linewidth}
   \centering
   \includegraphics[width=\linewidth]{pics/roadmap}
   \captionof{figure}{The roadmap of approaches for achieving exactly-once and at-least-once guarantees. Green elements indicate the path for our approach}
 \end{minipage}
 
-The desired system properties are:
+\vspace{3cm}
 
-\begin{itemize}
-  \item Computational model should be deterministic by design, i.e., it should produce deterministic results for any pipelines and business logic.
-  \item The performance overhead should be low in comparison with the existing systems.
-\end{itemize}
+\begin{multicols}{3} 
+  \section*{Graph as a function}
+  Determanistic exactly-once processing allows reasoning about execution results as they are determined only by input elements and logical graph.
 
-We will use the following principles for our system:
+  \fspic{function}{If computations are determenistic idempotance can be achieved by deduplication buffer at the end of a pipeline}
 
-\begin{itemize}
-  \item Support cyclic execution graph
-  \item Localize state management in terms of system operation type
-  \item A data partition must be processed on a single node
-  \item MapReduce completeness
-\end{itemize}
+  \section*{Drifting state}
+  Effectively, modern stream processing models allows to work with an operation state in a form of  
+  
+  \[(in, state) \rightarrow (out, newState)\]
+  
+  We call this representation a {\em canonical stateful transformation}. Even if models doesn't give such interface, systems provide consistent version through state wrappers. We make such contract explicit by decomposing cycle into two operations: grouping and stateless map
 
-\section{Model}
+  \fspic{transition}{Any canonical stateful transformation can be expressed by a combination of windowed grouping and stateless map operations}
 
-\begin{minipage}{\linewidth}
-  \includegraphics[width=\linewidth]{pics/logical-graph}
-  \captionof{figure}{A logical execution graph}
-  \label{logical-graph}
-\end{minipage}
+  \section*{Ordering}
+  To manage cyclic flows there is a need to impose strict rules on processing order.
 
-\begin{minipage}{\linewidth}
-  \includegraphics[width=\linewidth]{pics/ordering}
-  \captionof{figure}{Ordering model}
-  \label{ordering}
-\end{minipage}
+  \fspic{ordering}{Data item with payload $1'$ is the derivative of the item with payload $1$, according to operation $F$. The same is for items with payloads $2'$ and $2$. After merge operation, the order between $1$ and $2$ is preserved. Furthermore, $1'$ follows $1$, and $2'$ follows $2$.}
 
-\begin{minipage}{\linewidth}
-  \includegraphics[width=\linewidth]{pics/physical-graph}
-  \captionof{figure}{A physical execution graph}
-  \label{physical-graph}
-\end{minipage}
+  \section*{Operations}
+  Any stateful pipeline can be expanded into two operations:
 
-The list of available operations includes:
+  \begin {description}
+    \item [Map] applies a user-defined function to the payload of an input item and returns a (possibly empty) sequence of data items with transformed payloads. 
+    \item [Grouping] constructs a single item containing a set of consecutive items that have the same value of partition function. The maximum number of items that can be grouped is specified as a parameter  $Window Size.$ 
+  \end{description}
 
-\begin{description}
-  \item [Map] applies a user-defined function to the payload of an input item and returns a (possibly empty) sequence of data items with transformed payloads. 
-  \item [Broadcast] replicates an input item to the specified number of operations.
-  \item [Merge] operation is initialized with the specified number of input nodes. It sends all incoming data to the output.
-  \item [Grouping] constructs a single item containing a set of consecutive items that have the same value of partition function. The maximum number of items that can be grouped is specified as a parameter  $Window Size.$ 
-\end{description}
+  Groupings of different partitions are independent.
 
-The following example illustrates  the grouping operation. 
-Let the input stream be a series of integers: $ 1,2,3, \ldots$, and the  partition function returns for even numbers and 0 otherwise. If the window is set to 3, the output is 
-$$(1), (2), (1|3), (2|4), (1|3|5), (2|4|6), (3|5|7), (4|6|8), \ldots$$
+  \section*{Optimistic out-of-order processing}
+  Only grouping results depends on order elements as it is the only operation that maintains state (partial widows). 
+  
+  It has a well-defined state structure that allows to effectively provide correct results.
 
-\section*{Drifting state}
+  It optimistically produces tuples as they were in-order. I case of reordering it is locally generates correct tuples and sends tombstones for incorrect ones. 
+  \fspic{grouping-invalidation}{On arrival of out-of-order item, it is inserted in the correct location of the correcponding bucket. Valid elements containing new item are produced, and invalid ones are invalidated by sending a tombstone for it down the stream}
 
-\begin{minipage}{\linewidth}
-  \begin{algorithmic}
-    \Function{reduce}{$key$, $values$}
-      \State $accumulator$ \Comment{reduce's state}
-      \ForAll{$v \in values$} 
-        \State \Call{combine}{$v$, $accumulator$}
-      \EndFor
-      \State \Return \Call{map}{$accumulator$}
-    \EndFunction
-  \end{algorithmic}
-  \captionof{figure}{Generic reduce stage}
-\end{minipage}
+  \section*{Garbage filtering}
+  In case of reordering invalid tuples are generated. In order to return only correct tuples to users there is a barrier at the end of the pipeline. It passes correct items and filters out incorrect ones.
 
-\section*{Optimistic}
+  \fspic{happy-man}{Barrier collects elements in a buffer and removes item for which tombstones have arrived. Periodically it flushes buffer and returnes elements to the end-user. Punctuations used in OOP approach can be used as flush-trigger}
+
+  \section*{Consistency}
+  Model properties allows us to provide strong guarantees on processing results - exaclty-once semantics.
+
+  Total order and determinism allows us to filter out duplicates at the barrier by simply comparing elements timestamps with last evicted item.
+
+  Moreover state structures enables performing asynchronous snapshot of operations' states.
+
+  \fspic[.7]{bucket-parts}{Grouping buckets can be divided into two parts: immutable and mutable. The separator is the time of the last received punction (we call it minimal time). State snapshot for any time before minimal time can be obtained by extracting window-sized sublist}
+\end{multicols}
+
+\vspace{3cm}
 
 \begin{minipage}{\linewidth}
-  \includegraphics[width=\linewidth]{pics/grouping-replaying}
-  \captionof{figure}{The repair in grouping with $WindowSize = 2$.}
-  \label {grouping-replaying}
+  \fspic[.5]{comparison}{Comparison}
 \end{minipage}
-
-\begin{minipage}{\linewidth}
-  \centering
-  \includegraphics[width=\linewidth]{pics/mapreduce}
-  \captionof{figure}{Logical graph for MapReduce transformations}
-\end{minipage}
-
-\section*{Implementation}
-
-\[DataItem := (payload, Meta)\]
-
-\[Meta := (GlobalTime, childIds[\:], Trace, isTombstone)\]
-
-\[GlobalTime := (frontTs, frontId)\]
-
-\[Trace := \bigoplus_{op \in \text{visited}} Id(op)\]
-
-\begin{minipage}{\linewidth}
-  \centering
-  \includegraphics[width=\linewidth]{pics/acker}
-  \captionof{figure}{The example of tracking minimal time using acker}
-\end{minipage}
-
-\section*{Experiments}
-
-\begin{minipage}{\linewidth}
-  \centering
-  \begin{minipage}[b]{.58\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{pics/fs-index-quantiles}
-    \captionof{figure}{FlameStream latency distribution (left),  high quantiles (right)}
-    \label{fs-scalability}
-  \end{minipage}%
-  \hspace{\fill}
-  \begin{minipage}[b]{.40\textwidth}
-    \centering
-    \includegraphics[width=\linewidth]{pics/overhead}
-    \captionof{figure}{The relation between the number of workers, the average input rate, and the repair ratio}
-    \label{overhead}
-  \end{minipage}%
-\end{minipage}
-
-\begin{minipage}{\linewidth}
-  \centering
-  \includegraphics[width=\linewidth]{pics/comparison}
-  \captionof{figure}{The comparison in latencies between FlameStream and Flink for different consistency semantics within 10 nodes and 50 documents per second input rate}
-\end{minipage}
-
-\end{multicols*}
 \end{document}
