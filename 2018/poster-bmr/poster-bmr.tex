@@ -40,7 +40,7 @@
 
 \vspace{3cm}
 
-\begin{minipage}{.76\linewidth}
+\begin{minipage}{.66\linewidth}
   \centering
   \includegraphics[width=\linewidth]{pics/roadmap}
   \captionof{figure}{The roadmap of approaches for achieving exactly-once and at-least-once guarantees. Green elements indicate the path for our approach}
@@ -50,40 +50,32 @@
 
 \begin{multicols}{3} 
   \section*{Graph as a function}
-  Determanistic exactly-once processing allows reasoning about execution results as they are determined only by input elements and logical graph.
+  Determenistic exactly-once processing makes execution results predictable and repeatable as they are completely determined by input elements and a logical graph. This property is useful for preserving strong consistency in presence of failures and recoveries, because input replay does produce exactly the same results regardless the asynchronous nature of distributed systems. 
 
   \fspic{function}{If computations are determenistic idempotance can be achieved by deduplication buffer at the end of a pipeline}
 
   \section*{Drifting state}
-  Effectively, modern stream processing models allows to work with an operation state in a form of  
+  Effectively, modern stream processing models allows managing an operation state in a form of  
   
   \[(in, state) \rightarrow (out, newState)\]
   
-  We call this representation a {\em canonical stateful transformation}. Even if models doesn't give such interface, systems provide consistent version through state wrappers. We make such contract explicit by decomposing cycle into two operations: grouping and stateless map
+  Even if systems do not provide such interface explicitly, it is implemented internally and exported via consistent state wrappers. We make such contract explicit by decomposing any stateful operation into two operations with a cycle.
 
-  \fspic{transition}{Any canonical stateful transformation can be expressed by a combination of windowed grouping and stateless map operations}
+  \fspic{transition}{Any stateful transformation can be expressed by a combination of windowed grouping and stateless map operations}
+  \vfill\null
+  \columnbreak
 
   \section*{Ordering}
-  To manage cyclic flows there is a need to impose strict rules on processing order.
+  To achieve deterministic results and to properly manage drifting state cycles, there is a need to impose strong processing order on data items.
 
   \fspic{ordering}{Data item with payload $1'$ is the derivative of the item with payload $1$, according to operation $F$. The same is for items with payloads $2'$ and $2$. After merge operation, the order between $1$ and $2$ is preserved. Furthermore, $1'$ follows $1$, and $2'$ follows $2$.}
 
-  \section*{Operations}
-  Any stateful pipeline can be expanded into two operations:
-
-  \begin {description}
-    \item [Map] applies a user-defined function to the payload of an input item and returns a (possibly empty) sequence of data items with transformed payloads. 
-    \item [Grouping] constructs a single item containing a set of consecutive items that have the same value of partition function. The maximum number of items that can be grouped is specified as a parameter  $Window Size.$ 
-  \end{description}
-
-  Groupings of different partitions are independent.
-
   \section*{Optimistic out-of-order processing}
-  Only grouping results depends on order elements as it is the only operation that maintains state (partial widows). 
+  To achieve system-wide ordering, it is sufficient to impose strong order only within grouping operations. 
   
-  It has a well-defined state structure that allows to effectively provide correct results.
+  Grouping state has a well-defined simple structure that allows handling items speculatively without extra buffering.
 
-  It optimistically produces tuples as they were in-order. I case of reordering it is locally generates correct tuples and sends tombstones for incorrect ones. 
+  It immediately processes input items as they were in-order. I case of reordering it is locally generates correct tuples and sends tombstones for incorrect ones. 
   \fspic{grouping-invalidation}{On arrival of out-of-order item, it is inserted in the correct location of the correcponding bucket. Valid elements containing new item are produced, and invalid ones are invalidated by sending a tombstone for it down the stream}
 
   \section*{Garbage filtering}
@@ -103,11 +95,20 @@
 
 \vspace{1cm}
 
-\begin{flushright}
-  \begin{minipage}{.76\linewidth}
-    \fspic[1]{comparison}{Comparison}
-  \end{minipage}
-\end{flushright}
+\begin{minipage}{.30\linewidth}
+  Any stateful pipeline can be constructed using a cyclic graph :
+
+  \begin {description}
+    \item [Map] applies a user-defined function to the payload of an input item and returns a (possibly empty) sequence of data items with transformed payloads. 
+    \item [Grouping] constructs a single item containing a set of consecutive items that have the same value of partition function. The maximum number of items that can be grouped is specified as a parameter  $Window Size.$ 
+  \end{description}
+
+  Groupings of different partitions are independent.
+\end{minipage}
+\hspace{100pt}
+\begin{minipage}{.66\linewidth}
+  \fspic{comparison}{Comparison}
+\end{minipage}
 
 % \begin{minipage}{\linewidth}
 %   \begin{center}
