@@ -1,7 +1,15 @@
 \documentclass[a0,portrait]{a0poster}
 
-\usepackage{multicol}
-\columnsep=100pt
+%--------------------
+\newlength{\sepwidth}
+\setlength{\sepwidth}{3.5cm}
+
+\newlength{\colwidth}
+\setlength{\colwidth}{22.32cm}
+
+\newlength{\twocolwidth}
+\setlength{\twocolwidth}{48.14cm}
+%--------------------
 
 \usepackage{wrapfig}
 \usepackage[svgnames]{xcolor}
@@ -26,7 +34,7 @@
 
 \begin{document}
 
-\begin{minipage}[b]{0.86\linewidth}
+\begin{minipage}[t]{.86\linewidth}
   {\huge \textbf{\FlameStream: Model and Runtime for Distributed Stream Processing}}\\
   \bigbreak
   {\large \textbf{Igor E. Kuralenok$^1$, Artem Trofimov$^{1,2}$, Nikita Marshalkin$^{1,2}$, and Boris Novikov$^{1,2}$}}\\
@@ -34,13 +42,13 @@
   {\large $^1$JetBrains Research, $^2$Saint Petersburg State University}
 \end{minipage}
 %
-\begin{minipage}[b]{0.33\linewidth}
+\begin{minipage}[t]{0.33\linewidth}
   \includegraphics[width=10cm]{pics/jetbrains.png} 
 \end{minipage}
 
 \vspace{3cm}
 
-\begin{minipage}{.66\linewidth}
+\begin{minipage}{\twocolwidth}
   \centering
   \includegraphics[width=\linewidth]{pics/roadmap}
   \captionof{figure}{The roadmap of approaches for achieving exactly-once and at-least-once guarantees. Green elements indicate the path for our approach}
@@ -48,7 +56,7 @@
 
 \vspace{3cm}
 
-\begin{multicols}{3} 
+\begin{minipage}[t]{\colwidth}
   \section*{Graph as a function}
   Determenistic exactly-once processing makes execution results predictable and repeatable as they are completely determined by input elements and a logical graph. This property is useful for preserving strong consistency in presence of failures and recoveries, because input replay does produce exactly the same results regardless the asynchronous nature of distributed systems. 
 
@@ -62,40 +70,7 @@
   Even if systems do not provide such interface explicitly, it is implemented internally and exported via consistent state wrappers. We make such contract explicit by decomposing any stateful operation into two operations with a cycle.
 
   \fspic{transition}{Any stateful transformation can be expressed by a combination of windowed grouping and stateless map operations}
-  \vfill\null
-  \columnbreak
 
-  \section*{Ordering}
-  To achieve deterministic results and to properly manage drifting state cycles, there is a need to impose strong processing order on data items.
-
-  \fspic{ordering}{Data item with payload $1'$ is the derivative of the item with payload $1$, according to operation $F$. The same is for items with payloads $2'$ and $2$. After merge operation, the order between $1$ and $2$ is preserved. Furthermore, $1'$ follows $1$, and $2'$ follows $2$.}
-
-  \section*{Optimistic out-of-order processing}
-  To achieve system-wide ordering, it is sufficient to impose strong order only within grouping operations. 
-  
-  Grouping state has a well-defined simple structure that allows handling items speculatively without extra buffering.
-
-  It immediately processes input items as they were in-order. I case of reordering it is locally generates correct tuples and sends tombstones for incorrect ones. 
-  \fspic{grouping-invalidation}{On arrival of out-of-order item, it is inserted in the correct location of the correcponding bucket. Valid elements containing new item are produced, and invalid ones are invalidated by sending a tombstone for it down the stream}
-
-  \section*{Garbage filtering}
-  In case of reordering invalid tuples are generated. In order to return only correct tuples to users there is a barrier at the end of the pipeline. It passes correct items and filters out incorrect ones.
-
-  \fspic{happy-man}{Barrier collects elements in a buffer and removes item for which tombstones have arrived. Periodically it flushes buffer and returnes elements to the end-user. Punctuations used in OOP approach can be used as flush-trigger}
-
-  \section*{Consistency}
-  Model properties allows us to provide strong guarantees on processing results - exaclty-once semantics.
-
-  Total order and determinism allows us to filter out duplicates at the barrier by simply comparing elements timestamps with last evicted item.
-
-  Moreover state structures enables performing asynchronous snapshot of operations' states.
-
-  \fspic[.7]{bucket-parts}{Grouping buckets can be divided into two parts: immutable and mutable. The separator is the time of the last received punction (we call it minimal time). State snapshot for any time before minimal time can be obtained by extracting window-sized sublist}
-\end{multicols}
-
-\vspace{1cm}
-
-\begin{minipage}{.30\linewidth}
   Any stateful pipeline can be constructed using a cyclic graph :
 
   \begin {description}
@@ -105,14 +80,53 @@
 
   Groupings of different partitions are independent.
 \end{minipage}
-\hspace{100pt}
-\begin{minipage}{.66\linewidth}
-  \fspic{comparison}{Comparison}
+%
+\hspace{\sepwidth}
+%
+\begin{minipage}[t]{\twocolwidth}
+  \begin{minipage}[t]{\colwidth}
+    \section*{Ordering}
+    To achieve deterministic results and to properly manage drifting state cycles, there is a need to impose strong processing order on data items.
+
+    \fspic{ordering}{Data item with payload $1'$ is the derivative of the item with payload $1$, according to operation $F$. The same is for items with payloads $2'$ and $2$. After merge operation, the order between $1$ and $2$ is preserved. Furthermore, $1'$ follows $1$, and $2'$ follows $2$.}
+
+    \section*{Optimistic out-of-order processing}
+    To achieve system-wide ordering, it is sufficient to impose strong order only within grouping operations. 
+    
+    Grouping state has a well-defined simple structure that allows handling items speculatively without extra buffering.
+
+    It immediately processes input items as they were in-order. I case of reordering it is locally generates correct tuples and sends tombstones for incorrect ones. 
+    \fspic{grouping-invalidation}{On arrival of out-of-order item, it is inserted in the correct location of the correcponding bucket. Valid elements containing new item are produced, and invalid ones are invalidated by sending a tombstone for it down the stream}
+  \end{minipage}
+  %
+  \hspace{\sepwidth}
+  %
+  \begin{minipage}[t]{\colwidth}
+    \section*{Garbage filtering}
+    In case of reordering invalid tuples are generated. In order to return only correct tuples to users there is a barrier at the end of the pipeline. It passes correct items and filters out incorrect ones.
+
+    \fspic{happy-man}{Barrier collects elements in a buffer and removes item for which tombstones have arrived. Periodically it flushes buffer and returnes elements to the end-user. Punctuations used in OOP approach can be used as flush-trigger}
+
+    \section*{Consistency}
+    Model properties allows us to provide strong guarantees on processing results - exaclty-once semantics.
+
+    Total order and determinism allows us to filter out duplicates at the barrier by simply comparing elements timestamps with last evicted item.
+
+    Moreover state structures enables performing asynchronous snapshot of operations' states.
+
+    \fspic[.7]{bucket-parts}{Grouping buckets can be divided into two parts: immutable and mutable. The separator is the time of the last received punction (we call it minimal time). State snapshot for any time before minimal time can be obtained by extracting window-sized sublist}
+  \end{minipage}
+
+  \vspace{1cm}
+
+  \begin{minipage}[t]{\linewidth}
+    \fspic{comparison}{Comparison}
+  \end{minipage}
 \end{minipage}
 
-% \begin{minipage}{\linewidth}
-%   \begin{center}
-%     \includegraphics[width=.03\linewidth]{pics/qr-code}
-%   \end{center}
-% \end{minipage}
+\begin{minipage}{\linewidth}
+  \begin{center}
+    \includegraphics[width=.05\linewidth]{pics/qr-code}
+  \end{center}
+\end{minipage}
 \end{document}
