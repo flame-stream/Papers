@@ -48,13 +48,22 @@
 
   \vspace{3cm}
 
-  \begin{minipage}{\twocolwidth}
+  \begin{minipage}[t]{\twocolwidth}
     \centering
     \includegraphics[width=\linewidth]{pics/roadmap}
     \captionof{figure}{The roadmap of approaches for achieving exactly-once and at-least-once guarantees. Green elements indicate the path for our approach}
   \end{minipage}
+  %
+  \hspace{\sepwidth}
+  %
+  \begin{minipage}{\colwidth}
+    \section*{Garbage filtering}
+    In case of reordering invalid tuples are generated. In order to return only correct tuples to users there is a barrier at the end of the pipeline. It passes correct items and filters out incorrect ones.
 
-  \vspace{3cm}
+    \fspic{happy-man}{Barrier collects elements in a buffer and removes items if corresponding tombstones have arrived. It flushes buffer periodically and returns elements to the end-user. Punctuations (low-watermarks) proposed in OOP approach can be used as a flush-trigger}
+  \end{minipage}
+
+  \vspace{1cm}
 
   \begin{minipage}[t]{\colwidth}
     \section*{Graph as a function}
@@ -100,17 +109,14 @@
     \hspace{\sepwidth}
     %
     \begin{minipage}[t]{\colwidth}
-      \section*{Garbage filtering}
-      In case of reordering invalid tuples are generated. In order to return only correct tuples to users there is a barrier at the end of the pipeline. It passes correct items and filters out incorrect ones.
-
-      \fspic{happy-man}{Barrier collects elements in a buffer and removes items if corresponding tombstones have arrived. It flushes buffer periodically and returns elements to the end-user. Punctuations (low-watermarks) proposed in OOP approach can be used as a flush-trigger}
-
       \section*{Consistency}
       The properties of the proposed model lay the foundations for providing exaclty-once semantics with low overhead. Total order and determinism allows filtering out duplicates at the barrier by comparing timestamps. Grouping state structure enables performing asynchronous snapshots. 
 
      Therefore, our architecture decouples result releasing and state snapshotting mechanisms. Hence, it does not require heavy transactional protocols for achieving exactly-once.
 
       \fspic[.7]{bucket-parts}{Grouping buckets can be divided into the two parts: immutable and mutable. The separator is the time of the last received punctuation (we call it minimal time). State snapshot for any time before the minimal can be obtained by cutting window-sized sublist}
+
+      \section*{Experiments}
     \end{minipage}
 
     \vspace{1cm}
