@@ -30,6 +30,10 @@
   \end{center}\vspace{1cm}
 }
 
+\newcommand{\fssection}[3] {
+  \section*{#1}
+}
+
 \newcommand {\FlameStream} {FlameStream}
 
 \begin{document}
@@ -57,7 +61,7 @@
   \hspace{\sepwidth}
   %
   \begin{minipage}{\colwidth}
-    \section*{Garbage filtering}
+    \fssection{Garbage filtering}
     In case of reordering invalid tuples are generated. In order to return only correct tuples to users there is a barrier at the end of the pipeline. It passes correct items and filters out incorrect ones.
 
     \fspic{happy-man}{Barrier collects elements in a buffer and removes items if corresponding tombstones have arrived. It flushes buffer periodically and returns elements to the end-user. Punctuations (low-watermarks) proposed in OOP approach can be used as a flush-trigger}
@@ -66,12 +70,13 @@
   \vspace{1cm}
 
   \begin{minipage}[t]{\colwidth}
-    \section*{Graph as a function}
+    \fssection{Graph as a function}
+
     Determenistic exactly-once processing makes execution results predictable and repeatable as they are completely determined by input elements and a logical graph. This property is useful for preserving strong consistency in presence of failures and recoveries, because input replay does produce exactly the same results regardless the asynchronous nature of distributed systems. 
 
     \fspic{function}{If computations are determenistic idempotance can be achieved by deduplication buffer at the end of a pipeline}
 
-    \section*{Drifting state}
+    \fssection{Drifting state}
     Effectively, modern stream processing models allows managing an operation state in a form of  
     
     \[(in, state) \rightarrow (out, newState)\]
@@ -92,12 +97,12 @@
   %
   \begin{minipage}[t]{\twocolwidth}
     \begin{minipage}[t]{\colwidth}
-      \section*{Ordering}
+      \fssection{Ordering}
       To achieve deterministic results and to properly manage drifting state cycles, there is a need to impose strong processing order on data items.
 
       \fspic{ordering}{Data item with payload $1'$ is the derivative of the item with payload $1$, according to operation $F$. The same is for items with payloads $2'$ and $2$. After merge operation, the order between $1$ and $2$ is preserved. Furthermore, $1'$ follows $1$, and $2'$ follows $2$.}
 
-      \section*{Optimistic out-of-order processing}
+      \fssection{Optimistic out-of-order processing}
       To achieve system-wide ordering, it is sufficient to impose strong order only within grouping operations. 
       
       Grouping state has a well-defined simple structure that allows handling out-of-order items speculatively without extra buffering. More precisely, grouping immediately processes input items as they were in-order. In case of reordering, it is locally generates correct tuples and sends tombstones for incorrect ones. 
@@ -109,7 +114,7 @@
     \hspace{\sepwidth}
     %
     \begin{minipage}[t]{\colwidth}
-      \section*{Consistency}
+      \fssection{Consistency}
       The properties of the proposed model lay the foundations for providing exaclty-once semantics with low overhead. Total order and determinism allows filtering out duplicates at the barrier by comparing timestamps. Grouping state structure enables performing asynchronous snapshots. 
 
      Therefore, our architecture decouples result releasing and state snapshotting mechanisms. Hence, it does not require heavy transactional protocols for achieving exactly-once.
@@ -118,7 +123,7 @@
 
       \vspace{1cm}
 
-      \section*{Experiments}
+      \fssection{Experiments}
       We used a problem of building an incremental inverted index as a stream processing benchmark.
 
       The latency is defined as a (negated) time difference between the entry of new page and the delivery of all index updates generated in response.
