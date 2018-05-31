@@ -11,6 +11,7 @@
 \setlength{\twocolwidth}{48.14cm}
 %--------------------
 
+\usepackage{helvet}
 \usepackage{wrapfig}
 \usepackage[svgnames]{xcolor}
 \usepackage{graphicx} 
@@ -31,7 +32,7 @@
 }
 
 \newcommand{\fssection}[1] {
-  \section*{#1}
+  \section*{\textsf{#1}}
 }
 
 \newcommand {\FlameStream} {FlameStream}
@@ -39,15 +40,15 @@
 \begin{document}
 
   \begin{minipage}[t]{.86\linewidth}
-    {\huge \textbf{\FlameStream: Model and Runtime for Distributed Stream Processing}}\\
+    {\huge \textsf{\textbf{\FlameStream: Model and Runtime for Distributed Stream Processing}}}\\
     \bigbreak
-    {\large \textbf{Igor E. Kuralenok$^1$, Artem Trofimov$^{1,2}$, Nikita Marshalkin$^{1,2}$, and Boris Novikov$^{1,2}$}}\\
+    {\large \textsf{\textbf{Igor E. Kuralenok$^1$, Artem Trofimov$^{1,2}$, Nikita Marshalkin$^{1,2}$, and Boris Novikov$^{1,2}$}}}\\
     \bigbreak
-    {\large $^1$JetBrains Research, $^2$Saint Petersburg State University}
+    \textsf{{\large $^1$JetBrains Research, $^2$Saint Petersburg State University}}
   \end{minipage}
   %
-  \begin{minipage}[t]{0.14\linewidth}
-    \includegraphics[width=10cm]{pics/jetbrains.png} 
+  \begin{minipage}[t]{.14\linewidth}
+    \includegraphics[width=\linewidth]{pics/jetbrains.png} 
   \end{minipage}
 
   \vspace{3cm}
