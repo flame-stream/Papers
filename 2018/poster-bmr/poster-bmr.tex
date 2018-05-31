@@ -104,7 +104,7 @@
       To achieve system-wide ordering, it is sufficient to impose strong order only within grouping operations. 
       
       Grouping state has a well-defined simple structure that allows handling out-of-order items speculatively without extra buffering. More precisely, grouping immediately processes input items as they were in-order. In case of reordering, it is locally generates correct tuples and sends tombstones for incorrect ones. 
-      \fspic{grouping-invalidation}{On arrival of out-of-order item, it is inserted in the correct location of the correcponding bucket. Valid elements containing new item are produced, and invalid ones are invalidated by sending a tombstone for it down the stream}
+      \fspic[.8]{grouping-invalidation}{On arrival of out-of-order item, it is inserted in the correct location of the correcponding bucket. Valid elements containing new item are produced, and invalid ones are invalidated by sending a tombstone for it down the stream}
 
     Within the  optimistic approach, we accept the fact that grouping can produce incorrect output, but we guarantee that all correct groups are eventually produced.  
     \end{minipage}
