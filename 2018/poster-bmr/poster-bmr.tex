@@ -52,15 +52,13 @@
 
   \vspace{3cm}
 
-  \begin{minipage}[t]{\twocolwidth}
+  \begin{minipage}[b]{\twocolwidth}
     \centering
     \includegraphics[width=\linewidth]{pics/roadmap}
     \captionof{figure}{The roadmap of approaches for achieving exactly-once and at-least-once guarantees. Green elements indicate the path for our approach}
   \end{minipage}
-  %
   \hspace{\sepwidth}
-  %
-  \begin{minipage}{\colwidth}
+  \begin{minipage}[b]{\colwidth}
     \fssection{Garbage filtering}
     In case of reordering invalid tuples are generated. In order to return only correct tuples to users there is a barrier at the end of the pipeline. It passes correct items and filters out incorrect ones.
 
