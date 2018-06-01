@@ -84,12 +84,13 @@ Christos Doulkeridis and Kjetil NØrvåg. 2014. A survey of large-scale analytic
  issn = {1066-8888},
  pages = {355--380},
  numpages = {26},
- doi = {10.1007/s00778-013-0319-9},
- acmid = {2628782},
  publisher = {Springer-Verlag New York, Inc.},
  address = {Secaucus, NJ, USA},
  keywords = {Big Data, Data analysis, Large-scale, MapReduce, Query processing, Survey},
-} 
+}
+ doi = {10.1007/s00778-013-0319-9},
+ acmid = {2628782},
+ 
 Enterprises today acquire vast volumes of data from different sources and leverage this information by means of data analysis to support effective decision-making and provide new functionality and services. The key requirement of data analytics is scalability, simply due to the immense volume of data that need to be extracted, processed, and analyzed in a timely fashion. Arguably the most popular framework for contemporary large-scale data analytics is MapReduce, mainly due to its salient features that include scalability, fault-tolerance, ease of programming, and flexibility. However, despite its merits, MapReduce has evident performance limitations in miscellaneous analytical tasks, and this has given rise to a significant body of research that aim at improving its efficiency, while maintaining its desirable properties. This survey aims to review the state of the art in improving the performance of parallel query processing using MapReduce. A set of the most significant weaknesses and limitations of MapReduce is discussed at a high level, along with solving techniques. A taxonomy is presented for categorizing existing research on MapReduce improvements according to the specific problem they target. Based on the proposed taxonomy, a classification of existing research is provided focusing on the optimization objective. Concluding, we outline interesting directions for future parallel data processing systems.
 
 
@@ -221,7 +222,7 @@ Tyler Akidau, Robert Bradshaw, Craig Chambers, Slava Chernyak, Rafael J. Fernán
  acmid = {2824076},
  publisher = {VLDB Endowment},
 } 
- url = {http://dx.doi.org/10.14778/2824032.2824076},
+#   url = {http://dx.doi.org/10.14778/2824032.2824076},
 
 Unbounded, unordered, global-scale datasets are increasingly common in day-to-day business (e.g. Web logs, mobile usage statistics, and sensor networks). At the same time, consumers of these datasets have evolved sophisticated requirements, such as event-time ordering and windowing by features of the data themselves, in addition to an insatiable hunger for faster answers. Meanwhile, practicality dictates that one can never fully optimize along all dimensions of correctness, latency, and cost for these types of input. As a result, data processing practitioners are left with the quandary of how to reconcile the tensions between these seemingly competing propositions, often resulting in disparate implementations and systems.
 
@@ -244,12 +245,12 @@ Tyler Akidau, Alex Balikov, Kaya Bekiroğlu, Slava Chernyak, Josh Haberman, Reuv
  issn = {2150-8097},
  pages = {1033--1044},
  numpages = {12},
- doi = {10.14778/2536222.2536229},
  acmid = {2536229},
  publisher = {VLDB Endowment},
 }
  url = {http://dx.doi.org/10.14778/2536222.2536229},
- 
+ doi = {10.14778/2536222.2536229},
+  
 MillWheel is a framework for building low-latency data-processing applications that is widely used at Google. Users specify a directed computation graph and application code for individual nodes, and the system manages persistent state and the continuous flow of records, all within the envelope of the framework's fault-tolerance guarantees.
 
 This paper describes MillWheel's programming model as well as its implementation. The case study of a continuous anomaly detector in use at Google serves to motivate how many of MillWheel's features are used. MillWheel's programming model provides a notion of logical time, making it simple to write time-based aggregations. MillWheel was designed from the outset with fault tolerance and scalability in mind. In practice, we find that MillWheel's unique combination of scalability, fault tolerance, and a versatile programming model lends itself to a wide variety of problems at Google.
@@ -442,10 +443,11 @@ Shadi A. Noghabi, Kartik Paramasivam, Yi Pan, Navina Ramesh, Jon Bringhurst, Ind
  issn = {2150-8097},
  pages = {1634--1645},
  numpages = {12},
- doi = {10.14778/3137765.3137770},
- acmid = {3137770},
  publisher = {VLDB Endowment},
 } 
+ doi = {10.14778/3137765.3137770},
+ acmid = {3137770},
+ 
 Distributed stream processing systems need to support stateful processing, recover quickly from failures to resume such processing, and reprocess an entire data stream quickly. We present Apache Samza, a distributed system for stateful and fault-tolerant stream processing. Samza utilizes a partitioned local state along with a low-overhead background changelog mechanism, allowing it to scale to massive state sizes (hundreds of TB) per application. Recovery from failures is sped up by re-scheduling based on Host Affinity. In addition to processing infinite streams of events, Samza supports processing a finite dataset as a stream, from either a streaming source (e.g., Kafka), a database snapshot (e.g., Databus), or a file system (e.g. HDFS), without having to change the application code (unlike the popular Lambda-based architectures which necessitate maintenance of separate code bases for batch and stream path processing).
 
 Samza is currently in use at LinkedIn by hundreds of production applications with more than 10, 000 containers. Samza is an open-source Apache project adopted by many top-tier companies (e.g., LinkedIn, Uber, Netflix, TripAdvisor, etc.). Our experiments show that Samza: a) handles state efficiently, improving latency and throughput by more than 100X compared to using a remote storage; b) provides recovery time independent of state size; c) scales performance linearly with number of containers; and d) supports reprocessing of the data stream quickly and with minimal interference on real-time traffic.
@@ -603,11 +605,13 @@ Our technique outperforms known approaches on both synthetical data and real sen
  issn = {2150-8097},
  pages = {274--288},
  numpages = {15},
+ publisher = {VLDB Endowment},
+} 
  url = {http://dx.doi.org/10.14778/1453856.1453890},
  doi = {10.14778/1453856.1453890},
  acmid = {1453890},
- publisher = {VLDB Endowment},
-} 
+
+
 Many stream-processing systems enforce an order on data streams during query evaluation to help unblock blocking operators and purge state from stateful operators. Such in-order processing (IOP) systems not only must enforce order on input streams, but also require that query operators preserve order. This order-preserving requirement constrains the implementation of stream systems and incurs significant performance penalties, particularly for memory consumption. Especially for high-performance, potentially distributed stream systems, the cost of enforcing order can be prohibitive. We introduce a new architecture for stream systems, out-of-order processing (OOP), that avoids ordering constraints. The OOP architecture frees stream systems from the burden of order maintenance by using explicit stream progress indicators, such as punctuation or heartbeats, to unblock and purge operators. We describe the implementation of OOP stream systems and discuss the benefits of this architecture in depth. For example, the OOP approach has proven useful for smoothing workload bursts caused by expensive end-of-window operations, which can overwhelm internal communication paths in IOP approaches. We have implemented OOP in two stream systems, Gigascope and NiagaraST. Our experimental study shows that the OOP approach can significantly outperform IOP in a number of aspects, including memory, throughput and latency.
 
 @inproceedings{Cranor:2003:GSD:872757.872838,
@@ -749,13 +753,14 @@ Complex event processing has become increasingly important in modern application
  issn = {1066-8888},
  pages = {120--139},
  numpages = {20},
- url = {http://dx.doi.org/10.1007/s00778-003-0095-z},
- doi = {10.1007/s00778-003-0095-z},
- acmid = {950485},
  publisher = {Springer-Verlag New York, Inc.},
  address = {Secaucus, NJ, USA},
  keywords = {Continuous queries, Data stream management, Database triggers, Quality-of-service, Real-time systems},
 } 
+ url = {http://dx.doi.org/10.1007/s00778-003-0095-z},
+ doi = {10.1007/s00778-003-0095-z},
+ acmid = {950485},
+
 Abstract.This paper describes the basic processing model and architecture of Aurora, a new system to manage data streams for monitoring applications. Monitoring applications differ substantially from conventional business data processing. The fact that a software system must process and react to continual inputs from many sources (e.g., sensors) rather than from human operators requires one to rethink the fundamental architecture of a DBMS for this application area. In this paper, we present Aurora, a new DBMS currently under construction at Brandeis University, Brown University, and M.I.T. We first provide an overview of the basic Aurora model and architecture and then describe in detail a stream-oriented set of operators.
 
 @article{Arasu:2006:CCQ:1146461.1146463,
@@ -770,13 +775,14 @@ Abstract.This paper describes the basic processing model and architecture of Aur
  issn = {1066-8888},
  pages = {121--142},
  numpages = {22},
- url = {http://dx.doi.org/10.1007/s00778-004-0147-z},
- doi = {10.1007/s00778-004-0147-z},
- acmid = {1146463},
  publisher = {Springer-Verlag New York, Inc.},
  address = {Secaucus, NJ, USA},
  keywords = {Continuous queries, Data streams, Query language, Query processing},
 } 
+ url = {http://dx.doi.org/10.1007/s00778-004-0147-z},
+ doi = {10.1007/s00778-004-0147-z},
+ acmid = {1146463},
+
 CQL, a continuous query language, is supported by the STREAM prototype data stream management system (DSMS) at Stanford. CQL is an expressive SQL-based declarative language for registering continuous queries against streams and stored relations. We begin by presenting an abstract semantics that relies only on “black-box” mappings among streams and relations. From these mappings we define a precise and general interpretation for continuous queries. CQL is an instantiation of our abstract semantics using SQL to map from relations to relations, window specifications derived from SQL-99 to map from streams to relations, and three new operators to map from relations to streams. Most of the CQL language is operational in the STREAM system. We present the structure of CQL's query execution plans as well as details of the most important components: operators, interoperator queues, synopses, and sharing of components among multiple operators and queries. Examples throughout the paper are drawn from the Linear Road benchmark recently proposed for DSMSs. We also curate a public repository of data stream applications that includes a wide variety of queries expressed in CQL. The relative ease of capturing these applications in CQL is one indicator that the language contains an appropriate set of constructs for data stream processing.
 
 @inproceedings{Ding:2004:EWJ:1031171.1031189,
@@ -824,10 +830,11 @@ We explore join optimizations in the presence of both time-based constraints (sl
  location = {Berlin, Germany},
  pages = {297--308},
  numpages = {12},
- url = {http://dl.acm.org/citation.cfm?id=1315451.1315478},
- acmid = {1315478},
  publisher = {VLDB Endowment},
 } 
+ url = {http://dl.acm.org/citation.cfm?id=1315451.1315478},
+ acmid = {1315478},
+
 Continuous Query (CQ) systems typically exploit commonality among query expressions to achieve improved efficiency through shared processing. Recently proposed CQ systems have introduced window specifications in order to support unbounded data streams. There has been, however, little investigation of sharing for windowed query operators. In this paper, we address the shared execution of windowed joins, a core operator for CQ systems. We show that the strategy used in systems to date has a previously unreported performance flaw that can negatively impact queries with relatively small windows. We then propose two new execution strategies for shared joins. We evaluate the alternatives using both analytical models and implementation in a DBMS. The results show that one strategy, called MQT, provides the best performance over a range of workload settings.
 
 @Article{Li2011,
@@ -852,7 +859,7 @@ In recent years, there has been a growing need for complex event processing (CEP
 
 @INPROCEEDINGS{S7530084, 
 author={S. Chintapalli and D. Dagit and B. Evans and R. Farivar and T. Graves and M. Holderbaugh and Z. Liu and K. Nusbaum and K. Patil and B. J. Peng and P. Poulosky}, 
-booktitle={2016 IEEE International Parallel and Distributed Processing Symp. Workshops (IPDPSW)}, 
+booktitle={2016 IEEE Intnl. Parallel and Distributed Processing Symp. Workshops (IPDPSW)}, 
 title={Benchmarking Streaming Computation Engines: Storm, Flink and Spark Streaming}, 
 year={2016}, 
 volume={}, 
@@ -947,7 +954,7 @@ This article describes a modification to the concurrency control algorithm of a 
 
 @INPROCEEDINGS{7530084, 
 author={S. Chintapalli and D. Dagit and B. Evans and R. Farivar and T. Graves and M. Holderbaugh and Z. Liu and K. Nusbaum and K. Patil and B. J. Peng and P. Poulosky}, 
-booktitle={2016 IEEE International Parallel and Distributed Processing Symposium Workshops (IPDPSW)}, 
+booktitle={2016 IEEE Intnl. Parallel and Distributed Processing Symposium Workshops (IPDPSW)}, 
 title={Benchmarking Streaming Computation Engines: Storm, Flink and Spark Streaming}, 
 year={2016}, 
 volume={}, 
@@ -1053,12 +1060,13 @@ url = {http://seim-conf.org/en/about/accepted-papers/}
  issn = {2150-8097},
  pages = {1394--1405},
  numpages = {12},
- url = {http://proxy.library.spbu.ru:2083/10.14778/1920841.1921012},
- doi = {10.14778/1920841.1921012},
- acmid = {1921012},
  publisher = {VLDB Endowment},
  keywords = {ODBC, continuous processing, streaming processing},
 } 
+ url = {http://proxy.library.spbu.ru:2083/10.14778/1920841.1921012},
+ doi = {10.14778/1920841.1921012},
+ acmid = {1921012},
+
 
 @article{Garcia-Molina:1983:USK:319983.319985,
  author = {Garcia-Molina, Hector},

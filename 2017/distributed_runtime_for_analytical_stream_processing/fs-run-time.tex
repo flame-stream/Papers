@@ -50,11 +50,16 @@
 \begin{document}
 
 \title {\FlameStream: Model and Runtime for Distributed Analytical Stream Processing}
-\author{Igor E. Kuralenok \and Artem Trofimov \and Nikita Marshalkin \and Boris Novikov}
-\institute{JetBrains Research, St. Petersburg, Russia}
+\author{Igor E. Kuralenok\inst{1}
+       \and Artem Trofimov\inst{1,2}
+       \and Nikita Marshalkin\inst{1,2}
+      \and Boris~Novikov\inst{1,2}\orcidID{0000-0003-4657-0757}}
+\institute{JetBrains Research, St. Petersburg, Russia \and
+     St. Petersburg state university, St. Petersburg, Russia  \\
+\email{\string{ikuralenok, trofimov9artem, marnikitta\string}@gmail.com, borisnov@acm.org}
+}
 
 \maketitle
-\email{\string{ikuralenok, trofimov9artem, marnikitta\string}@gmail.com, borisnov@acm.org}
 
 \begin{abstract}
 Users of modern distributed stream processing systems have to choose between non-deterministic computations and high latency due to a need in excessive buffering. 
