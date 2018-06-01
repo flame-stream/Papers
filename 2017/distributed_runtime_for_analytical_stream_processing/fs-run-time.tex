@@ -62,7 +62,6 @@ Users of modern distributed stream processing systems have to choose between non
 We introduce a model based on MapReduce-complete set of operations that allows us to achieve determinism and low-latency.
 Experiments show that our prototype can outperform existing solutions due to low overhead of optimistic synchronization.
 
-
 %In recent years, there has been a growth in research and industrial solutions in the field of distributed stream processing. 
 %However, even state-of-the-art stream processing systems are inconvenient to work with in some ways. 
 %Firstly, existing solutions suppose that the state of operations should be managed directly by a user, and that can be confusingly for inexperienced users of analytical processing systems. 
@@ -75,6 +74,8 @@ Experiments show that our prototype can outperform existing solutions due to low
 %On the other hand, it is deterministic by design. 
 %We introduce an optimistic method that avoids buffering before each operation to achieve determinism with low overhead. 
 %The experiments show that prototype of our system requires a low extra cost for supporting proposed features and is able to outperform alternative industrial solutions in certain conditions.
+
+\keywords{Data streams  \and Distributed processing \and Latency.}
 \end {abstract}
 
 \section {Introduction}
@@ -89,8 +90,8 @@ Experiments show that our prototype can outperform existing solutions due to low
 \subsection {Computational model}
 \input {fs-run-time-model.tex}
 
-% \subsection{Drifting state}
-% \input {fs-run-time-drifting.tex}
+ \subsection{Drifting state}
+ \input {fs-run-time-drifting.tex}
 
 \subsection {Deterministic computations}
 \input {fs-run-time-deterministic.tex}
@@ -111,9 +112,9 @@ Experiments show that our prototype can outperform existing solutions due to low
 \bibliography{../../bibliography/flame-stream}
 
 %\newpage
-\appendix
-\section{MapReduce transformation}
-\input {fs-run-time-drifting.tex}
+%\appendix
+%\section{MapReduce transformation}
+%\input {fs-run-time-drifting.tex}
 
 \end {document}
 
