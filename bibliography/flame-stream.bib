@@ -553,19 +553,20 @@ Complex event processing has become increasingly important in modern application
  author = {Wei, Mingzhu and Liu, Mo and Li, Ming and Golovnya, Denis and Rundensteiner, Elke A. and Claypool, Kajal},
  title = {Supporting a Spectrum of Out-of-order Event Processing Technologies: From Aggressive to Conservative Methodologies},
  booktitle = {Proc. of the 2009 ACM SIGMOD Intnl. Conf. on Management of Data},
- series = {SIGMOD '09},
  year = {2009},
  isbn = {978-1-60558-551-2},
  location = {Providence, Rhode Island, USA},
  pages = {1031--1034},
  numpages = {4},
- doi = {10.1145/1559845.1559973},
  acmid = {1559973},
  publisher = {ACM},
  address = {New York, NY, USA},
  keywords = {complex event processing, out-of-order data, stream processing},
 } 
  url = {http://doi.acm.org/10.1145/1559845.1559973},
+  series = {SIGMOD '09},
+ doi = {10.1145/1559845.1559973},
+
 
 This demonstration presents a complex event processing system which focuses on out-of-order handling. State-of-the-art event stream processing technology experiences significant challenges when faced with out-of-order data arrival including huge system latencies, missing results, and incorrect result generation. We propose two out-of-order handling techniques, conservative and aggressive strategies. We will show the efficiency of our techniques and how they can satisfy various QoS requirements of different applications.
 
@@ -688,19 +689,20 @@ As most current query processing architectures are already pipelined, it seems l
  author = {Srivastava, Utkarsh and Widom, Jennifer},
  title = {Flexible Time Management in Data Stream Systems},
  booktitle = {Proc. PODS},
- series = {PODS '04},
  year = {2004},
  isbn = {158113858X},
  location = {Paris, France},
  pages = {263--274},
  numpages = {12},
- url = {http://doi.acm.org/10.1145/1055558.1055596},
- doi = {10.1145/1055558.1055596},
- acmid = {1055596},
  publisher = {ACM},
  address = {New York, NY, USA},
 } 
  booktitle = {Proceedings of the Twenty-third ACM SIGMOD-SIGACT-SIGART Symposium on Principles of Database Systems},
+ series = {PODS '04},
+ url = {http://doi.acm.org/10.1145/1055558.1055596},
+ doi = {10.1145/1055558.1055596},
+ acmid = {1055596},
+
 
 Continuous queries in a Data Stream Management System (DSMS) rely on time as a basis for windows on streams and for defining a consistent semantics for multiple streams and updatable relations. The system clock in a centralized DSMS provides a convenient and well-behaved notion of time, but often it is more appropriate for a DSMS application to define its own notion of time---its own clock(s), sequence numbers, or other forms of ordering and times-tamping. Flexible application-defined time poses challenges to the DSMS, since streams may be out of order and uncoordinated with each other, they may incur latency reaching the DSMS, and they may pause or stop. We formalize these challenges and specify how to generate heartbeats so that queries can be evaluated correctly and continuously in an application-defined time domain. Our heartbeat generation algorithm is based on parameters capturing skew between streams, unordering within streams, and latency in streams reaching the DSMS. We also describe how to estimate these parameters at run-time, and we discuss how heartbeats can be used for processing continuous queries.
 
