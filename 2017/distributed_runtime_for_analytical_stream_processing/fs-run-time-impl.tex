@@ -33,11 +33,9 @@ Global time is assigned to data item once the item enters the system. It is a pa
 
 Each map operation can produce multiple items from one.  An ordinal number, child id, is stored in the meta information to differentiate them. {\it ChildIds} is an array of child ids, that corresponds to all visited map operations.
 
-The global time and child ids are enough to uniquely identify data item within a stream if all processing is done in-order. In this case, if we compare $(GlobalTime, ChildIds[\:])$ lexicographicaly it has the desired properties that were defined in section~\ref{model-section}. 
+The global time and child ids are enough to identify data item within a stream if all processing is done in-order. In this case, if we compare $(GlobalTime, ChildIds[\:])$ lexicographicaly it has the desired properties that were defined in section~\ref{model-section}. 
 
 If any grouping repairs happened during processing, multiple items with different payloads but with the same global time and child ids exist in the stream. To match tombstone with the corresponding invalidated item without direct payload comparison, there is {\it Trace} value stored in the meta-information that identifies elements path. The unique random 64-bit identifier is assigned to each physical operation. The trace is a xor of all operations' ids visited by item so far. Invalid item and the corresponding tombstone go along the same path, because they have the same payload and the balancing functions are deterministic, so they have the same trace values. 
-
-Items with the same global times, child ids and traces are guaranteed to have equal payloads.
 
 \label{mininal-time}
 
