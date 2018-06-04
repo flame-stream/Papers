@@ -35,7 +35,7 @@ Each map operation can produce multiple items from one.  An ordinal number, chil
 
 The global time and child ids are enough to identify data item within a stream if all processing is done in-order. In this case, if we compare $(GlobalTime, ChildIds[\:])$ lexicographicaly it has the desired properties that were defined in section~\ref{model-section}. 
 
-If any grouping repairs happened during processing, multiple items with different payloads but with the same global time and child ids exist in the stream. To match tombstone with the corresponding invalidated item without direct payload comparison, there is {\it Trace} value stored in the meta-information that identifies elements path. The unique random 64-bit identifier is assigned to each physical operation. The trace is a xor of all operations' ids visited by item so far. Invalid item and the corresponding tombstone go along the same path, because they have the same payload and the balancing functions are deterministic, so they have the same trace values. 
+In order to filter out all invalid data at the barrier, there is a need to match tombstones with corresponding invalid items. However, if any grouping repairs happened during processing, multiple items with the same global time and child ids exist in the stream. To differentiate them without direct payload comparison, there is a {\it Trace} value stored in the meta-information. The trace is a xor of all physical operations' ids (random 64-bit identifier) visited by item so far. Invalid item and the corresponding tombstone go along the same path, because they have the same payload and the balancing functions are deterministic. Therefore, item and the corresponding tombstone can be revealed via trace matching. 
 
 \label{mininal-time}
 
