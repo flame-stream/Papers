@@ -1,7 +1,28 @@
 %%% fs-run-time-impl Implementation
 \label{fs-impl}
 
-\FlameStream\ is implemented in Java, using Akka framework for messaging and Apache Zookeeper for cluster state management.
+\FlameStream\ is implemented in Java, using Akka framework for messaging. There are several main components within the implementation:
+
+{\bf Data producers and data consumers} are deployed separately and play the role of data source and data sink correspondingly.
+
+{\bf Graph} is a component that is deployed on each node and executes a computational pipeline defined by a logical graph. Operations within the same node communicate with each other via direct function calls for performance optimization.
+
+{\bf Barrier} filters out invalid data items. Besides, it delivers output items to data consumers.
+
+{\bf Acker} tracks data items within the stream. Its functionality is detailed further.
+
+{\bf Apache ZooKeeper} is used for cluster management. The usage of ZooKeeper mitigates the need for the dedicated master node.
+
+{\bf Persistent storage} is used for persistent state storing.
+
+The overall scheme of the system components is shown in Figure~\ref{system-architecture}.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.70\textwidth]{pics/arch}
+  \caption{The overall scheme of the system components}
+  \label {system-architecture}
+\end{figure}
 
 \subsection{Ordering model}
 The meta-information of data item is implemented as a tuple of a {\it global time}, a {\it trace}, {\it child ids} and a {\it tombstone flag}.
