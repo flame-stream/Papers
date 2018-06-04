@@ -3,11 +3,7 @@
 
 \label{fs-drifting}
 
-An important special case of grouping with $Window Size = 2$  provides for realization of stateful calculations with drifting state technique manifested in section~\ref{motivation-section}.  
-
-FIXME
-
-Indeed, consider a map operation that follows the grouping and sends its output to the grouping input. This map operation receives a pair of its previous output considered as the state object, and new incoming item from the source stream. The map operation calculates new state object and sends it back as the grouping input. 
+An important special case of grouping with $Window Size = 2$  provides for realization of stateful calculations with drifting state technique manifested in section~\ref{motivation-section}. Indeed, consider a map operation that follows the grouping and sends its output to the grouping input. This map operation receives a pair of its previous output considered as the state object, and new incoming item from the source stream. The map operation calculates new state object and sends it back as the grouping input. 
 
 As an example, let us demonstrate a generic MapReduce transformation. The map stage of MapReduce can be expressed in terms of our map operation. 
 The generic reduce stage can be presented as
