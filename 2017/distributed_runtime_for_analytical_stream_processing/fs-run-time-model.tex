@@ -95,9 +95,6 @@ $$(1), (2), (1|3), (2|4), (1|3|5), (2|4|6), (3|5|7), (4|6|8), \ldots$$
 %It is important to mention that there are no parameters for state-management. 
 %Therefore, business-logic is stateless. Nevertheless, the operations set is enough to implement any MapReduce transformation as shown in the next section.
 
-An important special case of grouping with $Window Size = 2$  provides for realization of stateful calculations with drifting state techniques manifested in section~\ref{motivation-section}.  
-Indeed, consider a map operation that follows the grouping and sends its output to the grouping input. This map operation receives a pair of its previous output considered as the state object, and new incoming item from the source stream. The map operation calculates new state object and sends it back as the grouping input. 
-
 % More details are provided in the appendix~\ref{fs-drifting}.
 
 % \subsection{Drifting state}

@@ -31,7 +31,7 @@ Figure~\ref{logical-graph-ops-figure} shows the topology of each operation and h
 
 \subsection{Minimal time within stream}
 
-To release an item from the barrier we need to ensure that there are no in-flight tombstones for that item. 
+To release an item from the barrier we need to ensure that there are no in-flight tombstones for that item, i.e., tombstones which have been already generated, but have not arrived at the barrier yet.
 
 \newtheorem{minimal-time-claim}{Lemma}
 
@@ -69,6 +69,3 @@ Therefore, the barrier can release elements with global time $\mathcal{G} (D)$
 once it received notification with time greater than $\mathcal{G} (D)$.
 
 To ensure that no fronts can generate item with the specific timestamp, each front periodically sends to acker a special message called {\it heartbeat} indicating that front will not issue items with a timestamp lower than the reported. The value in the ack table can become zero only after the corresponding heartbeat arrives.
-
-The proposed mechanism could be isolated by hash range. This change allows us releasing from barriers on different workers independently. This feature is also known as early key availability.
-

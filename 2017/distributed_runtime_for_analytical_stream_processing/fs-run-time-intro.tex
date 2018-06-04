@@ -25,12 +25,7 @@ It is natural for the user of a software system to expect  that two independent 
     The absence of this property forces the usage of heavy transactional protocols to achieve exactly-once semantics~\cite{Carbone:2017:SMA:3137765.3137777, jacques2016consistent}.
 \end{itemize}
 
-In this work, we introduce \FlameStream\ - stream processing model that is deterministic by design. This property is achieved using strong ordering. 
-The typical way to perform in-order processing is to set up a special buffer in front of each order-sensitive operation~\cite{Li:2008:OPN:1453856.1453890}. 
-However, extra buffering can lead to latency growth~\cite{Zacheilas:2017:MDS:3093742.3093921}, especially if the processing pipeline contains several operations that require ordered input. We introduce an optimistic approach to handle out-of-order items to avoid this issue. 
-Our approach is based on the idea that state can be streamed as an ordinary element. 
-Such approach allows us to generalize speculative computations on the arbitrary MapReduce task. 
-Additionally, it makes the model stateless from the business logic point of view. Our evaluation demonstrates that our method has low overhead and can outperform alternative industrial solution under normal load conditions.
+In this work, we introduce \FlameStream\ - stream processing model that is deterministic by design. This property is achieved using strong ordering. The typical way to perform in-order processing is to set up a special buffer in front of each order-sensitive operation~\cite{Li:2008:OPN:1453856.1453890}. However, extra buffering can lead to latency growth~\cite{Zacheilas:2017:MDS:3093742.3093921}, especially if the processing pipeline contains several operations that require ordered input. To avoid this issue, we introduce an optimistic approach for handling out-of-order items that requires single buffer per computational pipeline. Our approach is based on the idea that state can be streamed as an ordinary element. Such approach allows us to generalize speculative computations on the arbitrary MapReduce task. Additionally, it makes the model stateless from the business logic point of view. Our evaluation demonstrates that our method has low overhead and can outperform alternative industrial solution under normal load conditions.
 
 Therefore, the contributions of this paper are the following:
 
