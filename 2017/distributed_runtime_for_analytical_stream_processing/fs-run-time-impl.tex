@@ -33,7 +33,7 @@ Global time is assigned to data item once the item enters the system. It is a pa
 
 Each map operation can produce multiple items from one.  An ordinal number, child id, is stored in the meta information to differentiate them. {\it ChildIds} is an array of child ids, that corresponds to all visited map operations.
 
-The global time and child ids are enough to identify data item within a stream if all processing is done in-order. In this case, if we compare $(GlobalTime, ChildIds[\:])$ lexicographicaly it has the desired properties that were defined in section~\ref{model-section}. 
+The global time and child ids are enough to identify data item within a stream if all processing is done in-order. In this case, if we global time and child ids lexicographicaly such meta has the desired properties that were defined in section~\ref{model-section}. 
 
 In order to filter out all invalid data at the barrier, there is a need to match tombstones with corresponding invalid items. However, if any grouping repairs happened during processing, multiple items with the same global time and child ids exist in the stream. To differentiate them without direct payload comparison, there is a {\it Trace} value stored in the meta-information. The trace is a xor of all physical operations' ids (random 64-bit identifier) visited by item so far. Invalid item and the corresponding tombstone go along the same path, because they have the same payload and the balancing functions are deterministic. Therefore, item and the corresponding tombstone can be revealed via trace matching. 
 
@@ -56,7 +56,7 @@ For any data item $D$ let $\mathcal{G} (D)$ be its global time.
   According to the definition of the tombstone item, $\mathcal{G} (D_{tomb}) = \mathcal{G} (D)$, hence $D_{tomb}$ is not in-flight.
   
   New tombstones for $D$ cannot be generated because items with global time greater than $\mathcal{G} (D)$ cannot trigger repair that affects $D$,
-  This implies that if the stream does not contain items $D\prime$ such that $\mathcal{G} (D\prime) \le \mathcal{G} (D)$, then all tombstones for $D$ had already arrived at the barrier. 
+  This implies that if the stream does not contain items $D\prime$ such that $\mathcal{G} (D\prime) \le \mathcal{G} (D)$, then all tombstones for $D$ had already arrived at the barrier. $\square$
 \end{proof}
 
 Therefore, to output an item from the barrier, we should ensure that there are no items in the stream with the global time less than or equal to the global time of this item.
