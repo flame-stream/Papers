@@ -2,18 +2,19 @@
 \label{fs-impl}
 
 \FlameStream\ is implemented in Java, using Akka framework for messaging. There are several main components within the implementation:
+\begin{description}
+  \item[Data producers and data consumers] are deployed separately and play the role of data source and data sink correspondingly.
 
-{\bf Data producers and data consumers} are deployed separately and play the role of data source and data sink correspondingly.
+  \item[Graph] is a component that is deployed on each node and executes a computational pipeline defined by a logical graph. Operations within the same node communicate with each other via direct function calls for performance optimization.
 
-{\bf Graph} is a component that is deployed on each node and executes a computational pipeline defined by a logical graph. Operations within the same node communicate with each other via direct function calls for performance optimization.
+  \item[Barrier] filters out invalid data items. Besides, it delivers output items to data consumers.
 
-{\bf Barrier} filters out invalid data items. Besides, it delivers output items to data consumers.
+  \item[Acker] tracks data items within the stream. Its functionality is detailed further.
 
-{\bf Acker} tracks data items within the stream. Its functionality is detailed further.
+  \item[Apache ZooKeeper] is used for cluster management. The usage of ZooKeeper mitigates the need for the dedicated master node.
 
-{\bf Apache ZooKeeper} is used for cluster management. The usage of ZooKeeper mitigates the need for the dedicated master node.
-
-{\bf Persistent storage} is used for persistent state storing.
+  \item[Persistent storage] is needed for recovery in case of failures
+\end{description}
 
 The overall scheme of the system components is shown in Figure~\ref{system-architecture}.
 
