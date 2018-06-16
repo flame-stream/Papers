@@ -1,0 +1,122 @@
+\begin{thebibliography}{10}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+
+\bibitem{Akidau:2013:MFS:2536222.2536229}
+Akidau, T., Balikov, A., Bekiro\u{g}lu, K., Chernyak, S., Haberman, J., Lax,
+  R., McVeety, S., Mills, D., Nordstrom, P., Whittle, S.: Millwheel:
+  Fault-tolerant stream processing at internet scale. Proc. VLDB  6(11),
+  1033--1044 (Aug 2013)
+
+\bibitem{Akidau:2015:DMP:2824032.2824076}
+Akidau, T., Bradshaw, R., Chambers, C., Chernyak, S., Fern\'{a}ndez-Moctezuma,
+  R.J., Lax, R., McVeety, S., Mills, D., Perry, F., Schmidt, E., Whittle, S.:
+  The dataflow model: A practical approach to balancing correctness, latency,
+  and cost in massive-scale, unbounded, out-of-order data processing. Proc.
+  VLDB  8(12),  1792--1803 (Aug 2015)
+
+\bibitem{apache:storm}
+Apache storm (Oct 2017), \url{http://storm.apache.org/}
+
+\bibitem{Arasu:2006:CCQ:1146461.1146463}
+Arasu, A., Babu, S., Widom, J.: The cql continuous query language: Semantic
+  foundations and query execution. The VLDB Journal  15(2),  121--142 (Jun
+  2006)
+
+\bibitem{Babu:2004:EKC:1016028.1016032}
+Babu, S., Srivastava, U., Widom, J.: Exploiting k-constraints to reduce memory
+  overhead in continuous queries over data streams. ACM Trans. Database Syst.
+  29(3),  545--580 (Sep 2004), \url{http://doi.acm.org/10.1145/1016028.1016032}
+
+\bibitem{Carbone:2017:SMA:3137765.3137777}
+Carbone, P., Ewen, S., F\'{o}ra, G., Haridi, S., Richter, S., Tzoumas, K.:
+  State management in apache flink\&reg;: Consistent stateful distributed
+  stream processing. Proc. VLDB  10(12),  1718--1729 (Aug 2017)
+
+\bibitem{carbone2015apache}
+Carbone, P., Katsifodimos, A., Ewen, S., Markl, V., Haridi, S., Tzoumas, K.:
+  Apache flink: Stream and batch processing in a single engine. Bulletin of the
+  IEEE Computer Society Technical Committee on Data Engineering  36(4) (2015)
+
+\bibitem{S7530084}
+Chintapalli, S., Dagit, D., Evans, B., Farivar, R., Graves, T., Holderbaugh,
+  M., Liu, Z., Nusbaum, K., Patil, K., Peng, B.J., Poulosky, P.: Benchmarking
+  streaming computation engines: Storm, flink and spark streaming. In: 2016
+  IEEE Intnl. Parallel and Distributed Processing Symp. Workshops (IPDPSW). pp.
+  1789--1792 (May 2016)
+
+\bibitem{Cranor:2003:GSD:872757.872838}
+Cranor, C., Johnson, T., Spataschek, O., Shkapenyuk, V.: Gigascope: A stream
+  database for network applications. In: Proceedings of the 2003 ACM SIGMOD
+  International Conference on Management of Data. pp. 647--651. SIGMOD '03,
+  ACM, New York, NY, USA (2003), \url{http://doi.acm.org/10.1145/872757.872838}
+
+\bibitem{jacques2016consistent}
+Jacques-Silva, G., Zheng, F., Debrunner, D., Wu, K.L., Dogaru, V., Johnson, E.,
+  Spicer, M., Sariy{\"u}ce, A.E.: Consistent regions: Guaranteed tuple
+  processing in ibm streams. Proceedings of the VLDB Endowment  9(13),
+  1341--1352 (2016)
+
+\bibitem{Li2011}
+Li, C.W., Gu, Y., Yu, G., Hong, B.: Aggressive complex event processing with
+  confidence over out-of-order streams. Journal of Computer Science and
+  Technology  26(4),  685--696 (Jul 2011),
+  \url{https://doi.org/10.1007/s11390-011-1168-x}
+
+\bibitem{Li:2008:OPN:1453856.1453890}
+Li, J., Tufte, K., Shkapenyuk, V., Papadimos, V., Johnson, T., Maier, D.:
+  Out-of-order processing: A new architecture for high-performance stream
+  systems. Proc. VLDB Endow.  1(1),  274--288 (Aug 2008)
+
+\bibitem{Murray:2013:NTD:2517349.2522738}
+Murray, D.G., McSherry, F., Isaacs, R., Isard, M., Barham, P., Abadi, M.:
+  Naiad: A timely dataflow system. In: Proceedings of the Twenty-Fourth ACM
+  Symposium on Operating Systems Principles. pp. 439--455. SOSP '13, ACM, New
+  York, NY, USA (2013), \url{http://doi.acm.org/10.1145/2517349.2522738}
+
+\bibitem{Noghabi:2017:SSS:3137765.3137770}
+Noghabi, S.A., Paramasivam, K., Pan, Y., Ramesh, N., Bringhurst, J., Gupta, I.,
+  Campbell, R.H.: Samza: Stateful scalable stream processing at linkedin. Proc.
+  VLDB Endow.  10(12),  1634--1645 (Aug 2017)
+
+\bibitem{Srivastava:2004:FTM:1055558.1055596}
+Srivastava, U., Widom, J.: Flexible time management in data stream systems. In:
+  Proc. PODS. pp. 263--274. ACM, New York, NY, USA (2004)
+
+\bibitem{Stonebraker:2005:RRS:1107499.1107504}
+Stonebraker, M., \c{C}etintemel, U., Zdonik, S.: The 8 requirements of
+  real-time stream processing. SIGMOD Rec.  34(4),  42--47 (Dec 2005)
+
+\bibitem{Tucker:2003:EPS:776752.776780}
+Tucker, P.A., Maier, D., Sheard, T., Fegaras, L.: Exploiting punctuation
+  semantics in continuous data streams. IEEE Trans. on Knowl. and Data Eng.
+  15(3),  555--568 (Mar 2003),
+  \url{http://dx.doi.org/10.1109/TKDE.2003.1198390}
+
+\bibitem{Wei:2009:SSO:1559845.1559973}
+Wei, M., Liu, M., Li, M., Golovnya, D., Rundensteiner, E.A., Claypool, K.:
+  Supporting a spectrum of out-of-order event processing technologies: From
+  aggressive to conservative methodologies. In: Proc. of the 2009 ACM SIGMOD
+  Intnl. Conf. on Management of Data. pp. 1031--1034. ACM, New York, NY, USA
+  (2009)
+
+\bibitem{Zacheilas:2017:MDS:3093742.3093921}
+Zacheilas, N., Kalogeraki, V., Nikolakopoulos, Y., Gulisano, V.,
+  Papatriantafilou, M., Tsigas, P.: Maximizing determinism in stream processing
+  under latency constraints. In: Proc. of the 11th ACM Intnl. Conf. on
+  Distributed and Event-based Systems. pp. 112--123. DEBS '17, ACM, New York,
+  NY, USA (2017)
+
+\bibitem{Zaharia:2012:DSE:2342763.2342773}
+Zaharia, M., Das, T., Li, H., Shenker, S., Stoica, I.: Discretized streams: An
+  efficient and fault-tolerant model for stream processing on large clusters.
+  In: Proc. of the 4th USENIX Conf. on Hot Topics in Cloud Ccomputing. pp.
+  10--10. HotCloud'12, USENIX Association, Berkeley, CA, USA (2012)
+
+\bibitem{Zaharia:2016:ASU:3013530.2934664}
+Zaharia, M., Xin, R.S., Wendell, P., Das, T., Armbrust, M., Dave, A., Meng, X.,
+  Rosen, J., Venkataraman, S., Franklin, M.J., Ghodsi, A., Gonzalez, J.,
+  Shenker, S., Stoica, I.: Apache spark: A unified engine for big data
+  processing. Commun. ACM  59(11),  56--65 (Oct 2016)
+
+\end{thebibliography}

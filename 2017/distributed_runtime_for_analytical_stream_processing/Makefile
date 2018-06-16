@@ -7,5 +7,5 @@ all:
 	evince fs-run-time.pdf
 
 clean:
-	@bash -c 'rm -rf *.{pdf,ps,log,aux,out,dvi,bbl,blg}'
+	@bash -c 'rm -rf *.{pdf,ps,log,aux,out,dvi,blg}'
 
