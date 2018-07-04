@@ -3,7 +3,7 @@
 
 Currently, state-of-the-art stream processing systems concentrate only on proving low-level consistency guarantees. However, it was realized that providing high-level guarantees on the top of low-level can significantly improve the efficiency of stream analytics. Therefore, our objective is to fill this gap and to provide reliable, efficient, and convenient mechanisms for high-level consistency maintenance within distributes stream processing.
 
-We recognized the following main problems on the way of achieving our goal:
+We recognized the following main problems on the way to achieving our goal:
 
 \begin{itemize}
     \item Design low-overhead approach for achieving low-level consistency in order to use it as a building block for high-level guarantees  
@@ -12,5 +12,7 @@ We recognized the following main problems on the way of achieving our goal:
     \item Efficiently implement meta-stream processing for handling complex high-level guarantees
     \item Bind data management and statistics in order to obtain reliable and valuable results  
 \end{itemize}
+
+The model of semantic types is a basic concept behind high-level consistency mechanisms. Unlike typical approaches for defining computational pipelines, such model combines declarative approach and custom constraints on data. It allows concentrating on high-level aspects of the data processing task, mitigating implementation details.     
 
 Our current contribution is a novel stream processing model that provides for exactly once with extremely low overhead~\cite{we2018seim, we2018beyondmr}. Although this result is a desired part of the full project, there is a lot of an ongoing theoretical and practical work on our track.   
