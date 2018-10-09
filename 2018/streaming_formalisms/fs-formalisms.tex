@@ -45,7 +45,7 @@
 
 In state-of-the-art stream processing systems~\cite{carbone2015apache, apache:storm, Zaharia:2016:ASU:3013530.2934664} a contract with end-user regarding ~{\em which data} will be eventually processed and released in case of failures is usually described in terms of so-called~{\em delivery guarantees}. These guarantees include {\em at most once}, {\em at least once}, and {\em exactly once}. {\it At most once} states that each input event is processed once or not processed at all. {\it At least once} guarantees that each input item is processed, but possibly multiple times, that can lead to result duplication. {\it Exactly once} assures that each input event is processed exactly one time.
 
-The trickiest thing in these seemingly simple definitions is that output items depend not only on the corresponding input items but also on the {\em state} of dataflow operations. This fact implies that a system can {\em technically} support exactly once delivery guarantee, but in practice can release completely invalid results, because of inconsistencies in the state. State-of-the-art stream processing systems avoid state inconsistencies using complex state management mechanisms~\cite{Carbone:2017:SMA:3137765.3137777}. In terms of these systems, exactly once or at least once is not only about delivery, but is also about {\em consistency}. We believe that such meaning is much more reasonable, and further in this paper, we will call them {\em consistency guarantees}.   
+The trickiest thing in these seemingly simple definitions is that output items depend not only on the corresponding input items but also on the {\em state} of dataflow operations. This fact implies that a system can {\em technically} support exactly once delivery guarantee, but in practice can release completely invalid results, because of inconsistencies in the state. State-of-the-art stream processing systems avoid state inconsistencies using complex state management mechanisms~\cite{Carbone:2017:SMA:3137765.3137777}. In terms of these systems, exactly once or at most once is not only about delivery, but is also about {\em consistency}. We believe that such meaning is much more reasonable, and further in this paper, we will call them {\em consistency guarantees}.   
 
 However, lack of formalism in the definitions of such streaming consistency guarantees is constantly causing debates and misunderstandings~\cite{JerryPengStreamIO, PaperTrail}. In this section, we introduce mathematical definitions in order to formally describe what exactly state-of-the-art stream processing engines guarantee. We also demonstrate the main difference between our approach for achieving exactly-once and state-of-the-art in such formal language.     
 
@@ -59,7 +59,11 @@ Using these basic definitions, we can introduce the remaining necessary ones. Le
 
 Having the definitions introduced above, now we can define the meaning of an element nullification. We say that element $x_\tau$ is nullified at time $\eta_{x_{\tau}}$ if $\eta_{x_{\tau}}$ is the minimal time, when $\nexists{y\in{W_{\eta_{x_{\tau}}}}}:{y}\to{x_{\tau}}$, where $\to$ is a transitive dependency. More formally, $\eta_{x_{\tau}} = inf(\hat{\tau}:\hat{\tau}\geqslant{\tau}\land{\nexists{y\in{W_{\eta_{x_{\hat{\tau}}}}}}:{y}\to{x_{\hat{\tau}}}})$. Therefore, in the proposed model events occur when an element is arrived and nullified, i.e., at times $t_i:\exists{x_{t_i}}$ and $t_o:\exists{\eta_{x_{t_o}}}$. In other words, we define time quantization for the state machine.
 
-Now we can compare the sets of working and left elements for the cases of different input sets at some defined points in time. The main idea here is to express at most once, at least once, and exactly once guarantees as interactions between such sets. Let us construct three sets:
+Now we can compare the sets of working and left elements for the cases of different input sets at some defined points in time. The main idea here is to express at most once, at least once, and exactly once guarantees as interactions between such sets. Let $x,a_1,a_\infty$ be input elements with arbitrary arrival times. $Q_\tau$ is all output elements by the time $\tau$:
+
+$Q_\tau=\bigcup\limits_{i=1}^{\tau}{q_i}$
+
+Let $p(W_\tau,Q_\tau|x,a_1...a_\infty)$ be a probability to observe state $W_\tau$ and output elements $Q_\tau$ at the time $\tau$ if input elements are $x,a_1,a_\infty$. Let us construct three sets:
 
 $X^0=(W_\infty,Q_\infty|p(W_\infty,Q_\infty|a_1...a_\infty)\neq{0})$
 
@@ -67,9 +71,19 @@ $X^1=(W_{\eta_{x}},Q_{\eta_{x}}|p(W_{\eta_{x}},Q_{\eta_{x}}|x,a_1...a_\infty)\ne
 
 $X^{*}=(W_{\eta_{x}},Q_{\eta_{x}}|p(W_{\eta_{x}},Q_{\eta_{x}}|x,a_1...a_\infty)\neq{0},\exists{i}:{a_i={x}},\exists{y\in{W_{\eta_{x}}}}:y\to{a_i})$
 
-$Q_\tau=\bigcup\limits_{i=1}^{\tau}{q_i}$
+These sets model the {\em observable} output and state of a stream processing engine. $X^0$ expresses the case, when element $x$ has not affected the state and the output, so it is a forbidden behavior for at least once and exactly once guarantees. On the other hand, $X^{*}$ defines possible results, after $x$ has been nullified, but $a_i=x$ or its dependencies are in the system. Such behavior can cause inconsistencies in operations state due to duplicates and should not be observed if the system provides for at most once or exactly-once. We define consistency guarantees as follows: 
 
-% Assume, that a distributed processing engine 
+{\em At most once} $\iff$ $\forall{x,a_1...a_\infty}:X^{1}\cap{X^{*}}=\emptyset$
+
+{\em At least once} $\iff$ $\forall{x,a_1...a_\infty}:X^{0}\cap{X^{1}}=\emptyset$
+
+{\em Exactly once} $\iff$ $\forall{x,a_1...a_\infty}:X^{0}\cap{X^{1}}\cap{X^{*}}=\emptyset$
+
+Now streaming consistency guarantees are defined in terms of correspondences between input, output and the state. Custom system or user-defined semantics are not considered in this model, e.g., if the system drops all input items, it also can be claimed as supporting exactly-once. Looking from another side, our model formally describes which properties are {\em exactly} supported by state-of-the-art stream processing systems, such as Flink, Storm, Spark Streaming, Samza, etc, so we can discuss its properties in unified terms. What is more important, we demonstrated that guarantees, which are misleadingly called {\em delivery}, in practice affect data {\em consistency} as well.
+
+\subsection{Additional properties and notes}
+ 
+ TBA
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{../../bibliography/flame-stream.bib}
