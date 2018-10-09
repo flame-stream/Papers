@@ -55,9 +55,19 @@ In order to make our mathematical model independent of any implementation, we co
 
 Three basic concepts can be different for different stream processing engines. However, generality is not lost, because the specific implementation does not influence the model. The first concept is {\em entering} to the system. For example, in Flink the fact that the element has been entered means that the element has arrived at {\em source} vertex. The second notion is {\em leaving} from the system. For example, it means that element has been released to a consumer or lost. The third one is a {\em dependency}. We say that element $b$ depends on the element $a$ if $a$ has been involved in the creation of $b$. In practice, it means, e.g., that $b$ has been generated from $a$ using flat map operation. It is assumed that the states of dataflow operations are just data elements in the system, which are independent of any other elements.
 
-Using these basic definitions, we can introduce the remaining necessary ones. Let $\tau$ be a global discrete time. Let $W_\tau$ is the set of {\em working} elements at the time $\tau$. Working elements at the time $\tau$ are the elements which have already entered the system or generated inside the system at the time $\geqslant{\tau}$, but have not left it yet. Let $x_\tau\in{W_\tau}$ be the element, which enters at the time $\tau$, and $q_\tau\notin{W_\tau},q_\tau\in{W_{\tau-1}}$ is the element, which leaves at the time $\tau$. Let $D_{x_{\tau}}$ be the set of elements, which depend on $x_\tau$.
+Using these basic definitions, we can introduce the remaining necessary ones. Let $\tau$ be a global discrete time. Let $W_\tau$ is the set of {\em working} elements at the time $\tau$. Working elements at the time $\tau$ are the elements which have already entered the system or generated inside the system at the time $\geqslant{\tau}$, but have not left it yet. Because of the assumption that states of dataflow operations are just independent elements in the system, they are also contained in the set of working elements, i.e. if $S$ is the set of operation states, then $S\subseteq{W_\infty}$. Let $x_\tau\in{W_\tau}$ be the element, which enters at the time $\tau$, and $q_\tau\notin{W_\tau},q_\tau\in{W_{\tau-1}}$ is the element, which leaves at the time $\tau$. Let $D_{x_{\tau}}$ be the set of elements, which depend on $x_\tau$.
 
 Having the definitions introduced above, now we can define the meaning of an element nullification. We say that element $x_\tau$ is nullified at time $\eta_{x_{\tau}}$ if $\eta_{x_{\tau}}$ is the minimal time, when $\nexists{y\in{W_{\eta_{x_{\tau}}}}}:{y}\to{x_{\tau}}$, where $\to$ is a transitive dependency. More formally, $\eta_{x_{\tau}} = inf(\hat{\tau}:\hat{\tau}\geqslant{\tau}\land{\nexists{y\in{W_{\eta_{x_{\hat{\tau}}}}}}:{y}\to{x_{\hat{\tau}}}})$. Therefore, in the proposed model events occur when an element is arrived and nullified, i.e., at times $t_i:\exists{x_{t_i}}$ and $t_o:\exists{\eta_{x_{t_o}}}$. In other words, we define time quantization for the state machine.
+
+Now we can compare the sets of working and left elements for the cases of different input sets at some defined points in time. The main idea here is to express at most once, at least once, and exactly once guarantees as interactions between such sets. Let us construct three sets:
+
+$X^0=(W_\infty,Q_\infty|p(W_\infty,Q_\infty|a_1...a_\infty)\neq{0})$
+
+$X^1=(W_{\eta_{x}},Q_{\eta_{x}}|p(W_{\eta_{x}},Q_{\eta_{x}}|x,a_1...a_\infty)\neq{0},\forall{i}:{a_i}\neq{x})$
+
+$X^{*}=(W_{\eta_{x}},Q_{\eta_{x}}|p(W_{\eta_{x}},Q_{\eta_{x}}|x,a_1...a_\infty)\neq{0},\exists{i}:{a_i={x}},\exists{y\in{W_{\eta_{x}}}}:y\to{a_i})$
+
+$Q_\tau=\bigcup\limits_{i=1}^{\tau}{q_i}$
 
 % Assume, that a distributed processing engine 
 
