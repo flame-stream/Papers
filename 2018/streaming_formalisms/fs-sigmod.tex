@@ -1,0 +1,111 @@
+\documentclass[sigconf]{acmart}
+
+\usepackage{graphicx}
+\usepackage{algorithm} % for algorithms
+\usepackage{algpseudocode}
+\algblockdefx[Process]{Process}{EndProcess}[2][Unknown]{{\bf Process} {\it #2}}{}
+\algblockdefx[Event]{Event}{EndEvent}[2][Unknown]{{\bf upon event #2 do}}{}
+
+\usepackage{booktabs} % For formal tables
+%\usepackage{cite} %for multiple refs
+
+\usepackage{amssymb} %for nice emptyset
+
+\theoremstyle{remark}
+
+\settopmatter{printacmref=false, printccs=true, printfolios=true}
+\pagestyle{plain} % removes running headers
+
+\newcommand{\PicScale}{0.5}
+\newcommand {\FlameStream} {Icetream}
+\begin{document}
+
+\title {Fair determinism: rethinking delivery guarantees in distributed stream processing}
+
+% \author{  Igor E. Kuralenok,$^1$     Artem Trofimov,$^ {1,2}$    Nikita Marshalkin,$^ {1,2}$   and  Boris Novikov$^ {1,2}$ }
+% \affiliation{%
+% \institution{$^1$JetBrains Research}
+%   \city{St. Petersburg} 
+%   \country{Russia}
+% }
+% \affiliation{%
+% \institution{$^2$Saint Petersburg State University}
+%   \city{St. Petersburg} 
+%   \country{Russia}
+% }
+% \email{\string{ikuralenok, trofimov9artem, marnikitta\string}@gmail.com, borisnov@acm.org}
+
+% \begin{abstract}
+% Currently, large-scale distributed stream processing is a hot area of research. While state-of-the-art distributed stream processing systems are able to provide low-latency under at-most-once and at-least-once guarantees, achieving exactly-once semantics is still a challenging problem. An important reason behind this fact was the lack of efficient implementation techniques for idempotent stream processing model. In this work, we apply a low-overhead deterministic model to the problem of exactly-once. We demonstrate the lightweight protocols which use the property of determinism for achieving system-wide idempotence, and, therefore, exactly-once. Our experiments show that proposed approach can significantly outperform an alternative industrial solution.
+% \end{abstract}
+
+\maketitle
+
+\section {Introduction}
+
+Stream processing is a hot topic and has a lot of applications, e.g. IoT, short-term personalization, fraud detection, etc. Kappa architecture - streaming without batching, only one set of code needs to be maintained. But, what are the pitfalls of stream processing?
+
+In batch processing, everything is consistent and deterministic, even in case of failures. State-of-the-art stream processing engines are non-deterministic. Behavior in case of failure is described in the terms of "delivery guarantees": at most once, at least once, exactly once. There are three basic problems regarding delivery guarantees: 
+\begin{itemize}
+    \item Misleading name: they are not only about "delivery"
+    \item Not formally defined
+    \item Only exactly once guarantees the same level of data consistency as batch processing 
+    \item Current implementations of exactly once are inefficient in the sense of latency
+\end{itemize}
+
+In this work we:
+\begin{itemize}
+    \item Define delivery guarantees in a formal way
+    \item Demonstrate that they are rather about "consistency" than "delivery"
+    \item Reveal that the property of {\em fair} determinism can  {\em potentially} reduce latency for exactly once
+    \item Build protocols for achieving exactly once on top of lightweight deterministic stream processing model 
+    \item Show that the proposed idea {\em practically} outperforms state-of-the-art 
+\end{itemize}
+
+\section{Formalization of consistency guarantees}
+
+Define exactly-once and determinism.
+
+\section{State of the art}
+
+Modern stream processing engines are non-deterministic, so output items and operation states can be different for different runs on the same data. Furthermore, output items and operation states can be different even for different runs on a single input item. One way to achieve exactly once, in this case, is to take state snapshots after each input element has been processed. Another approach is to atomically process and output results for the sets of elements. Let us call them {\em atomic sets}. In this setting, state snapshots can be taken after each atomic set has been processed. In Spark atomic set is micro-batch. In Flink atomic set contains all elements between checkpoints.  In these approaches items always wait for other items within the atomic set. Latency significantly suffers.    
+
+One another possibility is to deduplicate elements before each operation. However, deduplication before each operation is expensive.
+
+All these approaches provide so-called "effective determinism". But if we had a {\em fairly} deterministic engine, we would achieve exactly-once with only deduplication at systems exit. Also, we would not need to take state snapshots after each element or collect elements into atomic sets.
+
+\section{Exactly once on top of deterministic model}
+
+\subsection{Drifting state model}
+
+Very short explanation. Having determinism what do we need to add in order to achieve exactly once?
+
+\subsection{Input replay}
+
+\subsection{Deduplication}
+
+\subsection{State snapshotting}
+
+\subsection{Gathering all together}
+
+\section{Experiments}
+
+We have won!
+
+\section{Discussion}
+
+What {\em exactly} we have done and why our results are better. Tradeoffs.
+
+Exactly-once and determinism are connected.
+
+Nobody has tried to achieve exactly-once on top of fair determinism.
+
+\section{Conclusions and future work}
+
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{../../bibliography/flame-stream.bib}
+\end {document}
+
+\endinput
+you can put whatever here
