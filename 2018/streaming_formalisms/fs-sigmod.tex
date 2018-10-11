@@ -68,13 +68,17 @@ Define exactly-once and determinism.
 
 \section{State of the art}
 
-Modern stream processing engines are non-deterministic, so output items and operation states can be different for different runs on the same data. Furthermore, output items and operation states can be different even for different runs on a single input item. One way to achieve exactly once, in this case, is to take state snapshots after each input element has been processed. Another approach is to atomically process and output results for the sets of elements. Let us call them {\em atomic sets}. In this setting, state snapshots can be taken after each atomic set has been processed. In Spark atomic set is micro-batch. In Flink atomic set contains all elements between checkpoints.  In these approaches items always wait for other items within the atomic set. Latency significantly suffers.    
+Modern stream processing engines are non-deterministic. As we illustrated above, it means that output items and operation states can be different for different runs on the same input data, even if input order is defined. It implies that after failure and input replay, system can reach other state and output other elements. Put formulas here!
 
-One another possibility is to deduplicate elements before each operation. However, deduplication before each operation is expensive.
+To prevent exactly once in a non-deterministic case, system should output items and save state affected by these elements atomically. (Explain why in more detail). Such behavior is called {\em effective determinism}. Effective determinism means that system in practice can reach different states after failure and recovery, but end-user always observes only one of possible results. Formulas! 
 
-All these approaches provide so-called "effective determinism". But if we had a {\em fairly} deterministic engine, we would achieve exactly-once with only deduplication at systems exit. Also, we would not need to take state snapshots after each element or collect elements into atomic sets.
+One way to achieve effective determinism is to take state snapshots after each input element has been processed. It can be slightly relaxed by atomic processing and outputting results for the sets of elements. Let us call them {\em atomic sets}. In this setting, state snapshots can be taken after each atomic set has been processed. In Spark atomic set is a micro-batch. In Flink atomic set contains all elements between checkpoints. In this approach items always wait for other items within the atomic set. Latency significantly suffers.    
+
+One other possibility is to deduplicate elements before each operation. However, deduplication before each operation is expensive.
 
 \section{Exactly once on top of deterministic model}
+
+In all approaches mentioned above, a system has significant overhead on achieving effective determinism. But if we had a {\em fairly} deterministic engine, we would achieve exactly-once with a very low additional overhead. In this case there is no need to take state snapshots after each element or collect elements into atomic sets. Besides, deduplication must be applied only at systems exit.
 
 \subsection{Drifting state model}
 
