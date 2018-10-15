@@ -1,0 +1,39 @@
+\documentclass[runningheads]{llncs}
+
+
+\usepackage{booktabs} % For formal tables
+\usepackage{cite} %for multiple refs
+
+\usepackage{amssymb} %for nice emptyset
+
+\usepackage[T1]{fontenc}
+\usepackage{inconsolata}
+
+\pagestyle{plain} % removes running headers
+
+\newcommand{\PicScale}{0.5}
+\newcommand {\FlameStream} {FlameStream}
+
+\begin{document}
+
+\title {Research Summary: data validation in distributed stream processing}
+\author{Artem Trofimov}
+\institute{}
+
+\maketitle
+
+Distributed data processing is a hot topic of research and a key challenge, that data-intensive companies face. Batch processing is a working solution for popular use-cases. However, it has well-known issues: high latency, lack of iteration, etc. Stream processing addresses these problems for  IoT, anti-fraud, short-term personalization, etc.
+
+End-user of a data processing system desire to get reliable results, so almost any data processing task requires data validation. However, it makes sense only if data itself is reliable. Batch processing systems provide deterministic and consistent results. State-of-the-art stream processing systems are non-deterministic and provide so-called delivery guarantees: at most once, at least once, and exactly once. Only exactly once guarantees the similar level of consistency as batch processing. The lack of determinism together with high-overhead approaches for exactly-once lead to the absence of data validation mechanisms in stream processing.
+
+We designed a fairly deterministic stream processing model, that is applicable to any pipelines. Determinism is achieved using a low-overhead lightweight optimistic technique. Lightweight determinism allows us to achieve exactly once in a much more efficient way than state-of-the-art in terms of latency. Having both determinism and cheap exactly once, now it is reasonable to design data validation mechanisms on the top.
+
+Project outcome can directly affect Facebook internals. Short-term personalization can dramatically improve the user experience. Within this task, it is impossible to achieve both low-latency and data validation using state-of-the-art data processing systems. Our research project aims at solving this issue and has already demonstrated promising preliminary results.  
+
+% \bibliographystyle{splncs04}
+% \bibliography{../../bibliography/flame-stream}
+
+\end {document}
+
+\endinput
+you can put whatever here
