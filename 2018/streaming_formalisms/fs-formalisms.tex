@@ -11,6 +11,22 @@
 
 \usepackage{amssymb} %for nice emptyset
 
+\usepackage{amsmath}
+\DeclareMathOperator{\rank}{rank}
+\makeatletter
+\newenvironment{sqcases}{%
+  \matrix@check\sqcases\env@sqcases
+}{%
+  \endarray\right.%
+}
+\def\env@sqcases{%
+  \let\@ifnextchar\new@ifnextchar
+  \left\lbrack
+  \def\arraystretch{1.2}%
+  \array{@{}l@{\quad}l@{}}%
+}
+\makeatother
+
 \theoremstyle{remark}
 
 \settopmatter{printacmref=false, printccs=true, printfolios=true}
@@ -65,27 +81,79 @@ However, lack of formalism in the definitions of such streaming consistency guar
 
 \section{Formalization of consistency guarantees}
 
-In order to make our mathematical model independent of any implementation, we consider streaming consistency guarantees as correspondences between input and output streams and system state. If we formulate guarantees only in these terms, they can be applied to any system. However, the question of what to consider as a system state is a little bit sophisticated. An obvious idea is to say that system state is a state of user operations, i.e., so-called {\em business logic} state. However, output items can be affected not only by input ones and operations state, but also by other elements, which are currently in the system. For example, if cycles are allowed in a logical graph, cycling elements can affect output ones, but they do not belong to a state.   
+In order to make our mathematical model independent of any implementation, we consider streaming consistency guarantees as correspondences between input and output streams and system state. If we formulate guarantees only in these terms, they can be applied to any system. However, the question of what to consider as a system state is a little bit sophisticated. At a very high-level, we can define state as a {\em information} about input elements, which have been previously entered the system.  
 
-Let $\tau$ be an exact global discrete time. Let $a_\tau$ be the element, which enters at the time $\tau$, and $b_\tau$ is the element, which leaves at the time $\tau$. Let $W_\tau$ is the set of elements, which are currently in the system, $a_\tau\in{W_\tau}$, $b_\tau\notin{W_\tau},b_\tau\in{W_{\tau-1}}$. As it was mentioned above, we assume that the states of operations are elements in the system as well, so if $S_\tau$ is the set of states of operations at time $\tau$, then $S_\tau\subseteq{W_\tau}$. We can define $S_\tau$ as $W_\infty$ if there are no input elements since time $\tau$, i.e. $\forall t>\tau: a_t=\emptyset$. Let us denote it as $S_\tau=W^{\infty}_\tau$. We can imagine stream processing system as a pool, where some elements are poured in and others are poured out. The states are the elements, which are kept in the pool if we stop pouring in and wait infinite time.
+An obvious idea is to say that system state is a state of user-defined operations, i.e., so-called {\em business logic} state. The main purpose of the states of operations is to accumulate the information about input items. It allows system to not store all previous input elements in order to process a new one in a stateful user-defined operation. However, output items can be affected not only by input ones and operations state, but also by other elements, which are currently in the system. For instance, if cycles are allowed in a logical graph, cycling elements can affect output ones, but they do not belong to a state. In-flight elements can also influence the result, being not in the state. These examples demonstrate the evident fact that information about input elements can be contained not only in the states of operations, but in data flow elements as well.
 
-Let us consider $W_\tau$ as a system state, i.e., the system state is operations state together with all elements, which are in the system at the time $\tau$. At the time $\tau+1$, $W_\tau$ can be changed by one of the following atomic events:
+Facing this fact, let us try to dive into the internals of stream processing. Let $\tau$ be an exact global discrete time. Let $a_\tau$ be the element, which enters at the time $\tau$, and $b_\tau$ is the element, which leaves at the time $\tau$. Let $W_\tau$ be the set of elements, which are currently in the system, i.e.,
 
-\begin{enumerate}
-    \item Element enters the system
-    \item Element leaves the system
-    \item Element is transformed into an operation state and/or other elements
-\end{enumerate}
-
-More formally,
-
-$W_{\tau+1}=\begin{cases}
+$W_{\tau+1}=\begin{sqcases}
 W_{\tau}\cup{a_\tau}, & \text{or}\\
 W_{\tau}\setminus{b_{\tau+1}}, & \text{or}\\
-W_{\tau}\setminus{x}\cup{\{y_i\}}, & \text{}.
-\end{cases}$
+W_{\tau}\setminus{x}\cup{\{y_i\}}, x\in{W_\tau},{\{y_i\}}\in{W_{\tau+1}} & \text{}.
+\end{sqcases}$
 
-It can be said that an element depends on other one, if it is a result of transformation. Let us denote this as a transitive binary relation $D$. Let $Cl(D)$ be a transitive closure of $D$. 
+Basically, the last expression illustrates the case when an element transforms into other elements due to, e.g., map operation. But as it was mentioned above, we assume that the states of operations are elements in the system as well, so such transformation can also describe combining an element with the business logic state. In this setting, we can define operations state $S_\tau$ as $W$ if there are no input elements since time $\tau$, i.e. $\forall t>\tau: a_t=\emptyset$. Let us denote it as $S_\tau=W^{\infty}_\tau$. We can imagine stream processing system as a pool, where some elements are poured in and others are poured out. The business logic states are the elements, which are kept in the pool if we stop pouring in and wait infinite time. Regarding this model, we can use $W_\tau$ as a system state, because it contains both operations state and all elements, which are currently in the system, i.e., it contains a complete information about the elements, which have been already entered.
+
+The key problem within this model is that using only defined terms, we cannot observe a moment, when an input element starts to affect output elements only through the state. In other words, it is the moment, when all information about this input element is started to be contained only in business-logic state. Further in this paper, we will call this moment {\em nullification}. The lack of nullification is illustrated in Figure~\ref{nullification}. In order to define this event, let us introduce the notion of {\em dependency}. It can be said that an element depends on other one, if the element is a result of other element transformation. Let us denote this as a transitive binary relation $D$. Let $Cl(D)$ be a transitive closure of $D$. We say that input element $a_\tau$ is nullified at the time $\theta_{a_{\tau}}$ if $\theta_{a_{\tau}}=inf(\hat{\tau}>\tau|W_{\hat{\tau}}\setminus{W^{\infty}_{\hat{\tau}}}\cap{Cl(D)(a_\tau)=\emptyset})$, i.e., if at the time $\theta_{a_{\tau}}$ there are no elements in a system, which depend on $a_\tau$, except business-logic state.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.48\textwidth]{pics/nullification}
+  \caption{The red and blue elements have entered the system. Since that time, it is unclear, when they stop directly affect output elements}
+  \label {nullification}
+\end{figure}
+
+Now we can observe a system state and output elements for the cases of different input sets at some defined points in time. The main idea here is to express at most once, at least once, and exactly once guarantees as interactions between them. Let $x,a_1,a_\infty$ be input elements with arbitrary arrival times. $B_\tau$ is all output elements by the time $\tau$:
+
+$B_\tau=\bigcup\limits_{i=1}^{\tau}{b_i}$
+
+Let $p(W_\tau,B_\tau|x,a_1...a_\infty)$ be a probability to observe state $W_\tau$ and output elements $B_\tau$ at the time $\tau$ if input elements are $x,a_1,a_\infty$. Let us construct three sets:
+
+$X^0=(W_\infty,B_\infty|p(W_\infty,Q_\infty|a_1...a_\infty)\neq{0})$
+
+$X^1=(W_{\theta_{x}},B_{\theta_{x}}|p(W_{\theta_{x}},Q_{\theta_{x}}|x,a_1...a_\infty)\neq{0},\forall{i}:{a_i}\neq{x})$
+
+$X^{*}=(W_{\theta_{x}},B_{\theta_{x}}|p(W_{\theta_{x}},Q_{\theta_{x}}|x,a_1...a_\infty)\neq{0},\\
+\exists{i}:{a_i={x}},\exists{y:y\in{W_{\theta_{x}}\setminus{W_{\theta_x}^{\infty}}}\cap{Cl(D)(x)}})$
+
+These sets model the {\em observable} output and state of a stream processing engine. $X^0$ expresses the case, when element $x$ has not affected the system state and the output, so it is a forbidden behavior for at least once and exactly once guarantees. On the other hand, $X^{*}$ defines possible results, after $x$ has been nullified, but $a_i=x$ or its dependencies are in the system. Such behavior can cause inconsistencies in operations state due to duplicates and should not be observed if the system provides for at most once or exactly-once. We define consistency guarantees as follows: 
+
+{\em At most once} $\iff$ $\forall{x,a_1...a_\infty}:X^{1}\cap{X^{*}}=\emptyset$
+
+{\em At least once} $\iff$ $\forall{x,a_1...a_\infty}:X^{0}\cap{X^{1}}=\emptyset$
+
+{\em Exactly once} $\iff$ $\forall{x,a_1...a_\infty}:X^{0}\cap{X^{1}}\cap{X^{*}}=\emptyset$
+
+Now streaming consistency guarantees are defined in terms of correspondences between input, output and the system state. Custom system or user-defined semantics are not considered in this model, e.g., if the system drops all input items, it also can be claimed as supporting exactly-once. Looking from another side, our model formally describes which properties are {\em exactly} supported by state-of-the-art stream processing systems, such as Flink, Storm, Spark Streaming, Samza, etc, so we can discuss its properties in unified terms. What is more important, we demonstrated that guarantees, which are misleadingly called {\em delivery}, in practice affect data {\em consistency} as well.
+
+
+
+
+
+
+
+
+
+% Facing this fact, we can consider the system state as operations state together with all elements, which are currently in the system. Let $\tau$ be an exact global discrete time. Let $a_\tau$ be the element, which enters at the time $\tau$, and $b_\tau$ is the element, which leaves at the time $\tau$. Let $W_\tau$ is the set of elements, which are currently in the system, $a_\tau\in{W_\tau}$, $b_\tau\notin{W_\tau},b_\tau\in{W_{\tau-1}}$. As it was mentioned above, we assume that the states of operations are elements in the system as well, so if $S_\tau$ is the set of states of operations at time $\tau$, then $S_\tau\subseteq{W_\tau}$. We can define $S_\tau$ as $W_\infty$ if there are no input elements since time $\tau$, i.e. $\forall t>\tau: a_t=\emptyset$. Let us denote it as $S_\tau=W^{\infty}_\tau$. We can imagine stream processing system as a pool, where some elements are poured in and others are poured out. The states are the elements, which are kept in the pool if we stop pouring in and wait infinite time.
+
+% Let us consider $W_\tau$ as a system state, i.e., the system state is operations state together with all elements, which are in the system at the time $\tau$. At the time $\tau+1$, $W_\tau$ can be changed by one of the following atomic events:
+
+% \begin{enumerate}
+%     \item Element enters the system
+%     \item Element leaves the system
+%     \item Element is transformed into an operation state and/or other elements
+% \end{enumerate}
+
+% More formally,
+
+% $W_{\tau+1}=\begin{cases}
+% W_{\tau}\cup{a_\tau}, & \text{or}\\
+% W_{\tau}\setminus{b_{\tau+1}}, & \text{or}\\
+% W_{\tau}\setminus{x}\cup{\{y_i\}}, & \text{}.
+% \end{cases}$
+
+% It can be said that an element depends on other one, if it is a result of transformation. Let us denote this as a transitive binary relation $D$. Let $Cl(D)$ be a transitive closure of $D$. 
 
 
 
