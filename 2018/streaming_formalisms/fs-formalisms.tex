@@ -31,6 +31,7 @@
  
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}
+\newtheorem{corollary}{Corollary}
 
 \settopmatter{printacmref=false, printccs=true, printfolios=true}
 \pagestyle{plain} % removes running headers
@@ -115,11 +116,15 @@ We can imagine a stream processing system as a pool, where some elements are pou
 $D$ is a transitive binary relation $D\subseteq{{\bigcup^{\infty}_{i=1}{W_i}}\times{{\bigcup^{\infty}_{i=1}{W_i}}}}$. Pair $(x,y)\in{D}$ iff $\exists{\tau,X,Y}:W_{\tau+1}=W_\tau\setminus{X}\cup{Y}, x\in{X}, y\in{Y}$.
 \end{definition}
 
-Here we can draw an analogy with {\em Herbrand semantics}, where the notion of dependency is used to describe on which transactions, current write operation depends on. Write operation depends on a transaction if the transaction is active. Therefore, commit is a defined point, since then a transaction cannot affect further writes. In our model, there is also a need to define such moment, since then there are no elements in a system, which depend on $a_\tau$, except the business-logic state.
+Here we can draw an analogy with {\em Herbrand semantics}, where the notion of dependency is used to describe on which transactions, current write operation depends on. Write operation depends on a transaction if the transaction is active. Therefore, commit is a defined point, since then a transaction cannot affect further writes. In our model, there is also a need to define such a moment, since then there are no elements in a system, which depend on $a_\tau$, except the business-logic state.
 
 \begin{definition}{Nullification time}
 of an input element $a_\tau$ is the time $\theta_{a_\tau}=inf(\hat{\tau}>\tau|W_{\hat{\tau}}\setminus{S_{\hat{\tau}}}\cap{Cl(D)(a_\tau)=\emptyset})$, where $Cl(D)$ is a transitive closure of the relation $D$.
 \end{definition}
+
+\begin{corollary}
+Element is nullified after all dependent output elements left a system: $\forall{a_{\tau_i}}\forall{b_{\tau_o}\in{Cl(D)(a_{\tau_i})}}:\theta_{a_{\tau_i}}>\tau_o$.
+\end{corollary}
 
 Nullification time is a key concept within our model. It allows us to observe a moment when an input element starts to affect output elements only through the state. It should be noted that nullification is not only a theoretical concept, because it can be practically observed using, e.g., low watermarks or punctuations~\cite{Tucker:2003:EPS:776752.776780}. The concept of nullification is shown in Figure~\ref{nullification}.
 
@@ -131,49 +136,62 @@ Nullification time is a key concept within our model. It allows us to observe a 
 \end{figure}
 
 \begin{definition}{Time quantization}
-$t$ is the times of input, output, and nullification:
+$t$ is the time of input and nullification:
 
 $t=\begin{cases}
-\tau_i:\exists{a_{\tau_i}}, \\
-\tau_o:\exists{b_{\tau_o}}, \\
+\tau:\exists{a_{\tau}}, \\
 \theta_{a_\tau}.
 \end{cases}$
 \end{definition}
 
-The main purpose of time quantization is to provide observable points in time. Further, we will consider a system only in terms of time $t$. Now we can model a system state and output elements for the cases of different input sets at some defined points in time. 
+The main purpose of time quantization is to provide observable points in time, which an input element is processed atomically with its non-state dependencies between. Further, we will consider a system only in terms of time $t$. Now we can model a system state and output elements for the cases of different input sets at some defined points in time. 
 
-Let $x,a_1,a_\infty$ be input elements with arbitrary arrival times. $\mathbb{B}_t$ is all output elements by the time $t$:
+Let $x,a^{1},a^\infty$ be input elements with arbitrary arrival times. $\mathbb{B}_t$ is all output elements by the time $t$:
 
 $\mathbb{B}_t=\bigcup\limits_{i=1}^{t}{b_i}$
 
-Let $p(W_t,\mathbb{B}_t|x,a_1...a_\infty)$ be a probability to observe state $W_t$ and output elements $B_t$ at the time $t$ if input elements are $x,a_1,a_\infty$. Let us construct three sets:
+Let $p(W_t,\mathbb{B}_t|x,a^{1}...a^\infty)$ be a probability to observe state $W_t$ and output elements $B_t$ at the time $t$ if input elements are $x,a^{1},a^\infty$. Let us construct three sets:
 
-$X^0=(W_\infty,\mathbb{B}_\infty|p(W_\infty,Q_\infty|a_1...a_\infty)\neq{0})$
+$X^0=(W_\infty,\mathbb{B}_\infty|p(W_\infty,\mathbb{B}_\infty|a^{1}...a^\infty)\neq{0})$
 
-$X^1=(W_{\theta_{x}},\mathbb{B}_{\theta_{x}}|p(W_{\theta_{x}},Q_{\theta_{x}}|x,a_1...a_\infty)\neq{0},\forall{i}:{a_i}\neq{x})$
+$X^1=(W_{\theta_{x}},\mathbb{B}_{\theta_{x}}|p(W_{\theta_{x}},\mathbb{B}_{\theta_{x}}|x,a^{1}...a^\infty)\neq{0},\forall{i}:{a^i}\neq{x})$
 
-$X^{*}=(W_{\theta_{x}},\mathbb{B}_{\theta_{x}}|p(W_{\theta_{x}},Q_{\theta_{x}}|x,a_1...a_\infty)\neq{0},\\
-\exists{i}:{a_i={x}},\exists{y:y\in{W_{\theta_{x}}\setminus{S_{\theta_x}}}\cap{Cl(D)(a_i)}})$
+$X^{*}=(W_{\theta_{x}},\mathbb{B}_{\theta_{x}}|p(W_{\theta_{x}},\mathbb{B}_{\theta_{x}}|x,a^{1}...a^\infty)\neq{0},\\
+\exists{i}:{a^i={x}},\exists{y:y\in{W_{\theta_{x}}\setminus{S_{\theta_x}}}\cap{Cl(D)(a^i)}})$
 
-These sets model the {\em observable} output and state of a stream processing engine. $X^0$ expresses the case, when element $x$ has not affected the system state and the output, so it is a forbidden behavior for at least once and exactly once guarantees. On the other hand, $X^{*}$ defines possible results, after $x$ has been nullified, but $a_i=x$ or its dependencies are in the system. Such behavior can cause inconsistencies in operations state due to duplicates and should not be observed if the system provides for at most once or exactly-once. Using these modeled sets now we can define guarantees.
+These sets model the {\em observable} output and state of a stream processing engine. $X^0$ expresses the case, when element $x$ has not affected the system state and the output, so it is a forbidden behavior for at least once and exactly once guarantees. On the other hand, $X^{*}$ defines possible results, after $x$ has been nullified, but $a^i=x$ or its dependencies are in the system. Such behavior can cause inconsistencies in operations state due to duplicates and should not be observed if the system provides for at most once or exactly-once. Using these modeled sets now we can define guarantees.
 
 \begin{definition}{At most once}
-guarantee is provided by a system iff $\forall{x,a_1...a_\infty}:X^{1}\cap{X^{*}}=\emptyset$
+guarantee is provided by a system iff $\forall{x,a^{1}...a^\infty}:X^{1}\cap{X^{*}}=\emptyset$
 \end{definition}
 
 \begin{definition}{At least once}
-guarantee is provided by a system iff $\forall{x,a_1...a_\infty}:X^{0}\cap{X^{1}}=\emptyset$
+guarantee is provided by a system iff $\forall{x,a^{1}...a^\infty}:X^{0}\cap{X^{1}}=\emptyset$
 \end{definition}
 
 \begin{definition}{Exactly once}
-guarantee is provided by a system iff $\forall{x,a_1...a_\infty}:X^{0}\cap{X^{1}}\cap{X^{*}}=\emptyset$
+guarantee is provided by a system iff $\forall{x,a^{1}...a^\infty}:X^{0}\cap{X^{1}}\cap{X^{*}}=\emptyset$
 \end{definition}
 
 Now streaming consistency guarantees are defined in terms of correspondences between input, output and the system state. Custom system or user-defined semantics are not considered in this model, e.g., if the system drops all input items, it also can be claimed as supporting exactly-once. Looking from another side, our model formally describes which properties are {\em exactly} supported by state-of-the-art stream processing systems, such as Flink, Storm, Spark Streaming, Samza, etc, so we can discuss its properties in unified terms. What is more important, we demonstrated that guarantees, which are misleadingly called {\em delivery}, in practice affect data {\em consistency} as well.
 
 \subsection{Additional properties and notes}
  
- TBA
+In this section, we formally define some additional concepts and demonstrate a potential way to reduce latency overhead on exactly-once processing.
+
+\begin{definition}{Data processing system is {\em deterministic}}
+if \\
+$\forall{t} \forall{n\geq1} \forall{a_1...a_n}\exists{S_t,\mathbb{B}_t}:p(S_t,\mathbb{B}_t|a_1...a_n)=1$.
+\end{definition}
+
+\begin{definition}{Data processing system is {\em non-deterministic}}
+if \\
+$\forall{t} \forall{n\geq1} \forall{a_1...a_n}\nexists{S_t,\mathbb{B}_t}:p(S_t,\mathbb{B}_t|a_1...a_n)=1$.
+\end{definition}
+
+The property of determinism directly influences the way of achieving exactly-once. If a non-deterministic system fails, it needs to restore some consistent state. Let system fails at time $\tau_f$. It should restore state $S_{t_s}, t_s < \tau_f$ and restart processing since input element $a_t, t\geq{t_s}$. State $S_{t_s}$ is consistent because it includes the only result of atomic processing of input elements due to time $t$. However, after recovery and replay, the system can reach not only a different state but also can output different elements, because of non-determinism. This fact directly implies that nullification of an element must be done atomically with snapshotting of the business-logic state.
+
+As it was mentioned above, Flink achieves such atomicity using 2PC-based protocol. Google Millwheel uses deduplication before each operation in a data flow.
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{../../bibliography/flame-stream.bib}
