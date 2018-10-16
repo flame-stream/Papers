@@ -175,7 +175,7 @@ guarantee is provided by a system iff $\forall{x,a^{1}...a^\infty}:X^{0}\cap{X^{
 
 Now streaming consistency guarantees are defined in terms of correspondences between input, output and the system state. Custom system or user-defined semantics are not considered in this model, e.g., if the system drops all input items, it also can be claimed as supporting exactly-once. Looking from another side, our model formally describes which properties are {\em exactly} supported by state-of-the-art stream processing systems, such as Flink, Storm, Spark Streaming, Samza, etc, so we can discuss its properties in unified terms. What is more important, we demonstrated that guarantees, which are misleadingly called {\em delivery}, in practice affect data {\em consistency} as well.
 
-\subsection{Additional properties and notes}
+\section{Additional properties and notes}
  
 In this section, we formally define some additional concepts and demonstrate a potential way to reduce latency overhead on exactly-once processing.
 
