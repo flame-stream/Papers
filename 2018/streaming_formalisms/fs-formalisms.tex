@@ -170,28 +170,27 @@ guarantee is provided by a system iff $\forall{x,a^{1}...a^\infty}:X^{0}\cap{X^{
 \end{definition}
 
 \begin{definition}{Exactly once}
-guarantee is provided by a system iff $\forall{x,a^{1}...a^\infty}:X^{0}\cap{X^{1}}\cap{X^{*}}=\emptyset$
+guarantee is provided by a system iff $\forall{x,a^{1}...a^\infty}:X^{1}\cap{X^{*}}=\emptyset \wedge X^{0}\cap{X^{1}}=\emptyset$
 \end{definition}
 
 Now streaming consistency guarantees are defined in terms of correspondences between input, output and the system state. Custom system or user-defined semantics are not considered in this model, e.g., if the system drops all input items, it also can be claimed as supporting exactly-once. Looking from another side, our model formally describes which properties are {\em exactly} supported by state-of-the-art stream processing systems, such as Flink, Storm, Spark Streaming, Samza, etc, so we can discuss its properties in unified terms. What is more important, we demonstrated that guarantees, which are misleadingly called {\em delivery}, in practice affect data {\em consistency} as well.
 
 \section{Additional properties and notes}
- 
-In this section, we formally define some additional concepts and demonstrate a potential way to reduce latency overhead on exactly-once processing.
+
+Let $a_1...a_\infty$ be ordered in time input elements.
+
+\begin{definition}{Consistent state snapshot}
+$S^{t_s}_0$ at time $t_s$ is a business-logic state $S^{t_s}_0=S_{t_s}$ such that $\forall{t>{t_s}} \forall{a_0..a_t..a_\infty}:???$.
+\end{definition}
 
 \begin{definition}{Data processing system is {\em deterministic}}
 if \\
-$\forall{t} \forall{n\geq1} \forall{a_1...a_n}\exists{S_t,\mathbb{B}_t}:p(S_t,\mathbb{B}_t|a_1...a_n)=1$.
+$\forall{t} \forall{n\geq1} \forall{a_1...a_n}\exists{S_t,\mathbb{B}_t={\{b_1...b_m\}}}:p(S_t,\mathbb{B}_t|a_1...a_n)=1$.
 \end{definition}
 
-\begin{definition}{Data processing system is {\em non-deterministic}}
-if \\
-$\forall{t} \forall{n\geq1} \forall{a_1...a_n}\nexists{S_t,\mathbb{B}_t}:p(S_t,\mathbb{B}_t|a_1...a_n)=1$.
+\begin{definition}{Data processing system is {\em effectively deterministic}}
+if $\forall{t} \forall{n\geq1} \forall{a_1...a_n}\exists{\mathbb{B}_t={\{b_1...b_m\}}}:p(\mathbb{B}_t|a_1...a_n)=1$.
 \end{definition}
-
-The property of determinism directly influences the way of achieving exactly-once. If a non-deterministic system fails, it needs to restore some consistent state. Let system fails at time $\tau_f$. It should restore state $S_{t_s}, t_s < \tau_f$ and restart processing since input element $a_t, t\geq{t_s}$. State $S_{t_s}$ is consistent because it includes only the results of atomic processing of input elements due to time quantization $t$. However, after recovery and replay, the system can reach not only a different state but also can output different elements, because of non-determinism. This fact directly implies that nullification of an element must be done atomically with snapshotting of the business-logic state in order to achieve exactly once.
-
-As it was mentioned above, Flink achieves such atomicity using 2PC-based protocol. Google Millwheel uses deduplication before each operation in a data flow.
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{../../bibliography/flame-stream.bib}
