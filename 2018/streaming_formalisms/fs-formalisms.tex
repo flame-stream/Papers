@@ -128,7 +128,7 @@ $S_\tau$ at the time $\tau$ is $W_{\infty}$ if $A_{\infty}=\bigcup\limits_{i=1}^
 of an input element $a_\tau$ is the time $\theta_{a_\tau}=inf(\hat{\tau}>\tau|W_{\hat{\tau}}\setminus{S_{\hat{\tau}}}\cap{Cl(D)(a_\tau)=\emptyset})$, where $Cl(D)$ is a transitive closure of the relation $D$.
 \end{definition}
 
-The main purpose of user state is to accumulate the information about input items. In most systems, user state is stored on disk or in external system, e.g., key-value storage. It is commonly assumed that $\forall{\tau:} ||{W_\tau}\setminus{S_\tau}||<m<<||S_\tau||$, where $m$ is the memory size of all computational units. Hence, for each input element $a_\tau$, there must be a nullification time $\theta_{a_\tau}$, thereafter all elements, which depend on $a_\tau$, are in user state. Since the nullification time, the input element can affect output elements only through the state. The concept of nullification is shown in Figure~\ref{nullification}.   
+The main purpose of user state is to accumulate the information about input items. In most systems, user state is stored on disk or in external system, e.g., key-value storage. It is commonly assumed that $||{W}\setminus{S}||<m<<||S||$, where $m$ is the memory size of all computational units. Hence, for each input element $a_\tau$, there must be a nullification time $\theta_{a_\tau}$, thereafter all elements, which depend on $a_\tau$, are in user state. Otherwise, $W\setminus{S}$ will be eventually overflowed. Since the nullification time, the input element can affect output elements only through the state. The concept of nullification is shown in Figure~\ref{nullification}.   
 
 \begin{figure}[htbp]
   \centering
@@ -162,7 +162,7 @@ $X^1=(W_{\theta_{x}},\mathbb{B}_{\theta_{x}}|p(W_{\theta_{x}},\mathbb{B}_{\theta
 $X^{*}=(W_{\theta_{x}},\mathbb{B}_{\theta_{x}}|p(W_{\theta_{x}},\mathbb{B}_{\theta_{x}}|x,a^{1}...a^\infty)\neq{0},\\
 \exists{i}:{a^i={x}},\exists{y:y\in{W_{\theta_{x}}\setminus{S_{\theta_x}}}\cap{Cl(D)(a^i)}})$
 
-These sets model the {\em observable} output and state of a stream processing engine. $X^0$ expresses the case, when element $x$ has not affected the system state and the output, so it is a forbidden behavior for at least once and exactly once guarantees. On the other hand, $X^{*}$ defines possible results, after $x$ has been nullified, but $a^i=x$ or its dependencies are in the system. Such behavior can cause inconsistencies in operations state due to duplicates and should not be observed if the system provides for at most once or exactly-once. Using these modeled sets now we can define guarantees.
+These sets model the {\em observable} output, current elements, and state of a stream processing engine. $X^0$ expresses the case, when element $x$ has not affected the system, so it is a forbidden behavior for at least once and exactly once guarantees. On the other hand, $X^{*}$ defines possible results, after $x$ has been nullified, but $a^i=x$ or its dependencies are in the system. Such behavior can cause inconsistencies in user state due to duplicates and should not be observed if the system provides for at most once or exactly-once. Using these modeled sets now we can define guarantees.
 
 \begin{definition}{At most once}
 guarantee is provided by a system iff $\forall{x,a^{1}...a^\infty}:X^{1}\cap{X^{*}}=\emptyset$
