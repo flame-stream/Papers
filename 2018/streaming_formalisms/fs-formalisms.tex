@@ -89,44 +89,50 @@ An obvious idea is to say that system state is a state of user-defined operation
 
 \section{Formalization of consistency guarantees}
 
-Facing the facts discussed above, let us try to dive into the internals of stream processing. Let $\tau\in{\mathbb{N}}$ be an exact global discrete time. Let $a_\tau$ be the element, which enters at the time $\tau$, and $b_\tau$ is the element, which leaves at the time $\tau$. 
+\begin{definition}{Stream processing system}
+is a tuple of $(\Gamma,D,W)$, where $\Gamma$ is all possible data flow elements, $D$ is dependency relation between elements, and $W$ is a system state. 
+\end{definition}
+
+\begin{definition}{Dependency relation}
+$D\subseteq{\Gamma\times\Gamma}$ is a binary transitive relation. Pair $(x,y)\in{D}$ iff $y$ can be generated from $x$ within logical graph operations.
+\end{definition}
+
+Let $\tau\in{\mathbb{N}}$ be an exact global discrete time. Let $a_\tau$ be the element, which enters at the time $\tau$, and $b_\tau$ is the element, which leaves at the time $\tau$. 
 
 \begin{definition}{System state}
-$W_\tau$ at the time $\tau$ is the set of elements, which are currently in the system, $W_0=\emptyset$. There are only three ways to modify this set:
+$W_\tau$ at the time $\tau$ is the set of elements, which are currently in the system:
+
+$W_0=\emptyset$:
 
 $W_{\tau+1}=\begin{sqcases}
 W_{\tau}\cup{a_\tau}, & \text{or}\\
 W_{\tau}\setminus{b_{\tau+1}}, & \text{or}\\
-W_{\tau}\setminus{X}\cup{Y}, X\subseteq{W_\tau},{Y}\subseteq{W_{\tau+1}} & \text{}.
+W_{\tau}\setminus{X}\cup{Y}, \forall{x\in{X}\exists{y\in{Y}}}:(x,y)\in{D} & \text{}.
 \end{sqcases}$
 
 \end{definition}
 
-The last expression illustrates elements transformation. There are two possible scenarios. The first one is a transformation into other elements due to, e.g., map operation. The second case is combining elements and states of operations into the new states. As it was mentioned above, states of operations can be considered as ordinary elements in the system without loss of generality. Hence, $W_\tau$ is a valid system state, because it contains both operations state and all elements, which are currently in the system, i.e., it contains a complete information about the elements, which have been already entered.
+The notion of dependency expresses two possible scenarios. The first one is a transformation into other elements due to, e.g., map operation. The second case is combining elements and states of operations into the new states. As it was mentioned above, states of operations can be considered as ordinary elements in the system without loss of generality.
+
+Here we can draw an analogy with {\em Herbrand semantics}...
+
+$W_\tau$ is a valid system state, because it contains both operations state and all elements, which are currently in the system, i.e., it contains a complete information about the elements, which have been already entered.
+
+In terms of this model, we can express any state-of-the-art stream processing system. For example, in Spark Streaming...
+
+The main purpose of the states of operations or {\em business logic state} is to accumulate the information about input items. It allows a system to not store all previous input elements in order to process a new one in a stateful user-defined operation. Hence, for each input element, there is a moment, since then all dependencies of this element are in business logic state. We can imagine a stream processing system as a pool, where some elements are poured in and others are poured out. The business logic states are the elements, which are kept in the pool if we stop pouring in and wait infinite time.
 
 \begin{definition}{Operations state or business-logic state}
-$S_\tau$ at the time $\tau$ is $W_\infty$ if $\forall t>\tau: a_t=\emptyset$.
+$S_\tau$ at the time $\tau<\infty$ is $W_\infty$ if $\forall t>\tau: a_t=\emptyset$.
 \end{definition}
-
-% In this setting, we can define operations state $S_\tau$ as $W$ if there are no input elements since time $\tau$, i.e. $\forall t>\tau: a_t=\emptyset$. Let us denote it as $S_\tau=W^{\infty}_\tau$. 
-
-We can imagine a stream processing system as a pool, where some elements are poured in and others are poured out. The business logic states are the elements, which are kept in the pool if we stop pouring in and wait infinite time.
-
-\begin{definition}{Dependency relation}
-$D$ is a transitive binary relation $D\subseteq{{\bigcup^{\infty}_{i=1}{W_i}}\times{{\bigcup^{\infty}_{i=1}{W_i}}}}$. Pair $(x,y)\in{D}$ iff $\exists{\tau,X,Y}:W_{\tau+1}=W_\tau\setminus{X}\cup{Y}, x\in{X}, y\in{Y}$.
-\end{definition}
-
-Here we can draw an analogy with {\em Herbrand semantics}, where the notion of dependency is used to describe on which transactions, current write operation depends on. Write operation depends on a transaction if the transaction is active. Therefore, commit is a defined point, since then a transaction cannot affect further writes. In our model, there is also a need to define such a moment, since then there are no elements in a system, which depend on $a_\tau$, except the business-logic state.
 
 \begin{definition}{Nullification time}
 of an input element $a_\tau$ is the time $\theta_{a_\tau}=inf(\hat{\tau}>\tau|W_{\hat{\tau}}\setminus{S_{\hat{\tau}}}\cap{Cl(D)(a_\tau)=\emptyset})$, where $Cl(D)$ is a transitive closure of the relation $D$.
 \end{definition}
 
 \begin{corollary}
-Element is nullified after all dependent output elements left a system: $\forall{a_{\tau_i}}\forall{b_{\tau_o}\in{Cl(D)(a_{\tau_i})}}:\theta_{a_{\tau_i}}>\tau_o$.
+Element is nullified after all dependent output elements left a system: $\forall{a_{\tau_i}}\forall{b_{\tau_o}\in{Cl(D)(a_{\tau_i})}}:\theta_{a_{\tau_i}}\geq\tau_o$.
 \end{corollary}
-
-Nullification time is a key concept within our model. It allows us to observe a moment when an input element starts to affect output elements only through the state. It should be noted that nullification is not only a theoretical concept, because it can be practically observed using, e.g., low watermarks or punctuations~\cite{Tucker:2003:EPS:776752.776780}. The concept of nullification is shown in Figure~\ref{nullification}.
 
 \begin{figure}[htbp]
   \centering
@@ -139,14 +145,15 @@ Nullification time is a key concept within our model. It allows us to observe a 
 $t$ is the time of input and nullification:
 
 $t=\begin{cases}
-\tau:\exists{a_{\tau}}, \\
+\tau_i:\exists{a_{\tau_i}}, \\
+\tau_o:\exists{b_{\tau_o}}, \\
 \theta_{a_\tau}.
 \end{cases}$
 \end{definition}
 
-The main purpose of time quantization is to provide observable points in time, which an input element is processed atomically with its non-state dependencies between. Further, we will consider a system only in terms of time $t$. Now we can model a system state and output elements for the cases of different input sets at some defined points in time. 
+Nullification time is a key concept within our model. It defines a moment when an input element starts to affect output elements only through the state. It should be noted that nullification is not only a theoretical concept, because it can be practically observed using, e.g., low watermarks or punctuations~\cite{Tucker:2003:EPS:776752.776780}. The concept of nullification is shown in Figure~\ref{nullification}. Time quantization allows us ???.
 
-Let $x,a^{1},a^\infty$ be input elements with arbitrary arrival times. $\mathbb{B}_t$ is all output elements by the time $t$:
+Let $x,a^{1},a^\infty$ be input elements with arbitrary arrival times. $\mathbb{B}_t$ are all output elements by the time $t$:
 
 $\mathbb{B}_t=\bigcup\limits_{i=1}^{t}{b_i}$
 
@@ -175,22 +182,43 @@ guarantee is provided by a system iff $\forall{x,a^{1}...a^\infty}:X^{1}\cap{X^{
 
 Now streaming consistency guarantees are defined in terms of correspondences between input, output and the system state. Custom system or user-defined semantics are not considered in this model, e.g., if the system drops all input items, it also can be claimed as supporting exactly-once. Looking from another side, our model formally describes which properties are {\em exactly} supported by state-of-the-art stream processing systems, such as Flink, Storm, Spark Streaming, Samza, etc, so we can discuss its properties in unified terms. What is more important, we demonstrated that guarantees, which are misleadingly called {\em delivery}, in practice affect data {\em consistency} as well.
 
-\section{Additional properties and notes}
+\section{Implementation properties and notes}
 
-Let $a_1...a_\infty$ be ordered in time input elements.
+In this section, we formally define some additional concepts and demonstrate a potential way to reduce latency overhead on consistency guarantees. We mainly consider exactly once, because it is the strongest guarantee, which is extremely valuable in practice.	
 
-\begin{definition}{Consistent state snapshot}
-$S^{t_s}_0$ at time $t_s$ is a business-logic state $S^{t_s}_0=S_{t_s}$ such that $\forall{t>{t_s}} \forall{a_0..a_t..a_\infty}:???$.
+The key question within the preservation of consistency guarantees is how to recover the system after a failure. Assume that system fails at time $\tau_f$. The naive idea is to simply start processing from the very beginning, i.e., to set $W_{\tau_f+1}=\emptyset$, $a_{\tau_f+1}=a_1,...a_{\tau_f+\tau_f}=a_{\tau_f},a_{\tau_f+\tau_f+1}=a_{\tau_f+1}...$. However, it is impossible, because we cannot store the whole potentially infinite input stream.
+
+\begin{definition}{Snapshot}
+$P_0^{\tau_s}$ at time $\tau_s$ is persistently stored $W_{\tau_s}$ such that in case of failure at time $\tau_f>\tau_s$, $W_{\tau_f+1}=P_0^{\tau_s}$, $a_{\tau_f+1}=a_{\tau_s+1}...a_{2\tau_f-\tau_s}=a_{\tau_f}...$.
 \end{definition}
 
-\begin{definition}{Data processing system is {\em deterministic}}
-if \\
-$\forall{t} \forall{n\geq1} \forall{a_1...a_n}\exists{S_t,\mathbb{B}_t={\{b_1...b_m\}}}:p(S_t,\mathbb{B}_t|a_1...a_n)=1$.
-\end{definition}
+Snapshots allow system to restart processing since defined points and to not replay the whole input stream. State of the art stream processing systems mostly use two approaches for taking snapshots. The first one is snapshotting each $W_\tau$ and it is the way how Google MillWheel is implemented. MillWheel persistently stores input and output items of each operation together with user state within an atomic write operation. This approach is called {\em strong productions}. The second way is 
 
-\begin{definition}{Data processing system is {\em effectively deterministic}}
-if $\forall{t} \forall{n\geq1} \forall{a_1...a_n}\exists{\mathbb{B}_t={\{b_1...b_m\}}}:p(\mathbb{B}_t|a_1...a_n)=1$.
-\end{definition}
+\section{Plan}
+
+1. Определение системы: $\Gamma,D,W_\tau$.
+
+2. Ванна, семантики, Spark Streaming
+
+3. Пользовательский стейт и как им пользоваться. Картинка: как элементы могут идти через стейт и напрямую.
+
+4. Рассуждение о накоплении информации в дополнении к пользовательскому стейту. Противоречие. Как следствие, моменты дырок.
+
+5. Квантизация и наблюдение за дырками. Отсутсвие активности и лоу вотермарки. Перешли от непонятного времени к наблюдаемому.
+
+8. Теперь давайте определим гарантии. ИКСЫ + Гарантии.
+
+% 9. Это были гарантии доставки?
+
+6. Все было бы круто и легко, но система может падать. Не хотим идти с начала. Иначе - батчинг. Снепшот - можем сохранить $W_\tau$. 
+
+7. Для этого либо "сдуть", либо как есть. Сдуть значит остановить вход до момента, пока $W_\tau=S_\tau$. По этому пути идут все. По другому -  MillWheel.
+
+5. Рассуждение о том, как дырки соотносятся с выходными элементами. Дырки не могут образовываться до выхода. Только полсе или совместно. Вред от того, если дырка образуется после выхода.
+
+7. Если дырки образуются после выхода элемента, то есть элементы, которые не попали в снепшот. Теорема. 
+
+Давайте разберем несколько практических реализаций
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{../../bibliography/flame-stream.bib}
