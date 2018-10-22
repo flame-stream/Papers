@@ -206,7 +206,7 @@ Snapshot at time $t_s$ is consistent if and only if $W_{t_s}=S_{t_s}$ and $\fora
 \end{theorem}
 
 \begin{theorem}
-A system provides at most once guarantee only if all snapshots are consistent.  
+A system provides for at most once guarantee only if all snapshots are consistent.  
 \end{theorem}
 
 There are a lot of approaches for taking consistent snapshots...
@@ -217,6 +217,11 @@ Let $a_1...a_\infty$ be ordered in time input elements.
 if \\
 $\forall{t} \forall{n\geq1} \forall{a_1...a_n}\exists{W_t,\mathbb{B}_t={\{b_1...b_m\}}}:p(W_t,\mathbb{B}_t|a_1...a_n)=1$.
 \end{definition}
+
+\begin{theorem}
+A non-deterministic system provides for at most once guarantee only if for any ${t_o}:\exists{b_{t_o}}$, $\exists{P^{c}_{t_o}}$.  
+\end{theorem}
+
 
 % \section{Plan}
 
