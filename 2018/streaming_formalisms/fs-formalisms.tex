@@ -83,24 +83,24 @@ A tricky thing in these seemingly simple definitions is that output item depends
 
 However, lack of formalism in the definitions of such streaming consistency guarantees is constantly causing debates and misunderstandings~\cite{JerryPengStreamIO, PaperTrail}. There is a need to introduce formal definitions in order to describe what exactly state-of-the-art stream processing engines guarantee. Such formalisms can also help to illustrate the differences between existing approaches.
 
-In order to make our mathematical model independent of any implementation, we consider streaming consistency guarantees as correspondences between input and output streams and system state. If we formulate guarantees only in these terms, they can be applied to any system. However, the question of what to consider as a system state is a little bit sophisticated. At a very high-level, we can define a state as a {\em information} about input elements, which have been previously entered the system.  
+% In order to make our mathematical model independent of any implementation, we consider streaming consistency guarantees as correspondences between input and output streams and system state. If we formulate guarantees only in these terms, they can be applied to any system. However, the question of what to consider as a system state is a little bit sophisticated. At a very high-level, we can define a state as a {\em information} about input elements, which have been previously entered the system.  
 
-An obvious idea is to say that system state is a state of user-defined operations, i.e., so-called {\em business logic} state. The main purpose of the states of operations is to accumulate the information about input items. It allows a system to not store all previous input elements in order to process a new one in a stateful user-defined operation. However, output items can be affected not only by input ones and operations state but also by other elements, which are currently in the system. For instance, if cycles are allowed in a logical graph, cycling elements can affect output ones, but they do not belong to a state. In-flight elements can also influence the result, being not in the state. These examples demonstrate the evident fact that information about input elements can be contained not only in the states of operations but in data flow elements as well.
+% An obvious idea is to say that system state is a state of user-defined operations, i.e., so-called {\em business logic} state. The main purpose of the states of operations is to accumulate the information about input items. It allows a system to not store all previous input elements in order to process a new one in a stateful user-defined operation. However, output items can be affected not only by input ones and operations state but also by other elements, which are currently in the system. For instance, if cycles are allowed in a logical graph, cycling elements can affect output ones, but they do not belong to a state. In-flight elements can also influence the result, being not in the state. These examples demonstrate the evident fact that information about input elements can be contained not only in the states of operations but in data flow elements as well.
 
 \section{Formalization of consistency guarantees}
 
 \begin{definition}{Stream processing system}
-is a tuple of $(\Gamma,D,W)$, where $\Gamma$ is all possible data flow elements, $D$ is dependency relation between elements, and $W$ is a system state. 
+is a tuple of $(\Gamma,D,W)$, where $\Gamma$ is all possible data flow elements, $D$ is dependency relation between elements, and $W$ is a set of elements in a system. 
 \end{definition}
 
 \begin{definition}{Dependency relation}
 $D\subseteq{\Gamma\times\Gamma}$ is a binary transitive relation. Pair $(x,y)\in{D}$ iff $y$ can be generated from $x$ within logical graph operations.
 \end{definition}
 
-Let $\tau\in{\mathbb{N}}$ be an exact global discrete time. Let $a_\tau$ be the element, which enters at the time $\tau$, and $b_\tau$ is the element, which leaves at the time $\tau$. 
+Let $\tau\in{\mathbb{N}}$ be an exact global discrete time. Let $a_\tau\in{\Gamma}$ be the element, which enters at the time $\tau$, and $b_\tau\in{\Gamma}$ is the element, which leaves at the time $\tau$. 
 
-\begin{definition}{System state}
-$W_\tau$ at the time $\tau$ is the set of elements, which are currently in the system:
+\begin{definition}{Working set}
+$W_\tau\subseteq{\Gamma}$ at the time $\tau$ is the set of elements, which are currently in the system:
 
 $W_0=\emptyset$:
 
@@ -112,27 +112,23 @@ W_{\tau}\setminus{X}\cup{Y}, \forall{x\in{X}\exists{y\in{Y}}}:(x,y)\in{D} & \tex
 
 \end{definition}
 
-The notion of dependency expresses two possible scenarios. The first one is a transformation into other elements due to, e.g., map operation. The second case is combining elements and states of operations into the new states. As it was mentioned above, states of operations can be considered as ordinary elements in the system without loss of generality.
+We can imagine a stream processing system as a pool, where some elements are poured in and others are poured out. Inside a pool each element can be substituted by the other element, which can be substituted as well, and so on. Only survived elements are poured out from the pool.
 
-Here we can draw an analogy with {\em Herbrand semantics}...
+In terms of proposed definitions, we can declare any state-of-the-art stream processing system. In Storm, $\Gamma$ contains all possible {\em Tuples}, while in Flink all {\em StreamRecords}. The notion of dependency $D$ expresses two possible scenarios. The first one is a transformation into other elements due to, e.g., {\em Bolts} in Storm or {\em Operators} in Flink. In this case, transformed elements depend on original ones. The second option is combining an element and a {\em state} into the new state. It implies that the new state depends on the previous state and the element. In both Storm and Flink, state can be managed using state handlers, e.g., {\em KeyValueState} in Storm and {\em ValueState} in Flink. Technically, states in these systems are not data flow elements, but as it was mentioned above, they can be considered as data flow elements without loss of generality.
 
-$W_\tau$ is a valid system state, because it contains both operations state and all elements, which are currently in the system, i.e., it contains a complete information about the elements, which have been already entered.
+Regarding dependencies, we can draw an analogy with {\em Herbrand semantics}, where transitive binary relations are used to express, which write operations affect the read operation.
 
-In terms of this model, we can express any state-of-the-art stream processing system. For example, in Spark Streaming...
+Let $A_{\infty}=\bigcup\limits_{i=1}^{\infty}{a_i}$ be a set of all input elements.
 
-The main purpose of the states of operations or {\em business logic state} is to accumulate the information about input items. It allows a system to not store all previous input elements in order to process a new one in a stateful user-defined operation. Hence, for each input element, there is a moment, since then all dependencies of this element are in business logic state. We can imagine a stream processing system as a pool, where some elements are poured in and others are poured out. The business logic states are the elements, which are kept in the pool if we stop pouring in and wait infinite time.
-
-\begin{definition}{Operations state or business-logic state}
-$S_\tau$ at the time $\tau<\infty$ is $W_\infty$ if $\forall t>\tau: a_t=\emptyset$.
+\begin{definition}{User or business-logic state}
+$S_\tau$ at the time $\tau$ is $W_{\infty}$ if $A_{\infty}=\bigcup\limits_{i=1}^{\tau}{a_i}$.
 \end{definition}
 
 \begin{definition}{Nullification time}
 of an input element $a_\tau$ is the time $\theta_{a_\tau}=inf(\hat{\tau}>\tau|W_{\hat{\tau}}\setminus{S_{\hat{\tau}}}\cap{Cl(D)(a_\tau)=\emptyset})$, where $Cl(D)$ is a transitive closure of the relation $D$.
 \end{definition}
 
-\begin{corollary}
-Element is nullified after all dependent output elements left a system: $\forall{a_{\tau_i}}\forall{b_{\tau_o}\in{Cl(D)(a_{\tau_i})}}:\theta_{a_{\tau_i}}\geq\tau_o$.
-\end{corollary}
+The main purpose of user state is to accumulate the information about input items. In most systems, user state is stored on disk or in external system, e.g., key-value storage. It is commonly assumed that $\forall{\tau:} ||{W_\tau}\setminus{S_\tau}||<m<<||S_\tau||$, where $m$ is the memory size of all computational units. Hence, for each input element $a_\tau$, there must be a nullification time $\theta_{a_\tau}$, thereafter all elements, which depend on $a_\tau$, are in user state. Since the nullification time, the input element can affect output elements only through the state. The concept of nullification is shown in Figure~\ref{nullification}.   
 
 \begin{figure}[htbp]
   \centering
@@ -142,7 +138,7 @@ Element is nullified after all dependent output elements left a system: $\forall
 \end{figure}
 
 \begin{definition}{Time quantization}
-$t$ is the time of input and nullification:
+$t$ is the time of input, output, and nullification:
 
 $t=\begin{cases}
 \tau_i:\exists{a_{\tau_i}}, \\
@@ -151,7 +147,7 @@ $t=\begin{cases}
 \end{cases}$
 \end{definition}
 
-Nullification time is a key concept within our model. It defines a moment when an input element starts to affect output elements only through the state. It should be noted that nullification is not only a theoretical concept, because it can be practically observed using, e.g., low watermarks or punctuations~\cite{Tucker:2003:EPS:776752.776780}. The concept of nullification is shown in Figure~\ref{nullification}. Time quantization allows us ???.
+Time quantization allows us to consider only {\em observable} points in time. The time of input and output elements is obviously observed by any system. The mechanisms for tracking nullification vary slightly more. In Storm, special agent called {\em Acker} is used. In Flink, nullification time is tracked using {\em low watermarks}. In Spark Streaming nullification time for each element in a micro-batch coincides with the time, when the micro-batch is fully processed.
 
 Let $x,a^{1},a^\infty$ be input elements with arbitrary arrival times. $\mathbb{B}_t$ are all output elements by the time $t$:
 
@@ -180,7 +176,9 @@ guarantee is provided by a system iff $\forall{x,a^{1}...a^\infty}:X^{0}\cap{X^{
 guarantee is provided by a system iff $\forall{x,a^{1}...a^\infty}:X^{1}\cap{X^{*}}=\emptyset \wedge X^{0}\cap{X^{1}}=\emptyset$
 \end{definition}
 
-Now streaming consistency guarantees are defined in terms of correspondences between input, output and the system state. Custom system or user-defined semantics are not considered in this model, e.g., if the system drops all input items, it also can be claimed as supporting exactly-once. Looking from another side, our model formally describes which properties are {\em exactly} supported by state-of-the-art stream processing systems, such as Flink, Storm, Spark Streaming, Samza, etc, so we can discuss its properties in unified terms. What is more important, we demonstrated that guarantees, which are misleadingly called {\em delivery}, in practice affect data {\em consistency} as well.
+% Now streaming consistency guarantees are defined in terms of correspondences between input, output and the system state. Custom system or user-defined semantics are not considered in this model, e.g., if the system drops all input items, it also can be claimed as supporting exactly-once. Looking from another side, our model formally describes which properties are {\em exactly} supported by state-of-the-art stream processing systems, such as Flink, Storm, Spark Streaming, Samza, MillWheel, etc, so we can discuss its properties in unified terms.
+
+We defined streaming consistency guarantees in terms of the proposed model. This model is suitable for state-of-the-art stream processing systems, such as Flink, Storm, Spark Streaming, Samza, MillWheel, etc, so now we can discuss its properties in unified terms.
 
 \section{Implementation properties and notes}
 
