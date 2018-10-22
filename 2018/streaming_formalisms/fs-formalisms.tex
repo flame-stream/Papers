@@ -32,6 +32,7 @@
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}
 \newtheorem{corollary}{Corollary}
+\newtheorem{theorem}{Theorem}
 
 \settopmatter{printacmref=false, printccs=true, printfolios=true}
 \pagestyle{plain} % removes running headers
@@ -112,9 +113,9 @@ W_{\tau}\setminus{X}\cup{Y}, \forall{x\in{X}\exists{y\in{Y}}}:(x,y)\in{D} & \tex
 
 \end{definition}
 
-We can imagine a stream processing system as a pool, where some elements are poured in and others are poured out. Inside a pool each element can be substituted by the other element, which can be substituted as well, and so on. Only survived elements are poured out from the pool.
+We can imagine a stream processing system as a pool, where some elements are poured in and others are poured out. Inside a pool, each element can be substituted by the other element, which can be substituted as well, and so on. Only survived elements are poured out from the pool.
 
-In terms of proposed definitions, we can declare any state-of-the-art stream processing system. In Storm, $\Gamma$ contains all possible {\em Tuples}, while in Flink all {\em StreamRecords}. The notion of dependency $D$ expresses two possible scenarios. The first one is a transformation into other elements due to, e.g., {\em Bolts} in Storm or {\em Operators} in Flink. In this case, transformed elements depend on original ones. The second option is combining an element and a {\em state} into the new state. It implies that the new state depends on the previous state and the element. In both Storm and Flink, state can be managed using state handlers, e.g., {\em KeyValueState} in Storm and {\em ValueState} in Flink. Technically, states in these systems are not data flow elements, but as it was mentioned above, they can be considered as data flow elements without loss of generality.
+In terms of proposed definitions, we can declare any state-of-the-art stream processing system. In Storm, $\Gamma$ contains all possible {\em Tuples}, while in Flink all {\em StreamRecords}. The notion of dependency $D$ expresses two possible scenarios. The first one is a transformation into other elements due to, e.g., {\em Bolts} in Storm or {\em Operators} in Flink. In this case, transformed elements depend on original ones. The second option is combining an element and a {\em state} into the new state. It implies that the new state depends on the previous state and the element. In both Storm and Flink, a state can be managed using state handlers, e.g., {\em KeyValueState} in Storm and {\em ValueState} in Flink. Technically, states in these systems are not data flow elements, but as it was mentioned above, they can be considered as data flow elements without loss of generality.
 
 Regarding dependencies, we can draw an analogy with {\em Herbrand semantics}, where transitive binary relations are used to express, which write operations affect the read operation.
 
@@ -128,7 +129,7 @@ $S_\tau$ at the time $\tau$ is $W_{\infty}$ if $A_{\infty}=\bigcup\limits_{i=1}^
 of an input element $a_\tau$ is the time $\theta_{a_\tau}=inf(\hat{\tau}>\tau|W_{\hat{\tau}}\setminus{S_{\hat{\tau}}}\cap{Cl(D)(a_\tau)=\emptyset})$, where $Cl(D)$ is a transitive closure of the relation $D$.
 \end{definition}
 
-The main purpose of user state is to accumulate the information about input items. In most systems, user state is stored on disk or in external system, e.g., key-value storage. It is commonly assumed that $||{W}\setminus{S}||<m<<||S||$, where $m$ is the memory size of all computational units. Hence, for each input element $a_\tau$, there must be a nullification time $\theta_{a_\tau}$, thereafter all elements, which depend on $a_\tau$, are in user state. Otherwise, $W\setminus{S}$ will be eventually overflowed. Since the nullification time, the input element can affect output elements only through the state. The concept of nullification is shown in Figure~\ref{nullification}.   
+The main purpose of user state is to accumulate the information about input items. In most systems, the user state is stored on disk or in the external system, e.g., key-value storage. It is commonly assumed that $||{W}\setminus{S}||<m<<||S||$, where $m$ is the memory size of all computational units. Hence, for each input element $a_\tau$, there must be a nullification time $\theta_{a_\tau}$, thereafter all elements, which depend on $a_\tau$, are in the user state. Otherwise, $W\setminus{S}$ will be eventually overflowed. Since the nullification time, the input element can affect output elements only through the state. The concept of nullification is shown in Figure~\ref{nullification}.   
 
 \begin{figure}[htbp]
   \centering
@@ -147,7 +148,7 @@ $t=\begin{cases}
 \end{cases}$
 \end{definition}
 
-Time quantization allows us to consider only {\em observable} points in time. The time of input and output elements is obviously observed by any system. The mechanisms for tracking nullification vary slightly more. In Storm, special agent called {\em Acker} is used. In Flink, nullification time is tracked using {\em low watermarks}. In Spark Streaming nullification time for each element in a micro-batch coincides with the time, when the micro-batch is fully processed.
+Time quantization allows us to consider only {\em observable} points in time. The time of input and output elements is obviously observed by any system. The mechanisms for tracking nullification vary slightly more. In Storm, a special agent called {\em Acker} is used. In Flink, nullification time is tracked using {\em low watermarks}. In Spark Streaming nullification time for each element in a micro-batch coincides with the time, when the micro-batch is fully processed.
 
 Let $x,a^{1},a^\infty$ be input elements with arbitrary arrival times. $\mathbb{B}_t$ are all output elements by the time $t$:
 
@@ -182,41 +183,66 @@ We defined streaming consistency guarantees in terms of the proposed model. This
 
 \section{Implementation properties and notes}
 
-In this section, we formally define some additional concepts and demonstrate a potential way to reduce latency overhead on consistency guarantees. We mainly consider exactly once, because it is the strongest guarantee, which is extremely valuable in practice.	
+% In this section, we formally define some additional concepts and demonstrate a potential way to reduce latency overhead on consistency guarantees. We mainly consider exactly once, because it is the strongest guarantee, which is extremely valuable in practice.    
 
-The key question within the preservation of consistency guarantees is how to recover the system after a failure. Assume that system fails at time $\tau_f$. The naive idea is to simply start processing from the very beginning, i.e., to set $W_{\tau_f+1}=\emptyset$, $a_{\tau_f+1}=a_1,...a_{\tau_f+\tau_f}=a_{\tau_f},a_{\tau_f+\tau_f+1}=a_{\tau_f+1}...$. However, it is impossible, because we cannot store the whole potentially infinite input stream.
-
-\begin{definition}{Snapshot}
-$P_0^{\tau_s}$ at time $\tau_s$ is persistently stored $W_{\tau_s}$ such that in case of failure at time $\tau_f>\tau_s$, $W_{\tau_f+1}=P_0^{\tau_s}$, $a_{\tau_f+1}=a_{\tau_s+1}...a_{2\tau_f-\tau_s}=a_{\tau_f}...$.
+\begin{definition}{System failures}
+are the time moments, when the system loses its working set. 
 \end{definition}
 
-Snapshots allow system to restart processing since defined points and to not replay the whole input stream. State of the art stream processing systems mostly use two approaches for taking snapshots. The first one is snapshotting each $W_\tau$ and it is the way how Google MillWheel is implemented. MillWheel persistently stores input and output items of each operation together with user state within an atomic write operation. This approach is called {\em strong productions}. The second way is 
+Assume that the system fails at time $\tau_f$. The naive idea for recovering is to simply start processing from the very beginning, i.e., to set $W_{\tau_f+1}=\emptyset$ and to replay the whole input stream. However, storing and replaying the whole input stream is inefficient in terms of both memory and time consumption.
 
-\section{Plan}
+\begin{definition}{Snapshot}
+$P_{t_s}$ at time $t_s$ is persistently stored $W_{t_s}$ that is not lost even in case of failure.
+\end{definition}
 
-1. Определение системы: $\Gamma,D,W_\tau$.
+Snapshots allow system to restart processing since defined points and to not replay the whole input stream. Suppose, there is a snapshot at time $t_s$ and a system fails at time $\tau_f>t_s$. In order to recover processing, system sets $W_{\tau_f+1}=P_{t_s}$ and requests for replay elements $a$ such that $\forall{y\in{Cl(D)(a)}}:y\notin{P_{t_s}}$. The idea of taking snapshots is illustrated in Figure~\ref{snapshotting}.
 
-2. Ванна, семантики, Spark Streaming
+\begin{definition}{Consistent snapshot}
+$P^{c}_{t_s}$ at time $t_s$ is a snapshot such that $\forall{a}\in{Cl^{-1}(D)(P^{c}_{t_s})}:\exists{\theta_a}$.
+\end{definition}
 
-3. Пользовательский стейт и как им пользоваться. Картинка: как элементы могут идти через стейт и напрямую.
+\begin{theorem}
+Snapshot at time $t_s$ is consistent if and only if $W_{t_s}=S_{t_s}$ and $\forall{a}\in{Cl^{-1}(D)(S_{t_s})}:\exists{\theta_a}$. 
+\end{theorem}
 
-4. Рассуждение о накоплении информации в дополнении к пользовательскому стейту. Противоречие. Как следствие, моменты дырок.
+\begin{theorem}
+A system provides at most once guarantee only if all snapshots are consistent.  
+\end{theorem}
 
-5. Квантизация и наблюдение за дырками. Отсутсвие активности и лоу вотермарки. Перешли от непонятного времени к наблюдаемому.
+There are a lot of approaches for taking consistent snapshots...
 
-8. Теперь давайте определим гарантии. ИКСЫ + Гарантии.
+Let $a_1...a_\infty$ be ordered in time input elements.
 
-% 9. Это были гарантии доставки?
+\begin{definition}{Data processing system is {\em deterministic}}
+if \\
+$\forall{t} \forall{n\geq1} \forall{a_1...a_n}\exists{W_t,\mathbb{B}_t={\{b_1...b_m\}}}:p(W_t,\mathbb{B}_t|a_1...a_n)=1$.
+\end{definition}
 
-6. Все было бы круто и легко, но система может падать. Не хотим идти с начала. Иначе - батчинг. Снепшот - можем сохранить $W_\tau$. 
+% \section{Plan}
 
-7. Для этого либо "сдуть", либо как есть. Сдуть значит остановить вход до момента, пока $W_\tau=S_\tau$. По этому пути идут все. По другому -  MillWheel.
+% 1. Определение системы: $\Gamma,D,W_\tau$.
 
-5. Рассуждение о том, как дырки соотносятся с выходными элементами. Дырки не могут образовываться до выхода. Только полсе или совместно. Вред от того, если дырка образуется после выхода.
+% 2. Ванна, семантики, Spark Streaming
 
-7. Если дырки образуются после выхода элемента, то есть элементы, которые не попали в снепшот. Теорема. 
+% 3. Пользовательский стейт и как им пользоваться. Картинка: как элементы могут идти через стейт и напрямую.
 
-Давайте разберем несколько практических реализаций
+% 4. Рассуждение о накоплении информации в дополнении к пользовательскому стейту. Противоречие. Как следствие, моменты дырок.
+
+% 5. Квантизация и наблюдение за дырками. Отсутсвие активности и лоу вотермарки. Перешли от непонятного времени к наблюдаемому.
+
+% 8. Теперь давайте определим гарантии. ИКСЫ + Гарантии.
+
+% % 9. Это были гарантии доставки?
+
+% 6. Все было бы круто и легко, но система может падать. Не хотим идти с начала. Иначе - батчинг. Снепшот - можем сохранить $W_\tau$. 
+
+% 7. Для этого либо "сдуть", либо как есть. Сдуть значит остановить вход до момента, пока $W_\tau=S_\tau$. По этому пути идут все. По другому -  MillWheel.
+
+% 5. Рассуждение о том, как дырки соотносятся с выходными элементами. Дырки не могут образовываться до выхода. Только полсе или совместно. Вред от того, если дырка образуется после выхода.
+
+% 7. Если дырки образуются после выхода элемента, то есть элементы, которые не попали в снепшот. Теорема. 
+
+% Давайте разберем несколько практических реализаций
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{../../bibliography/flame-stream.bib}
