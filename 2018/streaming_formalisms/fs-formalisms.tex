@@ -211,7 +211,7 @@ Our notion of consistent state snapshot modifies the classical definition of {\e
 
 One popular method for taking consistent state snapshot is to artificially reproduce a moment $t_s$, when $\forall{a}\in{Cl^{-1}(D)(S_{t_s})}:\exists{\theta_a}$, and to save obtained $S_{t_s}$. Such approach is adopted in Apache Flink~\cite{Carbone:2017:SMA:3137765.3137777} and Apache Storm~\cite{apache:storm:state}. They achieve consistent state by injecting special elements called {\em checkpoints} into the input elements. Checkpoints go through the same network channels as ordinary elements and push all inverted dependencies of inputs through the system. Each operation in data flow prepares its snapshot independently at the moment of checkpoint arriving. Global snapshot is taken when checkpoint passes through the whole data flow. 
 
-Checkpoints can cause latency overhead because they can temporarily block input of an operation. This approach can be potentially relaxed if there is a mechanism to retrieve only a consistent part of each operation state at any moment in time. In this case, there is no need to technically reproduce a moment, when it is consistent, in order to obtain it.
+Checkpoints cause latency overhead because they periodically block some inputs of an operation with multiple inputs. This behavior is knows as {\em checkpoints alignment}. Consistent state snapshotting can be potentially relaxed if there is a mechanism to retrieve only a consistent part of each operation state at any moment in time. In this case, there is no need to technically reproduce a moment, when it is consistent, in order to obtain it.
 
 Another property that directly affects consistency guarantees is {\em determinism}. Let $a_1...a_\infty$ be ordered in time input elements.
 
