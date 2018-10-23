@@ -189,29 +189,31 @@ We defined streaming consistency guarantees in terms of the proposed model. This
 are the time moments, when the system loses its working set. 
 \end{definition}
 
-Assume that the system fails at time $\tau_f$. The naive idea for recovering is to simply start processing from the very beginning, i.e., to set $W_{\tau_f+1}=\emptyset$ and to replay the whole input stream. However, storing and replaying the whole input stream is inefficient in terms of both memory and time consumption.
+Assume that the system fails at time $\tau_f$. The naive idea for recovering is to simply start processing from the very beginning, i.e., to set $W_{\tau_f+1}=\emptyset$ and to replay the whole input stream. However, storing and replaying the whole input stream is inefficient in terms of both memory and time consuming and can violate consistency guarantees.
 
 \begin{definition}{Snapshot}
-at time $t_s$ is persistently stored $P_{t_s}\subseteq{W_{t_s}}$ that is not lost even in case of failure.
+at time $\tau_s$ is persistently stored $P_{\tau_s}\subseteq{W_{\tau_s}}$ that is not lost even in case of failure.
 \end{definition}
 
-Snapshots allow system to restart processing since defined points and to not replay the whole input stream. Suppose, there is a snapshot at time $t_s$ and a system fails at time $\tau_f>t_s$. In order to recover processing, system sets $W_{\tau_f+1}=P_{t_s}$ and requests for replay elements $a$ such that $\forall{y\in{Cl(D)(a)}}:y\notin{P_{t_s}}$. The idea of taking snapshots is illustrated in Figure~\ref{snapshotting}.
+Snapshots allow a system to restart processing since defined points. One approach for taking snapshots is to save (or update) the whole $W_{\tau}$ on each $\tau$. In this case, there is no need to replay input elements, because the system can completely restore computations using only a snapshot. Google MillWheel uses this method for recovering. {\em Strong productions} mechanism allows MillWheel to preserve exactly-once guarantee for the price of persistent updates of $P_\tau=W_\tau$ on each $\tau$~\cite{Akidau:2013:MFS:2536222.2536229}.    
 
-\begin{definition}{Consistent snapshot}
-$P^{c}_{t_s}$ at time $t_s$ is a snapshot such that $\forall{a}\in{Cl^{-1}(D)(P^{c}_{t_s})}:\exists{\theta_a}$.
+Another approach is to take so-called {\em state snapshots}. This kind of snapshots is considered in practice only within the time quantization $t$. It assumes that $\forall{t_s}:P_{t_s}=S_{t_s}$ and requires replay of input element. Suppose, there is a state snapshot at time $t_s$ and a system fails at time $\tau_f>t_s$. In order to recover processing, system sets $W_{\tau_f+1}=P_{t_s}$ and requests for replay elements $a$ such that $\forall{y\in{Cl(D)(a)}}:y\notin{P_{t_s}}$. The idea of taking snapshots is illustrated in Figure~\ref{snapshotting}.
+
+\begin{definition}{Consistent state snapshot}
+$P^{c}_{t_s}=S_{t_s}$ at time $t_s$ is a snapshot such that $\forall{a}\in{Cl^{-1}(D)(P^{c}_{t_s})}:\exists{\theta_a}$.
 \end{definition}
 
 \begin{theorem}
-Snapshot at time $t_s$ is consistent if and only if $W_{t_s}=S_{t_s}$ and $\forall{a}\in{Cl^{-1}(D)(S_{t_s})}:\exists{\theta_a}$. 
+A system, that uses state snapshots for recovery, provides for at most once guarantee only if all state snapshots are consistent.  
 \end{theorem}
 
-\begin{theorem}
-A system provides for at most once guarantee only if all snapshots are consistent.  
-\end{theorem}
+Our notion of consistent state snapshot modifies the classical definition of {\em consistent distributed snapshot} proposed in~\cite{Chandy:1985:DSD:214451.214456} for the case where dependencies between messages exist and input element must be applied to state atomically with its inversed dependencies. This notion is natural for stream processing systems because as it was shown, it is directly connected with streaming consistency guarantees. 
 
-There are a lot of approaches for taking consistent snapshots...
+One popular method for taking consistent state snapshot is to artificially reproduce a moment $t_s$, when $\forall{a}\in{Cl^{-1}(D)(S_{t_s})}:\exists{\theta_a}$, and to save obtained $S_{t_s}$. Such approach is adopted in Apache Flink~\cite{Carbone:2017:SMA:3137765.3137777} and Apache Storm~\cite{apache:storm:state}. They achieve consistent state by injecting special elements called {\em checkpoints} into the input elements. Checkpoints go through the same network channels as ordinary elements and push all inverted dependencies of inputs through the system. Each operation in data flow prepares its snapshot independently at the moment of checkpoint arriving. Global snapshot is taken when checkpoint passes through the whole data flow. 
 
-Let $a_1...a_\infty$ be ordered in time input elements.
+Checkpoints can cause latency overhead because they can temporarily block input of an operation. This approach can be potentially relaxed if there is a mechanism to retrieve only a consistent part of each operation state at any moment in time. In this case, there is no need to technically reproduce a moment, when it is consistent, in order to obtain it.
+
+Another property that directly affects consistency guarantees is {\em determinism}. Let $a_1...a_\infty$ be ordered in time input elements.
 
 \begin{definition}{Data processing system is {\em deterministic}}
 if \\
@@ -221,7 +223,6 @@ $\forall{t} \forall{n\geq1} \forall{a_1...a_n}\exists{W_t,\mathbb{B}_t={\{b_1...
 \begin{theorem}
 A non-deterministic system provides for at most once guarantee only if for any ${t_o}:\exists{b_{t_o}}$, $\exists{P^{c}_{t_o}}$.  
 \end{theorem}
-
 
 % \section{Plan}
 
