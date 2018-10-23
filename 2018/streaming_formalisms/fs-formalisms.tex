@@ -95,7 +95,7 @@ is a tuple of $(\Gamma,D,W)$, where $\Gamma$ is all possible data flow elements,
 \end{definition}
 
 \begin{definition}{Dependency relation}
-$D\subseteq{\Gamma\times\Gamma}$ is a binary transitive relation. Pair $(x,y)\in{D}$ iff $y$ can be generated from $x$ within logical graph operations.
+$D\subseteq{\Gamma\times\Gamma}$ is a binary relation. Pair $(x,y)\in{D}$ iff $y$ can be generated from $x$ within logical graph operations.
 \end{definition}
 
 Let $\tau\in{\mathbb{N}}$ be an exact global discrete time. Let $a_\tau\in{\Gamma}$ be the element, which enters at the time $\tau$, and $b_\tau\in{\Gamma}$ is the element, which leaves at the time $\tau$. 
@@ -117,7 +117,7 @@ We can imagine a stream processing system as a pool, where some elements are pou
 
 In terms of proposed definitions, we can declare any state-of-the-art stream processing system. In Storm, $\Gamma$ contains all possible {\em Tuples}, while in Flink all {\em StreamRecords}. The notion of dependency $D$ expresses two possible scenarios. The first one is a transformation into other elements due to, e.g., {\em Bolts} in Storm or {\em Operators} in Flink. In this case, transformed elements depend on original ones. The second option is combining an element and a {\em state} into the new state. It implies that the new state depends on the previous state and the element. In both Storm and Flink, a state can be managed using state handlers, e.g., {\em KeyValueState} in Storm and {\em ValueState} in Flink. Technically, states in these systems are not data flow elements, but as it was mentioned above, they can be considered as data flow elements without loss of generality.
 
-Regarding dependencies, we can draw an analogy with {\em Herbrand semantics}, where transitive binary relations are used to express, which write operations affect the read operation.
+Regarding dependencies, we can draw an analogy with {\em Herbrand semantics}, where binary relation is used to express, which write operations affect the read operation.
 
 Let $A_{\infty}=\bigcup\limits_{i=1}^{\infty}{a_i}$ be a set of all input elements.
 
@@ -144,7 +144,7 @@ $t$ is the time of input, output, and nullification:
 $t=\begin{cases}
 \tau_i:\exists{a_{\tau_i}}, \\
 \tau_o:\exists{b_{\tau_o}}, \\
-\theta_{a_\tau}.
+\theta_{a_\tau}:\forall{a_\tau}.
 \end{cases}$
 \end{definition}
 
@@ -192,7 +192,7 @@ are the time moments, when the system loses its working set.
 Assume that the system fails at time $\tau_f$. The naive idea for recovering is to simply start processing from the very beginning, i.e., to set $W_{\tau_f+1}=\emptyset$ and to replay the whole input stream. However, storing and replaying the whole input stream is inefficient in terms of both memory and time consumption.
 
 \begin{definition}{Snapshot}
-$P_{t_s}$ at time $t_s$ is persistently stored $W_{t_s}$ that is not lost even in case of failure.
+at time $t_s$ is persistently stored $P_{t_s}\subseteq{W_{t_s}}$ that is not lost even in case of failure.
 \end{definition}
 
 Snapshots allow system to restart processing since defined points and to not replay the whole input stream. Suppose, there is a snapshot at time $t_s$ and a system fails at time $\tau_f>t_s$. In order to recover processing, system sets $W_{\tau_f+1}=P_{t_s}$ and requests for replay elements $a$ such that $\forall{y\in{Cl(D)(a)}}:y\notin{P_{t_s}}$. The idea of taking snapshots is illustrated in Figure~\ref{snapshotting}.
