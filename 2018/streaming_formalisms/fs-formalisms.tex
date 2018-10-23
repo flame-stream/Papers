@@ -211,18 +211,22 @@ Our notion of consistent state snapshot modifies the classical definition of {\e
 
 One popular method for taking consistent state snapshot is to artificially reproduce a moment $t_s$, when $\forall{a}\in{Cl^{-1}(D)(S_{t_s})}:\exists{\theta_a}$, and to save obtained $S_{t_s}$. Such approach is adopted in Apache Flink~\cite{Carbone:2017:SMA:3137765.3137777} and Apache Storm~\cite{apache:storm:state}. They achieve consistent state by injecting special elements called {\em checkpoints} into the input elements. Checkpoints go through the same network channels as ordinary elements and push all inverted dependencies of inputs through the system. Each operation in data flow prepares its snapshot independently at the moment of checkpoint arriving. Global snapshot is taken when checkpoint passes through the whole data flow. 
 
-Checkpoints cause latency overhead because they periodically block some inputs of an operation with multiple inputs. This behavior is knows as {\em checkpoints alignment}. Consistent state snapshotting can be potentially relaxed if there is a mechanism to retrieve only a consistent part of each operation state at any moment in time. In this case, there is no need to technically reproduce a moment, when it is consistent, in order to obtain it.
+Checkpoints cause latency overhead because they periodically block some inputs of an operation with multiple inputs. This behavior is known as {\em checkpoints alignment}. Consistent state snapshotting can be potentially relaxed if there is a mechanism to retrieve only a consistent part of each operation state at any moment in time. In this case, there is no need to technically reproduce a moment, when it is consistent, in order to obtain it.
 
 Another property that directly affects consistency guarantees is {\em determinism}. Let $a_1...a_\infty$ be ordered in time input elements.
 
 \begin{definition}{Data processing system is {\em deterministic}}
 if \\
-$\forall{t} \forall{n\geq1} \forall{a_1...a_n}\exists{W_t,\mathbb{B}_t={\{b_1...b_m\}}}:p(W_t,\mathbb{B}_t|a_1...a_n)=1$.
+$\forall{t} \forall{n\geq1} \forall{a_1...a_n}\exists{\mathbb{B}_t={\{b_1...b_m\}}}:\sum\limits_{W_t} p(W_t,\mathbb{B}_t|a_1...a_n)=1$.
 \end{definition}
 
 \begin{theorem}
-A non-deterministic system provides for at most once guarantee only if for any ${t_o}:\exists{b_{t_o}}$, $\exists{P^{c}_{t_o}}$.  
+A non-deterministic system provides for at most once guarantee only if $\forall{b_{t_o}}:\exists{P^{c}_{t_o}} \wedge \forall{a\in{Cl^{-1}(b_{t_o})}},\theta_a=t_o$.  
 \end{theorem}
+
+Hence, non-deterministic systems that use state snapshots must atomically output elements and take a consistent snapshot that contains their inverted dependencies. In practice, it means that latency in the worst case in such systems is bounded from below by the duration of snapshotting. Besides, there is a trade-off between latency and the frequency of taking snapshots.
+
+On the other hand, if a system is deterministic, atomicity between output and snapshotting is not necessary, because in case of replay system releases exactly the same output, that can be simply deduplicated at the very last node in a data flow. Therefore, the open questions are: is it more efficient in practice to handle non-determinism by atomic snapshotting and output or not? Can determinism be implemented in a more effective way than snapshotting?
 
 % \section{Plan}
 
