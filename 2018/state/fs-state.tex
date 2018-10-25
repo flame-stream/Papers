@@ -99,17 +99,20 @@ Boris Novikov\\
 \maketitle
 
 \begin{abstract}
-Currently, large-scale distributed stream processing is a hot area of research. While state-of-the-art distributed stream processing systems are able to provide low-latency under at-most-once and at-least-once guarantees, achieving exactly-once semantics is still a challenging problem. An important reason behind this fact was the lack of efficient implementation techniques for idempotent stream processing model. In this work, we apply a low-overhead deterministic model to the problem of exactly-once. We demonstrate the lightweight protocols which use the property of determinism for achieving system-wide idempotence, and, therefore, exactly-once. Our experiments show that proposed approach can significantly outperform an alternative industrial solution.
+% Currently, large-scale distributed stream processing is a hot area of research. While state-of-the-art distributed stream processing systems are able to provide low-latency under at-most-once and at-least-once guarantees, achieving exactly-once semantics is still a challenging problem. An important reason behind this fact was the lack of efficient implementation techniques for idempotent stream processing model. In this work, we apply a low-overhead deterministic model to the problem of exactly-once. We demonstrate the lightweight protocols which use the property of determinism for achieving system-wide idempotence, and, therefore, exactly-once. Our experiments show that proposed approach can significantly outperform an alternative industrial solution.
 \end{abstract}
 
 \section {Introduction}
 \input {fs-state-intro.tex}
 
-\section {Related work}
-\input {fs-state-related.tex}
+\section {Preliminaries}
+\input {fs-state-preliminaries.tex}
 
 \section {Formalization}
 \input {fs-state-formalism.tex}
+
+\section {Discussion}
+\input {fs-state-discussion.tex}
 
 \section {Deterministic model}
 \input {fs-state-model.tex}
@@ -119,6 +122,9 @@ Currently, large-scale distributed stream processing is a hot area of research. 
 
 \section {Experiments}
 \input {fs-state-experiments.tex}
+
+\section {Related work}
+\input {fs-state-related.tex}
 
 \section {Conclusion and future work}
 \input {fs-state-conclusion.tex}

@@ -1,29 +1,3 @@
-\subsection{Preliminaries}
-
-In this section, we remind main concepts of stream processing, which we use further in this paper. Basically, a distributed stream processing system is a shared-nothing distributed runtime, that can handle a potentially unlimited sequence of input items. Each item can be transformed multiple times before the final result is released from the system. Elements can be processed one-by-one or grouped into small input sets, usually called {\em micro-batches}. 
-
-An element has been {\em entered} if the system is aware of this element since that moment and takes some kind of responsibility for its processing. This concept can be implemented in a different way in different systems. For example, in Flink the fact that the element has been entered means that the element has arrived at {\em Source} vertex. In Spark Streaming, element enters, when it is read or received by an input agent also called {\em Source}. 
-
-An element has {\em left} the system if an element has been released to a consumer. Since that time system cannot observe it anymore. This concept can also be implemented differently in various systems. For instance, in Spark Streaming element leaves when it is pushed to output operation, .e.g., written to HDFS or file. In Flink element leaves when it leaves from {\em Sink} vertex.   
-
-It is important to note that input and output elements cannot be directly matched due to a possibility of complex transformations within the system. For instance, a single input element can be transformed into multiple ones. Hence, in a general case, it is impossible to determine input element by an output.
-
-The way how a system transforms input elements is usually defined in the form of a {\em logical graph}. A logical graph is a graph, typically set up by a user, where vertices are {\em business-logic} operations and edges determine the order of processing. Each user-defined operation may be {\em stateless} or {\em stateful}. States of operations are usually managed by the system itself to prevent inconsistencies.
-
-The main difference between the state of user-defined operation and an ordinary element is that the state is consumed, updated, and produced by the same operation. In~\cite{we2018adbis} it is shown that operations state can practically be an ordinary data flow element for any stateful operation. Therefore, without loss of generality, we can assume that the states of operations are just special elements in a data flow.
-
-\subsection {Motivation}
-
-In state-of-the-art stream processing systems~\cite{carbone2015apache, apache:storm, Zaharia:2016:ASU:3013530.2934664} a contract with end-user regarding ~{\em which data} will be eventually processed and released in case of failures is usually described in terms of so-called~{\em delivery guarantees}. These guarantees include {\em at most once}, {\em at least once}, and {\em exactly once}. {\it At most once} states that each input event is processed once or not processed at all. {\it At least once} guarantees that each input item is processed, but possibly multiple times, that can lead to result duplication. {\it Exactly once} assures that each input event is processed exactly one time.
-
-A tricky thing in these seemingly simple definitions is that output item depends not only on the corresponding input item but also on the {\em state} of data flow operations and on the other elements in a data flow. This fact implies that a system can {\em technically} support exactly once delivery guarantee, but in practice can release completely invalid results, because of inconsistencies in the state or in-flight elements. Another vague point is the possibility of the generation of multiple elements from one inside a data flow. If these elements are applied to state or released non-atomically, it can lead to inconsistencies as well. State-of-the-art stream processing systems avoid these types of inconsistencies using complex recovery and state management mechanisms~\cite{Carbone:2017:SMA:3137765.3137777}. In terms of these systems, exactly once or at most once is not only about delivery but is also about {\em consistency}. We believe that such meaning is much more reasonable, and further in this paper, we will call them {\em consistency guarantees}.   
-
-However, lack of formalism in the definitions of such streaming consistency guarantees is constantly causing debates and misunderstandings~\cite{JerryPengStreamIO, PaperTrail}. There is a need to introduce formal definitions in order to describe what exactly state-of-the-art stream processing engines guarantee. Such formalisms can also help to illustrate the differences between existing approaches.
-
-% In order to make our mathematical model independent of any implementation, we consider streaming consistency guarantees as correspondences between input and output streams and system state. If we formulate guarantees only in these terms, they can be applied to any system. However, the question of what to consider as a system state is a little bit sophisticated. At a very high-level, we can define a state as a {\em information} about input elements, which have been previously entered the system.  
-
-% An obvious idea is to say that system state is a state of user-defined operations, i.e., so-called {\em business logic} state. The main purpose of the states of operations is to accumulate the information about input items. It allows a system to not store all previous input elements in order to process a new one in a stateful user-defined operation. However, output items can be affected not only by input ones and operations state but also by other elements, which are currently in the system. For instance, if cycles are allowed in a logical graph, cycling elements can affect output ones, but they do not belong to a state. In-flight elements can also influence the result, being not in the state. These examples demonstrate the evident fact that information about input elements can be contained not only in the states of operations but in data flow elements as well.
-
 \subsection{Formalization of consistency guarantees}
 
 \begin{definition}{Stream processing system}
@@ -159,7 +133,3 @@ $\forall{t} \forall{n\geq1} \forall{a_1...a_n}\exists{\mathbb{B}_t={\{b_1...b_m\
 \begin{theorem}
 A non-deterministic system provides for at most once guarantee only if $\forall{b_{t_o}}:\exists{P^{c}_{t_o}} \wedge \forall{a\in{Cl^{-1}(b_{t_o})}},\theta_a=t_o$.  
 \end{theorem}
-
-Hence, non-deterministic systems that use state snapshots must atomically output elements and take a consistent snapshot that contains their inverted dependencies. In practice, it means that the lower bound of latency in the worst case in such systems is the duration of snapshotting. Besides, there is a trade-off between latency and the frequency of taking snapshots.
-
-On the other hand, if a system is deterministic, atomicity between output and snapshotting is not necessary, because in case of replay system releases exactly the same output, that can be simply deduplicated at the very last node in a data flow. Therefore, the open questions are: is it more efficient in practice to handle non-determinism by atomic snapshotting and output or not? Can determinism be implemented in a more effective way than snapshotting?
