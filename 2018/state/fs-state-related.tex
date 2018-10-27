@@ -10,14 +10,5 @@ Another way to provide exactly-once semantics is to cope with a non-deterministi
 
 Google's MillWheel~\cite{Akidau:2013:MFS:2536222.2536229} uses a different approach to achieve exactly-once within a non-deterministic model. It persistently stores each input item before each operation to filter out duplicates if any. Such technique, called {\em strong productions}, makes system idempotent but provides high overhead on frequent accesses to persistent storage.
 
-The roadmap of approaches for achieving exactly-once and at-least-once guarantees is shown in Figure~\ref{roadmap}. Green elements indicate the path for our approach that is detailed in further sections.
-
-\begin{figure*}[htbp]
-  \centering
-  \includegraphics[width=0.97\textwidth]{pics/roadmap}
-  \caption{The roadmap of approaches for achieving exactly-once and at-least-once guarantees. Green elements indicate the path for our approach}
-  \label {roadmap}
-\end{figure*}
-
 
 
