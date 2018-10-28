@@ -13,6 +13,7 @@ An obvious idea, how to make stream processing system deterministic, requires se
     \item Define synthetic total order on data items using meta-information, e.g., by assigning logical timestamps at system entry
     \item Preserve such total order before each order-sensitive operation in a data flow
     \item Preserve the same order of output items
+    \item Ensure that all operations are pure
 \end{enumerate}
 
 At the first glance, total order preservation is not a reasonable requirement. It can be achieved, e.g., using buffering before each order-sensitive operation until punctuation or low watermark arrives ~\cite{Li:2008:OPN:1453856.1453890}. However, frequent buffering can dramatically increase latency. 
@@ -27,7 +28,7 @@ The following example illustrates the semantics of the operation. The grouping a
 
 \[(1), (2), (1|3), (2|4), (1|3|5), (2|4|6), (3|5|7), (4|6|8)...\]
 
-Actually, any stateful transformation can be expressed by decomposing into map and grouping operations with a cycle. Let us illustrate it by the example of sum operation. In a classical setting each element is combined with previous state value and outputted. After that, the state is updated. In our model, firstly each element is grouped with previous state element into the pair. After that, map operation delivers a combined result, updates the state, and returns it to the grouping through the cycle. The comparison between the classical state handling approach and drifting state model is shown in Figure~\ref{classical-drifting}.
+Actually, any stateful transformation can be expressed by decomposing into map and grouping operations with a cycle. Let us illustrate it by the example of sum operation. In a classical setting, each element is combined with previous state value and outputted. After that, the state is updated. In our model, firstly each element is grouped with previous state element into the pair. After that, map operation delivers a combined result, updates the state, and returns it to the grouping through the cycle. The comparison between the classical state handling approach and drifting state model is shown in Figure~\ref{classical-drifting}.
 
 \begin{figure}[htbp]
   \centering
@@ -36,7 +37,7 @@ Actually, any stateful transformation can be expressed by decomposing into map a
   \label {classical-drifting}
 \end{figure}
 
-We call such model a drifting state because operation states become ordinary data flow elements. In this setting, only grouping operation is order-sensitive, because it should group new element with the exact previous state. Fortunately, grouping can be implemented optimistically. The idea is shown in Figure~\ref{optimistic-grouping}. Assume that numbers on this figure are timestamps. An element with timestamp 3 is out-of-order. We know that we have already outputted pair (one; five), which is actually invalid. The main idea here is that if an arrived element is out-of-order, we always can generate valid pairs because we know the right position of the element. Besides, we can resend an invalid pair with a special flag. Let’s call such elements invalidators or tombstones.
+We call such model a drifting state because operation states become ordinary data flow elements. In this setting, map operation is pure and order insensitive, and grouping operation is pure. Grouping operation is order-sensitive because it should group new element with the exact previous state. Fortunately, grouping can be implemented optimistically. The scheme is shown in Figure~\ref{optimistic-grouping}. Assume that numbers on this figure are timestamps. An element with timestamp 3 is out-of-order. We know that actually invalid pair (one; five) has been already outputted. The main idea here is that if an arrived element is out-of-order, the system always can generate valid pairs because it knows the right position of the element. Besides, an invalid pair with a special flag can be resent. Let us call such elements invalidators or tombstones. The main purpose of invalidators is to hunt down previously outputted invalid pairs and to remove them from other grouping or to intercept before outputting. Map functions are required to be pure in order to ensure that invalidators will go through exactly the same path as original pairs. This method is applicable to any number of subsequent groupings.
  
 \begin{figure}[htbp]
   \centering
@@ -45,10 +46,16 @@ We call such model a drifting state because operation states become ordinary dat
   \label {optimistic-grouping}
 \end{figure} 
  
-The main purpose of invalidators is to hunt down previously outputted invalid pairs and to kill them. To kill here means to remove from other grouping or to intercept before outputting. Map functions are required to be pure in order to ensure that invalidators will go through exactly the same path as original pairs. This method is applicable to any number of subsequent groupings.
- 
-In order to allow invalidators to catch invalid pairs, we buffer all items before output in a very last node of the graph called a {\em barrier}. The barrier can be safely flushed if there is a guarantee that there are no in-flight invalidators for elements in the barrier. The exact mechanism for barrier flushing is discussed in the next section. Barrier releases items in the order of meta-information, so results will be the same after any number of reruns on the same input. It is worth to note that barrier is the only buffer in any data flow graph within this approach. Therefore, drifting state model allows achieving determinism by the price of a single buffer per any data flow graph.
+In order to allow invalidators to catch invalid pairs, we buffer all items before output in a very last node of the graph called a {\em barrier}. The barrier can be safely flushed if there is a guarantee that there are no in-flight invalidators for elements in the barrier. In other words, an element can be released from the barrier at the nullification time of all input items, which affect it. Hence, there is a need for nullification tracking mechanism. The exact method for barrier flushing is discussed in the next section. Barrier releases items in the order of meta-information, so results will be the same after any number of reruns on the same input. It is worth to note that barrier is the only buffer in any data flow graph within this approach due to optimistic groupings. 
 
+Therefore, drifting state model has the following properties:
+\begin{itemize}
+    \item Determinism is achieved by the price of a single buffer per any data flow graph. In practice, waiting time in this buffer is in terms of milliseconds~\cite{we2018adbis}.
+    \item There are only two operations in the model: map and windowed grouping. The set of dependencies $D$ contains conversions only between these operations.
+    \item User-defined code can be only in map operation, while for grouping, a user should only define hash balancing function. Therefore, drifting state model is stateless from a user point of view.
+    \item Only grouping operation maintains a system state. The state is represented by sorted on meta-information lists of data items.
+    \item The only hard requirement of our model is that map operations must be pure.
+\end{itemize}
 
 % In this section, we outline the model of our system. We focus on the core concepts and definitions to introduce the necessary preliminaries for consistency preserving mechanisms. The \FlameStream\ model has much in common with other stream processing systems but has several vital differences that enable an opportunity for efficient implementation of consistency guarantees. Among them are reduced set of operations, strict ordering, and cyclic graphs.
 
