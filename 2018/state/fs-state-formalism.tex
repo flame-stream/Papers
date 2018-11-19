@@ -1,21 +1,21 @@
-\begin{definition}{Stream processing system}
-is a tuple of $(\Gamma,D,W,P,F)$, where $\Gamma$ is all possible data flow elements, $D$ is dependency relation between elements, $W$ is a set of elements in a system, $P$ is a snapshot, and $F$ is recovery function. 
+\begin{definition}{Ideal stream processing system}
+is a tuple of $(\Gamma,D)$, where $\Gamma$ is all possible data flow elements and $D$ is dependency relation between elements. 
 \end{definition}
 
 \begin{definition}{Dependency relation}
-$D\subseteq{\Gamma\times\Gamma}$ is a binary relation. Pair $(x,y)\in{D}$ iff $y$ can be generated from $x$ within logical graph operations.
+$D\subseteq{\Gamma\times\Gamma}$ is a binary relation. Pair $(x,y)\in{D}$ if $y$ can be generated from $x$ within user-defined logic, that is commonly expressed in a form of a logical graph.
 \end{definition}
 
 Let $\tau\in{\mathbb{N}}$ be an exact global discrete time. Let $a_\tau\in{\Gamma}$ be the element, which enters at the time $\tau$, and $b_\tau\in{\Gamma}$ is the element, which leaves at the time $\tau$. Let $A_{\tau}=\bigcup\limits_{i=1}^{\tau}{a_i}$ be a set of all input elements by the time $\tau$ and ${B}_\tau=\bigcup\limits_{i=1}^{\tau}{b_i}$ be a set of all output elements.
 
 \begin{definition}{An ideal working set}
-$\widehat{W}_\tau\subseteq{\Gamma}$ at the time $\tau$ is the set of elements, which are currently in the system:
+$\widehat{W}_\tau\subseteq{\Gamma}$ at the time $\tau$ is the set of elements, which are currently in the ideal system:
 
 $\widehat{W}_0=\emptyset$:
 
 $\widehat{W}_{\tau+1}=\begin{sqcases}
-\widehat{W}_{\tau}\cup{a_\tau}, & \text{or}\\
-\widehat{W}_{\tau}\setminus{b_{\tau+1}}, & \text{or}\\
+\widehat{W}_{\tau}\cup{\{a_{\tau+1}\}}, & \text{or}\\
+\widehat{W}_{\tau}\setminus{\{b_{\tau+1}\}}, & \text{or}\\
 \widehat{W}_{\tau}\setminus{X}\cup{Y}, \forall{x\in{X}\exists{y\in{Y}}}:(x,y)\in{D} & \text{}.
 \end{sqcases}$
 
@@ -23,6 +23,10 @@ $\widehat{W}_{\tau+1}=\begin{sqcases}
 
 \begin{definition}{System failures}
 are the time moments, when the system loses its working set. 
+\end{definition}
+
+\begin{definition}{Stream processing system}
+is a tuple of $(\Gamma,D,P,F)$, where $\Gamma$ and $D$ are the same as in the ideal system, $P$ is a snapshot, and $F$ is a recovery function. 
 \end{definition}
 
 \begin{definition}{Snapshot}
@@ -39,8 +43,8 @@ $W_\tau\subseteq{\Gamma}$ at the time $\tau$ is the set of elements, which are c
 $W_0=\emptyset$:
 
 $W_{\tau+1}=\begin{sqcases}
-W_{\tau}\cup{a_\tau}, & \text{or}\\
-W_{\tau}\setminus{b_{\tau+1}}, & \text{or}\\
+W_{\tau}\cup{\{a_{\tau+1}\}}, & \text{or}\\
+W_{\tau}\setminus{\{b_{\tau+1}\}}, & \text{or}\\
 W_{\tau}\setminus{X}\cup{Y}, \forall{x\in{X}\exists{y\in{Y}}}:(x,y)\in{D} & \text{or}\\
 F(A^{p}_\tau,P_\tau), A^{p}_\tau\subseteq{A_\tau} & \text{}.
 \end{sqcases}$
@@ -56,60 +60,71 @@ of an input element $a_\tau$ is the time $\theta_{a_\tau}=inf(\hat{\tau}>\tau|W_
 \end{definition}
 
 \begin{definition}{Time quantization}
-t are time moments $\tau$ such that there is an output element at these moments, $t=\{\tau:\exists{b_\tau}\}$.
+$t$ is a discrete time that determines only output elements $\forall{t}\exists{b_{\tau(t)}}$.
 \end{definition}
 
+Because of distributed asynchronous processing, streaming systems are usually non-deterministic, therefore, there is a probability to observe output element $b_{t+1}$. Let us denote such probability in ideal system as $p(b_{t+1}|A_{t+1},B_t)$, and in real system as $\widetilde{p}(b_{t+1}|A_{t+1},B_t)$.
+
 \begin{definition}{System provides for exactly once}
-if each output element $b_{t+1}$ is consistent with previous output, input and dependency relation, i.e., $p(b_{t+1}|B_t, A_{t+1}, D)>0$.
+if it is possible to obtain each output element $b_{t+1}$ in the ideal stream processing system, i.e.,\\ 
+$\forall{t} \forall{b_{t+1}}: \widetilde{p}(b_{t+1}|A_{t+1},B_t)>0 \Rightarrow p(b_{t+1}|A_{t+1},B_t)>0$.
 \end{definition}
 
 \begin{definition}{System provides for at most once}
-if $\exists{A^{0}_{t+1}\subseteq{A_{t+1}}}$ such that $\forall{b_{t+1}}, p(b_{t+1}|B_t, A^{0}_{t+1}, D)>0$.
+if \\
+$\exists{A^{0}_{t+1}\subseteq{A_{t+1}}}$ such that \\
+$\forall{t} \forall{b_{t+1}}: \widetilde{p}(b_{t+1}|A_{t+1},B_t)>0 \Rightarrow p(b_{t+1}|A^{0}_{t+1},B_t)>0$.
 \end{definition}
 
 \begin{definition}{System provides for at least once}
-if $\exists{A^{*}_{t+1}\subseteq{2^{A_{t+1}}}}$ such that $\forall{b_{t+1}}, p(b_{t+1}|B_t, A^{*}_{t+1}, D)>0$.
+if \\
+$\exists{A^{*}_{t+1}\subseteq{2^{A_{t+1}}}}$ such that \\
+$\forall{t} \forall{b_{t+1}}: \widetilde{p}(b_{t+1}|A_{t+1},B_t)>0 \Rightarrow p(b_{t+1}|A^{*}_{t+1},B_t)>0$.
 \end{definition}
 
-Further we will consider mostly exactly once. We can proceed from the probability of output element to the probability of the working set through the law of total probability:
+Further we will mostly consider exactly once. We can proceed from the probability of output element to the probability of the working set through the law of total probability:
 
-$p(b_{t+1}|B_t, A_{t+1}, D)=\\
-\sum\limits_{W_{t+1}}p(W_{t+1}|B_t,A_{t+1},D)p(b_{t+1}|B_t,A_{t+1},W_{t+1},D)=\\
-\sum\limits_{W_{t+1}}p(W_{t+1}|B_t,A_{t+1},D)p(b_{t+1}|W_{t+1},D)
+$p(b_{t+1}|A_{t+1},B_t)=\\
+\sum\limits_{W_{t+1}}p(W_{t+1}|A_{t+1},B_t)p(b_{t+1}|A_{t+1},B_t,W_{t+1})=\\
+\sum\limits_{W_{t+1}}p(W_{t+1}|A_{t+1},B_t)p(b_{t+1}|W_{t+1})
 $.
 
-\begin{definition}{Snapshot P is consistent}
-if $\forall{t} \exists{A^{p}_t\subseteq{A_t}} : p(W_{t+1}=F(A^{p}_t,P_t)|B_t,A_{t+1},D)>0$.
-\end{definition}
+Hence, in order to preserve exactly once, system must preserve working set that is possible to observe in ideal system, because $\forall{t} \forall{b_{t+1}} p(b_{t+1}|A_{t+1},B_t)>0$ only if $\forall{t} \exists{W_{t+1}}:p(W_{t+1}|A_{t+1},B_t)>0$.
 
-\begin{theorem}
-If $\forall{t} \exists{A^{p}_t\subset{A_t}} : F(A^{p}_t,P_t)=\widehat{W_t}$, then snapshot $P$ is consistent.
-\end{theorem}
+\begin{definition}{Snapshotting mechanism $P,F$ is consistent}
+if $\forall{t} \exists{A^{p}_t\subseteq{A_t}} : p(F(A^{p}_t,P_t)|A_{t+1},B_t)>0$.
+\end{definition}
 
 MillWheel ensures that $F(\emptyset,P_t)=\widehat{W_t}$ using strong productions and deduplication.
 
 \begin{definition}{State snapshot}
-$P^{s}$ is a snapshot such that $\forall{\tau} P^{s}_\tau = S_{\tau_s},\tau_s \leq \tau$.
+$P^{s}$ is a snapshot such that $\forall{t} P^{s}_t = S_{t_s},t_s \leq t$.
 \end{definition}
 
 \begin{theorem}
-The necessary conditions of consistent state snapshot are:\\
-1. $\forall{y}\in{P^{s}_t}, \forall{a\in{Cl^{-1}(D)(y)}} : \exists{\theta_a}$\\
-2. $\forall{a}\notin{Cl^{-1}(D)(P^{s}_t)} \wedge \nexists{\theta_a}:a\in{A^{p}_t}$
+\label{necessary_conditions}
+The necessary conditions of consistent state snapshotting are:\\
+1. $\forall{b_t}:P^{s}_t=S_t$\\
+2. $\forall{t}\forall{a}\notin{A^{p}_t} : \exists{\theta_a}$
 \end{theorem}
-
-\begin{corollary}
-System that uses state snapshot provides for exactly once only if $\forall{b_t} : P^{s}_t=S_t$.
-\end{corollary}
+\begin{sketch}
+$ $\newline
+1. Assume that $\exists{b_t}:P^{s}_t = S_{t_s}, t_s < t$. Let system fails at $\tau_f = \tau(t)+1$. Let $(a_{\tau(t_s)+1},y)\in{D}$ and $y\in{S_t}$. In this case, recovery function must reprocess $a_{\tau(t_s)+1}$ in order to achieve $W_t=F(A^{p}_t,S_{t_s})\supseteq{S_t}$ that is possible in the ideal system. However, reprocessing of $a_{\tau(t_s)+1}$ can cause some output $ b_{t+1}\in{Cl^{-1}(a_{\tau(t_s)+1})}$, such that $p(b_{t}|A_t,B_{t-1})=0$, because $B_{t-1}$ can already contain output elements that have been generated from element $a_{\tau(t_s)+1}$ before reprocessing. \\
+2. Assume that $\exists{t} \exists{a} \notin{A^{p}_t}:\nexists{\theta{a}}$. In this case, $Cl^{-1} \cap (W_t \setminus{S_t}) \neq \emptyset$. If system fails at time $\tau_f=\tau(t)+1$, elements $Cl^{-1} \cap (W_t \setminus{S_t})$ cannot be restored using $A^{p}_t$ and $P^{s}_t=S_t$, because restoring requires reprocessing of element $a$.
+\end{sketch}
 
 \begin{definition}{System is deterministic}
 if\\ 
-$\forall{b_{t+1}} : p(b_{t+1}|B_t, A_{t+1}, D)=1$.
+$\forall{b_{t+1}},p(b_{t+1}|A_{t+1},B_t)=1$.
 \end{definition}
 
 \begin{theorem}
-In deterministic system, necessary condition on exactly once $\forall{b_t} \exists{P^{s}_t=S_t}$ can be relaxed if state snapshot is extended by the last output element: $\forall{b_t}:P_t=P^{s}_t \cup b_t$.
+\label{determinism}
+In deterministic system, necessary condition on exactly once $\forall{b_t} : \exists{P^{s}_t=S_t}$ can be relaxed if state snapshot is extended by the last output element: $\forall{b_t}:P_t=P^{s}_t \cup b_t$.
 \end{theorem}
+\begin{sketch}
+Assume that $\exists{b_t}:P_t = S_{t_s} \cup b_t, t_s < t$. Without loss of generality, assume that system fails at the time $\tau_f = \tau(t)+1$. The problem here is that if $(a_{\tau(t_s)+1},y)\in{D}$ and $y\in{S_t}$, recovery function must reprocess $a_{\tau(t_s)+1}$ in order to achieve $W_t=F(A^{p}_t,S_{t_s})\supseteq{S_t}$ that is possible in the ideal system. However, reprocessing can cause inconsistent output as it is shown in Theorem~\ref{necessary_conditions}. The property of determinism guarantees that in case of reprocessing output elements will be the same and released in the same order. Therefore, having last outputted before the failure element $b_t$, we can filter out output elements, which are generated during reprocessing, but have been already outputted before the failure.
+\end{sketch}
 
 % \subsection{Formalization of consistency guarantees}
 
