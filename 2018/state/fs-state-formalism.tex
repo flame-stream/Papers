@@ -1,12 +1,10 @@
+\subsection{Ideal streaming model}
+
 \begin{definition}{Ideal stream processing system}
-is a tuple of $(\Gamma,D)$, where $\Gamma$ is all possible data flow elements and $D$ is dependency relation between elements. 
+is a tuple of $(\Gamma,D)$. $\Gamma$ is all possible data flow elements. $D\subseteq{\Gamma\times\Gamma}$ is a binary relation. Pair $(x,y)\in{D}$ if $y$ can be generated from $x$ within user-defined logic, that is commonly expressed in a form of a logical graph. For simplification, we assume that user-defined operations are pure.
 \end{definition}
 
-\begin{definition}{Dependency relation}
-$D\subseteq{\Gamma\times\Gamma}$ is a binary relation. Pair $(x,y)\in{D}$ if $y$ can be generated from $x$ within user-defined logic, that is commonly expressed in a form of a logical graph.
-\end{definition}
-
-Let $\tau\in{\mathbb{N}}$ be an exact global discrete time. Let $a_\tau\in{\Gamma}$ be the element, which enters at the time $\tau$, and $b_\tau\in{\Gamma}$ is the element, which leaves at the time $\tau$. Let $A_{\tau}=\bigcup\limits_{i=1}^{\tau}{a_i}$ be a set of all input elements by the time $\tau$ and ${B}_\tau=\bigcup\limits_{i=1}^{\tau}{b_i}$ be a set of all output elements.
+Within our model, one can define streaming system using only data flow elements and business logic. However, without the notion of time, we cannot observe any processing progress. Let $\tau\in{\mathbb{N}}$ be an exact global discrete time. Let $a_\tau\in{\Gamma}$ be the element, which enters at the time $\tau$, and $\{b_\tau\}\in{2^\Gamma}$ are the elements, which leave at the time $\tau$. Let $A_{\tau}=\bigcup\limits_{i=1}^{\tau}{a_i}$ be a set of all input elements by the time $\tau$ and ${B}_\tau=\bigcup\limits_{i=1}^{\tau}{\{b_i\}}$ be a set of all output elements.
 
 \begin{definition}{An ideal working set}
 $\widehat{W}_\tau\subseteq{\Gamma}$ at the time $\tau$ is the set of elements, which are currently in the ideal system:
@@ -14,12 +12,39 @@ $\widehat{W}_\tau\subseteq{\Gamma}$ at the time $\tau$ is the set of elements, w
 $\widehat{W}_0=\emptyset$:
 
 $\widehat{W}_{\tau+1}=\begin{sqcases}
-\widehat{W}_{\tau}\cup{\{a_{\tau+1}\}}, & \text{or}\\
+\widehat{W}_{\tau}\cup{a_{\tau+1}}, & \text{or}\\
 \widehat{W}_{\tau}\setminus{\{b_{\tau+1}\}}, & \text{or}\\
 \widehat{W}_{\tau}\setminus{X}\cup{Y}, \forall{x\in{X}\exists{y\in{Y}}}:(x,y)\in{D} & \text{}.
 \end{sqcases}$
 
 \end{definition}
+
+We can imagine a stream processing system as a pool, where some elements are poured in and others are poured out. Inside a pool, each element can be substituted by the other element, which can be substituted as well, and so on. Only survived elements are poured out from the pool.
+
+\begin{definition}{System state}
+$S_\tau$ at the time $\tau$ is $\widehat{W}_\tau^{\infty}$ if $A_{\infty}=\bigcup\limits_{i=1}^{\tau}{a_i}$.
+\end{definition}
+
+\begin{definition}{Nullification time}
+of an input element $a_\tau$ is the time $\theta_{a_\tau}=inf(\hat{\tau}>\tau|W_{\hat{\tau}}\setminus{S_{\hat{\tau}}}\cap{Cl(D)(a_\tau)=\emptyset})$, where $Cl(D)$ is a transitive closure of the relation $D$.
+\end{definition}
+
+Technically, states in existing stream processing systems are not data flow elements, but as it was mentioned above, they can be presented in such a way using drifting state model. The main purpose of the state is to accumulate the information about input items. Data flow elements cannot be in $W\setminus{S}$ for an infinite time by the definition. Hence, for each input element $a_\tau$, there is a nullification time $\theta_{a_\tau}$, thereafter all elements, which depend on $a_\tau$, are in the system state. Since the nullification time, the input element can affect output elements only through the state.
+
+\begin{definition}{Time quantization}
+$t$ is a discrete time such that $\tau(t)$ determines output elements $\forall{t}\exists{b_{\tau(t)}}$.
+\end{definition}
+
+\begin{definition}{Probability of output element in an ideal system}
+$p(b_{t+1}|A_{t+1}, B_t)$ is a probability to observe output element $b$ at the time $t+1$ considering all previous input and output elements. For all output elements from the ideal working set, such probability is positive,\\
+$\forall{\{b_{t+1}\}:\exists{\widehat{W}_{t+1}=\widehat{W}_{t}\setminus{\{b_{t+1}\}}}} \Rightarrow p(b_{t+1}|A_{t+1}, B_t) > 0$.
+\end{definition}
+
+In classical distributed system model proposed in~\cite{Chandy:1985:DSD:214451.214456}, a distributed system is defined as a graph of processes, which can be connected to each other via channels. Each process can generate {\em events} and send them to other processes through the channels. Global system state in this model contains processes states and channel states, e.g., elements, which are in-flight at the moment. Distributed asynchronous processing is simulated using permutations of events. 
+
+In terms of this concept, the global state of our streaming model contains only channel states, while events are input elements, output elements, and user-defined transformations. We model the asynchronous nature of distributed processing via global discrete time, that does not determine a priori order of transformations. Therefore, there is only a probability to observe some specified output element, even in an ideal system. However, our model has a significant distinction: it is assumed that end-user is external to the system, i.e., a user is able to observe output elements, but not the system states. Hence, as we show further, the notion of {\em consistency} in this case should also be defined in terms of output elements.  
+
+\subsection{Streaming model with failures}
 
 \begin{definition}{System failures}
 are the time moments, when the system loses its working set. 
@@ -43,7 +68,7 @@ $W_\tau\subseteq{\Gamma}$ at the time $\tau$ is the set of elements, which are c
 $W_0=\emptyset$:
 
 $W_{\tau+1}=\begin{sqcases}
-W_{\tau}\cup{\{a_{\tau+1}\}}, & \text{or}\\
+W_{\tau}\cup{a_{\tau+1}}, & \text{or}\\
 W_{\tau}\setminus{\{b_{\tau+1}\}}, & \text{or}\\
 W_{\tau}\setminus{X}\cup{Y}, \forall{x\in{X}\exists{y\in{Y}}}:(x,y)\in{D} & \text{or}\\
 F(A^{p}_\tau,P_\tau), A^{p}_\tau\subseteq{A_\tau} & \text{}.
@@ -64,6 +89,8 @@ $t$ is a discrete time that determines only output elements $\forall{t}\exists{b
 \end{definition}
 
 Because of distributed asynchronous processing, streaming systems are usually non-deterministic, therefore, there is a probability to observe output element $b_{t+1}$. Let us denote such probability in ideal system as $p(b_{t+1}|A_{t+1},B_t)$, and in real system as $\widetilde{p}(b_{t+1}|A_{t+1},B_t)$.
+
+\subsection{Consistency guarantees}
 
 \begin{definition}{System provides for exactly once}
 if it is possible to obtain each output element $b_{t+1}$ in the ideal stream processing system, i.e.,\\ 
@@ -125,6 +152,14 @@ In deterministic system, necessary condition on exactly once $\forall{b_t} : \ex
 \begin{sketch}
 Assume that $\exists{b_t}:P_t = S_{t_s} \cup b_t, t_s < t$. Without loss of generality, assume that system fails at the time $\tau_f = \tau(t)+1$. The problem here is that if $(a_{\tau(t_s)+1},y)\in{D}$ and $y\in{S_t}$, recovery function must reprocess $a_{\tau(t_s)+1}$ in order to achieve $W_t=F(A^{p}_t,S_{t_s})\supseteq{S_t}$ that is possible in the ideal system. However, reprocessing can cause inconsistent output as it is shown in Theorem~\ref{necessary_conditions}. The property of determinism guarantees that in case of reprocessing output elements will be the same and released in the same order. Therefore, having last outputted before the failure element $b_t$, we can filter out output elements, which are generated during reprocessing, but have been already outputted before the failure.
 \end{sketch}
+
+\subsection{Examples}
+
+\subsubsection{Spark}
+
+\subsubsection{MillWheel}
+
+\subsubsection{Flink}
 
 % \subsection{Formalization of consistency guarantees}
 
