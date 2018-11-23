@@ -42,13 +42,11 @@ $\forall{\{b_{t+1}\}:\exists{\widehat{W}_{t+1}=\widehat{W}_{t}\setminus{\{b_{t+1
 
 In classical distributed system model proposed in~\cite{Chandy:1985:DSD:214451.214456}, a distributed system is defined as a graph of processes, which can be connected to each other via channels. Each process can generate {\em events} and send them to other processes through the channels. Global system state in this model contains processes states and channel states, e.g., elements, which are in-flight at the moment. Distributed asynchronous processing is simulated using permutations of events. 
 
-In terms of this concept, the global state of our streaming model contains only channel states, while events are input elements, output elements, and user-defined transformations. We model the asynchronous nature of distributed processing via global discrete time, that does not determine a priori order of transformations. Therefore, there is only a probability to observe some specified output element, even in an ideal system. However, our model has a significant distinction: it is assumed that end-user is external to the system, i.e., a user is able to observe output elements, but not the system states. Hence, as we show further, the notion of {\em consistency} in this case should also be defined in terms of output elements.  
+In terms of this concept, the global state of our streaming model contains only channel states, while events are input elements, output elements, and user-defined transformations. We model the asynchronous nature of distributed processing via global discrete time, that does not determine a priori order of transformations. Therefore, there is only a probability to observe some specified output element, even in the ideal system. However, our model has a significant distinction: it is assumed that end-user is external to the system, i.e., a user is able to observe output elements, but not the system states. Hence, as we show further, the notion of {\em consistency} in this case should also be defined in terms of output elements.  
 
 \subsection{Streaming model with failures}
 
-\begin{definition}{System failures}
-are the time moments, when the system loses its working set. 
-\end{definition}
+Unfortunately, the ideal stream processing system is just an abstract concept, that is not possible to implement due to probable failures of computational units and network. Failure can be considered as a loss of the working set or its part. There is a need to extend the ideal model by recovering mechanism that allows a system to transparently pass through the failures.
 
 \begin{definition}{Stream processing system}
 is a tuple of $(\Gamma,D,P,F)$, where $\Gamma$ and $D$ are the same as in the ideal system, $P$ is a snapshot, and $F$ is a recovery function. 
@@ -76,21 +74,18 @@ F(A^{p}_\tau,P_\tau), A^{p}_\tau\subseteq{A_\tau} & \text{}.
 
 \end{definition}
 
-\begin{definition}{System state}
-$S_\tau$ at the time $\tau$ is $\widehat{W}_\tau^{\infty}$ if $A_{\infty}=\bigcup\limits_{i=1}^{\tau}{a_i}$.
-\end{definition}
-
-\begin{definition}{Nullification time}
-of an input element $a_\tau$ is the time $\theta_{a_\tau}=inf(\hat{\tau}>\tau|W_{\hat{\tau}}\setminus{S_{\hat{\tau}}}\cap{Cl(D)(a_\tau)=\emptyset})$, where $Cl(D)$ is a transitive closure of the relation $D$.
-\end{definition}
-
-\begin{definition}{Time quantization}
-$t$ is a discrete time that determines only output elements $\forall{t}\exists{b_{\tau(t)}}$.
-\end{definition}
-
-Because of distributed asynchronous processing, streaming systems are usually non-deterministic, therefore, there is a probability to observe output element $b_{t+1}$. Let us denote such probability in ideal system as $p(b_{t+1}|A_{t+1},B_t)$, and in real system as $\widetilde{p}(b_{t+1}|A_{t+1},B_t)$.
-
 \subsection{Consistency guarantees}
+
+The problem of consistency preservation arises when we move from the ideal system to the model with failures. Let us demonstrate it by an example. Assume that business logic contains single operation $V^{i+1}=a_\tau(1+V^{i}),V\in{S}$ and $\forall{t},b_t=V$. If system recovers $V$ incorrectly after a failure, the results may become invalid, despite the fact, that in terms of delivery, all elements are processed exactly one time. This example is demonstrated in Figure~\ref{state-inconsistency}. 
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.48\textwidth]{pics/state-inconsistency}
+  \caption{Inconsistency of results after incorrect recovery}
+  \label {state-inconsistency}
+\end{figure}
+
+As it was mentioned above, end-user cannot observe internal system state. We define streaming consistency guarantees only in terms of output elements. The ideal system is used to determine which of them are correct.
 
 \begin{definition}{System provides for exactly once}
 if it is possible to obtain each output element $b_{t+1}$ in the ideal stream processing system, i.e.,\\ 
@@ -109,7 +104,9 @@ $\exists{A^{*}_{t+1}\subseteq{2^{A_{t+1}}}}$ such that \\
 $\forall{t} \forall{b_{t+1}}: \widetilde{p}(b_{t+1}|A_{t+1},B_t)>0 \Rightarrow p(b_{t+1}|A^{*}_{t+1},B_t)>0$.
 \end{definition}
 
-Further we will mostly consider exactly once. We can proceed from the probability of output element to the probability of the working set through the law of total probability:
+Exactly once states that observed results cannot be distinguished from the results of the ideal system. At most once and at least once guarantees are the relaxations of exactly once. The results within these guarantees can be obtained in the ideal system, but with the assumption, that input is not completely correct. At most once can be achieved in the ideal system if some input elements are missed. At least once can be reproduced if the input contains duplicates. 
+
+We can proceed from the probability of output element to the probability of the working set through the law of total probability:
 
 $p(b_{t+1}|A_{t+1},B_t)=\\
 \sum\limits_{W_{t+1}}p(W_{t+1}|A_{t+1},B_t)p(b_{t+1}|A_{t+1},B_t,W_{t+1})=\\
@@ -122,7 +119,7 @@ Hence, in order to preserve exactly once, system must preserve working set that 
 if $\forall{t} \exists{A^{p}_t\subseteq{A_t}} : p(F(A^{p}_t,P_t)|A_{t+1},B_t)>0$.
 \end{definition}
 
-MillWheel ensures that $F(\emptyset,P_t)=\widehat{W_t}$ using strong productions and deduplication.
+% MillWheel ensures that $F(\emptyset,P_t)=\widehat{W_t}$ using strong productions and deduplication.
 
 \begin{definition}{State snapshot}
 $P^{s}$ is a snapshot such that $\forall{t} P^{s}_t = S_{t_s},t_s \leq t$.
