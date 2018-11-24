@@ -34,7 +34,7 @@ of an input element $a_\tau$ is the time $\theta_{a_\tau}=inf(\hat{\tau}>\tau|W_
 Technically, states in existing stream processing systems are not data flow elements, but as it was mentioned above, they can be presented in such a way using drifting state model. The main purpose of the state is to accumulate the information about input items. Data flow elements cannot be in $W\setminus{S}$ for an infinite time by the definition. Hence, for each input element $a_\tau$, there is a nullification time $\theta_{a_\tau}$, thereafter all elements, which depend on $a_\tau$, are in the system state. Since the nullification time, the input element can affect output elements only through the state.
 
 \begin{definition}{Time quantization}
-$t$ is a discrete time such that $\tau(t)$ determines output elements $\forall{t}\exists{b_{\tau(t)}}$.
+$\tau(t)$ is a discrete time such that $\tau(t)$ determines output elements $\forall{t}\exists{b_{\tau(t)}}$.
 \end{definition}
 
 \begin{definition}{Probability of output element in a reference system}
@@ -55,7 +55,7 @@ is a tuple of $(\Gamma,D,P,F)$, where $\Gamma$ and $D$ are the same as in the re
 \end{definition}
 
 \begin{definition}{Snapshot}
-$P$ is an information about system execution that is not lost even in case of a system failure. At time $\tau$ snapshot contains information $P_\tau$.
+$P$ is an information about system execution that is available even in case of a system failure. At time $\tau$ snapshot contains information $P_\tau$.
 \end{definition}
 
 \begin{definition}{Recovery function}

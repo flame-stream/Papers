@@ -4,7 +4,7 @@ An element has been {\em entered} if the system is aware of this element since t
 
 An element has {\em left} the system if an element has been released to a consumer. Since that time system cannot observe it anymore. This concept can also be implemented differently in various systems. For instance, in Spark Streaming element leaves when it is pushed to output operation, .e.g., written to HDFS or file. In Flink element leaves when it leaves from {\em Sink} vertex.   
 
-It is important to note that input and output elements cannot be directly matched due to a possibility of complex transformations within the system. For instance, a single input element can be transformed into multiple ones. Hence, in a general case, it is impossible to determine input element by an output.
+It is important to note that input and output elements cannot be directly matched due to a possibility of complex transformations within the system. For instance, a single input element can be transformed into multiple ones. After the split, resulting elements are able to be processed in completely different ways and even influence each other. Hence, in a general case, it is impossible to determine input element by an output.
 
 The way how a system transforms input elements is usually defined in the form of a {\em logical graph}. A logical graph is a graph, typically set up by a user, where vertices are {\em business-logic} operations and edges determine the order of processing. Each user-defined operation may be {\em stateless} or {\em stateful}. States of operations are usually managed by the system itself to prevent inconsistencies.
 
