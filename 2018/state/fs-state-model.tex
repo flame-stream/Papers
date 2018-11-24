@@ -52,11 +52,11 @@ We call such model a drifting state because operation states become ordinary dat
  
 In order to allow invalidators to catch invalid pairs, we buffer all items before output in a very last node of the graph called a {\em barrier}. The barrier can be safely flushed if there is a guarantee that there are no in-flight invalidators for elements in the barrier. In other words, an element can be released from the barrier at the nullification time of all input items, which affect it. Hence, there is a need for nullification tracking mechanism. The exact method for barrier flushing is discussed in the next section. Barrier releases items in the order of meta-information, so results will be the same after any number of reruns on the same input. It is worth to note that barrier is the only buffer in any data flow graph within this approach due to optimistic groupings. 
 
-Therefore, the drifting state has the following properties:
+The drifting state has the following properties:
 \begin{itemize}
     \item Determinism is achieved by the price of a single buffer per any data flow graph. In practice, waiting time in this buffer is in terms of milliseconds~\cite{we2018adbis}.
     \item There are only two operations: map and windowed grouping. The set of dependencies $D$ contains conversions only between these operations.
-    \item User-defined code can be only in map operation, while for grouping, a user should only define hash balancing function. Therefore, drifting state model is stateless from a user point of view.
+    \item User-defined code can be only in map operation, while for grouping, a user should only define hash balancing function. Drifting state model is stateless from a user point of view.
     \item Only grouping operation maintains a system state. The state is represented by sorted on meta-information lists of data items.
     \item The only hard requirement of our model is that map operations must be pure.
 \end{itemize}
@@ -65,7 +65,7 @@ Therefore, the drifting state has the following properties:
 
 As it is demonstrated in section~\ref{fs-formalism}, in a deterministic system, state snapshotting and output releasing can be unsynchronized if the system includes in the snapshot last outputted element as well as system state. The trickiest problem here is a need to save at the time $\tau$ snapshot for state $S_{\tau-n}$. The exact protocols, which are used for snapshotting are detailed in the next section, while now we focus on the properties of drifting state, which allow making these protocols work correctly. 
 
-The only stateful operation in drifting state model is grouping. Hence, there is only a need to save grouping's state in order to take the complete state snapshot. Grouping's state in practice are lists sorted by meta information. As it was mentioned above, meta information indicates global discrete time $\tau$. Assume that nullification tracking mechanism reported that the minimal time of a non-nullified element is $\tau_{min}$. Because of the properties of nullification, these lists cannot be modified at any position before the item that corresponds to $\tau_{min}$. The immutable prefix and mutable suffix of grouping bucket are shown at Figure~\ref{immutable}. At the same time, because of the grouping semantics, state that is reached after consuming all input data items $[a_{0}...a_{\tau_{min}})$ is just a window-sized sublist that is located in the immutable part of the bucket, the example is shown in figure~\ref{substate}. 
+The only stateful operation in drifting state model is grouping. Hence, there is only a need to save grouping's state in order to take the complete state snapshot. Grouping's state in practice are lists sorted by meta information. As it was mentioned above, meta information indicates global discrete time $\tau$. Assume that nullification tracking mechanism reported that the minimal time of a non-nullified element is $\tau_{min}$. Because of the properties of nullification, these lists cannot be modified at any position before the item that corresponds to $\tau_{min}$. The immutable prefix and mutable suffix of grouping bucket are shown in Figure~\ref{immutable}. At the same time, because of the grouping semantics, state that is reached after consuming all input data items $[a_{0}...a_{\tau_{min}})$ is just a window-sized sublist that is located in the immutable part of the bucket, the example is shown in figure~\ref{substate}. 
 
 \begin{figure}[htbp]
   \centering
@@ -81,7 +81,7 @@ The only stateful operation in drifting state model is grouping. Hence, there is
   \label {substate}
 \end{figure}
 
-Therefore, the fact that the only state in drifting state model has a simple structure of lists sorted by meta-information allows us to take snapshots that contain {\em the past} state. The property of determinism guarantees that such state snapshot together with the last outputted element is consistent. 
+The fact that the only state in drifting state model has a simple structure of lists sorted by meta-information allows us to take snapshots that contain {\em the past} state. The property of determinism guarantees that such state snapshot together with the last outputted element is consistent. 
 
 % In this section, we outline the model of our system. We focus on the core concepts and definitions to introduce the necessary preliminaries for consistency preserving mechanisms. The \FlameStream\ model has much in common with other stream processing systems but has several vital differences that enable an opportunity for efficient implementation of consistency guarantees. Among them are reduced set of operations, strict ordering, and cyclic graphs.
 
