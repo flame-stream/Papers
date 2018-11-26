@@ -2,7 +2,32 @@
 
 \label {fs-consistency-section}
 
+In this section, we outline implementation details of~\FlameStream\ - an open-source prototype of drifting state model. Firstly, we describe the whole architecture of the system. After that, we demonstrate how exactly nullification tracking and barrier flushing mechanisms work. Eventually, the details of state snapshotting and failure recovery protocols are shown. 
+
 \subsection{System architecture}
+
+\FlameStream\ is implemented in Java, using Akka framework. An overview of the \FlameStream\ system model and architecture is shown in Figure~\ref{arch}. The main components are:
+
+{\bf Node} is a computational unit. Each node runs a process called {\it worker}, and each worker executes user-defined business logic. The range of 32-bit signed integer is divided into the fixed number of non-intersecting {\it hash units}. Each worker can be responsible for one or many hash units. Hash units are used for data partitioning before grouping operations and for state management. The number of hash-units per worker is a user-defined parameter, and it must be set before the start of computations. 
+
+{\bf Execution graph} is an Akka-based representation of user-defined processing logic. The graph is deployed on each node. A data item can be sent to another partition before each grouping operation. Grouping hash function is applied to the payload of a data item, and it is sent to the worker, which is responsible for the associated hash unit. The communication within a node is done via messaging or direct function calls depending on runtime heuristics. A delivery that crosses node boundaries is performed by means of TCP.
+
+{\bf Barrier} is located at the end of each graph instance. The main role of a barrier is to filter out possible duplicates or invalid results. Another function is to carry out an output protocol between system and data consumers, which is an essential part of providing exactly-once semantics.
+
+{\bf Data producers and data consumers} are deployed separately and communicate with the system via defined protocols. We assume that data producers support replaying input stream from points determined by meta-information. We also suppose that data consumers are able to return the last received element on request.
+
+{\bf Acker} is nullification tracking agent. Besides, it supervises the computation process and plays a role of coordinator in state snapshotting and recovery protocols described in the following sections.
+
+{\bf Apache ZooKeeper} is used as a {\it cluster state manager}. The usage of ZooKeeper mitigates the need for the dedicated master node.
+
+{\bf Persistent storage} is needed for reliable state saving to mitigate failures, it can be a distributed filesystem or database (e.g., HDFS, S3, MongoDB, GFS, HBase, ...).
+
+\begin{figure*}[htbp]
+  \centering
+  \includegraphics[scale=0.78]{pics/arch}
+  \caption{The overview of \FlameStream\ physical architecture}
+  \label {arch}
+\end{figure*}
 
 \subsection{Nullification tracking}
 
