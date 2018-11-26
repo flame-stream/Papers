@@ -4,21 +4,24 @@
 
 In this section, we outline the lightweight deterministic model. While it is deeply detailed in~\cite{we2018adbis}, in this paper we only mention properties, which play important roles in the preservation of consistency guarantees.
 
-Set $\Gamma$ of all possible data flow elements is represented in our model by {\em data items}. Data item is a {\it payload} and a {\it meta-information} associated with it. The payload is an arbitrary user-provided data. Meta is structured system-assigned information.
+Set $\Gamma$ of all possible data flow elements is represented in our model by {\em data items}. Data item is a {\it payload} and a {\it meta-information} associated with it. The payload is an arbitrary user-provided data. Meta is structured system-assigned information, its exact form is detailed in~\cite{we2018adbis}.
 
 \[DataItem := (Payload, Meta)\]
+
+Meta-information defines a total order on all data flow elements. Basically, meta-information can be interpreted as an indication of the global discrete time $\tau$. Further, in this paper, we use it mostly in this sense.
+
+\subsection{Nullification tracking}
+
+Meta-information provides an indicator for nullification tracking. We assume that each operation periodically receives a report about which elements have been nullified since the last report. We also suppose that these reports are monotonic regarding meta-information. In state-of-the-art streaming systems, such mechanism is typically implemented using {\em punctuations} or {\em low watermarks}. The implementation of such nullification tracking mechanism within the drifting state model is detailed in the next section.
 
 \subsection{Optimistic determinism}
 
 An obvious idea, how to make stream processing system deterministic, requires several steps:
 \begin{enumerate}
-    \item Define synthetic total order on data items using meta-information, e.g., by assigning logical timestamps at system entry
-    \item Preserve such total order before each order-sensitive operation in a data flow
+    \item Preserve total order defined by meta-information before each order-sensitive operation in a data flow
     \item Preserve the same order of output items
     \item Ensure that all operations are pure
 \end{enumerate}
-
-In this case, meta information can be also considered as an indication of time $\tau$, because it implies total order on all data flow elements.
 
 At the first glance, total order preservation is not a reasonable requirement. It can be achieved, e.g., using buffering before each order-sensitive operation until punctuation or low watermark arrives ~\cite{Li:2008:OPN:1453856.1453890}. However, frequent buffering can dramatically increase latency. 
 
@@ -50,7 +53,7 @@ We call such model a drifting state because operation states become ordinary dat
   \label {optimistic-grouping}
 \end{figure} 
  
-In order to allow invalidators to catch invalid pairs, we buffer all items before output in a very last node of the graph called a {\em barrier}. The barrier can be safely flushed if there is a guarantee that there are no in-flight invalidators for elements in the barrier. In other words, an element can be released from the barrier at the nullification time of all input items, which affect it. Hence, there is a need for nullification tracking mechanism. The exact method for barrier flushing is discussed in the next section. Barrier releases items in the order of meta-information, so results will be the same after any number of reruns on the same input. It is worth to note that barrier is the only buffer in any data flow graph within this approach due to optimistic groupings. 
+In order to allow invalidators to catch invalid pairs, we buffer all items before output in a very last node of the graph called a {\em barrier}. The barrier can be safely flushed if there is a guarantee that there are no in-flight invalidators for elements in the barrier. In other words, an element can be released from the barrier at the nullification time of all input items, which affect it. Barrier decides to release elements based on reports from nullification tracking mechanism. The exact method for barrier flushing is discussed in the next section. Barrier releases items in the order of meta-information, so results will be the same after any number of reruns on the same input. It is worth to note that barrier is the only buffer in any data flow graph within this approach due to optimistic groupings. 
 
 The drifting state has the following properties:
 \begin{itemize}
@@ -65,7 +68,7 @@ The drifting state has the following properties:
 
 As it is demonstrated in section~\ref{fs-formalism}, in a deterministic system, state snapshotting and output releasing can be unsynchronized if the system includes in the snapshot last outputted element as well as system state. The trickiest problem here is a need to save at the time $\tau$ snapshot for state $S_{\tau-n}$. The exact protocols, which are used for snapshotting are detailed in the next section, while now we focus on the properties of drifting state, which allow making these protocols work correctly. 
 
-The only stateful operation in drifting state model is grouping. Hence, there is only a need to save grouping's state in order to take the complete state snapshot. Grouping's state in practice are lists sorted by meta information. As it was mentioned above, meta information indicates global discrete time $\tau$. Assume that nullification tracking mechanism reported that the minimal time of a non-nullified element is $\tau_{min}$. Because of the properties of nullification, these lists cannot be modified at any position before the item that corresponds to $\tau_{min}$. The immutable prefix and mutable suffix of grouping bucket are shown in Figure~\ref{immutable}. At the same time, because of the grouping semantics, state that is reached after consuming all input data items $[a_{0}...a_{\tau_{min}})$ is just a window-sized sublist that is located in the immutable part of the bucket, the example is shown in figure~\ref{substate}. 
+The only stateful operation in drifting state model is grouping. Hence, there is only a need to save grouping's state in order to take the complete state snapshot. Grouping's state in practice are lists sorted by meta-information. As it was mentioned above, meta-information indicates global discrete time $\tau$. Assume that nullification tracking mechanism reported that the last nullified element has time $\tau_{min}$. Because of reports monotonicity and the properties of nullification, these grouping state lists cannot be modified at any position before the item that corresponds to $\tau_{min}$. The immutable prefix and mutable suffix of grouping bucket are shown in Figure~\ref{immutable}. At the same time, because of the grouping semantics, state that is reached after consuming all input data items $[a_{0}...a_{\tau_{min}})$ is just a window-sized sublist that is located in the immutable part of the bucket, the example is shown in figure~\ref{substate}. 
 
 \begin{figure}[htbp]
   \centering
@@ -81,7 +84,7 @@ The only stateful operation in drifting state model is grouping. Hence, there is
   \label {substate}
 \end{figure}
 
-The fact that the only state in drifting state model has a simple structure of lists sorted by meta-information allows us to take snapshots that contain {\em the past} state. The property of determinism guarantees that such state snapshot together with the last outputted element is consistent. 
+The fact that the only state in drifting state model has a simple structure of lists sorted by meta-information allows us to take snapshots that contain {\em the past} state. The property of determinism guarantees that such state snapshot together with the last outputted element is enough to make snapshotting mechanism consistent. 
 
 % In this section, we outline the model of our system. We focus on the core concepts and definitions to introduce the necessary preliminaries for consistency preserving mechanisms. The \FlameStream\ model has much in common with other stream processing systems but has several vital differences that enable an opportunity for efficient implementation of consistency guarantees. Among them are reduced set of operations, strict ordering, and cyclic graphs.
 
