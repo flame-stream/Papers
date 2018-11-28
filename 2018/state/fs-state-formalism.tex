@@ -3,7 +3,7 @@
 \subsection{Reference streaming model}
 
 \begin{definition}{Reference stream processing system}
-is a tuple of $(\Gamma,D)$. $\Gamma$ is all possible data flow elements. $D\subseteq{\Gamma\times\Gamma}$ is a binary relation. Pair $(x,y)\in{D}$ if $y$ can be generated from $x$ within user-defined logic, that is commonly expressed in a form of a logical graph. For simplification, we assume that user-defined operations are pure.
+is a tuple of $(\Gamma,D)$. $\Gamma$ is a set of all possible data flow elements. $D\subseteq{\Gamma\times\Gamma}$ is a binary relation. Pair $(x,y)\in{D}$ if $y$ can be generated from $x$ within user-defined operations, that is commonly expressed in a form of a logical graph. We assume that user-defined operations are pure.
 \end{definition}
 
 Within our model, one can define streaming system using only data flow elements and business logic. However, without the notion of time, we cannot observe any processing progress. Let $\tau\in{\mathbb{N}}$ be an exact global discrete time. Let $a_\tau\in{\Gamma}$ be the element, which enters at the time $\tau$, and $b_\tau\in{2^\Gamma}$ be the elements, which leave at the time $\tau$. Let $A_{\tau}=\bigcup\limits_{i=1}^{\tau}{a_i}$ be a set of all input elements by the time $\tau$ and ${B}_\tau=\bigcup\limits_{i=1}^{\tau}{b_i}$ be a set of all output elements.
@@ -48,7 +48,7 @@ In terms of this concept, the global state of our streaming model contains only 
 
 \subsection{Streaming model with failures}
 
-Unfortunately, the reference stream processing system is just an abstract concept, that is not possible to implement due to probable failures of network and computational units. Failure can be considered as a loss of the working set or its part. There is a need to extend the reference model by recovering mechanism that allows a system to transparently pass through the failures.
+Unfortunately, the reference stream processing system is just an abstract concept, because it does not capture probable failures of network and computational units. Failure can be expressed as a loss of the working set or its part. There is a need to extend the reference model by recovering mechanism that allows a system to transparently pass through the failures.
 
 \begin{definition}{Stream processing system}
 is a tuple of\\
@@ -84,7 +84,7 @@ The problem of consistency preservation arises when we move from the reference s
   \label {state-inconsistency}
 \end{figure}
 
-As it was mentioned above, end-user cannot observe internal system state. We define streaming consistency guarantees only in terms of output elements. The reference system is used to determine which of them are correct.
+As it was mentioned above, end-user cannot observe internal system state. We define streaming consistency guarantees in terms of output elements only. The reference system is used to determine which of them are correct.
 
 \begin{definition}{System provides for exactly once}
 if it is possible to obtain each output element $b_{t+1}$ in the reference stream processing system, i.e.,\\ 
@@ -103,7 +103,7 @@ $\exists{A^{*}_{t+1}\subseteq{2^{A_{t+1}}}}$ such that \\
 $\forall{t} \forall{b_{t+1}}: \widetilde{p}(b_{t+1}|A_{t+1},B_t)>0 \Rightarrow p(b_{t+1}|A^{*}_{t+1},B_t)>0$.
 \end{definition}
 
-Exactly once states that observed results cannot be distinguished from the results of the reference system. At most once and at least once guarantees are the relaxations of exactly once. The results within these guarantees can be obtained in the reference system, but with the assumption, that input is not completely correct. At most once can be achieved in the reference system if some input elements are missed. At least once can be reproduced if the input contains duplicates. This way, we can relax system recovery mechanisms by possible input channel flaws. This trick allows us to represent invisible system details in clear for user terms.
+Exactly once states that observed results cannot be distinguished from the results of the reference system. At most once and at least once guarantees are the relaxations of exactly once. The results within these guarantees can be obtained in the reference system, but with the assumption, that input is not completely correct. At most once can be achieved in the reference system if some input elements are missed. At least once can be reproduced if the input contains duplicates. Thus, we can relax system recovery mechanisms by possible input channel flaws. This trick allows us to represent invisible system details in clear for user terms.
 
 We can proceed from the probability of output element to the probability of the working set through the formula of total probability:
 
@@ -126,7 +126,7 @@ $P^{s}$ is a snapshot such that $\forall{t} P^{s}_t = S_{t_s},t_s \leq t$.
 
 A streaming system must provide for consistent state snapshotting mechanism in order to support exactly once processing by the definition. Further, we demonstrate the ways how it is done in state-of-the-art solutions, but before it, we formally show the basic motivation behind some of them. 
 
-One of the main factors that affects a method of taking a snapshot is the amount of information that is included in the snapshot. An obvious idea is to maintain the whole $W$, like it is done in MillWheel. Some other industrial systems, like Flink and Storm, save only system state, that takes up less disk space in a general case. However, state snapshotting imposes additional restrictions on the snapshot structure and mechanism.
+One of the main factors that affects a method of taking a snapshot is the amount of information that is included in the snapshot. An obvious idea is to maintain the whole $W$, like it is done in MillWheel. Some other industrial systems, like Flink and Storm, save only system state, that takes up less disk space in general. However, state snapshotting imposes additional restrictions on the snapshot structure and mechanism.
 
 \begin{theorem}
 \label{necessary_conditions}
@@ -147,9 +147,11 @@ if\\
 $\forall{b_{t+1}},p(b_{t+1}|A_{t+1},B_t)=1$.
 \end{definition}
 
+The following theorem shows that for a deterministic system the first condition of a Theorem~\ref{necessary_conditions} can be relaxed. 
+
 \begin{theorem}
 \label{determinism}
-In deterministic system, necessary condition on exactly once $\forall{b_t} : \exists{P^{s}_t=S_t}$ can be relaxed if state snapshot is extended by the last output element: $\forall{b_t}:P_t=P^{s}_t \cup b_t$.
+If system is deterministic, state snapshot is extended with the last output element: $\forall{b_t}:P_t=P^{s}_t \cup b_t$, and $\forall{t}\forall{a}\notin{A^{p}_t} : \theta_a \leq t$, then system is able to provide exactly once.
 \end{theorem}
 \begin{sketch}
 Assume that $\exists{b_t}:P_t = S_{t_s} \cup b_t, t_s < t$. Without loss of generality, assume that system fails at the time $\tau_f = \tau(t)+1$. The problem here is that if $(a_{\tau(t_s)+1},y)\in{D}$ and $y\in{S_t}$, recovery function must reprocess $a_{\tau(t_s)+1}$ in order to achieve $W_t=F(A^{p}_t,S_{t_s})\supseteq{S_t}$ that is possible in the reference system. However, reprocessing can cause inconsistent output as it is shown in Theorem~\ref{necessary_conditions}. The property of determinism guarantees that in case of reprocessing output elements will be the same and released in the same order. Having last outputted before the failure element $b_t$, we can filter out output elements, which are generated during reprocessing, but have been already outputted before the failure.

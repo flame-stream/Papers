@@ -4,15 +4,16 @@
 
 In this section, we outline the lightweight deterministic model. While it is described in details in~\cite{we2018adbis}, in this paper we only mention properties, which play important roles in the preservation of consistency guarantees.
 
-Set $\Gamma$ of all possible data flow elements is represented in our model by {\em data items}. Data item is a {\it payload} and a {\it meta-information} associated with it. The payload is an arbitrary user-provided data. Meta is structured system-assigned information, its exact form is detailed in~\cite{we2018adbis}.
+Set $\Gamma$ of all possible data flow elements is represented in our model by {\em data items}. Data item is a {\it payload} and a {\it meta-information} associated with it.
 
 \[DataItem := (Payload, Meta)\]
 
-Meta-information defines a total order on all data flow elements. Basically, meta-information can be interpreted as an indication of the global discrete time $\tau$. Further, in this paper, we use it mostly in this sense.
-
-\subsection{Nullification tracking}
-
-Meta-information provides an indicator for nullification tracking. We assume that each operation periodically receives a report about which elements have been nullified since the last report. We also suppose that these reports are monotonic regarding meta-information. In state-of-the-art streaming systems, such mechanism is typically implemented using {\em punctuations} or {\em low watermarks}. The implementation of such nullification tracking mechanism within the drifting state model is detailed in the next section.
+The payload is an arbitrary user-provided data. Meta is structured system-assigned information. The exact form of meta-information is detailed in the next section, but its main purposes are:
+\begin{itemize}
+    \item Define a total order on all data flow elements. The order is used for achieving determinism and deduplication
+    \item Maintain information about $Cl^{-1}(D)(x)$ for each data item $x$
+    \item Keep other service information about a data item, e.g., extra flags
+\end{itemize}
 
 \subsection{Optimistic determinism}
 
@@ -44,7 +45,7 @@ Actually, any stateful transformation can be expressed by decomposing into map a
   \label {classical-drifting}
 \end{figure}
 
-We call such model a drifting state because operation states become ordinary data flow elements. In this setting, map operation is pure and order insensitive, and grouping operation is pure. Grouping operation is order-sensitive because it should group new element with the exact previous state. Fortunately, grouping can be implemented optimistically. The scheme is shown in Figure~\ref{optimistic-grouping}. Assume that numbers on this figure are timestamps. An element with timestamp 3 is out-of-order. We know that actually invalid pair (one; five) has been already outputted. The main idea here is that if an arrived element is out-of-order, the system always can generate valid pairs because it knows the right position of the element. Besides, an invalid pair with a special flag can be resent. Let us call such elements invalidators or tombstones. The main purpose of invalidators is to hunt down previously outputted invalid pairs and to remove them from other grouping or to intercept before outputting. Map functions are required to be pure in order to ensure that invalidators will go through exactly the same path as original pairs. This method is applicable to any number of subsequent groupings.
+We call such model a drifting state because operation states become ordinary data flow elements. In this setting, map operation is pure and order insensitive, and grouping operation is pure. Grouping operation is order-sensitive because it should group new element with the exact previous state. Fortunately, grouping can be implemented optimistically. The scheme is shown in Figure~\ref{optimistic-grouping}. Assume that numbers on this figure represent meta-information. An element with meta 3 is out-of-order. We know that actually invalid pair (one; five) has been already outputted. The main idea here is that if an arrived element is out-of-order, the system always can generate valid pairs because it knows the right position of the element. Besides, an invalid pair with a special flag in meta can be resent. Let us call such elements invalidators or tombstones. The main purpose of invalidators is to hunt down previously outputted invalid pairs and to remove them from other grouping or to intercept before outputting. Map functions are required to be pure in order to ensure that invalidators will go through exactly the same path as original pairs. This method is applicable to any number of subsequent groupings.
  
 \begin{figure}[htbp]
   \centering
@@ -53,7 +54,7 @@ We call such model a drifting state because operation states become ordinary dat
   \label {optimistic-grouping}
 \end{figure} 
  
-In order to allow invalidators to catch invalid pairs, we buffer all items before output in a very last node of the graph called a {\em barrier}. The barrier can be safely flushed if there is a guarantee that there are no in-flight invalidators for elements in the barrier. In other words, an element can be released from the barrier at the nullification time of all input items, which affect it. Barrier decides to release elements based on reports from nullification tracking mechanism. The exact method for barrier flushing is discussed in the next section. Barrier releases items in the order of meta-information, so results will be the same after any number of reruns on the same input. It is worth to note that barrier is the only buffer in any data flow graph within this approach due to optimistic groupings. 
+In order to allow invalidators to catch invalid pairs, we buffer all items before output in a very last node of the graph called a {\em barrier}. The barrier can be safely flushed if there is a guarantee that there are no in-flight invalidators for elements in the barrier. Hence, an element can be released from the barrier at the nullification time of the last input items, which affect it. In other words, element $b$ can be released at the time $\tau(t)$ if $\forall{a}:b\in{Cl(D)(a)},\theta_a \leq \tau(t)$. If there is an information, which input elements have been already nullified, meta-information of an element in the barrier can be used to determine the correct moment to release this element. The exact method for barrier flushing is discussed in the next section. Barrier releases items in the order of meta-information, so results will be the same after any number of reruns on the same input. It is worth to note that barrier is the only buffer in any data flow graph within this approach due to optimistic groupings. 
 
 The drifting state has the following properties:
 \begin{itemize}
@@ -66,25 +67,29 @@ The drifting state has the following properties:
 
 \subsection{Snapshotting}
 
-As it is demonstrated in section~\ref{fs-formalism}, in a deterministic system, state snapshotting and output releasing can be unsynchronized if the system includes in the snapshot last outputted element as well as system state. The trickiest problem here is a need to save at the time $\tau$ snapshot for state $S_{\tau-n}$. The exact protocols, which are used for snapshotting are detailed in the next section, while now we focus on the properties of drifting state, which allow making these protocols work correctly. 
+As it is demonstrated in section~\ref{fs-formalism}, in a deterministic system, state snapshotting and output releasing can be unsynchronized if the system includes in the snapshot last outputted element as well as system state. The problem here is a need to save at the time $\tau$ snapshot for state $S_{\tau-n}$ for some $n$.
 
-The only stateful operation in drifting state model is grouping. Hence, there is only a need to save grouping's state in order to take the complete state snapshot. Grouping's state in practice are lists sorted by meta-information. As it was mentioned above, meta-information indicates global discrete time $\tau$. Assume that nullification tracking mechanism reported that the last nullified element has time $\tau_{min}$. Because of reports monotonicity and the properties of nullification, these grouping state lists cannot be modified at any position before the item that corresponds to $\tau_{min}$. The immutable prefix and mutable suffix of grouping bucket are shown in Figure~\ref{immutable}. At the same time, because of the grouping semantics, state that is reached after consuming all input data items $[a_{0}...a_{\tau_{min}})$ is just a window-sized sublist that is located in the immutable part of the bucket, the example is shown in figure~\ref{substate}. 
+The only stateful operation in drifting state model is grouping. Hence, there is only a need to save grouping's state in order to take the complete state snapshot. Grouping's state in practice are lists of data items sorted by meta-information. If all input elements $[a_{0}...a_{\tau-n}]$ have been nullified, then state $S_{\tau-n}$ can be snapshotted. Therefore, to take a snapshot at time $\tau$, there is a need to determine maximal $\tau-n$ such that all input elements $[a_{0}...a_{\tau-n}]$ have been nullified. After that, we can just save elements from grouping state lists, which are affected only by these elements. These elements can be determined using meta-information because it contains information about $Cl^{-1}(D)$.
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=.3\textwidth]{pics/immutable}
-  \caption{Grouping bucket won't be modified up to element that corresponds to current minimal time}
-  \label {immutable}
-\end{figure}
+The fact that the only state in drifting state model has a simple structure of lists sorted by meta-information allows us to take snapshots that contain {\em the past} state. The property of determinism guarantees that such state snapshot together with the last outputted element is enough to make snapshotting mechanism consistent. The exact protocols, which are used for snapshotting are detailed in the next section.  
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=.3\textwidth]{pics/substate}
-  \caption{Grouping buckets with window = 2. Window-sized sublists are grouping states at past global times}
-  \label {substate}
-\end{figure}
+% Assume that all input elements, which affect the prefix of the lists have been nullified. It means that these grouping state lists cannot be modified at any position before the item that corresponds to $\tau_{min}$. The immutable prefix and mutable suffix of grouping bucket are shown in Figure~\ref{immutable}. At the same time, because of the grouping semantics, state that is reached after consuming all input data items $[a_{0}...a_{\tau_{min}})$ is just a window-sized sublist that is located in the immutable part of the bucket, the example is shown in figure~\ref{substate}. 
 
-The fact that the only state in drifting state model has a simple structure of lists sorted by meta-information allows us to take snapshots that contain {\em the past} state. The property of determinism guarantees that such state snapshot together with the last outputted element is enough to make snapshotting mechanism consistent. 
+% \begin{figure}[htbp]
+%   \centering
+%   \includegraphics[width=.3\textwidth]{pics/immutable}
+%   \caption{Grouping bucket won't be modified up to element that corresponds to current minimal time}
+%   \label {immutable}
+% \end{figure}
+
+% \begin{figure}[htbp]
+%   \centering
+%   \includegraphics[width=.3\textwidth]{pics/substate}
+%   \caption{Grouping buckets with window = 2. Window-sized sublists are grouping states at past global times}
+%   \label {substate}
+% \end{figure}
+
+% The fact that the only state in drifting state model has a simple structure of lists sorted by meta-information allows us to take snapshots that contain {\em the past} state. The property of determinism guarantees that such state snapshot together with the last outputted element is enough to make snapshotting mechanism consistent. 
 
 % In this section, we outline the model of our system. We focus on the core concepts and definitions to introduce the necessary preliminaries for consistency preserving mechanisms. The \FlameStream\ model has much in common with other stream processing systems but has several vital differences that enable an opportunity for efficient implementation of consistency guarantees. Among them are reduced set of operations, strict ordering, and cyclic graphs.
 
