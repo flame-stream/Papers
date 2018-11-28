@@ -3,27 +3,27 @@
 \label {fs-consistency-section}
 
 In this section, we outline implementation details of \\ 
-\FlameStream\ - an open-source prototype of drifting state model. Firstly, we describe the whole architecture of the system. After that, we demonstrate how exactly nullification tracking and barrier flushing mechanisms work. Eventually, the details of state snapshotting and failure recovery protocols are shown. 
+\FlameStream\ - an open-source prototype of drifting state model. Firstly, we describe the architecture of the distributed stream processing system. After that, we demonstrate how exactly nullification tracking and barrier flushing mechanisms work. Eventually, the details of state snapshotting and failure recovery protocols are shown. 
 
 \subsection{System architecture}
 
-Распределенность, свзязь всех со всеми, мапим логический граф на каждую машинку. Есть отслеживание (acker). Barrier. В чем предназначение деталей? В больших камнях. Более подробно + что, а не как.
+%Распределенность, свзязь всех со всеми, мапим логический граф на каждую машинку. Есть отслеживание (acker). Barrier. В чем предназначение деталей? В больших камнях. Более подробно + что, а не как.
 
-\FlameStream\ is implemented in Java, using Akka framework. An overview of the \FlameStream\ architecture is shown in Figure~\ref{arch}. The main components are:
+\FlameStream\ is a distributed stream processing engine that is implemented in Java, using Akka framework. An overview of the \FlameStream\ architecture is shown in Figure~\ref{arch}. The main components are:
 
-{\bf Node} is a computational unit. Each node runs a process called {\it worker}, and each worker executes user-defined business logic. The range of 32-bit signed integer is divided into the fixed number of non-intersecting {\it hash units}. Each worker can be responsible for one or many hash units. Hash units are used for data partitioning before grouping operations and for state management. The number of hash-units per worker is a user-defined parameter, and it must be set before the start of computations. 
+{\bf Node} is a computational unit. Each node is connected through a network with all other nodes. A node runs a process called {\it worker}. Worker executes user-defined operations. The range of 32-bit signed integer is divided into the fixed number of non-intersecting {\it hash units}. Each worker can be responsible for one or many hash units. Hash units are used for data partitioning and state management. The number of hash-units per worker is a user-defined parameter, and it must be set before the start of computations. 
 
-{\bf Execution graph} is an Akka-based representation of user-defined processing logic. The graph is deployed on each node. A data item can be sent to another partition before each grouping operation. Grouping hash function is applied to the payload of a data item, and it is sent to the worker, which is responsible for the associated hash unit. The communication within a node is done via messaging or direct function calls depending on runtime heuristics. A delivery that crosses node boundaries is performed by means of TCP.
+{\bf Execution graph} is an Akka-based representation of a user-defined logical graph. Execution graph is deployed on each node. A data item can be sent to another worker before each operation due to balancing technique and the distribution of hash units. The communication within a node is done via messaging or direct function calls depending on runtime heuristics. A delivery that crosses node boundaries is performed by means of TCP.
 
-{\bf Barrier} is located at the end of each graph instance. The main role of a barrier is to filter out possible duplicates or invalid results. Another function is to carry out an output protocol between system and data consumers, which is an essential part of providing exactly-once semantics.
+{\bf Barrier} is located at the end of each execution graph instance. One role of a barrier is to filter out possible duplicates or invalid results. Another function is to carry out an output protocol between system and data consumers, which is an essential part of providing exactly-once semantics.
 
-{\bf Data producers and data consumers} are deployed separately and communicate with the system via defined protocols. We assume that data producers support replaying input stream from points determined by meta-information. We also suppose that data consumers are able to return the last received element on request.
+{\bf Data producers and data consumers} are deployed separately and communicate with the system via defined protocols. We assume that data producers support replaying input stream from some defined points. We also suppose that data consumers are able to return the last received element on request. The requirement regarding data producers and consumers are discussed in details in further sections.
 
-{\bf Acker} is nullification tracking agent. Besides, it supervises the computation process and plays a role of coordinator in state snapshotting and recovery protocols described in the following sections.
+{\bf Acker} is an agent that tracks the processing progress of the system. Acker broadcasts information about input elements nullification that is needed for barrier flushing. Besides, it plays a role of coordinator in state snapshotting and recovery protocols described in the following sections.
 
-{\bf Apache ZooKeeper} is used as a {\it cluster state manager}. The usage of ZooKeeper mitigates the need for the dedicated master node.
+{\bf Apache ZooKeeper} is used as a {\it cluster state manager}. It contains basic system parameters and locations of workers and acker. The usage of ZooKeeper mitigates the need for the dedicated master node.
 
-{\bf Persistent storage} is needed for reliable state saving to mitigate failures, it can be a distributed filesystem or database (e.g., HDFS, S3, MongoDB, GFS, HBase, ...).
+{\bf Persistent storage} is needed for reliable storing of state snapshot. In case of failures, state snapshot is recovered from the persistent storage. It can be a distributed file system or database (e.g., HDFS, S3, MongoDB, GFS, HBase, etc.).
 
 \begin{figure*}[htbp]
   \centering
@@ -34,13 +34,25 @@ In this section, we outline implementation details of \\
 
 \subsection{Meta-information structure}
 
+In~\FlameStream\ the meta-information is a tuple of a {\it global time}, a {\it trace}, {\it child ids} and a {\it tombstone flag}.
+
+\[Meta := (GlobalTime, ChildIds[\:], Trace, IsTombstone)\]
+
+Global time is assigned to each input data item $a$ when it enters the system. It is a logical time and identifier of data producer. The identifier of data producer is needed to prevent collisions. All derivative data items $x \in Cl(D)(a)$ inherit global time form $a$. Global time of grouping output elements is a maximum global time among the group. This property guarantees that if a data flow element $x$ has global time $GT$ and an input element that is defined by global time $GT$ has been already nullified, then all input elements that affect $x$ have been nullified as well. It allows the system to use global time as an indicator of $Cl^{-1}(D)$. It is worth to note that we do not rely on any clock synchronization between nodes. The only implication of the clock skew is the system degradation regarding latency: 1 ms of the fronts clock difference appends 1 ms to minimal latency.
+
+Map operation is able to generate multiple items from one, and {\em child ids} define an order on them. {\it ChildIds} is an array of child ids, that corresponds to all visited map operations.
+
+If tombstones have been generated, multiple items with the same global time and child ids can exist in the stream. To differentiate them without the comparison of a payload, there is a {\it Trace} value stored in the meta-information. The trace is a xor of all physical operations' ids (random 64-bit identifier) visited by item so far. Invalid item and the corresponding tombstone go along the same path because they have the same payload and the balancing functions are deterministic. Therefore, item and the corresponding tombstone can be revealed via trace matching. 
+
+Therefore, on the one hand, meta-information defines a total order on data flow elements (meta is compared lexicographically). On the other hand, it provides additional information about $Cl^{-1}(D)$ and tombstones.
+
 \subsection{Nullification tracking}
 
-In drifting state model, it is assumed that there is a mechanism that periodically provides monotonic, in terms of meta-information, reports about which elements have been nullified. The well-known solution for detecting nullified elements is to inject in execution graph special elements that go through the same network channels as ordinary data items and, in some sense, push through data flow elements. When such element is released from the very last node of execution graph, it means that all previous input elements have been nullified due to FIFO network channels. While this approach works well in systems that support only acyclic execution graphs, it is unclear how to handle such pushing elements in drifting state cycles. 
+% In drifting state model, it is assumed that there is a mechanism that periodically provides monotonic, in terms of meta-information, reports about which elements have been nullified. The well-known solution for detecting nullified elements is to inject in execution graph special elements that go through the same network channels as ordinary data items and, in some sense, push through data flow elements. When such element is released from the very last node of execution graph, it means that all previous input elements have been nullified due to FIFO network channels. While this approach works well in systems that support only acyclic execution graphs, it is unclear how to handle such pushing elements in drifting state cycles. 
 
-To solve the problem we adopt an idea from Apache Storm~\cite{apache:storm}. Storm uses special agent called {\em Acker} for elements tracking. On each input item any operation sends to the Acker checksum hash of the corresponding output item and then checksum hash of the input item. Acker XORs all checksums and when the result becomes zero, it means that all items were processed. In this approach, collisions are possible, but they are very unlikely in practice. In our modification, checksum hash is sent together with element meta-information. Acker groups XORs by the meta-information. If XOR for corresponding meta becomes zero, it means that execution graph does not contain in-flight elements with such meta, e.g., the element is nullified. 
+% To solve the problem we adopt an idea from Apache Storm~\cite{apache:storm}. Storm uses special agent called {\em Acker} for elements tracking. On each input item any operation sends to the Acker checksum hash of the corresponding output item and then checksum hash of the input item. Acker XORs all checksums and when the result becomes zero, it means that all items were processed. In this approach, collisions are possible, but they are very unlikely in practice. In our modification, checksum hash is sent together with element meta-information. Acker groups XORs by the meta-information. If XOR for corresponding meta becomes zero, it means that execution graph does not contain in-flight elements with such meta, e.g., the element is nullified. 
 
-Acker broadcasts information about nullified timestamps, so we get the equivalent of low watermarks.
+% Acker broadcasts information about nullified timestamps, so we get the equivalent of low watermarks.
 
 % Acker tracks data items using a checksum hash. When the item is sent or received by an operation, its global time and checksum are sent to the acker. This message is called {\it ack}. Acker groups acks by a global time into the structure called {\it ack table}. Once acker receives an ack message with global time {\it GT} and {\it XOR} it updates {\it GT} entry in the table by xoring {\it XOR} with the current value. When an item is sent and later received by the next operation, xoring corresponding {\it XOR}s would yield zero.
 
