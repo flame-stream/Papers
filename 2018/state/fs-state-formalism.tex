@@ -3,10 +3,12 @@
 \subsection{Reference streaming model}
 
 \begin{definition}{Reference stream processing system}
-is a tuple of $(\Gamma,D)$. $\Gamma$ is a set of all possible data flow elements. $D\subseteq{\Gamma\times\Gamma}$ is a binary relation. Pair $(x,y)\in{D}$ if $y$ can be generated from $x$ within user-defined operations, that is commonly expressed in a form of a logical graph. We assume that user-defined operations are pure.
+is a tuple of $(\Gamma,D)$. Where $\Gamma$ is a set of all possible data flow elements and $D\subseteq{\Gamma\times\Gamma}$ is a binary relation on it. Pair $(x,y)$ is in ${D}$ if $y$ can be generated from $x$ within user-defined operations.
 \end{definition}
 
-Within our model, one can define streaming system using only data flow elements and business logic. However, without the notion of time, we cannot observe any processing progress. Let $\tau\in{\mathbb{N}}$ be an exact global discrete time. Let $a_\tau\in{\Gamma}$ be the element, which enters at the time $\tau$, and $b_\tau\in{2^\Gamma}$ be the elements, which leave at the time $\tau$. Let $A_{\tau}=\bigcup\limits_{i=1}^{\tau}{a_i}$ be a set of all input elements by the time $\tau$ and ${B}_\tau=\bigcup\limits_{i=1}^{\tau}{b_i}$ be a set of all output elements.
+Basically $D$ captures the notion of a logical graph which vertices are pure functions.
+
+Within our model, one can define streaming system using only data flow elements and business logic. However, without the notion of time, we cannot observe any processing progress. Let $\tau\in{\mathbb{N}}$ be an exact global discrete time. Let $a_\tau\in{\Gamma}$ be the element, which enters at the time $\tau$, and $b_\tau\in{2^\Gamma}$ be the elements, which leave at the time $\tau$. Let $A_{\tau}=\{a_i\}_{i=1}^{\tau}$ be a set of all input elements by the time $\tau$ and ${B}_\tau=\bigcup\limits_{i=1}^{\tau}{b_i}$ be a set of all output elements.
 
 \begin{definition}{A reference working set}
 $\widehat{W}_\tau\subseteq{\Gamma}$ at the time $\tau$ is the set of elements, which are currently in the reference system:
@@ -14,27 +16,31 @@ $\widehat{W}_\tau\subseteq{\Gamma}$ at the time $\tau$ is the set of elements, w
 $\widehat{W}_0=\emptyset$:
 
 $\widehat{W}_{\tau+1}=\begin{sqcases}
-\widehat{W}_{\tau}\cup{a_{\tau+1}}, & \text{or}\\
+  \widehat{W}_{\tau}\cup{\{a_{\tau+1}\}}, & \text{or}\\
 \widehat{W}_{\tau}\setminus{b_{\tau+1}}, & \text{or}\\
 \widehat{W}_{\tau}\setminus{X}\cup{Y}, \forall{x\in{X}\exists{y\in{Y}}}:(x,y)\in{D} & \text{}.
 \end{sqcases}$
 
 \end{definition}
 
-We can imagine a stream processing system as a pool, where some elements are poured in and others are poured out. Inside a pool, each element can be substituted by the other element, which can be substituted as well, and so on. Only survived elements are poured out from the pool.
+We can imagine a stream processing system as a pool, where some elements are poured in and others are poured out. Inside a pool, each element can be substituted by the other element accroding to logical graph, which can be substituted as well, and so on. Only survived elements are poured out from the pool.
 
 \begin{definition}{System state}
-$S_\tau$ at the time $\tau$ is $\widehat{W}_\tau^{\infty}$ if $A_{\infty}=\bigcup\limits_{i=1}^{\tau}{a_i}$.
+  $S_\tau$ at the time $\tau$ is $\widehat{W}_\tau^{\infty}$ if $A_{\infty}=\{a_i\}_{i=1}^{\tau}$.
 \end{definition}
+
+System state essescially is everything that stays in the system if we block the input and wait for an infinite time.
 
 \begin{definition}{Nullification time}
-of an input element $a_\tau$ is the time $\theta_{a_\tau}=inf(\hat{\tau}>\tau|W_{\hat{\tau}}\setminus{S_{\hat{\tau}}}\cap{Cl(D)(a_\tau)=\emptyset})$, where $Cl(D)$ is a transitive closure of the relation $D$.
+  of an input element $a_\tau$ is the first time $\theta_{a_tau}$ when all elements that are produced from the $a_\tau$ are in state or are released from the system. $\theta_{a_\tau}=inf(\hat{\tau}>\tau|W_{\hat{\tau}}\setminus{S_{\hat{\tau}}}\cap{Cl(D)(a_\tau)=\emptyset})$, where $Cl(D)$ is a transitive closure of the relation $D$.
 \end{definition}
 
-Technically, states in existing stream processing systems are not data flow elements, but as it was mentioned above, they can be presented in such a way using drifting state model. The main purpose of the state is to accumulate the information about input items. Data flow elements cannot be in $W\setminus{S}$ for an infinite time by the definition. Hence, for each input element $a_\tau$, there is a nullification time $\theta_{a_\tau}$, thereafter all elements, which depend on $a_\tau$, are in the system state. Since the nullification time, the input element can affect output elements only through the state.
+Technically, states in existing stream processing systems are not data flow elements, but as it was mentioned above, they can be presented in such a way using drifting state model. The main purpose of the state is to accumulate the information about input items. Data flow elements cannot stay in $W\setminus{S}$ for an infinite time by the definition. Hence, for each input element $a_\tau$, there is a nullification time $\theta_{a_\tau}$, thereafter all elements, which depend on $a_\tau$, are in the system state. Since the nullification time, the input element can affect output elements only through the state.
+
+In our model internal transitions cannot be observed directely from outside the system. Moreover, it is not important the exact order and value of internal elements, only the output elements are essensial for reasoning on consistency guaranties. Therefore it is convinient to limit global discreete time only to the moments when output element are released.
 
 \begin{definition}{Time quantization}
-$\tau(t)$ is a discrete time such that $\tau(t)$ determines output elements $\forall{t}\exists{b_{\tau(t)}}$.
+$\tau(t)$ is a discrete time such that $\tau(t)$ determines output elements $\exists{b_{\tau(t)}}$.
 \end{definition}
 
 \begin{definition}{Probability of output element in a reference system}
