@@ -7,6 +7,8 @@ In this section, we outline implementation details of \\
 
 \subsection{System architecture}
 
+Распределенность, свзязь всех со всеми, мапим логический граф на каждую машинку. Есть отслеживание (acker). Barrier. В чем предназначение деталей? В больших камнях. Более подробно + что, а не как.
+
 \FlameStream\ is implemented in Java, using Akka framework. An overview of the \FlameStream\ architecture is shown in Figure~\ref{arch}. The main components are:
 
 {\bf Node} is a computational unit. Each node runs a process called {\it worker}, and each worker executes user-defined business logic. The range of 32-bit signed integer is divided into the fixed number of non-intersecting {\it hash units}. Each worker can be responsible for one or many hash units. Hash units are used for data partitioning before grouping operations and for state management. The number of hash-units per worker is a user-defined parameter, and it must be set before the start of computations. 
@@ -29,6 +31,8 @@ In this section, we outline implementation details of \\
   \caption{The overview of \FlameStream\ architecture}
   \label {arch}
 \end{figure*}
+
+\subsection{Meta-information structure}
 
 \subsection{Nullification tracking}
 

@@ -4,11 +4,11 @@
 
 In this section, we outline the lightweight deterministic model. While it is described in details in~\cite{we2018adbis}, in this paper we only mention properties, which play important roles in the preservation of consistency guarantees.
 
-Set $\Gamma$ of all possible data flow elements is represented in our model by {\em data items}. Data item is a {\it payload} and a {\it meta-information} associated with it.
+Set $\Gamma$ of all possible data flow elements in our model consists of {\em data items}. Data item contains an arbitrary application domain {\it payload} and a structured system-assigned {\it meta-information}.
 
 \[DataItem := (Payload, Meta)\]
 
-The payload is an arbitrary user-provided data. Meta is structured system-assigned information. The exact form of meta-information is detailed in the next section, but its main purposes are:
+The exact form of meta-information is detailed in the next section, but its main purposes are:
 \begin{itemize}
     \item Define a total order on all data flow elements. The order is used for achieving determinism and deduplication
     \item Maintain information about $Cl^{-1}(D)(x)$ for each data item $x$
@@ -17,16 +17,16 @@ The payload is an arbitrary user-provided data. Meta is structured system-assign
 
 \subsection{Optimistic determinism}
 
-An obvious idea, how to make stream processing system deterministic, requires several steps:
+A straightforward idea, how to make stream processing system deterministic, requires several steps:
 \begin{enumerate}
     \item Preserve total order defined by meta-information before each order-sensitive operation in a data flow
     \item Preserve the same order of output items
     \item Ensure that all operations are pure
 \end{enumerate}
 
-At the first glance, total order preservation is not a reasonable requirement. It can be achieved, e.g., using buffering before each order-sensitive operation until punctuation or low watermark arrives ~\cite{Li:2008:OPN:1453856.1453890}. However, frequent buffering can dramatically increase latency. 
+At the first glance, total order preservation is over-restrictive. It can be achieved, e.g., using buffering before each order-sensitive operation until punctuation or low watermark arrives ~\cite{Li:2008:OPN:1453856.1453890}. However, frequent buffering can dramatically increase latency. 
 
-Let us consider two operations:
+Any logical graph in drifting state model is constructed using the following two operations:
 
 {\bf Map} applies a user-defined function to the payload of an input item. This function returns a sequence of data items with transformed payloads. An output sequence can be empty.
 
@@ -67,7 +67,7 @@ The drifting state has the following properties:
 
 \subsection{Snapshotting}
 
-As it is demonstrated in section~\ref{fs-formalism}, in a deterministic system, state snapshotting and output releasing can be unsynchronized if the system includes in the snapshot last outputted element as well as system state. The problem here is a need to save at the time $\tau$ snapshot for state $S_{\tau-n}$ for some $n$.
+As it is demonstrated in section~\ref{fs-formalism}, in a deterministic system, state snapshotting and output delivery can be unsynchronized if the system includes in the snapshot last released element as well as system state. The problem here is a need to save at the time $\tau$ snapshot for state $S_{\tau-n}$ for some $n$.
 
 The only stateful operation in drifting state model is grouping. Hence, there is only a need to save grouping's state in order to take the complete state snapshot. Grouping's state in practice are lists of data items sorted by meta-information. If all input elements $[a_{0}...a_{\tau-n}]$ have been nullified, then state $S_{\tau-n}$ can be snapshotted. Therefore, to take a snapshot at time $\tau$, there is a need to determine maximal $\tau-n$ such that all input elements $[a_{0}...a_{\tau-n}]$ have been nullified. After that, we can just save elements from grouping state lists, which are affected only by these elements. These elements can be determined using meta-information because it contains information about $Cl^{-1}(D)$.
 
