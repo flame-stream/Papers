@@ -48,30 +48,24 @@ Therefore, on the one hand, meta-information defines a total order on data flow 
 
 \subsection{Nullification tracking}
 
-% In drifting state model, it is assumed that there is a mechanism that periodically provides monotonic, in terms of meta-information, reports about which elements have been nullified. The well-known solution for detecting nullified elements is to inject in execution graph special elements that go through the same network channels as ordinary data items and, in some sense, push through data flow elements. When such element is released from the very last node of execution graph, it means that all previous input elements have been nullified due to FIFO network channels. While this approach works well in systems that support only acyclic execution graphs, it is unclear how to handle such pushing elements in drifting state cycles. 
+% In drifting state model, it is assumed that there is a mechanism that periodically provides monotonic, in terms of meta-information, reports about which elements have been nullified. 
 
-% To solve the problem we adopt an idea from Apache Storm~\cite{apache:storm}. Storm uses special agent called {\em Acker} for elements tracking. On each input item any operation sends to the Acker checksum hash of the corresponding output item and then checksum hash of the input item. Acker XORs all checksums and when the result becomes zero, it means that all items were processed. In this approach, collisions are possible, but they are very unlikely in practice. In our modification, checksum hash is sent together with element meta-information. Acker groups XORs by the meta-information. If XOR for corresponding meta becomes zero, it means that execution graph does not contain in-flight elements with such meta, e.g., the element is nullified. 
+As it was mentioned above, in order to implement barrier flushing and state snapshotting mechanisms, there is a need for a mechanism that identifies nullified input elements. The well-known solution for detecting nullified elements is to inject in execution graph special elements that go through the same network channels as ordinary data items and push through data flow elements. When such element is released from the very last node of the execution graph, it means that all previous input elements have been nullified due to FIFO network channels. Flink checkpointing technique is based on this approach~\cite{Carbone:2017:SMA:3137765.3137777}. While it works well in systems that support only acyclic execution graphs, it is unclear how to handle such pushing elements in drifting state cycles. 
 
-% Acker broadcasts information about nullified timestamps, so we get the equivalent of low watermarks.
+To solve the problem we adopt an idea from Apache Storm~\cite{apache:storm}. Storm uses a special agent called {\em Acker} for elements tracking. On each input item, an operation sends to the Acker checksum hash of the corresponding output item and then checksum hash of the input item. Acker XORs all checksums and when the result becomes zero, it means that all items were processed. In this approach, collisions are possible, but they are very unlikely in practice. In our modification, checksum hash is sent together with element global time. This message is called {\it ack}. Acker groups acks by a global time into the structure called {\it ack table}. Once acker receives an ack message with global time {\it GT} and {\it XOR} it updates {\it GT} entry in the table by xoring {\it XOR} with the current value. When an item is sent and later received by the next operation, xoring corresponding {\it XOR}s would yield zero.
 
-% Acker tracks data items using a checksum hash. When the item is sent or received by an operation, its global time and checksum are sent to the acker. This message is called {\it ack}. Acker groups acks by a global time into the structure called {\it ack table}. Once acker receives an ack message with global time {\it GT} and {\it XOR} it updates {\it GT} entry in the table by xoring {\it XOR} with the current value. When an item is sent and later received by the next operation, xoring corresponding {\it XOR}s would yield zero.
+Acks are overlapped to make table's entry equal to zero only when an item arrives at the barrier, i.e., ack for receive is sent only after both transformation is done and the ack for the transformed item is sent, as illustrated in Figure~\ref{acker}. In this example, different shapes of items mean different payloads. The ack for the sending of the triangular element is sent before the rectangular one. We expect the channel between the acker and each operation to be FIFO, so ack for the triangular item would be xored before the rectangular. So the two equal values are separated by a distinct one. This technique guarantees that the {\it XOR} for some global time is equal to zero only if there are no in-flight elements with such global time.
 
-% Acks are overlapped to nullify table's entry only when an item arrives at the barrier. That is, ack for receive is sent only after both processing and the ack sending for the transformed item, as illustrated in Figure~\ref{acker}. Different shapes of items mean different payloads. The ack for the sending of the triangular element is sent before the rectangular one. We expect the channel between the acker and each operation to be FIFO, so ack for the triangular item would be xored before the rectangular. So the two equal values are separated by distinct one. This technique guarantees that the {\it XOR} for some global time is equal to zero only if there are no in-flight elements with such global time.
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[scale=0.58]{pics/acker}
+  \caption{The example of tracking minimal time using acker}
+  \label {acker}
+\end{figure}
 
-% \begin{figure}[htbp]
-%   \centering
-%   \includegraphics[scale=0.58]{pics/acker}
-%   \caption{The example of tracking minimal time using acker}
-%   \label {acker}
-% \end{figure}
+The {\em minimal time} within a stream is the minimal global time with non-zero {\it XOR}. On minimal time changes, acker broadcasts new minimal time to the barrier and operations. An important property of these notifications is monotonicity in terms of global time. Minimal time notifications guarantee that there are no elements in a data flow, except in the barrier, with the given global time and less. It implies that there are tombstones with such global time and less as well. The barrier can release elements with global time {\it GT} once it received notification from acker that the minimal time within the stream is greater than {\it GT} because it means that input element identified by {\it GT} is ready for safe nullification. 
 
-% The minimal time within a stream is the minimal global time with non-zero {\it XOR}. On minimal time changes, acker broadcasts new minimal time to the barrier and operations. Minimal time notifications plays the same role as {\em low-watermarks} in OOP architecture~\cite{Li:2008:OPN:1453856.1453890}. Therefore, the barrier can release elements with global time {\it GT} once it received notification from acker that the minimal time within the stream is greater than {\it GT}.
-
-% The important implication of ack-table structure is that items that was generated by a single input event become ready for release at the same moment.
-
-% To ensure that no fronts can generate item with the specific timestamp, each front periodically sends to acker special message called {\it report}, which promises that front will not generate items with a timestamp lower than the reported. The value in the ack table can become zero only after the corresponding report arrives.
-
-% It must be noted that acker can play the role of worker's coordinator because it observes the progress of the whole system. This property is used further in the implementation of mechanisms for fault tolerance. 
+It must be noted that acker can play the role of a worker's coordinator because it observes the progress of the whole system. This property is used further in the implementation of mechanisms for fault tolerance. 
 
 \subsection{Barrier flushing}
 
