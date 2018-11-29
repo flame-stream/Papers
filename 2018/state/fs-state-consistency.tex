@@ -3,7 +3,7 @@
 \label {fs-consistency-section}
 
 In this section, we outline implementation details of \\ 
-\FlameStream\ - an open-source prototype of drifting state model. Firstly, we describe the architecture of the distributed stream processing system. After that, we demonstrate how exactly nullification tracking and barrier flushing mechanisms work. Eventually, the details of state snapshotting and failure recovery protocols are shown. 
+\FlameStream\ - an open-source prototype of drifting state model. Firstly, we describe the architecture of the distributed stream processing system. After that, we demonstrate how exactly nullification tracking and barrier flushing mechanisms work. Eventually, the details of snapshotting and failure recovery protocols are shown. 
 
 \subsection{System architecture}
 
@@ -46,7 +46,7 @@ If tombstones have been generated, multiple items with the same global time and 
 
 Therefore, on the one hand, meta-information defines a total order on data flow elements (meta is compared lexicographically). On the other hand, it provides additional information about $Cl^{-1}(D)$ and tombstones.
 
-\subsection{Nullification tracking}
+\subsection{Nullification tracking and barrier flushing}
 
 % In drifting state model, it is assumed that there is a mechanism that periodically provides monotonic, in terms of meta-information, reports about which elements have been nullified. 
 
@@ -67,11 +67,27 @@ The {\em minimal time} within a stream is the minimal global time with non-zero 
 
 It must be noted that acker can play the role of a worker's coordinator because it observes the progress of the whole system. This property is used further in the implementation of mechanisms for fault tolerance. 
 
-\subsection{Barrier flushing}
+\subsection{Last output element snapshotting}
+
+As we demonstrated in section~\ref{fs-formalism} if consistent state snapshotting is extended by the snapshotting of the last output element, then a system is able to provide exactly once without synchronization between state snapshotting and output elements releasing. 
+
+Minimal time notifications are sent by the acker with monotonically increasing global times. Barrier receives these notifications and releases output items with monotonically increasing global times as well. Hence, the barrier can filter out any items with a global time less than or equal to the global time of the last released item $GT_{last}$ in order to preserve exactly once. To implement this mechanism, there is a need to atomically output items and update $GT_{last}$. To solve this problem, we require the following output protocol with data consumer: 
+
+\begin{itemize}
+    \item When minimal time notification is received, barrier send output bundle to the data consumer. This bundle contains all corresponding output items and $GT_{last}$. The consumer must acknowledge that it received the bundle
+    \item Barrier does not send new output bundle until the previous one is not acknowledged
+    \item Consumer must return last received bundle on barrier's request 
+\end{itemize}
+
+This protocol guarantees that $GT_{last}$ and released items are always consistent with each other. It implies that barrier can request the last released bundle and fetch $GT_{last}$ after recovery to avoid duplicates and preserve exactly-once semantics.
+
+Thus, on the one hand, we delegate the part of the basic functionality to data consumers. On the other hand, the requirement on data consumer is not so strong and can be naturally satisfied by real-world consumers (HDFS, Kafka, databases, etc.). 
 
 % \subsection{Input replay}
 
 \subsection{State snapshotting}
+
+
 
 \subsection{Failure detection and recovery}
 
