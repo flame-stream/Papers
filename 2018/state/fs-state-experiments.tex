@@ -36,7 +36,7 @@ By the notion of {\it latency} we assume the time between two events:
     \item All the change records for the page leave the stream
 \end{enumerate}
 
-Our experiments were performed on the cluster of 10 Amazon EC2 micro instances with 1GB RAM and 1 core CPU. We used 10000 Wikipedia articles as a dataset. Documents per second input rate is 50. RocksDB~\cite{rocksdb} is used as a storage for the state. The role of data producer and data consumer is played by a custom server application that sends and receives data through socket and measures the latency.
+Our experiments were performed on the cluster of 10 Amazon EC2 micro instances with 1GB RAM and 1 core CPU. We used Wikipedia articles as a dataset. Documents per second input rate is 50. RocksDB~\cite{rocksdb} is used as a storage for the state. The role of data producer and data consumer is played by a custom server application that sends and receives data through socket and measures the latency.
 
 \subsection{Overhead and recovery}
 The performance of the proposed deterministic model within the same stream processing task is deeply analyzed in~\cite{hiddenSeim}. In this paper, we aim to evaluate the overhead on providing consistency guarantees and the time needed for the full recovery.
