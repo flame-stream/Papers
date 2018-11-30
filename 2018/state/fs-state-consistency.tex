@@ -3,27 +3,17 @@
 \label {fs-consistency-section}
 
 In this section, we outline implementation details of \\ 
-\FlameStream\ - an open-source prototype of drifting state model. Firstly, we describe the architecture of the distributed stream processing system. After that, we demonstrate how exactly nullification tracking and barrier flushing mechanisms work. Eventually, the details of snapshotting and failure recovery protocols are shown. 
+\FlameStream\ - an open-source prototype implementation of drifting state model. Firstly, we describe the architecture of our prototype. After that, we demonstrate how exactly nullification tracking and barrier flushing mechanisms work. Finally, the details of snapshotting and failure recovery protocols are shown. 
 
 \subsection{System architecture}
 
 %Распределенность, свзязь всех со всеми, мапим логический граф на каждую машинку. Есть отслеживание (acker). Barrier. В чем предназначение деталей? В больших камнях. Более подробно + что, а не как.
 
-\FlameStream\ is a distributed stream processing engine that is implemented in Java, using Akka framework. An overview of the \FlameStream\ architecture is shown in Figure~\ref{arch}. The main components are:
+\FlameStream\ is a distributed stream processing engine that is implemented in Java, using Akka framework. \FlameStream\ can be deployed on hardware cluster consisted of computational units that we call nodes. We assume that each node is connected through a network with all other nodes.
 
-{\bf Node} is a computational unit. Each node is connected through a network with all other nodes. A node runs a process called {\it worker}. Worker executes user-defined operations. The range of 32-bit signed integer is divided into the fixed number of non-intersecting {\it hash units}. Each worker can be responsible for one or many hash units. Hash units are used for data partitioning and state management. The number of hash-units per worker is a user-defined parameter, and it must be set before the start of computations. 
+Data producers and data consumers are deployed separately and communicate with the system via defined protocols. We require data producers to support replaying input stream from some defined points. We also suppose that data consumers are able to return the last received element on request. The requirement regarding data producers and consumers are discussed in details in further sections.
 
-{\bf Execution graph} is an Akka-based representation of a user-defined logical graph. Execution graph is deployed on each node. A data item can be sent to another worker before each operation due to balancing technique and the distribution of hash units. The communication within a node is done via messaging or direct function calls depending on runtime heuristics. A delivery that crosses node boundaries is performed by means of TCP.
-
-{\bf Barrier} is located at the end of each execution graph instance. One role of a barrier is to filter out possible duplicates or invalid results. Another function is to carry out an output protocol between system and data consumers, which is an essential part of providing exactly-once semantics.
-
-{\bf Data producers and data consumers} are deployed separately and communicate with the system via defined protocols. We assume that data producers support replaying input stream from some defined points. We also suppose that data consumers are able to return the last received element on request. The requirement regarding data producers and consumers are discussed in details in further sections.
-
-{\bf Acker} is an agent that tracks the processing progress of the system. Acker broadcasts information about input elements nullification that is needed for barrier flushing. Besides, it plays a role of coordinator in state snapshotting and recovery protocols described in the following sections.
-
-{\bf Apache ZooKeeper} is used as a {\it cluster state manager}. It contains basic system parameters and locations of workers and acker. The usage of ZooKeeper mitigates the need for the dedicated master node.
-
-{\bf Persistent storage} is needed for reliable storing of state snapshot. In case of failures, state snapshot is recovered from the persistent storage. It can be a distributed file system or database (e.g., HDFS, S3, MongoDB, GFS, HBase, etc.).
+An overview of the \FlameStream\ architecture is shown in Figure~\ref{arch}. The main components are:
 
 \begin{figure*}[htbp]
   \centering
@@ -31,6 +21,23 @@ In this section, we outline implementation details of \\
   \caption{The overview of \FlameStream\ architecture}
   \label {arch}
 \end{figure*}
+
+{\bf Node} runs a process called {\it worker}. Worker executes user-defined operations. The computational load is balanced through the distribution of data items among workers. A worker for a data item is determined by the value of a hash function of item payload. Such hash functions can be defined by a user before each logical operation. Each worker can be responsible for one or many ranges of values of hash functions called {\it hash units}. The number of hash-units per worker is a user-defined parameter, and it must be set before the start of computations. 
+
+{\bf Execution graph} is an Akka-based representation of a user-defined logical graph. Execution graph is run by each worker. A data item can be sent to another worker before each operation due to balancing technique and the distribution of hash units. The communication within a node is done via messaging or direct function calls depending on runtime heuristics. A delivery that crosses node boundaries is performed by means of TCP.
+
+{\bf Barrier} is located at the end of each execution graph instance. The barrier has two main responsibilities:
+
+\begin{itemize}
+    \item Filtering out possible duplicates or invalid results
+    \item Conducting a snapshot of the last released element, that is an essential part of providing exactly-once semantics
+\end{itemize}
+
+{\bf Acker} is an agent that tracks the processing progress of the system. Acker has two main roles as well. It broadcasts information about input elements nullification that is needed for barrier flushing and coordinates state snapshotting and recovery protocols described in the following sections.
+
+{\bf Apache ZooKeeper} is used as a {\it cluster state manager}. It contains basic system parameters and locations of workers and acker. The usage of ZooKeeper mitigates the need for the dedicated master node.
+
+{\bf Persistent storage} is needed for reliable storing of state snapshot. In case of failures, state snapshot is recovered from the persistent storage. It can be a distributed file system or database (e.g., HDFS, S3, MongoDB, GFS, HBase, etc.).
 
 \subsection{Meta-information structure}
 
