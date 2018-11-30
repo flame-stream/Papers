@@ -33,8 +33,10 @@ of an input element $a_\tau$ is the first moment of time when all elements that 
 
 State is all data flow elements that stays in the system if we block input and wait for an infinite time. Technically, states in existing stream processing systems are not data flow elements, but as it was mentioned above, they can be presented in such a way using drifting state model. The main purpose of the state is to accumulate the information about input items. Data flow elements cannot be in $W\setminus{S}$ for an infinite time by the definition of state. Hence, for each input element $a_\tau$, there is a nullification time $\theta_{a_\tau}$, thereafter all elements, which depend on $a_\tau$, are in the system state. Since the nullification time, the input element can affect output elements only through the state.
 
+Since we cannot observe internal transitions directly, it is convenient to limit global time domain only to moments of output events.
+
 \begin{definition}{Time quantization}
-$\tau(t)$ is a discrete time such that $\tau(t)$ determines output elements $\forall{t}\exists{b_{\tau(t)}}$.
+$\tau(t)$ is monotonic mapping from time domain restricted to only output events to global discrete time $\tau$, $\forall{t}\exists{b_{\tau(t)}}$.
 \end{definition}
 
 \begin{definition}{Probability of output element in a reference system}
@@ -49,6 +51,8 @@ In terms of this concept, the global state of our streaming model contains only 
 \subsection{Streaming model with failures}
 
 Unfortunately, the reference stream processing system is just an abstract concept, because it does not capture probable failures of network and computational units. Failure can be expressed as a loss of the working set or its part. There is a need to extend the reference model by recovering mechanism that allows a system to transparently pass through the failures.
+
+{\bf Snapshot = set!}
 
 \begin{definition}{Stream processing system}
 is a tuple of\\
@@ -68,6 +72,8 @@ F(A^{p}_\tau,P_\tau), A^{p}_\tau\subseteq{A_\tau} & \text{}.
 \end{sqcases}$
 
 \end{definition}
+
+{\bf Working set captures the same transitions as the reference working set, but it also has a {\em recovery transition}.}
 
 \begin{definition}{Probability of output element}
 $\widetilde{p}(b_{t+1}|A_{t+1}, B_t)$ is a probability to observe output element $b$ at the time $t+1$ considering all previous input and output elements.
