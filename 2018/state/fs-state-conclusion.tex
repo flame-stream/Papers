@@ -3,6 +3,7 @@
 \label {fs-conclusion-seciton}
 
 We introduced formal conceptual framework for modeling of consistency properties for any stream processing system. We demonstrated how the behavior of that state-of-the-art research and industrial systems can be described in terms of proposed framework. It was shown that the property of determinism is tightly connected with the concept of exactly-once. Non-deterministic systems must preserve atomicity between state snapshotting and output elements delivery in order to achieve exactly-once. Therefore, most of the state-of-the-art stream processing systems use one of the following approaches for consistency maintenance: 
+
 \begin{itemize}
     \item Enforcing determinism by micro-batching
     \item Applying distributed transaction control protocols that connect state snapshotting and data delivery
@@ -13,10 +14,8 @@ Both methods experience difficulties with working under low-latency requirements
 We demonstrated that {\em drifting state} technique introduced in our previous work~\cite{we2018adbis} provides inexpensive determinism due to optimistic nature and low overhead on buffering. In this work, we proposed mechanisms for achieving exactly once on top of {\em drifting state} model. Because of the determinism, the protocols provide the following features:
 
 \begin{itemize}
-    \item Elements are processed one-by-one in a pure streaming manner without input buffering
-    \item The processes of business-logic computations, state snapshotting and delivery output items work asynchronously and independently
+    \item Elements are processed in a pure streaming manner without input buffering
+    \item The processes of business-logic computations, state snapshotting and delivery of output items work asynchronously and independently
 \end{itemize}
 
-We implemented the prototype of the proposed technique to examine its performance and scalability. Our experiments demonstrated that the introduced protocols for fault tolerance are scalable and provide remarkably low overhead within different computational layouts. Furthermore, the comparison with industrial stream processing solution indicated that our prototype can provide significantly lower latency in case of exactly once semantics.
-
-Regarding future work, we plan to implement mechanisms for collaborative usage of the system. In particular, we aim to build convenient tools for partial reusing of execution graphs. An additional task that we intend to work on is the generation of execution graphs based on some declarative language.
+We implemented the prototype of the proposed technique to examine its performance and scalability. Our experiments demonstrated that the introduced protocols for fault tolerance are scalable and provide remarkably low overhead within different computational layouts. Furthermore, the comparison with industrial stream processing solution indicated that our prototype can provide significantly lower latency in case of exactly once.
