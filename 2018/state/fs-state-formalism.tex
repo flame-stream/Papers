@@ -31,7 +31,7 @@ $S_\tau$ at the time $\tau$ is $\widehat{W}_\tau^{\infty}$ if $A_{\infty}=\{a_i\
 of an input element $a_\tau$ is the first moment of time when all elements that depends on $a_\tau$ are in state or released from the system, $\theta_{a_\tau}=inf(\hat{\tau}>\tau|W_{\hat{\tau}}\setminus{S_{\hat{\tau}}}\cap{Cl(D)(a_\tau)=\emptyset})$, where $Cl(D)$ is a transitive closure of the relation $D$.
 \end{definition}
 
-State is all data flow elements that stays in the system if we block input and wait for an infinite time. Technically, states in existing stream processing systems are not data flow elements, but as it was mentioned above, they can be presented in such a way using drifting state model. The main purpose of the state is to accumulate the information about input items. Data flow elements cannot be in $W\setminus{S}$ for an infinite time by the definition of state. Hence, for each input element $a_\tau$, there is a nullification time $\theta_{a_\tau}$, thereafter all elements, which depend on $a_\tau$, are in the system state. Since the nullification time, the input element can affect output elements only through the state.
+State is a set of all data flow elements that stay in the system if we block input and wait for an infinite time. Technically, states in existing stream processing systems are not data flow elements, but as it was mentioned above, they can be presented in such a way using drifting state model. The main purpose of the state is to accumulate the information about input items. Data flow elements cannot be in $W\setminus{S}$ for an infinite time by the definition of state. Hence, for each input element $a_\tau$, there is a nullification time $\theta_{a_\tau}$, thereafter all elements, which depend on $a_\tau$, are in the system state. Since the nullification time, the input element can affect output elements only through the state.
 
 Since we cannot observe internal transitions directly, it is convenient to limit global time domain only to moments of output events.
 
@@ -46,7 +46,7 @@ $\forall{b_{t+1}:\exists{\widehat{W}_{t+1}=\widehat{W}_{t}\setminus{b_{t+1}}}} \
 
 In classical distributed system model proposed in~\cite{Chandy:1985:DSD:214451.214456}, a distributed system is defined as a graph of processes, which can be connected to each other via channels. Each process can generate {\em events} and send them to other processes through the channels. Global system state in this model contains processes states and channel states, e.g., elements, which are in-flight at the moment. Distributed asynchronous processing is simulated using permutations of events. 
 
-In terms of this concept, the global state of our streaming model contains only channel states, while events are input elements, output elements, and user-defined transformations. We model the asynchronous nature of distributed processing via global discrete time, that does not determine a priori order of transformations. There is only a probability to observe some specified output element, even in the reference system. However, our model has a significant distinction: it is assumed that end-user is external to the system, i.e., a user is able to observe output elements, but not the system states. Hence, as we show further, the notion of {\em consistency} in this case should also be defined in terms of output elements.  
+In terms of Chandy-Lamport model, the global state of our streaming model contains only channel states, while events are input elements, output elements, and user-defined transformations. We model the asynchronous nature of distributed processing via global discrete time, that does not determine a priori order of transformations. There is only a probability to observe some specified output element, even in the reference system. However, our model has a significant distinction: it is assumed that end-user is external to the system, i.e., a user is able to observe output elements, but not the system states. Hence, as we show further, the notion of {\em consistency} in this case should also be defined in terms of output elements.  
 
 \subsection{Streaming model with failures}
 
@@ -81,6 +81,8 @@ $\widetilde{p}(b_{t+1}|A_{t+1}, B_t)$ is a probability to observe output element
 
 \subsection{Consistency guarantees}
 
+% Прожевать цепочку. Введя референс систему мы ввели понятие валидности. Мы вводим ограничение на функционирование системы не напрямую, а через выход. В реальных системах, напрмер, часть функционирования, которая влияет на выход - это восстановление. Пример.
+
 The problem of consistency preservation arises when we move from the reference system to the model with failures. Let us demonstrate it by an example. Assume that business logic contains single operation $V^{i+1}=a_\tau(1+V^{i}),V^{0}=0,V\in{S}$ and $\forall{t},b_t=V$. In case of failure and recovery, the consistency of subsequent results depends not only on further input elements but on the restored $V$ as well. If system recovers $V$ incorrectly after a failure, the results may become invalid, despite the fact, that in terms of delivery, all elements are processed exactly one time. For instance, if $V=0$ after recovery, but before failure it was equal to some value $q\neq{0}$, end-user will receive unexpected output, even if each input element $a_\tau$ is processed exactly once. This example is demonstrated in Figure~\ref{state-inconsistency}. 
 
 \begin{figure}[htbp]
@@ -90,6 +92,7 @@ The problem of consistency preservation arises when we move from the reference s
   \label {state-inconsistency}
 \end{figure}
 
+% Жевать
 As it was mentioned above, end-user cannot observe internal system state. We define streaming consistency guarantees in terms of output elements only. The reference system is used to determine which of them are correct.
 
 \begin{definition}{System provides for exactly once}
@@ -109,7 +112,12 @@ $\exists{A^{*}_{t+1}\subseteq{2^{A_{t+1}}}}$ such that \\
 $\forall{t} \forall{b_{t+1}}: \widetilde{p}(b_{t+1}|A_{t+1},B_t)>0 \Rightarrow p(b_{t+1}|A^{*}_{t+1},B_t)>0$.
 \end{definition}
 
-Exactly once states that observed results cannot be distinguished from the results of the reference system. At most once and at least once guarantees are the relaxations of exactly once. The results within these guarantees can be obtained in the reference system, but with the assumption, that input is not completely correct. At most once can be achieved in the reference system if some input elements are missed. At least once can be reproduced if the input contains duplicates. Thus, we can relax system recovery mechanisms by possible input channel flaws. This trick allows us to represent invisible system details in clear for user terms.
+% Один из возможных
+Exactly once states that observed results cannot be distinguished from the results of the reference system. At most once and at least once guarantees are the relaxations of exactly once. The results within these guarantees can be obtained in the reference system, but with the assumption, that input is not completely correct. At most once can be achieved in the reference system if some input elements are missed. At least once can be reproduced if the input contains duplicates. 
+% странно
+% погрепать only и посмотреть на порядок
+% outputting -> releasing, sending out
+Thus, we can relax system recovery mechanisms by possible input channel flaws. This trick allows us to represent invisible system details in clear for user terms.
 
 We can proceed from the probability of output element to the probability of the working set through the formula of total probability:
 
@@ -163,8 +171,11 @@ If system is deterministic, state snapshot is extended with the last output elem
 Assume that $\exists{b_t}:P_t = S_{t_s} \cup b_t, t_s < t$. Without loss of generality, assume that system fails at the time $\tau_f = \tau(t)+1$. The problem here is that if $(a_{\tau(t_s)+1},y)\in{D}$ and $y\in{S_t}$, recovery function must reprocess $a_{\tau(t_s)+1}$ in order to achieve $W_t=F(A^{p}_t,S_{t_s})\supseteq{S_t}$ that is possible in the reference system. However, reprocessing can cause inconsistent output as it is shown in Theorem~\ref{necessary_conditions}. The property of determinism guarantees that in case of reprocessing output elements will be the same and released in the same order. Having last outputted before the failure element $b_t$, we can filter out output elements, which are generated during reprocessing, but have been already outputted before the failure.
 \end{sketch}
 
+% It means? it - ?
 If a system is deterministic, it is possible to inexpensively achieve consistent snapshotting mechanism without synchronization between taking snapshots and outputting. It means that deterministic system can release an element $b_t$ before state snapshot $P^{s}_t=S_t$ is taken. As we show further in experiments, this relaxation is able to dramatically decrease processing latency, because there is no need to wait until the snapshot is taken in order to release output elements.
 
+% In - first? We proposed
+% question arises?
 To the best of our knowledge, only micro-batching systems support the property of determinism in streaming. However, micro-batching solutions provide higher latency than pure streaming engines due to overhead on input buffering~\cite{karimov2018benchmarking}. In~\cite{we2018adbis} there was proposed a pure streaming model called {\em drifting state} that allows achieving both determinism and low latency. Therefore, we have an open question: is it more efficient in practice to handle non-determinism by atomic snapshotting and releasing than to maintain a fair determinism in order to get exactly once? 
 
 It is important to note that the proposed model is suitable not only for the formal analysis of the properties of exactly once but for a deeper understanding of at most once and at least once guarantees. While these topics are interesting as well, they are out of scope of this paper. 
@@ -179,13 +190,14 @@ MillWheel maintains the whole $W$ in a snapshot. Each operation saves all its in
 
 \subsubsection{Flink}
 
-Flink uses state snapshotting mechanism. It artificially reproduces a moment $t_s$, when $\forall{a}\in{Cl^{-1}(D)(S_{t_s})}:\theta_a \leq t_s$, and saves obtained $S_{t_s}$. Flink achieves consistent state by injecting special elements called {\em checkpoints} into the input elements. Checkpoints go through the same network channels as ordinary elements and push all inverted dependencies of inputs through the system. Each operation in data flow prepares its snapshot independently at the moment of checkpoint arriving. Global snapshot is taken when checkpoint passes through the whole data flow. Flink atomicity between state snapshotting and elements releasing is preserved using the modification of 2PC protocol.
+Flink uses state snapshotting mechanism. It artificially reproduces a moment $t_s$, when $\forall{a}\in{Cl^{-1}(D)(S_{t_s})}:\theta_a \leq t_s$, and saves obtained $S_{t_s}$. Flink achieves consistent state by injecting special elements called {\em checkpoints} into the input stream. Checkpoints go through the same network channels as ordinary elements and push all inverted dependencies of inputs through the system. Each operation in data flow prepares its snapshot independently at the moment of checkpoint arrival. Global snapshot is taken when checkpoint passes through the whole data flow. Flink atomicity between state snapshotting and elements delivery is preserved using the modification of 2PC protocol.
 
+% input - заменить
 Besides overhead on snapshotting and outputting synchronization, checkpoints cause extra latency overhead because they periodically block some inputs of an operation with multiple inputs. This behavior is known as {\em checkpoints alignment}.
 
 \subsubsection{Spark streaming}
 
-As it was mentioned above, to the best of our knowledge, spark streaming is the only state-of-the-art stream processing system that provides for deterministic results. However, an architecture based on input buffering makes it impossible to achieve latency lower than several seconds~\cite{7530084, 7474816}. 
+To the best of our knowledge, spark streaming is the only state-of-the-art stream processing system that provides for deterministic results. However, an architecture based on input buffering makes it impossible to achieve latency lower than several seconds~\cite{7530084, 7474816}. 
 
 % \subsection{Formalization of consistency guarantees}
 
