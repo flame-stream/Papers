@@ -2,6 +2,7 @@
 
 \label {fs-model-section}
 
+% preservation -> enforcement
 In this section, we outline the lightweight deterministic model. While it is described in details in~\cite{we2018adbis}, in this paper we only mention properties, which play important roles in the preservation of consistency guarantees.
 
 Set $\Gamma$ of all possible data flow elements in our model consists of {\em data items}. Data item contains an arbitrary application domain {\it payload} and a structured system-assigned {\it meta-information}.
@@ -12,12 +13,12 @@ The exact form of meta-information is detailed in the next section, but its main
 \begin{itemize}
     \item Define a total order on all data flow elements. The order is used for achieving determinism and deduplication
     \item Maintain information about $Cl^{-1}(D)(x)$ for each data item $x$
-    \item Keep other service information about a data item, e.g., extra flags
+    \item Keep extra information about a data item
 \end{itemize}
 
 \subsection{Optimistic determinism}
 
-A straightforward idea, how to make stream processing system deterministic, requires several steps:
+A straightforward approach, how to make stream processing system deterministic, requires several steps:
 \begin{enumerate}
     \item Preserve total order defined by meta-information before each order-sensitive operation in a data flow
     \item Preserve the same order of output items
@@ -36,7 +37,7 @@ The following example illustrates the semantics of the operation. The grouping a
 
 \[(1), (2), (1|3), (2|4), (1|3|5), (2|4|6), (3|5|7), (4|6|8)...\]
 
-Actually, any stateful transformation can be expressed by decomposing into map and grouping operations with a cycle. Let us illustrate it by the example of sum operation. In a classical setting, each element is combined with previous state value and outputted. After that, the state is updated. In our model, firstly each element is grouped with previous state element into the pair. After that, map operation delivers a combined result, updates the state, and returns it to the grouping through the cycle. The comparison between the classical state handling approach and drifting state model is shown in Figure~\ref{classical-drifting}.
+Actually, any stateful transformation can be expressed by decomposing into map and grouping operations with a cycle. Let us illustrate it by the example of sum operation. In a classical setting, each element is combined with previous state value and outputted. Then, the state is updated. In our model, firstly each element is grouped with previous state element into the pair. After that, map operation delivers a combined result, updates the state, and returns it to the grouping through the cycle. A comparison between the classical state handling approach and drifting state model is shown in Figure~\ref{classical-drifting}.
 
 \begin{figure}[htbp]
   \centering
@@ -45,7 +46,7 @@ Actually, any stateful transformation can be expressed by decomposing into map a
   \label {classical-drifting}
 \end{figure}
 
-We call such model a drifting state because operation states become ordinary data flow elements. In this setting, map operation is pure and order insensitive, and grouping operation is pure. Grouping operation is order-sensitive because it should group new element with the exact previous state. Fortunately, grouping can be implemented optimistically. The scheme is shown in Figure~\ref{optimistic-grouping}. Assume that numbers on this figure represent meta-information. An element with meta 3 is out-of-order. We know that actually invalid pair (one; five) has been already outputted. The main idea here is that if an arrived element is out-of-order, the system always can generate valid pairs because it knows the right position of the element. Besides, an invalid pair with a special flag in meta can be resent. Let us call such elements invalidators or tombstones. The main purpose of invalidators is to hunt down previously outputted invalid pairs and to remove them from other grouping or to intercept before outputting. Map functions are required to be pure in order to ensure that invalidators will go through exactly the same path as original pairs. This method is applicable to any number of subsequent groupings.
+We call such model a drifting state because operation states become ordinary data flow elements. In this setting, map operation is pure and order insensitive, and grouping operation is pure. Grouping operation is order-sensitive because it should group new element with the exact previous state. Fortunately, grouping can be implemented optimistically. The scheme is shown in Figure~\ref{optimistic-grouping}. Assume that numbers on this figure represent meta-information. An element with meta 3 is out-of-order. We know that actually invalid pair (one; five) has been already outputted. The main idea here is that if an arrived element is out-of-order, the system always can generate valid pairs because it knows the right position of the element. Besides, an invalid pair with a special flag in meta can be resent. Let us call such elements invalidators or tombstones. The purpose of invalidators is to hunt down previously outputted invalid pairs and to remove them from other grouping or to intercept before outputting. Map functions are required to be pure in order to ensure that invalidators will go through exactly the same path as original pairs. This method is applicable to any number of subsequent groupings.
  
 \begin{figure}[htbp]
   \centering
@@ -58,10 +59,10 @@ In order to allow invalidators to catch invalid pairs, we buffer all items befor
 
 The drifting state has the following properties:
 \begin{itemize}
-    \item Determinism is achieved by the price of a single buffer per any data flow graph. In practice, waiting time in this buffer is in terms of milliseconds~\cite{we2018adbis}.
-    \item There are only two operations: map and windowed grouping. The set of dependencies $D$ contains conversions only between these operations.
-    \item User-defined code can be only in map operation, while for grouping, a user should only define hash balancing function. Drifting state model is stateless from a user point of view.
-    \item Only grouping operation maintains a system state. The state is represented by sorted on meta-information lists of data items.
+    \item Determinism is achieved by the price of a single buffer per any data flow graph. In our experiments, waiting time in this buffer is in order of milliseconds~\cite{we2018adbis}.
+    \item There are only two operations: map and windowed grouping. The set of dependencies $D$ is generated only by these operations.
+    \item User-defined code can only be present in map operation, while for grouping, a user should only define hash balancing function. Drifting state model is stateless from a user point of view.
+    \item Grouping operation only maintains a system state. The state is represented by sorted on meta-information lists of data items.
     \item The only hard requirement of our model is that map operations must be pure.
 \end{itemize}
 
