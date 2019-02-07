@@ -3,7 +3,7 @@
 \subsection{Reference streaming model}
 
 \begin{definition}{Reference stream processing system}
-is a tuple of $(\Gamma,D)$, where $\Gamma$ is a set of all possible data flow elements, and $D\subseteq{\Gamma\times\Gamma}$ is a binary relation on it. Pair $(x,y)\in{D}$ if $y$ can be generated from $x$ within user-defined operations, that is commonly expressed in a form of a logical graph. We assume that user-defined operations are pure.
+is a tuple of $(\Gamma,D)$, where $\Gamma$ is a set of all possible data flow elements, and $D\subseteq{\Gamma\times\Gamma}$ is a binary relation on it. Pair $(x,y)\in{D}$ if $y$ can be generated from $x$ within physical graph. We assume that all user-defined operations are pure.
 \end{definition}
 
 Within our model, one can define streaming system using only data flow elements and business logic. However, without the notion of time, we cannot observe any processing progress. Let $\tau\in{\mathbb{N}}$ be an exact global discrete time. Let $a_\tau\in{\Gamma}$ be the element, which enters at the time $\tau$, and $b_\tau\in{2^\Gamma}$ be the elements, which leave at the time $\tau$. Let $A_{\tau}=\{a_i\}^{\tau}_{i=1}$ be a set of all input elements by the time $\tau$ and ${B}_\tau=\bigcup\limits_{i=1}^{\tau}{b_i}$ be a set of all output elements.
