@@ -81,9 +81,7 @@ $\widetilde{p}(b_{t+1}|A_{t+1}, B_t)$ is a probability to observe output element
 
 \subsection{Consistency guarantees}
 
-% Прожевать цепочку. Введя референс систему мы ввели понятие валидности. Мы вводим ограничение на функционирование системы не напрямую, а через выход. В реальных системах, напрмер, часть функционирования, которая влияет на выход - это восстановление. Пример. At most once введена, но не определена.
-
-The problem of consistency preservation arises when we move from the reference system to the model with failures. Let us demonstrate it by an example. Assume that business logic contains single operation $V^{i+1}=a_\tau(1+V^{i}),V^{0}=0,V\in{S}$ and $\forall{t},b_t=V$. In case of failure and recovery, the consistency of subsequent results depends not only on further input elements but on the restored $V$ as well. If system recovers $V$ incorrectly after a failure, the results may become invalid, despite the fact, that in terms of delivery, all elements are processed exactly one time. For instance, if $V=0$ after recovery, but before failure it was equal to some value $q\neq{0}$, end-user will receive unexpected output, even if each input element $a_\tau$ is processed exactly once. This example is demonstrated in Figure~\ref{state-inconsistency}. 
+The reference system concept allows us to express the notion of valid execution in terms of correspondence between input and output elements. In most real cases, input and output elements are the only data that can be observed by end-user. In real distributed stream processing systems, failures and recoveries can corrupt the output, despite the fact, that in terms of a naive definition of delivery guarantees, all elements are processed exactly one time. Let us demonstrate it by an example. Assume that execution graph consists of a single operation $V^{i+1}=a_\tau(1+V^{i}),V^{0}=0,V\in{S}$ and $\forall{t},b_t=V$. In case of failure and recovery, the consistency of subsequent results depends not only on further input elements but on the restored $V$ as well. If a system recovers $V$ incorrectly after a failure, the results may become invalid. For instance, if $V=0$ after recovery, but before failure it was equal to some value $q\neq{0}$, end-user will receive unexpected output, even if each input element $a_\tau$ is processed exactly once. This example is demonstrated in Figure~\ref{state-inconsistency}. 
 
 \begin{figure}[htbp]
   \centering
@@ -91,9 +89,6 @@ The problem of consistency preservation arises when we move from the reference s
   \caption{Inconsistency of results after incorrect recovery}
   \label {state-inconsistency}
 \end{figure}
-
-% Жевать
-As it was mentioned above, end-user cannot observe internal system state. We define streaming consistency guarantees in terms of output elements only. The reference system is used to determine which of them are correct.
 
 \begin{definition}{System provides for exactly once}
 if it is possible to obtain each output element $b_{t+1}$ in the reference stream processing system, i.e.,\\ 
@@ -106,16 +101,14 @@ $\exists{A^{0}_{t+1}\subseteq{A_{t+1}}}$ such that \\
 $\forall{t} \forall{b_{t+1}}: \widetilde{p}(b_{t+1}|A_{t+1},B_t)>0 \Rightarrow p(b_{t+1}|A^{0}_{t+1},B_t)>0$.
 \end{definition}
 
-% Делаем предположение об атомарности. Никто не думал и в реальных системах нет at most once. Пример непонимания.
-
 \begin{definition}{System provides for at least once}
 if \\
 $\exists{A^{*}_{t+1}\subseteq{2^{A_{t+1}}}}$ such that \\
 $\forall{t} \forall{b_{t+1}}: \widetilde{p}(b_{t+1}|A_{t+1},B_t)>0 \Rightarrow p(b_{t+1}|A^{*}_{t+1},B_t)>0$.
 \end{definition}
 
-% Один из возможных
-Exactly once states that observed results cannot be distinguished from the results of the reference system. At most once and at least once guarantees are the relaxations of exactly once. The results within these guarantees can be obtained in the reference system, but with the assumption, that input is not completely correct. At most once can be achieved in the reference system if some input elements are missed. At least once can be reproduced if the input contains duplicates. 
+Exactly once states that observed results cannot be distinguished from one of the possible results produced by the reference system. At most once and at least once guarantees are the relaxations of exactly once. The results within these guarantees can be obtained in the reference system, but with the assumption, that input is not completely correct. At least once can be reproduced if the input contains duplicates. At most once can be achieved in the reference system if some input elements are missed. It is important to note, that regarding at most once guarantee we require an input element to be processed atomically with all its derivatives or not processed at all. To the best of our knowledge, no one real stream processing engine supports at most once guarantee, so we cannot verify the relevancy of this assumption. 
+
 % странно
 % погрепать only и посмотреть на порядок
 % outputting -> releasing, sending out
