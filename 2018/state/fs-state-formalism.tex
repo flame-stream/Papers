@@ -109,8 +109,6 @@ $\forall{t} \forall{b_{t+1}}: \widetilde{p}(b_{t+1}|A_{t+1},B_t)>0 \Rightarrow p
 
 Exactly once states that observed results cannot be distinguished from one of the possible results produced by the reference system. At most once and at least once guarantees are the relaxations of exactly once. The results within these guarantees can be obtained in the reference system, but with the assumption, that input is not completely correct. At least once can be reproduced if the input contains duplicates. At most once can be achieved in the reference system if some input elements are missed. It is important to note, that regarding at most once guarantee we require an input element to be processed atomically with all its derivatives or not processed at all. To the best of our knowledge, no one real stream processing engine supports at most once guarantee, so we cannot verify the relevancy of this assumption. 
 
-% outputting -> releasing, sending out
-
 In our formal model, the relaxations of exactly once are defined without diving into recovery mechanisms. Instead, they are described through possible input channel flaws in a reference system. This trick allows us to represent invisible system details in clear for user terms.
 
 We can proceed from the probability of output element to the probability of the working set through the formula of total probability:
@@ -165,7 +163,7 @@ If system is deterministic, state snapshot is extended with the last output elem
 Assume that $\exists{b_t}:P_t = S_{t_s} \cup b_t, t_s < t$. Without loss of generality, assume that system fails at the time $\tau_f = \tau(t)+1$. The problem here is that if $(a_{\tau(t_s)+1},y)\in{D}$ and $y\in{S_t}$, recovery function must reprocess $a_{\tau(t_s)+1}$ in order to achieve $W_t=F(A^{p}_t,S_{t_s})\supseteq{S_t}$ that is possible in the reference system. However, reprocessing can cause inconsistent output as it is shown in Theorem~\ref{necessary_conditions}. The property of determinism guarantees that in case of reprocessing output elements will be the same and released in the same order. Having last outputted before the failure element $b_t$, we can filter out output elements, which are generated during reprocessing, but have been already outputted before the failure.
 \end{sketch}
 
-If a system is deterministic, it is possible to inexpensively achieve consistent snapshotting mechanism without synchronization between taking snapshots and outputting. Deterministic system can release an element $b_t$ before state snapshot $P^{s}_t=S_t$ is taken. As we show further in experiments, this relaxation is able to dramatically decrease processing latency, because there is no need to wait until the snapshot is taken in order to release output elements.
+If a system is deterministic, it is possible to inexpensively achieve consistent snapshotting mechanism without synchronization between taking snapshots and output elements delivery. Deterministic system can release an element $b_t$ before state snapshot $P^{s}_t=S_t$ is taken. As we show further in experiments, this relaxation is able to dramatically decrease processing latency, because there is no need to wait until the snapshot is taken in order to release output elements.
 
 To the best of our knowledge, only micro-batching systems support the property of determinism in streaming. However, micro-batching solutions provide higher latency than pure streaming engines due to overhead on input buffering~\cite{karimov2018benchmarking}. We proposed a pure streaming model called {\em drifting state}~\cite{we2018adbis} that allows achieving both determinism and low latency. Therefore, a question arises: is it more efficient in practice to handle non-determinism by atomic snapshotting and releasing than to maintain a fair determinism in order to get exactly once? 
 
@@ -183,7 +181,7 @@ MillWheel maintains the whole $W$ in a snapshot. Each operation saves all its in
 
 Flink uses state snapshotting mechanism. It artificially reproduces a moment $t_s$, when $\forall{a}\in{Cl^{-1}(D)(S_{t_s})}:\theta_a \leq t_s$, and saves obtained $S_{t_s}$. Flink achieves consistent state by injecting special elements called {\em checkpoints} into the input stream. Checkpoints go through the same network channels as ordinary elements and push all inverted dependencies of inputs through the system. Each operation in data flow prepares its snapshot independently at the moment of checkpoint arrival. Global snapshot is taken when checkpoint passes through the whole data flow. Flink atomicity between state snapshotting and elements delivery is preserved using the modification of 2PC protocol.
 
-Besides overhead on snapshotting and outputting synchronization, checkpoints cause extra latency overhead because an operation with multiple inputs must wait until checkpoints arrive from each input. Only after that, an operation can safely send checkpoint further. This behavior is known as {\em checkpoints alignment}.
+Besides overhead on snapshotting and delivery synchronization, checkpoints cause extra latency overhead because an operation with multiple inputs must wait until checkpoints arrive from each input. Only after that, an operation can safely send checkpoint further. This behavior is known as {\em checkpoints alignment}.
 
 \subsubsection{Spark streaming}
 
