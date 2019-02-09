@@ -3,15 +3,15 @@
 \label {fs-consistency-section}
 
 In this section, we outline implementation details of \\ 
-\FlameStream\ - an open-source prototype implementation of drifting state model. Firstly, we describe the architecture of our prototype. After that, we demonstrate how exactly nullification tracking and barrier flushing mechanisms work. Finally, the details of snapshotting and failure recovery protocols are shown. 
+\FlameStream\ - an open-source prototype implementation of drifting state model. Firstly, we describe the architecture of our prototype. Then, we demonstrate how exactly nullification tracking and barrier flushing mechanisms work. Finally, the details of snapshotting and failure recovery protocols are shown. 
 
 \subsection{System architecture}
 
 %Распределенность, свзязь всех со всеми, мапим логический граф на каждую машинку. Есть отслеживание (acker). Barrier. В чем предназначение деталей? В больших камнях. Более подробно + что, а не как.
 
-\FlameStream\ is a distributed stream processing engine that is implemented in Java, using Akka framework. \FlameStream\ can be deployed on hardware cluster consisted of computational units that we call nodes. We assume that each node is connected through a network with all other nodes.
+\FlameStream\ is a distributed stream processing engine implemented in Java using Akka framework. \FlameStream\ can be deployed on hardware cluster of computational units that we call nodes. We assume that each node is connected through a network with all other nodes.
 
-Data producers and data consumers are deployed separately and communicate with the system via defined protocols. We require data producers to support replaying input stream from some defined points. We also suppose that data consumers are able to return the last received element on request. The requirement regarding data producers and consumers are discussed in details in further sections.
+Data producers and data consumers are deployed separately and communicate with the system via defined protocols. We require data producers to support replaying input stream from defined points. We also suppose that data consumers are able to return the last received element on request. The requirement regarding data producers and consumers are discussed in details in further sections.
 
 An overview of the \FlameStream\ architecture is shown in Figure~\ref{arch}. The main components are:
 
@@ -30,7 +30,7 @@ An overview of the \FlameStream\ architecture is shown in Figure~\ref{arch}. The
 
 \begin{itemize}
     \item Filtering out possible duplicates or invalid results
-    \item Conducting a snapshot of the last released element, that is an essential part of providing exactly-once semantics
+    \item Taking a snapshot of the last released element, that is an essential part of providing exactly-once semantics
 \end{itemize}
 
 {\bf Acker} is an agent that tracks the processing progress of the system. Acker has two main roles as well. It broadcasts information about input elements nullification that is needed for barrier flushing and coordinates state snapshotting and recovery protocols described in the following sections.
