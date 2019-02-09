@@ -2,7 +2,7 @@
 
 \label {fs-model-section}
 
-In this section, we outline the lightweight deterministic model. While it is described in details in~\cite{we2018adbis}, in this paper we  mention properties, which play important roles in consistency enforcement techniques.
+In this section, we outline the lightweight deterministic model. While it is described in details in~\cite{we2018adbis}, in this paper we mention properties, which play important roles in consistency enforcement techniques.
 
 Set $\Gamma$ of all possible data flow elements in our model consists of {\em data items}. Data item contains an arbitrary application domain {\it payload} and a structured system-assigned {\it meta-information}.
 
@@ -24,9 +24,9 @@ A straightforward approach, how to make stream processing system deterministic, 
     \item Ensure that all operations are pure
 \end{enumerate}
 
-At the first glance, total order maintenance is over-restrictive. It can be achieved, e.g., using buffering before each order-sensitive operation until punctuation or low watermark arrives ~\cite{Li:2008:OPN:1453856.1453890}. However, frequent buffering can dramatically increase latency. 
+At first glance, total order maintenance is over-restrictive. It can be achieved, e.g., using buffering before each order-sensitive operation until punctuation or low watermark arrives ~\cite{Li:2008:OPN:1453856.1453890}. However, frequent buffering can dramatically increase latency. 
 
-Any logical graph in drifting state model is constructed using the following two operations:
+Any logical graph in the drifting state model is constructed using the following two operations:
 
 {\bf Map} applies a user-defined function to the payload of an input item. This function returns a sequence of data items with transformed payloads. An output sequence can be empty.
 
@@ -36,7 +36,7 @@ The following example illustrates the semantics of the operation. The grouping a
 
 \[(1), (2), (1|3), (2|4), (1|3|5), (2|4|6), (3|5|7), (4|6|8)...\]
 
-Actually, any stateful transformation can be expressed by decomposing into map and grouping operations with a cycle. Let us illustrate it by the example of sum operation. In a classical setting, each element is combined with previous state value and released. Then, the state is updated. In our model, firstly each element is grouped with previous state element into the pair. After that, map operation delivers a combined result, updates the state, and returns it to the grouping through the cycle. A comparison between the classical state handling approach and drifting state model is shown in Figure~\ref{classical-drifting}.
+Actually, any stateful transformation can be expressed by decomposing into map and grouping operations with a cycle. Let us illustrate it by the example of sum operation. In a classical setting, each element is combined with previous state value and released. Then, the state is updated. In our model, firstly each element is grouped with previous state element into the pair. After that, map operation delivers a combined result, updates the state, and returns it to the grouping through the cycle. A comparison between the classical state handling approach and the drifting state model is shown in Figure~\ref{classical-drifting}.
 
 \begin{figure}[htbp]
   \centering
@@ -45,7 +45,7 @@ Actually, any stateful transformation can be expressed by decomposing into map a
   \label {classical-drifting}
 \end{figure}
 
-We call such model a drifting state because operation states become ordinary data flow elements. In this setting, map operation is pure and order insensitive, and grouping operation is pure. Grouping operation is order-sensitive because it should group new element with the exact previous state. Fortunately, grouping can be implemented optimistically. The scheme is shown in Figure~\ref{optimistic-grouping}. The numbers on this figure represent meta-information. An element with meta 3 is out-of-order. We know that actually invalid pair (one; five) has been already released. In this case, system generates valid pairs because it knows the right position of the element with meta 3. Besides, an invalid pair with a special flag in meta is resent. Let us call such elements invalidators or tombstones. The purpose of invalidators is to hunt down previously released invalid pairs and to remove them from other grouping or to intercept before delivery to end-user. Map functions are required to be pure in order to ensure that invalidators will go through exactly the same path as original pairs. This method is applicable to any number of subsequent groupings.
+We call this model a drifting state because operation states become ordinary data flow elements. In this setting, map operation is pure and order insensitive, and grouping operation is pure. Grouping operation is order-sensitive because it should group a new element with the exact previous state. Fortunately, grouping can be implemented optimistically. The scheme is shown in Figure~\ref{optimistic-grouping}. The numbers on this figure represent meta-information. An element with meta 3 is out-of-order. We know that actually invalid pair (one; five) has been already released. In this case, the system generates valid pairs because it knows the right position of the element with meta 3. Besides, an invalid pair with a special flag in meta is resent. Let us call such elements invalidators or tombstones. The purpose of invalidators is to hunt down previously released invalid pairs and to remove them from other grouping or to intercept before delivery to end-user. Map functions are required to be pure in order to ensure that invalidators will go through exactly the same path as original pairs. This method is applicable to any number of subsequent groupings.
  
 \begin{figure}[htbp]
   \centering
@@ -54,15 +54,15 @@ We call such model a drifting state because operation states become ordinary dat
   \label {optimistic-grouping}
 \end{figure} 
  
-In order to allow invalidators to catch invalid pairs, we buffer all items before output in a very last node of the graph called a {\em barrier}. The barrier can be safely flushed if there is a guarantee that there are no in-flight invalidators for elements in the barrier. Hence, an element can be released from the barrier at the nullification time of the last input items, which affect it. In other words, element $b$ can be released at the time $\tau(t)$ if $\forall{a}:b\in{Cl(D)(a)},\theta_a \leq \tau(t)$. If there is an information, which input elements have been already nullified, meta-information of an element in the barrier can be used to determine the correct moment to release this element. The exact method for barrier flushing is discussed in the next section. Barrier releases items in the order of meta-information, so results will be the same after any number of reruns on the same input. It is worth to note that barrier is the only buffer in any data flow graph within this approach due to optimistic groupings. 
+In order to allow invalidators to catch invalid pairs, we buffer all items before output in a very last node of the graph called a {\em barrier}. The barrier can be safely flushed if there is a guarantee that there are no in-flight invalidators for elements in the barrier. Hence, an element can be released from the barrier at the nullification time of the last input items, which affect it. In other words, element $b$ can be released at the time $\tau(t)$ if $\forall{a}:b\in{Cl(D)(a)},\theta_a \leq \tau(t)$. If there is information, which input elements have been already nullified, meta-information of an element in the barrier can be used to determine the correct moment to release this element. The exact method for barrier flushing is discussed in the next section. Barrier releases items in the order of meta-information, so results will be the same after any number of reruns on the same input. It is worth to note that barrier is the only buffer in any data flow graph within this approach due to optimistic groupings. 
 
 The drifting state has the following properties:
 \begin{itemize}
-    \item Determinism is achieved by the price of a single buffer per any data flow graph. In our experiments, waiting time in this buffer is in order of milliseconds~\cite{we2018adbis}.
+    \item Determinism is achieved by the price of a single buffer per any data flow graph. In our experiments, the waiting time in this buffer is in order of milliseconds~\cite{we2018adbis}.
     \item There are only two operations: map and windowed grouping. The set of dependencies $D$ is generated by these operations.
     \item User-defined code can be present only in map operation, while for grouping, a user should define hash balancing function.
-    \item Map is stateless operation and grouping maintains sorted on meta-information lists of data items. Only system itself can manage this state, so drifting state model is stateless from a user point of view.
-    \item In spite of reduced set of operations, this model is sufficient to express any stateful transformation.
+    \item Map is stateless operation and grouping maintains sorted on meta-information lists of data items. The system itself only can manage this state, so the drifting state model is stateless from a user point of view.
+    \item In spite of the reduced set of operations, this model is sufficient to express any stateful transformation.
     \item The only requirement of our model is that map operations must be pure.
 \end{itemize}
 
@@ -70,134 +70,6 @@ The drifting state has the following properties:
 
 As it is demonstrated in section~\ref{fs-formalism}, in a deterministic system, state snapshotting and output delivery can be unsynchronized if the system includes in the snapshot last released element as well as system state. The problem here is a need to save at the time $\tau$ snapshot for state $S_{\tau-n}$ for some $n$.
 
-The only stateful operation in drifting state model is grouping. Hence, there is only a need to save grouping's state in order to take the complete state snapshot. Grouping's state in practice are lists of data items sorted by meta-information. If all input elements $[a_{0}...a_{\tau-n}]$ have been nullified, then state $S_{\tau-n}$ can be snapshotted. Therefore, to take a snapshot at time $\tau$, there is a need to determine maximal $\tau-n$ such that all input elements $[a_{0}...a_{\tau-n}]$ have been nullified. After that, we can just save elements from grouping state lists, which are affected only by these elements. These elements can be determined using meta-information because it contains information about $Cl^{-1}(D)$.
+The only stateful operation in the drifting state model is grouping. Hence, there is only a need to save grouping's state in order to take the complete state snapshot. Grouping's state in practice are lists of data items sorted by meta-information. If all input elements $[a_{0}...a_{\tau-n}]$ have been nullified, then state $S_{\tau-n}$ can be snapshotted. Therefore, to take a snapshot at time $\tau$, there is a need to determine maximal $\tau-n$ such that all input elements $[a_{0}...a_{\tau-n}]$ have been nullified. After that, we can just save elements from grouping state lists, which are affected only by these elements. These elements can be determined using meta-information because it contains information about $Cl^{-1}(D)$.
 
-The fact that the only state in drifting state model has a simple structure of lists sorted by meta-information allows us to take snapshots that contain {\em the past} state. The property of determinism guarantees that such state snapshot together with the last released element is enough to make snapshotting mechanism consistent. The exact protocols, which are used for snapshotting are detailed in the next section.  
-
-% Assume that all input elements, which affect the prefix of the lists have been nullified. It means that these grouping state lists cannot be modified at any position before the item that corresponds to $\tau_{min}$. The immutable prefix and mutable suffix of grouping bucket are shown in Figure~\ref{immutable}. At the same time, because of the grouping semantics, state that is reached after consuming all input data items $[a_{0}...a_{\tau_{min}})$ is just a window-sized sublist that is located in the immutable part of the bucket, the example is shown in figure~\ref{substate}. 
-
-% \begin{figure}[htbp]
-%   \centering
-%   \includegraphics[width=.3\textwidth]{pics/immutable}
-%   \caption{Grouping bucket won't be modified up to element that corresponds to current minimal time}
-%   \label {immutable}
-% \end{figure}
-
-% \begin{figure}[htbp]
-%   \centering
-%   \includegraphics[width=.3\textwidth]{pics/substate}
-%   \caption{Grouping buckets with window = 2. Window-sized sublists are grouping states at past global times}
-%   \label {substate}
-% \end{figure}
-
-% The fact that the only state in drifting state model has a simple structure of lists sorted by meta-information allows us to take snapshots that contain {\em the past} state. The property of determinism guarantees that such state snapshot together with the last outputted element is enough to make snapshotting mechanism consistent. 
-
-% In this section, we outline the model of our system. We focus on the core concepts and definitions to introduce the necessary preliminaries for consistency preserving mechanisms. The \FlameStream\ model has much in common with other stream processing systems but has several vital differences that enable an opportunity for efficient implementation of consistency guarantees. Among them are reduced set of operations, strict ordering, and cyclic graphs.
-
-% \subsection{Data flow}
-% The basic data flow abstraction is a {\it stream}. The stream is represented by an infinite heterogeneous sequence of data items. Data item is a {\it payload} and a {\it meta-information} associated with it. 
-
-% \[DataItem := (Payload, Meta)\]
-
-% The payload is an arbitrary user-provided data. Meta is structured system-assigned information. The primary purpose of the meta-information is to impose the total order on data items. Part of meta information is an application time - logical time, provided by data-producer, that is used for initial ordering.
-
-% Inside stream, data items can be dropped or transformed into the new data items.
-
-% \subsection{Boundaries}
-% Data producers are external to our system. {\em Front} is a component that acts as a mediator between them and a computational pipeline.
-
-% At the end of a pipeline, there is a {\em barrier} that prepares results to be consumed by a user. The main role of a barrier is to filter out possible duplicates or invalid results. Another function is to carry out an output protocol between system and data consumers, which is an essential part of providing exactly-once semantics.
-
-% \subsection{Computational flow}
-% The stream between front and barrier is handled by a user-provided directed data flow graph. Each node of the graph represents a single operation parameterized by user-defined business-logic. An operation can have multiple inputs and outputs. Edges indicate the order of these operations. Data items are processed one-by-one in a "streaming" manner. Our model allows cycles in the graph while data flow graphs are commonly assumed to be acyclic (DAGs) 
-% ~\cite{Zaharia:2016:ASU:3013530.2934664, Carbone:2017:SMA:3137765.3137777}.
-
-% \subsection{Physical deployment and partitioning}
-% In order to perform actual computations, data flow graph is distributed among computational units. Each unit runs a process called {\it worker}, and each of the workers executes complete data flow graph. The range of 32-bit signed integer is divided into the fixed number of non-intersecting {\it hash units}. Each worker can be responsible for one or many hash units. Hash units are used further for partitioning and state saving. The number of hash-units per worker is a user-defined parameter, and it must be set before the start of computations. 
-
-% Each operation input has a user-provided hash function called {\it balancing function}. This function is applied to the payload of data items and determines partitioning before each operation. After that, the data items are sent to the worker, which is responsible for the associated hash unit. Therefore, load balancing explicitly depends on the user-defined balancing functions. It allows the developer to determine optimal balancing which requires the knowledge of the payload distribution. The system optimizes the hash ranges assignment according to the processing statistics. 
-
-% \subsection{Ordering assumptions}
-% The system enforces a total order on data items. Ordering is preserved when an item is traveling through the operations. More precisely, the order of output items is the same as the order of corresponding input items. If more than one item is generated, they are inserted in output stream sequentially. Moreover, the output follows corresponding input but precedes the next item. This rule is vital for cycle processing. Without diving into details, it should be noted that the order of items is maintained across different fronts.
-
-% The concept of ordering is shown in Figure~\ref{ordering}. Data item with payload $1'$ is the derivative of the item with payload $1$, according to operation $F$. The same is for items with payloads $2'$ and $2$. After union operation, the order between $1$ and $2$ is preserved. Furthermore, $1'$ follows $1$, and $2'$ follows $2$.  
-% \begin{figure}[htbp]
-%   \centering
-%   \includegraphics[width=0.48\textwidth]{pics/ordering}
-%   \caption{The concept of ordering model}
-%   \label {ordering}
-% \end{figure}
-
-% We assume that input items of the operations are strictly ordered.
-
-% \subsection{Supported operations}
-% The list of available operations includes:
-
-% {\bf Map} applies a user-defined function to the payload of an input item. This function returns a sequence of data items with transformed payloads. An output sequence can be empty.
-
-% {\bf Broadcast} replicates an input item to the specified number of operations.
-
-% {\bf Merge} operation is initialized with the specified number of input nodes. It sends all incoming data to the output.
-
-% {\bf Grouping} has a {\it window size} parameter. Grouping stores input items into distinct buckets by the value of the input balancing function applied to the payload. When the next item arrives at the grouping, it is appended to the corresponding bucket. Each time the grouping outputs window-sized {\it tuple item}, which consists of the most recent (in terms of the meta-information) items of this bucket. If the size of the bucket is less than the window, all items of the bucket are taken. Grouping is the only operation that has a state.
-
-% The following example illustrates the semantics of the operation. The grouping accepts items with payload represented as natural numbers: 1,2,3, etc. The hash function returns 1 if the number is even and 0 otherwise. If the window is set to 3, the output elements are:
-
-% \[(1), (2), (1|3), (2|4), (1|3|5), (2|4|6), (3|5|7), (4|6|8)...\]
-
-% There are two important properties of the grouping operation: the output tuples are ordered by their last elements, the results among items with different values of a hash function are independent.
-
-% \subsection{Stateful transformations}
-% The given set of operations jointly with cyclic execution graphs is enough to implement any stateful operation, i.e., reduce in terms of MapReduce model. The scheme of such transformations is out of the scope of this paper. It is deeply detailed in~\cite{hiddenSeim}.
-
-% \subsection{Implementation notes}
-
-% As it was defined previously, in our model, only the grouping operation maintains a state and the state depends on the order of incoming items. Therefore, to achieve deterministic processing, there is a need to enforce the right order. However, conservative methods for the order enforcing are based on buffering~\cite{Li:2008:OPN:1453856.1453890} and can imply high latency overhead. The main difficulty here is that items can be easily reordered within stream processing systems because of asynchrony and the possible existence of multiple paths between two nodes. 
-
-% In~\cite{hiddenSeim} an optimistic approach to handle out-of-order items was introduced. The key idea behind it is that grouping can produce invalid results, but they must be filtered out at the barrier. Therefore, there is a need to buffer output items at the barrier before it is ensured that there are no invalid in-flight items and they cannot be generated. It is convenient to release items by global times.
-
-% To track the global time of in-flight items we adopt an idea of {\it acker task} inspired by Apache Storm~\cite{apache:storm}. Acker tracks data items using a checksum hash. When the item is sent or received by an operation, its global time and checksum are sent to the acker. This message is called {\it ack}. Acker groups acks by a global time into the structure called {\it ack table}. Once acker receives an ack message with global time {\it GT} and {\it XOR} it updates {\it GT} entry in the table by xoring {\it XOR} with the current value. When an item is sent and later received by the next operation, xoring corresponding {\it XOR}s would yield zero.
-
-% Acks are overlapped to nullify table's entry only when an item arrives at the barrier. That is, ack for receive is sent only after both processing and the ack sending for the transformed item, as illustrated in Figure~\ref{acker}. Different shapes of items mean different payloads. The ack for the sending of the triangular element is sent before the rectangular one. We expect the channel between the acker and each operation to be FIFO, so ack for the triangular item would be xored before the rectangular. So the two equal values are separated by distinct one. This technique guarantees that the {\it XOR} for some global time is equal to zero only if there are no in-flight elements with such global time.
-
-% \begin{figure}[htbp]
-%   \centering
-%   \includegraphics[scale=0.58]{pics/acker}
-%   \caption{The example of tracking minimal time using acker}
-%   \label {acker}
-% \end{figure}
-
-% The minimal time within a stream is the minimal global time with non-zero {\it XOR}. On minimal time changes, acker broadcasts new minimal time to the barrier and operations. Minimal time notifications plays the same role as {\em low-watermarks} in OOP architecture~\cite{Li:2008:OPN:1453856.1453890}. Therefore, the barrier can release elements with global time {\it GT} once it received notification from acker that the minimal time within the stream is greater than {\it GT}.
-
-% The important implication of ack-table structure is that items that was generated by a single input event become ready for release at the same moment.
-
-% To ensure that no fronts can generate item with the specific timestamp, each front periodically sends to acker special message called {\it report}, which promises that front will not generate items with a timestamp lower than the reported. The value in the ack table can become zero only after the corresponding report arrives.
-
-% It must be noted that acker can play the role of worker's coordinator because it observes the progress of the whole system. This property is used further in the implementation of mechanisms for fault tolerance. 
-
-% \FlameStream\ is implemented in Java, using Akka framework for messaging. An overview of the \FlameStream\ system model and architecture is shown in Figure~\ref{arch}. The main componets are:
-
-% {\bf Acker} supervises computation process and play role of coordinator in consistency protocols described in following sections.
-
-% {\bf Graph} is deployed on each node and process a partition of data that corresponds to its hash range. The communication within a node is done via messaging or direct function calls depending on runtime heuristics, a delivery that crosses node boundaries is performed by means of TCP.
-
-% {\bf Barrier} is located at the end of each graph instance. It filters duplicates and invalid data and delivers it to data consumers.
-
-% {\bf Data producers and data consumers} are deployed separately and communicate with system via defined protocols
-
-% {\bf Apache ZooKeeper} is used as a {\it cluster state manager}. The usage of ZooKeeper mitigates the need for the dedicated master node.
-
-% {\bf Persistent storage} is needed for reliable state saving to mitigate failures, in can be a distributed filesystem or database (e.g., HDFS, S3, MongoDB, GFS, HBase, ...)
-
-
-% \begin{figure*}[htbp]
-%   \centering
-%   \includegraphics[scale=0.78]{pics/arch}
-%   \caption{The overview of \FlameStream\ physical architecture}
-%   \label {arch}
-% \end{figure*}
-
-% \subsection{Consistency guarantees}
-% There are three main types of consistency guarantees relating to stream processing. {\it At most once} semantics states that each input event is processed once or not processed at all. {\it At least once} guarantees that each input item is processed, but possibly multiple times, that can lead to result duplication or state inconsistency. {\it Exactly once} semantics guarantee that each input event is processed exactly one time. 
-
-% The properties of the proposed model provide several useful features for achieving exactly-once semantics. The total order directly leads to the property of determinism, while the optimistic approach for handling out-of-order items allows o enforce it with low overhead. In turn, as it was mentioned above, determinism is a convenient base for system-wide idempotence. The roadmap of our approach is shown in Figure~\ref{roadmap}. The exact techniques to achieve exactly-once are detailed in the next section. 
+The fact that the only state in the drifting state model has a simple structure of lists sorted by meta-information allows us to take snapshots that contain {\em the past} state. The property of determinism guarantees that such state snapshot together with the last released element is enough to make snapshotting mechanism consistent. The exact protocols, which are used for snapshotting are detailed in the next section.  
