@@ -1,0 +1,65 @@
+\documentclass[sigconf]{acmart}
+
+\usepackage{graphicx}
+\usepackage{algorithm} % for algorithms
+\usepackage{algpseudocode}
+\usepackage{booktabs} % For formal tables
+\usepackage{amsthm} % For claims
+
+\theoremstyle{remark}
+
+\settopmatter{printacmref=false, printccs=true, printfolios=true}
+\pagestyle{empty} % removes running headers
+
+\newcommand{\PicScale}{0.5}
+\newcommand {\FlameStream} {FlameStream}
+\begin{document}
+
+\copyrightyear{2019} 
+\acmYear{2019} 
+\setcopyright{acmcopyright}
+% \acmConference[BeyondMR'18]{Algorithms and Systems for MapReduce and Beyond }{June 15, 2018}{Houston, TX, USA}
+% \acmBooktitle{BeyondMR'18: Algorithms and Systems for MapReduce and Beyond , June 15, 2018, Houston, TX, USA}
+% \acmPrice{15.00}
+% \acmDOI{10.1145/3206333.3209273}
+% \acmISBN{978-1-4503-5703-6/18/06}
+
+\title {Dependency Tracking in Cyclic Streaming Dataflows}
+
+% \author{  Igor E. Kuralenok,$^1$     Artem Trofimov,$^ {1,2}$    Nikita Marshalkin,$^ {1,2}$   and  Boris Novikov$^ {1,2}$ }
+% \affiliation{%
+% \institution{$^1$JetBrains Research}
+%   \city{St. Petersburg} 
+%   \country{Russia}
+% }
+% \affiliation{%
+% \institution{$^2$Saint Petersburg State University}
+%   \city{St. Petersburg} 
+%   \country{Russia}
+% }
+% \email{\string{ikuralenok, trofimov9artem, marnikitta\string}@gmail.com, borisnov@acm.org}
+
+\begin{abstract}
+\end {abstract}
+
+% \keywords{Data streams, exactly-once, drifting state, optimistic OOP}
+
+\maketitle
+
+\thispagestyle{empty}
+
+\section {Introduction}
+\input {fs-acker-intro.tex}
+
+\section {Experiments}
+\input {fs-acker-experiments.tex}
+
+\section {Conclusion}
+\input {fs-acker-conclusion.tex}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{../../bibliography/flame-stream}
+
+\end {document}
+
+\endinput
