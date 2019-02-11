@@ -1,4 +1,4 @@
-name := fs-seim
+name := fs-classification
 
 all:
 	pdflatex ${name}.tex
@@ -6,8 +6,8 @@ all:
 	pdflatex ${name}.tex
 	pdflatex ${name}.tex
 	pdflatex ${name}.tex
-	evince ${name}.pdf
+	okular ${name}.pdf
 
 clean:
-	rm -rf *.{pdf,ps,log,aux,out,dvi,bbl,blg}
+	@bash -c 'rm -rf *.{pdf,ps,log,aux,out,dvi,bbl,blg}'
 
