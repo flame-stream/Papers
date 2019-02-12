@@ -12,25 +12,23 @@
 % - Real-time дообучаем логистическую регрессию
 % 7) Помимо подхода, мы описываем сложности и проводим эксперименты на базе FlameStream (ссылка)
 
-    Text classsification has become important due to lots of unstructured data such as emails, chats, social media and others. Texts are a great source of information, but extracting semantics from it can be time-consuming or difficult. Thus, nowadays machine learning helps us to categorize a text among several text classes. 
-    
-    There are several methods of ML of solving the problem. Most well-known classifier models are provided by sklearn module[]: Naive Bayes, Decision Trees, Support Vector Machines, Neural Networks. In addition, some methods of natural language processing such as tokenizing and removing stop words can be taken from nltk[] library. 
-    
-    Assuming that, the size of the training dataset is relatively small, that can be processed by one machine, these methods are enough. Howerer, in the case, where the data cannot be processed by only one machine, which is common for large amount of data, distributed systems might solve the problem. For instance, Map Reduce, which is common technique for big data processing. This methods were used [] for text classification on Apache Spark Platform. Although the system is able to work on huge amounts of data, the training dataset is remaining static, which is considered as a drawback due to lack of flexibility.
-    
-    Working with non-static training datasets leads to use threads for achieving maximum perfomance. This approach was considered by []. The paper proposed a method of classification on streams. Even though, this method is implemented with continious training dataset, the solution isn't scalable to more than one machine. This disadvantage prevents using the method in the case of big data for efficient processing.
-    
-    In this work we want to introduce our computational pipeline and our machine learning model as a solution for the scalable distributed streaming text classification. The streaming implies potential infinite amounts of data. We vectorize our text with TF-IDF features, where TF is known as term-frequency and IDF as inverse document frequency. This features are computed using sharding technique [?]. As a classifier model we use logistic regression with l1 and l2 regularizations. The model is pretrained on the initial dataset and then is able to continue to train in real-time on the streaming data. Besides our approach, we describing what problems we had and how we managed to solve them and providing our experiments based on FlameStream platform [].
-    
-    We have encountered as well as some of the described above techniques the following challanges:
-    
-    \textbf{Distributed TF-IDF computing.} Features of the documents are proposed to compute in a distributed manner, otherwise, this part of the pipeline is able to produce a bottleneck, which removes property of scalability.
-    
-    \textbf{Concept drift.} Users may change their interests from time to time, so it shifts the labels of the streaming documents. In order to overcome this problem we managed to use a sliding window for computing document features.
-    
-    \textbf{Additional training.} Our model is able to adapt to new labels of documents during streaming. To achieve this, additional fitting is considered fast enough, so the model does not lose it's perfomance.
-    
-    \textbf{Model storage.} After the additional training, new model should be delivered to every processing unit in the pipeline, so the size of the model should be reasonably small in order to faster updating the pipeline.
-    
-    The structure of the paper as follows. In the next module we describe the classifier: computing features for the model, pretraining process and the ability to get fitted in real time. Section 3 will be devoted to the classification on streaming system and in the last section we provide benchmarks and experiments.
+Text analysis and, in particular, text classification is an emerging field of study. Nowadays, it is successfully applied in information extraction, text retrieval, question-answering, etc~\cite{tampakas2005}. There are several methods of ML of solving the problem. Most well-known classifier models are provided by sklearn module[]: Naive Bayes, Decision Trees, Support Vector Machines, Neural Networks. In addition, some methods of natural language processing such as tokenizing and removing stop words can be taken from nltk[] library. 
+
+Assuming that, the size of the training dataset is relatively small, that can be processed by one machine, these methods are enough. Howerer, in the case, where the data cannot be processed by only one machine, which is common for large amount of data, distributed systems might solve the problem. For instance, Map Reduce, which is common technique for big data processing. This methods were used [] for text classification on Apache Spark Platform. Although the system is able to work on huge amounts of data, the training dataset is remaining static, which is considered as a drawback due to lack of flexibility.
+
+Working with non-static training datasets leads to use threads for achieving maximum perfomance. This approach was considered by []. The paper proposed a method of classification on streams. Even though, this method is implemented with continious training dataset, the solution isn't scalable to more than one machine. This disadvantage prevents using the method in the case of big data for efficient processing.
+
+In this work we want to introduce our computational pipeline and our machine learning model as a solution for the scalable distributed streaming text classification. The streaming implies potential infinite amounts of data. We vectorize our text with TF-IDF features, where TF is known as term-frequency and IDF as inverse document frequency. This features are computed using sharding technique [?]. As a classifier model we use logistic regression with l1 and l2 regularizations. The model is pretrained on the initial dataset and then is able to continue to train in real-time on the streaming data. Besides our approach, we describing what problems we had and how we managed to solve them and providing our experiments based on FlameStream platform [].
+
+We have encountered as well as some of the described above techniques the following challanges:
+
+\textbf{Distributed TF-IDF computing.} Features of the documents are proposed to compute in a distributed manner, otherwise, this part of the pipeline is able to produce a bottleneck, which removes property of scalability.
+
+\textbf{Concept drift.} Users may change their interests from time to time, so it shifts the labels of the streaming documents. In order to overcome this problem we managed to use a sliding window for computing document features.
+
+\textbf{Additional training.} Our model is able to adapt to new labels of documents during streaming. To achieve this, additional fitting is considered fast enough, so the model does not lose it's perfomance.
+
+\textbf{Model storage.} After the additional training, new model should be delivered to every processing unit in the pipeline, so the size of the model should be reasonably small in order to faster updating the pipeline.
+
+The structure of the paper as follows. In the next module we describe the classifier: computing features for the model, pretraining process and the ability to get fitted in real time. Section 3 will be devoted to the classification on streaming system and in the last section we provide benchmarks and experiments.
     
