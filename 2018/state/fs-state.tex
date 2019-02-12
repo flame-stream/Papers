@@ -9,6 +9,7 @@
 \algblockdefx[Process]{Process}{EndProcess}[2][Unknown]{{\bf Process} {\it #2}}{}
 \algblockdefx[Event]{Event}{EndEvent}[2][Unknown]{{\bf upon event #2 do}}{}
 
+\usepackage{xcolor}
 \usepackage{booktabs} % For formal tables
 %\usepackage{cite} %for multiple refs
 
@@ -116,10 +117,10 @@ Boris Novikov\\
 % \section {Discussion}
 % \input {fs-state-discussion.tex}
 
-\section {Drifting state model}
+\section {Deterministic streaming model}
 \input {fs-state-model.tex}
 
-\section{Implementation}
+\section{Exactly once over determinism}
 \input {fs-state-consistency.tex}
 
 \section {Experiments}

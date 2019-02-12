@@ -2,79 +2,34 @@
 
 \label {fs-consistency-section}
 
-In this section, we outline the implementation details of \\ 
-\FlameStream\ - an open-source prototype implementation of the drifting state model. Firstly, we describe the architecture of our prototype. Then, we demonstrate how exactly nullification tracking and barrier flushing mechanisms work. Finally, the details of snapshotting and failure recovery protocols are shown. 
+To fill the gap between the determinism and exactly once we need to design state snapshotting and recovery protocols. In this section, we describe protocols for exactly once enforcement on top of drifting state model introduced in the previous section. While we exploit some properties of this model, proposed protocols can be easily generalized to any deterministic stream processing engine.
 
-\subsection{System architecture}
+% In this section, we outline the implementation details of \\ 
+% \FlameStream\ - an open-source prototype implementation of the drifting state model. Firstly, we describe the architecture of our prototype. Then, we demonstrate how exactly nullification tracking and barrier flushing mechanisms work. Finally, the details of snapshotting and failure recovery protocols are shown. 
 
-%Распределенность, свзязь всех со всеми, мапим логический граф на каждую машинку. Есть отслеживание (acker). Barrier. В чем предназначение деталей? В больших камнях. Более подробно + что, а не как.
+% \subsection{Meta-information structure}
 
-\FlameStream\ is a distributed stream processing engine implemented in Java using Akka framework. \FlameStream\ can be deployed on a hardware cluster of computational units that we call nodes. We assume that each node is connected through a network with all other nodes.
+% In~\FlameStream\ the meta-information is a tuple of a {\it global time}, a {\it trace}, {\it child ids} and a {\it tombstone flag}.
 
-Data producers and data consumers are deployed separately and communicate with the system via defined protocols. We require data producers to support replaying input stream from defined points. We also suppose that data consumers are able to return the last received element on request. The requirement regarding data producers and consumers are discussed in details in further sections.
+% \[Meta := (GlobalTime, ChildIds[\:], Trace, IsTombstone)\]
 
-An overview of the \FlameStream\ architecture is shown in Figure~\ref{arch}. The main components are:
+% Global time is assigned to each input data item $a$ when it enters the system. It is a logical time and identifier of data producer. The identifier of a data producer is needed to prevent collisions. Global time of a derivative item is a maximal global time among input elements that affect it. This property is preserved in grouping operation and guarantees that if a data flow element $x$ has global time $GT$ and an input element that is defined by global time $GT$ has been already nullified, then all input elements that affect $x$ have been nullified as well. It allows the system to use global time as an indicator of $Cl^{-1}(D)$. It is worth to note that we do not rely on any clock synchronization between nodes. The only implication of the clock skew is the system degradation regarding latency: 1 ms of the fronts clock difference appends 1 ms to minimal latency.
 
-\begin{figure*}[htbp]
-  \centering
-  \includegraphics[scale=0.78]{pics/arch}
-  \caption{The overview of \FlameStream\ architecture}
-  \label {arch}
-\end{figure*}
+% Map operation is able to generate multiple items from one, and {\em child ids} define an order on them. {\it ChildIds} is an array of child ids, that corresponds to all visited map operations.
 
-{\bf Node} runs a process called {\it worker}. Worker executes user-defined operations. The computational load is balanced through the distribution of data items among workers. A worker for a data item is determined by the value of a hash function of item payload. Such hash functions can be defined by a user before each logical operation. Each worker can be responsible for one or many ranges of values of hash functions called {\it hash units}. The number of hash-units per worker is a user-defined parameter, and it must be set before the start of computations. 
+% If tombstones have been generated, multiple items with the same global time and child ids can exist in the stream. To differentiate them without the comparison of a payload, there is a {\it Trace} value stored in the meta-information. The trace is a xor of all physical operations' ids (random 64-bit identifier) visited by item so far. Invalid item and the corresponding tombstone go along the same path because they have the same payload and the balancing functions are deterministic. Therefore, item and the corresponding tombstone can be revealed via trace matching. 
 
-{\bf Execution graph} is an Akka-based representation of a user-defined logical graph. Execution graph is run by each worker. A data item can be sent to another worker before each operation due to balancing technique and the distribution of hash units. The communication within a node is done via messaging or direct function calls depending on runtime heuristics. A delivery that crosses node boundaries is performed by means of TCP.
+% Therefore, on the one hand, meta-information defines a total order on data flow elements (meta is compared lexicographically). On the other hand, it provides additional information about $Cl^{-1}(D)$ and tombstones.
 
-{\bf Barrier} is located at the end of each execution graph instance. The barrier has two main responsibilities:
+\subsection{Snapshotting}
 
-\begin{itemize}
-    \item Filtering out possible duplicates or invalid results
-    \item Taking a snapshot of the last released element, that is an essential part of providing exactly-once semantics
-\end{itemize}
+As it is demonstrated in section~\ref{fs-formalism}, in a deterministic system, state snapshotting and output delivery can be unsynchronized if the system includes in the snapshot last released element as well as system state. The problem here is a need to save at the time $\tau$ snapshot for state $S_{\tau-n}$ for some $n$.
 
-{\bf Acker} is an agent that tracks the processing progress of the system. Acker has two main roles as well. It broadcasts information about input elements nullification that is needed for barrier flushing and coordinates state snapshotting and recovery protocols described in the following sections.
+The only stateful operation in the drifting state model is grouping. Hence, there is only a need to save grouping's state in order to take the complete state snapshot. Grouping's state in practice are lists of data items sorted by meta-information. If all input elements $[a_{0}...a_{\tau-n}]$ have been nullified, then state $S_{\tau-n}$ can be snapshotted. Therefore, to take a snapshot at time $\tau$, there is a need to determine maximal $\tau-n$ such that all input elements $[a_{0}...a_{\tau-n}]$ have been nullified. After that, we can just save elements from grouping state lists, which are affected only by these elements. These elements can be determined using meta-information because it contains information about $Cl^{-1}(D)$.
 
-{\bf Apache ZooKeeper} is used as a {\it cluster state manager}. It contains basic system parameters and locations of workers and acker. The usage of ZooKeeper mitigates the need for the dedicated master node.
+The fact that the only state in the drifting state model has a simple structure of lists sorted by meta-information allows us to take snapshots that contain {\em the past} state. The property of determinism guarantees that such state snapshot together with the last released element is enough to make snapshotting mechanism consistent. The exact protocols, which are used for snapshotting are detailed in the next section.  
 
-{\bf Persistent storage} is needed for reliable storing of state snapshot. In case of failures, the state snapshot is recovered from persistent storage. It can be a distributed file system or database (e.g., HDFS, S3, MongoDB, GFS, HBase, etc.).
-
-\subsection{Meta-information structure}
-
-In~\FlameStream\ the meta-information is a tuple of a {\it global time}, a {\it trace}, {\it child ids} and a {\it tombstone flag}.
-
-\[Meta := (GlobalTime, ChildIds[\:], Trace, IsTombstone)\]
-
-Global time is assigned to each input data item $a$ when it enters the system. It is a logical time and identifier of data producer. The identifier of a data producer is needed to prevent collisions. Global time of a derivative item is a maximal global time among input elements that affect it. This property is preserved in grouping operation and guarantees that if a data flow element $x$ has global time $GT$ and an input element that is defined by global time $GT$ has been already nullified, then all input elements that affect $x$ have been nullified as well. It allows the system to use global time as an indicator of $Cl^{-1}(D)$. It is worth to note that we do not rely on any clock synchronization between nodes. The only implication of the clock skew is the system degradation regarding latency: 1 ms of the fronts clock difference appends 1 ms to minimal latency.
-
-Map operation is able to generate multiple items from one, and {\em child ids} define an order on them. {\it ChildIds} is an array of child ids, that corresponds to all visited map operations.
-
-If tombstones have been generated, multiple items with the same global time and child ids can exist in the stream. To differentiate them without the comparison of a payload, there is a {\it Trace} value stored in the meta-information. The trace is a xor of all physical operations' ids (random 64-bit identifier) visited by item so far. Invalid item and the corresponding tombstone go along the same path because they have the same payload and the balancing functions are deterministic. Therefore, item and the corresponding tombstone can be revealed via trace matching. 
-
-Therefore, on the one hand, meta-information defines a total order on data flow elements (meta is compared lexicographically). On the other hand, it provides additional information about $Cl^{-1}(D)$ and tombstones.
-
-\subsection{Nullification tracking and barrier flushing}
-
-% In drifting state model, it is assumed that there is a mechanism that periodically provides monotonic, in terms of meta-information, reports about which elements have been nullified. 
-
-As it was mentioned above, in order to implement barrier flushing and state snapshotting mechanisms, there is a need for a mechanism that identifies nullified input elements. The well-known solution for detecting nullified elements is to inject in execution graph special elements that go through the same network channels as ordinary data items and push through data flow elements. When such element is released from the very last node of the execution graph, it means that all previous input elements have been nullified due to FIFO network channels. Flink checkpointing technique is based on this approach~\cite{Carbone:2017:SMA:3137765.3137777}. While it works well in systems that support only acyclic execution graphs, it is unclear how to handle such pushing elements in drifting state cycles. 
-
-To solve the problem we adopt an idea from Apache Storm~\cite{apache:storm}. Storm uses a special agent called {\em Acker} for elements tracking. On each input item, an operation sends to the Acker checksum hash of the corresponding output item and then checksum hash of the input item. Acker XORs all checksums and when the result becomes zero, it means that all items were processed. In this approach, collisions are possible, but they are very unlikely in practice. In our modification, checksum hash is sent together with element global time. This message is called {\it ack}. Acker groups acks by a global time into the structure called {\it ack table}. Once acker receives an ack message with global time {\it GT} and {\it XOR} it updates {\it GT} entry in the table by xoring {\it XOR} with the current value. When an item is sent and later received by the next operation, xoring corresponding {\it XOR}s would yield zero.
-
-Acks are overlapped to make table's entry equal to zero only when an item arrives at the barrier, i.e., ack for receive is sent only after both transformation is done and the ack for the transformed item is sent, as illustrated in Figure~\ref{acker}. In this example, different shapes of items mean different payloads. The ack for the sending of the triangular element is sent before the rectangular one. We expect the channel between the acker and each operation to be FIFO, so ack for the triangular item would be xored before the rectangular. So the two equal values are separated by a distinct one. This technique guarantees that the {\it XOR} for some global time is equal to zero only if there are no in-flight elements with such global time.
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[scale=0.58]{pics/acker}
-  \caption{The example of tracking minimal time using acker}
-  \label {acker}
-\end{figure}
-
-The {\em minimal time} within a stream is the minimal global time with non-zero {\it XOR}. On minimal time changes, acker broadcasts new minimal time to the barrier and operations. An important property of these notifications is monotonicity in terms of global time. Minimal time notifications guarantee that there are no elements in a data flow, except in the barrier, with the given global time and less. It implies that there are tombstones with such global time and less as well. The barrier can release elements with global time {\it GT} once it received notification from acker that the minimal time within the stream is greater than {\it GT} because it means that input element identified by {\it GT} is ready for safe nullification. 
-
-It must be noted that acker can play the role of a worker's coordinator because it observes the progress of the whole system. This property is used further in the implementation of mechanisms for fault tolerance. 
-
-\subsection{Last output element snapshotting}
+\subsubsection{Last output element snapshotting}
 
 As we demonstrated in section~\ref{fs-formalism} if consistent state snapshotting is extended by the snapshotting of the last output element, then a system is able to provide exactly once without synchronization between state snapshotting and output elements releasing. 
 
@@ -92,7 +47,7 @@ Thus, on the one hand, we delegate the part of the basic functionality to data c
 
 % \subsection{Input replay}
 
-\subsection{State snapshotting and input replay}
+\subsubsection{State snapshotting and input replay}
 
 Input replay functionality is commonly used to restore computational process after a failure in stream processing systems~\cite{Carbone:2017:SMA:3137765.3137777, Akidau:2013:MFS:2536222.2536229, apache:storm}. The key idea here is that in case of failure, previously released input data can be retrieved again. Usually, replay is started not from the beginning, but from a certain point. Like other stream processing solutions, our system requires from producers an ability to replay input data. The only difference is that the initial point of replay is defined in terms of global time. Practically, the role of global times can be played by any monotonically increasing sequence, e.g., offsets in Apache Kafka~\cite{kreps2011kafka} or the values of a logical clock. Therefore, this requirement is not a strong limitation for real-life deployments.
 
