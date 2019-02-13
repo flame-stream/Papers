@@ -1,30 +1,19 @@
 % %%% fs-state-model - Model
 
-% Set $\Gamma$ of all possible data flow elements in our model consists of {\em data items}. Data item contains an arbitrary application domain {\it payload} and a structured system-assigned {\it meta-information}.
-
-% \[DataItem := (Payload, Meta)\]
-
-% The exact form of meta-information is detailed in the next section, but its main purposes are:
-% \begin{itemize}
-%     \item Define a total order on all data flow elements. The order is used for achieving determinism and deduplication
-%     \item Maintain information about $Cl^{-1}(D)(x)$ for each data item $x$
-%     \item Keep extra information about a data item
-% \end{itemize}
-
 \label {fs-model-section}
 
 In this section, we outline the lightweight deterministic model called {\em drifting state}. While it is described in details in~\cite{we2018adbis}, in this paper we mention properties, which play important roles in consistency enforcement techniques.
 
 A straightforward approach, how to make stream processing system deterministic, requires several steps:
 \begin{enumerate}
-    \item Preserve total order of elements before each order-sensitive operation in a data flow
+    \item Preserve predefined total order of elements before each order-sensitive operation in a data flow
     \item Preserve the same order of output items
     \item Ensure that all operations are pure
 \end{enumerate}
 
-At first glance, total order maintenance is over-restrictive. It can be achieved, e.g., using buffering before each order-sensitive operation until punctuation or low watermark arrives ~\cite{Li:2008:OPN:1453856.1453890}. However, buffering can dramatically increase latency. 
+At first glance, total order maintenance is over-restrictive. It can be achieved, e.g., using buffering before each order-sensitive operation until punctuation or low watermark arrives ~\cite{Li:2008:OPN:1453856.1453890}. However, buffering can dramatically increase latency. We assume that reorderings occur only in a physical graph because the order of input elements defines a required order for deterministic execution.
 
-An underlaying idea of drifting state model is a reduced set of available operations which are pure and can enforce order optimistically, without blocking, but are sufficient to implement any stateful streaming data flow. 
+An underlying idea of drifting state model is a reduced set of available operations which are pure and can enforce order optimistically but are sufficient to implement any stateful streaming data flow. 
 
 \subsection{Basic operations}
 
@@ -32,7 +21,7 @@ Any logical graph in the drifting state model is constructed using the following
 
 {\bf Map} applies a user-defined function to the payload of an input item. This function returns a sequence of data items with transformed payloads. An output sequence can be empty.
 
-{\bf Grouping} has a {\it window size} parameter. Grouping stores input items into distinct buckets by the value of the input balancing function applied to the payload. When the next item arrives at the grouping, it is appended to the corresponding bucket. Each time the grouping outputs window-sized {\it tuple item}, which consists of the most recent (in terms of the meta-information) items of this bucket. If the size of the bucket is less than the window, all items of the bucket are taken.
+{\bf Grouping} stores input items into distinct buckets by the value of the input balancing function applied to the payload. When the next item arrives at the grouping, it is appended to the corresponding bucket. Each time the grouping outputs window-sized {\it tuple item}, which consists of the most recent (in terms of the meta-information) items of this bucket. If the size of the bucket is less than the window, all items of the bucket are taken.
 
 The following example illustrates the semantics of the operation. The grouping accepts items with payload represented as natural numbers: 1,2,3, etc. The hash function returns 1 if the number is even and 0 otherwise. If the window is set to 3, the output elements are:
 
@@ -49,7 +38,7 @@ Any stateful transformation can be expressed by decomposing into map and groupin
   \label {classical-drifting}
 \end{figure}
 
-We call this model a drifting state because operation states become ordinary data flow elements. Unlike common approach, in this model user does not have direct access to state, and state management is done completely on the system side.
+We call this model a drifting state because operation states become ordinary data flow elements. Unlike a common approach, in this model user does not have direct access to state, and state management is done completely on the system side.
 
 \subsection{Properties of operations}
 
@@ -61,42 +50,24 @@ In this setting, map operation is pure and order insensitive, and grouping opera
   \caption{An idea of optimistic grouping implementation}
   \label {optimistic-grouping}
 \end{figure} 
- 
-% In order to allow invalidators to catch invalid pairs, we buffer all items before output in a very last node of the graph called a {\em barrier}. The barrier can be safely flushed if there is a guarantee that there are no in-flight invalidators for elements in the barrier. Hence, an element can be released from the barrier at the nullification time of the last input items, which affect it. In other words, element $b$ can be released at the time $\tau(t)$ if $\forall{a}:b\in{Cl(D)(a)},\theta_a \leq \tau(t)$. If there is information, which input elements have been already nullified, meta-information of an element in the barrier can be used to determine the correct moment to release this element. The exact method for barrier flushing is discussed in the next section. Barrier releases items in the order of meta-information, so results will be the same after any number of reruns on the same input. It is worth to note that barrier is the only buffer in any data flow graph within this approach due to optimistic groupings. 
 
-% \textcolor{red}{connect atomicity and invalidating}
+\subsection{Output elements delivery}
 
-% The drifting state has the following properties:
-% \begin{itemize}
-%     \item Determinism is achieved by the price of a single buffer per any data flow graph. In our experiments, the waiting time in this buffer is in order of milliseconds~\cite{we2018adbis}.
-%     \item There are only two operations: map and windowed grouping. The set of dependencies $D$ is generated by these operations.
-%     \item User-defined code can be present only in map operation, while for grouping, a user should define hash balancing function.
-%     \item Map is stateless operation and grouping maintains sorted on meta-information lists of data items. The system itself only can manage this state, so the drifting state model is stateless from a user point of view.
-%     \item In spite of the reduced set of operations, this model is sufficient to express any stateful transformation.
-%     \item The only requirement of our model is that map operations must be pure.
-% \end{itemize}
+As it was demonstrated in section~\ref{fs-formalism}, an element can be consistently released at the time of nullification. In this case, it is guaranteed that the element is processed and delivered atomically with all its derivatives. In order to enforce such atomicity, we buffer all output items in the very last nodes of the physical graph called {\em barriers}. The barrier must ensure that all dependent elements have already arrived before it can safely deliver them to end-user. This behavior allows us to ensure that all invalid elements are destroyed by the corresponding sentinels before delivery. This property is proved in~\cite{we2018adbis}, but the intuitive explanation is that we hold invalid elements in the barrier until sentinels arrive. 
 
-\subsection{Nullification tracking}
+\subsection{Dependency tracking}
 
-As it was demonstrated in section~\ref{fs-formalism}, an element can be released without loss of exactly once at the time of nullification. In this case, it is guaranteed that the element is processed atomically with all its derivatives. For drifting state model it also means that all sentinels 
+Barriers require mechanisms for detecting dependencies between data flow elements. The well-known solution for dependency tracking is to inject special elements in a data flow. These elements go through the same path in a physical graph and "push through" preceding data flow elements. When such element arrives at the barrier, it means that buffered elements do not have in-flight dependencies. Flink checkpointing technique is based on this approach~\cite{Carbone:2017:SMA:3137765.3137777}. While it works well in systems that support only acyclic execution graphs, it is unclear how to handle such "pushing" elements in drifting state cycles. 
 
-% In drifting state model, it is assumed that there is a mechanism that periodically provides monotonic, in terms of meta-information, reports about which elements have been nullified. 
+To solve this problem, each data item maintains a so-called {\em global time}. Global time is the minimal time of arrival among all input elements which affect a given one,  $GT(x)=min\{t:a_t\in Cl^{-1}(x)\}$. The exact algorithms for computing and maintaining global time are detailed in~\cite{we2018adbis}, but the important property is that dependent in-flight elements have the same global time. 
 
-% As it was mentioned above, in order to implement barrier flushing and state snapshotting mechanisms, there is a need for a mechanism that identifies nullified input elements. 
+On each input item, any operation in a physical graph sends to the special agent called Acker global time together with a checksum hash of the corresponding output item. Then, it sends global time and a checksum hash of the input item. Acker XORs all checksums grouped by global times and when the result becomes zero, it means that all items with a given global time were processed. In other words, it means that all derivatives of an input element with the arrival time $GT$ are in the barrier. When such event occurs, acker broadcasts a notification to the subscribers, e.g. barriers. In this approach, collisions are possible, but they are very unlikely in practice. The idea of Acker is adopted from Apache Storm~\cite{apache:storm}.
 
-The well-known solution for detecting nullified elements is to inject in execution graph special elements that go through the same network channels as ordinary data items and push through data flow elements. When such element is released from the very last node of the execution graph, it means that all previous input elements have been nullified due to FIFO network channels. Flink checkpointing technique is based on this approach~\cite{Carbone:2017:SMA:3137765.3137777}. While it works well in systems that support only acyclic execution graphs, it is unclear how to handle such pushing elements in drifting state cycles. 
-
-To solve the problem we adopt an idea from Apache Storm~\cite{apache:storm}. Storm uses a special agent called {\em Acker} for elements tracking. On each input item, an operation sends to the Acker checksum hash of the corresponding output item and then checksum hash of the input item. Acker XORs all checksums and when the result becomes zero, it means that all items were processed. In this approach, collisions are possible, but they are very unlikely in practice. In our modification, checksum hash is sent together with element global time. This message is called {\it ack}. Acker groups acks by a global time into the structure called {\it ack table}. Once acker receives an ack message with global time {\it GT} and {\it XOR} it updates {\it GT} entry in the table by xoring {\it XOR} with the current value. When an item is sent and later received by the next operation, xoring corresponding {\it XOR}s would yield zero.
-
-Acks are overlapped to make table's entry equal to zero only when an item arrives at the barrier, i.e., ack for receive is sent only after both transformation is done and the ack for the transformed item is sent, as illustrated in Figure~\ref{acker}. In this example, different shapes of items mean different payloads. The ack for the sending of the triangular element is sent before the rectangular one. We expect the channel between the acker and each operation to be FIFO, so ack for the triangular item would be xored before the rectangular. So the two equal values are separated by a distinct one. This technique guarantees that the {\it XOR} for some global time is equal to zero only if there are no in-flight elements with such global time.
+Figure~\ref{acker} illustrates acker functionality. Different shapes of items mean different data items. The ack for the sending of the triangular element is sent before the rectangular one. We expect the channel between the acker and each operation to be FIFO, so ack for the triangular item would be xored before the rectangular. So the two equal values are separated by a distinct one. This technique guarantees that the {\it XOR} for some global time is equal to zero only if there are no in-flight elements with a given global time.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[scale=0.58]{pics/acker}
-  \caption{The example of tracking minimal time using acker}
+  \caption{The example of tracking dependencies using acker}
   \label {acker}
 \end{figure}
-
-The {\em minimal time} within a stream is the minimal global time with non-zero {\it XOR}. On minimal time changes, acker broadcasts new minimal time to the barrier and operations. An important property of these notifications is monotonicity in terms of global time. Minimal time notifications guarantee that there are no elements in a data flow, except in the barrier, with the given global time and less. It implies that there are tombstones with such global time and less as well. The barrier can release elements with global time {\it GT} once it received notification from acker that the minimal time within the stream is greater than {\it GT} because it means that input element identified by {\it GT} is ready for safe nullification. 
-
-It must be noted that acker can play the role of a worker's coordinator because it observes the progress of the whole system. This property is used further in the implementation of mechanisms for fault tolerance. 
