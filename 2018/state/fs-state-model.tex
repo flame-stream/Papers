@@ -4,26 +4,27 @@
 
 In this section, we outline the lightweight deterministic model called {\em drifting state}. While it is described in details in~\cite{we2018adbis}, in this paper we mention properties, which play important roles in consistency enforcement techniques.
 
-A straightforward approach, how to make stream processing system deterministic, requires several steps:
+Determinism can be achieved in a stream processing system with the following straightforward approach:
 \begin{enumerate}
     \item Preserve predefined total order of elements before each order-sensitive operation in a data flow
     \item Preserve the same order of output items
-    \item Ensure that all operations are pure
+    \item Require all operations to be pure
 \end{enumerate}
 
-At first glance, total order maintenance is over-restrictive. It can be achieved, e.g., using buffering before each order-sensitive operation until punctuation or low watermark arrives ~\cite{Li:2008:OPN:1453856.1453890}. However, buffering can dramatically increase latency. We assume that reorderings occur only in a physical graph because the order of input elements defines a required order for deterministic execution.
+The order on elements can be defined using a natural order of input elements arrival, e.g., $x\in Cl(D)(a_t) < y\in Cl(D)(a_{t+1})$. If multiple elements are generated from one, the order between them is based on the order of generation. In this case, reorderings may occur only in a physical graph.
+
+At first glance, total order maintenance is over-restrictive. It can be achieved, e.g., using buffering before each order-sensitive operation until punctuation or low watermark arrives ~\cite{Li:2008:OPN:1453856.1453890}. However, buffering can dramatically increase latency.
 
 An underlying idea of drifting state model is a reduced set of available operations which are pure and can enforce order optimistically but are sufficient to implement any stateful streaming data flow. 
-
 \subsection{Basic operations}
 
 Any logical graph in the drifting state model is constructed using the following two operations:
 
-{\bf Map} applies a user-defined function to the payload of an input item. This function returns a sequence of data items with transformed payloads. An output sequence can be empty.
+{\bf Map} applies a user-defined function to an input item. It returns a sequence of new data items generated from the input one. An output sequence can be empty.
 
-{\bf Grouping} stores input items into distinct buckets by the value of the input balancing function applied to the payload. When the next item arrives at the grouping, it is appended to the corresponding bucket. Each time the grouping outputs window-sized {\it tuple item}, which consists of the most recent (in terms of the meta-information) items of this bucket. If the size of the bucket is less than the window, all items of the bucket are taken.
+{\bf Grouping} stores input items into distinct buckets by the value of the input balancing function. When the next item arrives at the grouping, it is appended to the corresponding bucket. Each time the grouping outputs window-sized {\it tuple item}, which consists of the most recent (in terms of the defined order) items of this bucket. If the size of the bucket is less than the window, all items of the bucket are taken.
 
-The following example illustrates the semantics of the operation. The grouping accepts items with payload represented as natural numbers: 1,2,3, etc. The hash function returns 1 if the number is even and 0 otherwise. If the window is set to 3, the output elements are:
+The following example illustrates the semantics of the operation. The grouping accepts items represented as natural numbers: 1,2,3, etc. The hash function returns 1 if the number is even and 0 otherwise. If the window is set to 3, the output elements are:
 
 \[(1), (2), (1|3), (2|4), (1|3|5), (2|4|6), (3|5|7), (4|6|8)...\]
 
@@ -59,7 +60,7 @@ As it was demonstrated in section~\ref{fs-formalism}, an element can be consiste
 
 Barriers require mechanisms for detecting dependencies between data flow elements. The well-known solution for dependency tracking is to inject special elements in a data flow. These elements go through the same path in a physical graph and "push through" preceding data flow elements. When such element arrives at the barrier, it means that buffered elements do not have in-flight dependencies. Flink checkpointing technique is based on this approach~\cite{Carbone:2017:SMA:3137765.3137777}. While it works well in systems that support only acyclic execution graphs, it is unclear how to handle such "pushing" elements in drifting state cycles. 
 
-To solve this problem, each data item maintains a so-called {\em global time}. Global time is the minimal time of arrival among all input elements which affect a given one,  $GT(x)=min\{t:a_t\in Cl^{-1}(x)\}$. The exact algorithms for computing and maintaining global time are detailed in~\cite{we2018adbis}, but the important property is that dependent in-flight elements have the same global time. 
+To solve this problem, each data item maintains a so-called {\em global time}. Global time is the minimal time of arrival among all input elements which affect a given one,  $GT(x)=min\{t:a_t\in Cl^{-1}(D)(x)\}$. The exact algorithms for computing and maintaining global time are detailed in~\cite{we2018adbis}, but the important property is that dependent in-flight elements have the same global time. 
 
 On each input item, any operation in a physical graph sends to the special agent called Acker global time together with a checksum hash of the corresponding output item. Then, it sends global time and a checksum hash of the input item. Acker XORs all checksums grouped by global times and when the result becomes zero, it means that all items with a given global time were processed. In other words, it means that all derivatives of an input element with the arrival time $GT$ are in the barrier. When such event occurs, acker broadcasts a notification to the subscribers, e.g. barriers. In this approach, collisions are possible, but they are very unlikely in practice. The idea of Acker is adopted from Apache Storm~\cite{apache:storm}.
 
