@@ -40,6 +40,15 @@
 % \email{\string{ikuralenok, trofimov9artem, marnikitta\string}@gmail.com, borisnov@acm.org}
 
 \begin{abstract}
+
+%Задача классификации текстов является хорошо изученной, однако когда данные являются потоковыми начинаются трудности. При такого рода данных, основная сложность является в обеспечении малой задержки между получением очередного текста и его разметкой. Задача обработки текстов на потоковых данных известна, однако существующие решения либо batch processing либо не являются масштабируемыми, также эти решения не обладают гибкостью к постоянно изменяющимся потоку данных. В нашей работе мы представляем систему, где нам удалось создать решение, обеспечивающее минимальную задержку при классификации текстов, при этом, проходить дообучение в реальном времени, сохраняя эту задержку. Мы провели эксперименты, показывающие успешность наших результатов.
+
+Multi-labelled text classification problem is well-known one, but classifying text data on streams is a challenging task. Due to the nature of data, the main difficulty is providing a low latency between obtaining text and its labeling. There are solutions of processing texts on streams, however, they are either batch based or non-scalable ones, in addition, this techniques do not adopt to constantly evolving data stream. In this work, we introduce a system, which manages the previous aspects and providing low latency, moreover, the system is able to continue training in real-time without compromising the latency. Our experiment results demonstrate the benefits of our approach.
+
+% Комментарии БА: нет постановки задачи из-за этого все едет.
+% Как такого request-а нет -- при написании слова реквест кажется, что как будто пользователь его делает, но это не так.
+% Prior research on processing streaming data has been worked only on batch based solutions or non-scalable ones. However, due to the nature of data is critical to have a scalable solution, moreover, obtaining an answer for a [request] essentially to have low latency. In this paper, we propose text classification on streaming data, where this aspects were considered. Our system is able to continue to fit on the fly without compromising the latency, but increasing answer accuracy instead.
+
 \end {abstract}
 
 % \keywords{Data streams, exactly-once, drifting state, optimistic OOP}
