@@ -28,7 +28,7 @@ The following example illustrates the semantics of the operation. The grouping a
 
 \[(1), (2), (1|3), (2|4), (1|3|5), (2|4|6), (3|5|7), (4|6|8)...\]
 
-\subsection{Completeness of operations}
+\subsubsection{Completeness}
 
 Any stateful transformation can be expressed by decomposing into map and grouping operations with a cycle~\cite{we2018adbis}. Let us illustrate it by the example of sum operation. In a typical setting, each element is combined with previous state value and released. Then, the state is updated. In our model, firstly each element is grouped with previous state element into the pair. After that, map operation delivers a combined result, updates the state, and returns it to the grouping through the cycle. A comparison between the classical state handling approach and the drifting state model is shown in Figure~\ref{classical-drifting}.
 
@@ -41,9 +41,9 @@ Any stateful transformation can be expressed by decomposing into map and groupin
 
 We call this model a drifting state because operation states become ordinary data flow elements. Unlike a common approach, in this model user does not have direct access to state, and state management is done completely on the system side.
 
-\subsection{Properties of operations}
+\subsubsection{Properties}
 
-In this setting, map operation is pure and order insensitive, and grouping operation is pure. Grouping operation is order-sensitive because it should group a new element with the exact previous state. Hence, a straightforward approach to achieve determinism is to enforce order before grouping. Fortunately, grouping can be implemented optimistically. The scheme is shown in Figure~\ref{optimistic-grouping}. The numbers on this figure represent the right order of elements. An arriving element 3 is out-of-order. We know that actually invalid pair (one; five) has been already released. In this case, the system generates valid pairs because it knows the right position of the element 3. Besides, an invalid pair with a special flag is resent. Let us call such elements {\em sentinels}. The purpose of sentinels is to seek and destroy previously released invalid pairs. Sentinels remove them from other groupings or intercept before delivery to end-user. Map functions are required to be pure in order to ensure that sentinels will go through exactly the same path as original pairs. This method is applicable to any number of subsequent groupings.
+In this setting, map operation is pure and order insensitive, and grouping operation is pure. Grouping operation is order-sensitive because it should group a new element with the exact previous state. Hence, a straightforward approach to achieve determinism is to enforce order before grouping. Fortunately, grouping can be implemented optimistically. The scheme is shown in Figure~\ref{optimistic-grouping}. The numbers on this figure represent the right order of elements. An arriving element 3 is out-of-order. We know that actually invalid pair (1; 5) has been already released. In this case, the system generates valid pairs because it knows the right position of the element 3. Besides, an invalid pair with a special flag is resent. Let us call such elements {\em sentinels}. The purpose of sentinels is to seek and destroy previously released invalid pairs. Sentinels remove them from other groupings or intercept before delivery to end-user. Map functions are required to be pure in order to ensure that sentinels will go through exactly the same path as original pairs. This method is applicable to any number of subsequent groupings.
  
 \begin{figure}[htbp]
   \centering
@@ -52,11 +52,15 @@ In this setting, map operation is pure and order insensitive, and grouping opera
   \label {optimistic-grouping}
 \end{figure} 
 
-\subsection{Output elements delivery}
+\subsection{Output consistency}
 
-As it was demonstrated in section~\ref{fs-formalism}, an element can be consistently released at the time of nullification. In this case, it is guaranteed that the element is processed and delivered atomically with all its derivatives. In order to enforce such atomicity, we buffer all output items in the very last nodes of the physical graph called {\em barriers}. The barrier must ensure that all dependent elements have already arrived before it can safely deliver them to end-user. This behavior allows us to ensure that all invalid elements are destroyed by the corresponding sentinels before delivery. This property is proved in~\cite{we2018adbis}, but the intuitive explanation is that we hold invalid elements in the barrier until sentinels arrive. 
+Invalid grouping items must be destroyed by sentinels to prevent inconsistent output. Hence, the system must hold invalid elements until all corresponding sentinels arrive. In drifting state model all output items are buffered in the very last nodes of the physical graph called {\em barriers}. The problem here is to detect that there are no in-flight sentinels. Invalid items and corresponding sentinels always depend on the same input element. Hence, if a system knows that all elements that depend on an input item are in the barrier, these elements can be delivered to end-user. On the other hand, as it was demonstrated in section~\ref{fs-formalism}, atomic delivery of all dependent elements is a requirement for exactly once. Therefore, the atomic releasing of dependent elements allows us to solve both problems. 
 
-\subsection{Dependency tracking}
+Figure~\ref{???} illustrates the concern. Elements $b^{1},b^{2},b^{3},b^{4}$ can be delivered to end-user only after the element $b^{4}$ has been processed because only in this case they can be released atomically. Otherwise, invalid grouping elements may be delivered to end-user. Another possible issue is that some elements can be applied to a system state and delivered twice in case of failure. 
+
+% In order to enforce such atomicity, we buffer all output items in the very last nodes of the physical graph called {\em barriers}. The barrier must ensure that all dependent elements have already arrived before it can safely deliver them to end-user. This behavior allows us to ensure that all invalid elements are destroyed by the corresponding sentinels before delivery. This property is proved in~\cite{we2018adbis}, but the intuitive explanation is that we hold invalid elements in the barrier until sentinels arrive. 
+
+\subsubsection{Dependency tracking}
 
 Barriers require mechanisms for detecting dependencies between data flow elements. The well-known solution for dependency tracking is to inject special elements in a data flow. These elements go through the same path in a physical graph and "push through" preceding data flow elements. When such element arrives at the barrier, it means that buffered elements do not have in-flight dependencies. Flink checkpointing technique is based on this approach~\cite{Carbone:2017:SMA:3137765.3137777}. While it works well in systems that support only acyclic execution graphs, it is unclear how to handle such "pushing" elements in drifting state cycles. 
 
