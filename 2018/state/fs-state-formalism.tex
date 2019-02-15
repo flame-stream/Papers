@@ -6,7 +6,7 @@
 is a tuple of $(\Gamma,D)$, where $\Gamma$ is a set of all possible data flow elements, and $D\subseteq{\Gamma\times\Gamma}$ is a binary relation on it. Pair $(x,y)\in{D}$ if $y$ can be generated from $x$ within physical graph. We assume that all user-defined operations are pure.
 \end{definition}
 
-Within our model, one can define a streaming system using only data flow elements and business logic. However, without the notion of time, we cannot observe any processing progress. Let $\tau\in{\mathbb{N}}$ be an exact global discrete time. We assume that only one event can happen at any single point in time $\tau$. Let $a_\tau\in{\Gamma}$ be the element, which enters at the time $\tau$, and $b_\tau\in{2^\Gamma}$ be the elements, which leave at the time $\tau$. Let $A_{\tau}=\{a_i\}^{\tau}_{i=1}$ be a set of all input elements by the time $\tau$ and ${B}_\tau=\bigcup\limits_{i=1}^{\tau}{b_i}$ be a set of all output elements.
+Within our model, one can define a streaming system using only data flow elements and business logic. However, without the notion of time, we cannot observe any processing progress. Let $\tau\in{\mathbb{N}}$ be an exact global discrete time. We assume that only one event can happen at any single point in time $\tau$. Let $a_\tau\in{\Gamma}$ be the element, which enters at the time $\tau$, and $b_\tau\in{2^\Gamma}$ be the elements, which leave at the time $\tau$. Let $A_{\tau}=\{a_i\}^{\tau}_{i=1}$ be a set of all input elements by the time $\tau$ and ${B}_\tau=\bigcup\limits_{i=1}^{\tau}{b_i}$ be a set of all output elements. $b_\tau$ is a set because some elements must be released atomically. 
 
 \begin{definition}{A reference working set}
 $\widehat{W}_\tau\subseteq{\Gamma}$ at the time $\tau$ is the set of elements, which are currently in the reference system:
@@ -21,7 +21,7 @@ $\widehat{W}_{\tau+1}=\begin{sqcases}
 
 \end{definition}
 
-We can imagine a stream processing system as a pool, where some elements are poured in and others are poured out. Inside a pool, each element can be substituted by the other element, which can be substituted as well, and so on. Only survived elements are poured out from the pool.
+We can imagine a stream processing system as a pool, where some elements are poured in and others are poured out. Inside a pool, each element can be transformed into the other element, which can be transformed as well, and so on. Only survived elements are poured out from the pool.
 
 % верхний индекс - что это?
 
@@ -32,10 +32,10 @@ $S_\tau$ at the time $\tau$ is $\widehat{W}_\tau^{\infty}$ if $A_{\infty}=\{a_i\
 The state is a set of all data flow elements that stay in the system if we block input and wait for an infinite time. Technically, states in existing stream processing systems are not data flow elements, but as it was mentioned above, they can be presented in such a way using the drifting state model. The main purpose of the state is to accumulate information about input items.
 
 \begin{definition}{Nullification time}
-of an input element $a_\tau$ is the first moment of time when all elements that depends on $a_\tau$ are in state or released from the system, $\theta_{a_\tau}=inf(\hat{\tau}>\tau|W_{\hat{\tau}}\setminus{S_{\hat{\tau}}}\cap{Cl(D)(a_\tau)=\emptyset})$, where $Cl(D)$ is a transitive closure of the relation $D$.
+of an input element $a_\tau$ is the first moment of time when all elements that depends on $a_\tau$ are in state or released from the system, $\theta_{a_\tau}=inf(\hat{\tau}>\tau|\widehat{W}_{\hat{\tau}}\setminus{S_{\hat{\tau}}}\cap{Cl(D)(a_\tau)=\emptyset})$, where $Cl(D)$ is a transitive closure of the relation $D$.
 \end{definition}
 
-Data flow elements cannot be in $W\setminus{S}$ for an infinite time by the definition of the state. Hence, for each input element $a_\tau$, there is a nullification time $\theta_{a_\tau}$, thereafter all elements, which depend on $a_\tau$, are in the system state. Since the nullification time, the input element can affect output elements only through the state.
+Data flow elements and their descendants cannot be in $\widehat{W}\setminus{S}$ for an infinite time by the definition of the state. Hence, for each input element $a_\tau$, there is a nullification time $\theta_{a_\tau}$, thereafter all elements, which depend on $a_\tau$, are in the system state. Since the nullification time, the input element can affect output elements only through the state.
 
 Since we cannot observe internal transitions directly, it is convenient to limit the global time domain only to moments of output events.
 
