@@ -145,12 +145,12 @@ One of the main factors that affects a method of taking a snapshot is the amount
 \label{necessary_conditions}
 The necessary conditions of consistent state snapshotting are:\\
 1. $\forall{b_t}:P^{s}_t=S_t$\\
-2. $\forall{t,a}\notin{A^{p}_t} : \theta_a \leq t$
+2. $\forall{t, a}\in{A_t \setminus A^{p}_t} : \theta_a \leq t$
 \end{theorem}
 \begin{sketch}
 $ $\newline
 1. Assume that $\exists{t}:b_t\neq{\emptyset} \wedge S_{t}\setminus{P^{s}_t}=\{y\}$. Let system fails at $\tau_f = \tau(t)+1$ and $(a_{t-1},y)\in{D}$. In this case, recovery function must reprocess $a_{t-1}$ in order to achieve $W_t=F(A^{p}_t,P^{s}_t)\supseteq{S_t}$ that is possible in the reference system. However, reprocessing of $a_{t-1}$ causes output $b_{t+1}\in{Cl(a_{t-1})}$, such that $P(b_{t+1}|A_{t+1},B_{t})=0$, because $B_{t}$ already contains output elements that have been generated from element $a_{t-1}$ before reprocessing. \\
-2. Assume that $\exists{t,a} \notin{A^{p}_t}:\theta_{a}>t$. In this case, $Cl(D)(a) \cap (W_t \setminus{S_t}) \neq \emptyset$. If system fails at time $\tau_f=\tau(t)+1$, elements $Cl(D)(a) \cap (W_t \setminus{S_t})$ cannot be restored using $A^{p}_t$ and $P^{s}_t=S_t$, because restoring requires reprocessing of element $a$.
+2. Assume that $\exists{}t,a \in{A_t \setminus A^{p}_t}:\theta_{a}>t$. In this case, $Cl(D)(a) \cap (W_t \setminus{S_t}) \neq \emptyset$. If system fails at time $\tau_f=\tau(t)+1$, elements $Cl(D)(a) \cap (W_t \setminus{S_t})$ cannot be restored using $A^{p}_t$ and $P^{s}_t=S_t$, because restoring requires reprocessing of element $a$.
 \end{sketch}
 
 This theorem has a direct practical implication. If a system that uses state snapshots aims at providing for exactly once, it must output elements $b_t$ only if there exists a snapshot for time $t$. It means that the lower bound of latency in the worst case in such systems is the snapshotting period together with the duration of taking a snapshot. There is a trade-off between latency and the frequency of taking snapshots because too frequent snapshotting can cause high extra load, while rare snapshots lead to high latency.
@@ -164,7 +164,7 @@ The following theorem shows that for a deterministic system the first condition 
 
 \begin{theorem}
 \label{determinism}
-If system is deterministic, state snapshot is extended with the last output element: $\forall{b_t}:P_t=P^{s}_t \cup b_t$, and $\forall{t,a}\notin{A^{p}_t} : \theta_a \leq t$, then system is able to provide exactly once.
+If system is deterministic, state snapshot is extended with the last output element: $\forall{b_t}:P_t=P^{s}_t \cup b_t$, and $\forall{t,a}\in{A_t \setminus A^{p}_t} : \theta_a \leq t$, then system is able to provide exactly once.
 \end{theorem}
 \begin{sketch}
 Assume that $\exists{t}:b_t\neq{\emptyset} \wedge b_t \in P_t \wedge S_{t}\setminus{P_t}=\{y\}$. Without loss of generality, assume that system fails at the time $\tau_f = \tau(t)+1$. The problem here is that if $(a_{t-1},y)\in{D}$, recovery function must reprocess $a_{t-1}$ in order to achieve $W_t=F(A^{p}_t,S_{t_s})\supseteq{S_t}$ that is possible in the reference system. However, reprocessing can cause inconsistent output as it is shown in Theorem~\ref{necessary_conditions}. The property of determinism guarantees that in case of reprocessing output elements will be the same and released in the same order. Having the last released element before the failure, we can filter out output elements, which are generated during reprocessing, but have been already released before the failure.
