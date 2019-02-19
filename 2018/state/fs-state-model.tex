@@ -13,7 +13,7 @@ Determinism can be achieved in a stream processing system with the following str
 
 The order on elements can be defined using a natural order of input elements arrival. More formally, this order can be defined as $r(x) < r(y) \Rightarrow x < y$, where $r(x)$ is:
 
-$\forall{t\in{\mathbb{N}}, x\in{W_t}}, r(x)=\begin{sqcases}
+$\forall{t\in{\mathbb{N}}, x\in{W_t}} : r(x)=\begin{sqcases}
 t, & \text{if }x=a_t\\
 min(r(a), a\in Cl^{-1}(x)), & \text{otherwise.}\\
 \end{sqcases}$
@@ -29,9 +29,9 @@ Any logical graph in the drifting state model is constructed using the following
 
 {\bf Grouping} stores input items into distinct buckets by the value of the input balancing function. When the next item arrives at the grouping, it is appended to the corresponding bucket. Each time the grouping outputs window-sized {\it tuple item}, which consists of the most recent (in terms of $r(x)$) items of this bucket. If the size of the bucket is less than the window, all items of the bucket are taken.
 
-The following example illustrates the semantics of the operation. The grouping accepts items represented as natural numbers: 1,2,3, etc. The hash function returns 1 if the number is even and 0 otherwise. If the window is set to 3, the output elements are:
+The following example illustrates the semantics of the operation. The grouping accepts items represented as natural numbers: 1,2,3, etc. If the window is set to 3, the output elements are:
 
-\[(1), (2), (1|3), (2|4), (1|3|5), (2|4|6), (3|5|7), (4|6|8)...\]
+\[(1), (1|2), (1|2|3), (2|3|4), (3|4|5), (4|5|6), (5|6|7), (6|7|8)...\]
 
 \subsubsection{Functional completeness}
 
@@ -72,15 +72,20 @@ Figure~\ref{???} illustrates the concept. Elements $b^{1},b^{2},b^{3},b^{4}$ are
 
 Barriers require mechanisms for detecting dependencies between data flow elements. The well-known solution for dependency tracking is to inject special elements in a data flow. These elements go through the same path in a physical graph and "push through" preceding data flow elements. When such element arrives at the barrier, it means that buffered elements do not have in-flight dependencies. Flink checkpointing technique is based on this approach~\cite{Carbone:2017:SMA:3137765.3137777}. While it works well in systems that support only acyclic execution graphs, it is unclear how to handle such "pushing" elements in drifting state cycles. 
 
-To solve this problem, each data item maintains a so-called {\em global time}. Global time is the minimal time of arrival among all input elements which affect a given one,  $GT(x)=min\{t:a_t\in Cl^{-1}(D)(x)\}$. The exact algorithms for computing and maintaining global time are detailed in~\cite{we2018adbis}, but the important property is that dependent in-flight elements have the same global time. 
+To solve this problem, each data item maintains a so-called {\em global time}: 
 
-On each input item, any operation in a physical graph sends to the special agent called Acker global time together with a checksum hash of the corresponding output item. Then, it sends global time and a checksum hash of the input item. Acker XORs all checksums grouped by global times and when the result becomes zero, it means that all items with a given global time were processed. In other words, it means that all derivatives of an input element with the arrival time $GT$ are in the barrier. When such event occurs, acker broadcasts a notification to the subscribers, e.g. barriers. In this approach, collisions are possible, but they are very unlikely in practice. The idea of Acker is adopted from Apache Storm~\cite{apache:storm}.
+$\forall{t\in{\mathbb{N}}, x\in{W_t}} : GT(x)=min\Big[\frac{r(x)}{\Delta t}\Big]$. 
 
-Figure~\ref{acker} illustrates acker functionality. Different shapes mean different data items. Green element is an input item. During processing, it is transformed into a blue item, and then the blue item is transformed into a yellow item. Yellow and blue items depend on the green item, so they all have the same global time (21). Each operation sends an ack for transformed items before ack for the input one to prevent XORed value become zero until all dependencies are in the barrier. For example, entry for global time 17 is zero, so it means that all dependencies of input element $a_{17}$ can be consistently released from the barrier, but for an input item $a_{21}$ there are still in-flight elements which depend on it.
+% Global time is the minimal time of arrival among all input elements which affect a given one,  $GT(x)=min\{t:a_t\in Cl^{-1}(D)(x)\}$. 
+Here, $\Delta t$ is the time quantum, that is possible to obtain on real hardware, e.g. 1 ms. The exact algorithms for computing and maintaining global time are detailed in~\cite{we2018adbis}, but the important property is that dependent in-flight elements have the same global time by the definition of $r(x)$. 
+
+On each input item, an operation in a physical graph sends to the special agent called~{\em \Acker\ } global time together with checksum hashes of the input and output items. \Acker\ XORs all checksums grouped by global times and when the result becomes zero, it means that all items with a given global time were processed. In other words, it means that all descendants of an input element with the arrival time $GT$ are in the barrier. When such event occurs, \Acker\ broadcasts a notification to the subscribers, e.g. barriers. In this approach, collisions are possible, but they are very unlikely in practice. The idea of~\Acker\ is an adaptation of {\em Acker} from Apache Storm~\cite{apache:storm}.
+
+Figure~\ref{acker} illustrates~\Acker\ functionality. Different shapes mean different data items. Green element is an input item. During processing, it is transformed into a blue item, and then the blue item is transformed into a yellow item. Yellow and blue items depend on the green item, so they all have the same global time (21). Each operation sends an ack for transformed items before ack for the input one to prevent XORed value become zero until all dependencies are in the barrier. For example, entry for global time 17 is zero, so it means that all dependencies of input element $a_{17}$ can be consistently released from the barrier, but for an input item $a_{21}$ there are still in-flight elements which depend on it.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[scale=0.58]{pics/acker}
-  \caption{The example of tracking dependencies using acker}
+  \caption{The example of tracking dependencies using~\Acker\ }
   \label {acker}
 \end{figure}
