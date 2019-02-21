@@ -3,15 +3,20 @@
 \subsection{Distributed streaming model}
 
 \begin{definition}{Reference stream processing system}
-is a tuple of $(\Gamma,D,W^{*}_{\tau+1}(W^{*}_\tau))$. $\Gamma$ is a set of all possible data flow elements. $D\subseteq{2^{\Gamma}\times2^{\Gamma}}$ is a binary relation on it. Pair $(x,y)\in{D}$ if $y$ can be generated from $x$ within user-defined operations. We assume that all operations are pure and that it is possible to construct transitive closure of $D$. $W^{*}_{\tau+1}(W^{*}_\tau)$ is a processing rule, where on each iteration next step is randomly chosen:\\
+is a tuple of $(\Gamma,D,W^{*}_\tau)$, where $\Gamma$ is a set of all possible data flow elements, $D\subseteq{2^{\Gamma}\times2^{\Gamma}}$ is a binary relation on it. A pair $(x,y)\in{D}$ if $y$ can be generated from $x$ within user-defined operations. We assume that all operations are pure and that it is possible to construct transitive closure of $D$. The working set $W^{*}_{\tau}$ is defined by the following recurrent rules:
 
-$W^{*}_0=\emptyset$:
-
-$W^{*}_{\tau+1}=\begin{sqcases}
+$$
+\begin{array}{lcl}
+W^{*}_0 & = & \emptyset \\
+W^{*}_{\tau+1} & = & \begin{sqcases}
 W^{*}_{\tau}\cup{a_{\tau+1}},a_{\tau+1}\in{\Gamma} & \text{or}\\
 W^{*}_{\tau}\setminus{b_{\tau+1}}, b_{\tau+1}\in{2^{\Gamma}}, & \text{or}\\
-W^{*}_{\tau}\setminus{X}\cup{Y}, (X,Y)\in{D} & \text{}.
-\end{sqcases}$
+W^{*}_{\tau}\setminus{X}\cup{Y}, (X,Y)\in{D} & ,
+\end{sqcases}
+\end{array}
+$$
+
+\noindent where on each iteration next step is randomly chosen.
 
 \end{definition}
 
@@ -47,16 +52,19 @@ The reference stream processing system is just an abstract concept because it do
 
 \begin{definition}{Stream processing system}
 is a tuple of\\
-$(\Gamma,D,W_{\tau+1}(W_\tau),P,F)$. As in a reference system, $\Gamma$ and $D$ define the possible data items and user-defined computations. Snapshot $P$ is an information about system execution that is available even in case of a system failure. At time $\tau$ snapshot contains information $P_\tau$. Recovery function $F(A^{p}_\tau,P_\tau)$ provides logic for recovering of working set in case of system failures based on some set of input elements $A^{p}_\tau\subseteq{A_\tau}$ and a snapshot $P_\tau$. Processing rule $W_{\tau+1}(W_\tau)$ is extended with a {\em recovery transition}:
+$(\Gamma,D,W_\tau,P_\tau,F)$. As in a reference system, $\Gamma$ and $D$ define the possible data items and user-defined computations. Snapshot $P$ is an information about system execution that is available even in case of a system failure. At time $\tau$ snapshot contains information $P_\tau$. Recovery function $F(P_\tau)$ provides logic for recovering of working set in case of system failures. Recurrent rules for working set $W_\tau$ is extended with a {\em recovery transition}:
+$$
+\begin{array}{lcl}
+W_0 & = & \emptyset \\
+W_{\tau+1} & = & \begin{sqcases}
+W_{\tau}\cup{a_{\tau+1}},a_{\tau+1}\in{\Gamma} & \text{or}\\
+W_{\tau}\setminus{b_{\tau+1}}, b_{\tau+1}\in{2^{\Gamma}}, & \text{or}\\
+F(P_\tau) & .
+\end{sqcases}
+\end{array}
+$$
 
-$W_0=\emptyset$:
-
-$W_{\tau+1}=\begin{sqcases}
-W_{\tau}\cup{a_{\tau+1}}, & \text{or}\\
-W_{\tau}\setminus{b_{\tau+1}}, & \text{or}\\
-W_{\tau}\setminus{X}\cup{Y}, \forall{x\in{X}\exists{y\in{Y}}}:(x,y)\in{D} & \text{or}\\
-F(A^{p}_\tau,P_\tau), A^{p}_\tau\subseteq{A_\tau} & \text{}.
-\end{sqcases}$
+\noindent We assume that $P_\tau$ is consistent in terms of Chandy-Lamport~\cite{Chandy:1985:DSD:214451.214456}, so $F(P_\tau)=W^{*}_{q}$ for some $q\in{\mathbb{N}}$. In general, there is no guarantee that in case of failure at time $\tau_f$, $q={\tau_f-1}$ or $W^{*}_q=W_q$ due to probabilistic nature of $W^{*}$ and $W$.
 
 \end{definition}
 
@@ -96,7 +104,15 @@ Exactly once states that observed results cannot be distinguished from one of th
 
 In our formal model, the relaxations of exactly once are defined without diving into recovery mechanisms. Instead, they are described through possible input channel flaws in a reference system. This trick allows us to represent invisible system details in terms clear for a user.
 
-Operations that are presented in $D$ can directly affect the complexity of consistency enforcement mechanisms. For example, if all operations are idempotent, exactly once can be obviously achieved~\cite{Akidau:2013:MFS:2536222.2536229}. On the other hand, if the system supports a variety of operations including non-idempotent and non-commutative, exactly once becomes challenging.
+We can proceed from the probability of output element to the probability of the working set through the formula of total probability:
+$$
+\begin{array}{lcl}
+P(b_{t+1}|A_{t+1},B_t)= \\	
+\sum\limits_{W_{t+1}}P(W_{t+1}|A_{t+1},B_t)P(b_{t+1}|A_{t+1},B_t,W_{t+1})=\\	
+\sum\limits_{W_{t+1}}P(W_{t+1}|A_{t+1},B_t)P(b_{t+1}|W_{t+1}).	
+\end{array}
+$$
+Hence, in order to preserve exactly once, system must preserve working set that is possible to observe in reference system and that is consistent with all previous output elements. The problem here is the following: if $D$ contains non-commutative operations, failure and recovery may lead to working set that is possible to reach in a reference system, but that is inconsistent with the previous released items. 
 
 \begin{definition}{System is deterministic}
 if\\ 
@@ -105,48 +121,52 @@ $\forall{t\in{\mathbb{N}}, b_{t+1}\in{2^{\Gamma}}}:P(W_{t+1}|A_{t+1},B_t)=1$.
 
 An important property of a deterministic system is that it preserves the same order of elements before non-commutative operations on each run.
 
+% Operations that are presented in $D$ can directly affect the complexity of consistency enforcement mechanisms. For example, if all operations are idempotent, exactly once can be obviously achieved~\cite{Akidau:2013:MFS:2536222.2536229}. On the other hand, if the system supports a variety of operations including non-idempotent and non-commutative, exactly once becomes challenging.
+
 \begin{theorem}
 \label{necessary_conditions}
-If system is non-deterministic and $D$ captures at least one non-commutative operation then system must atomically release all descendants of an input element in order to preserve exactly once.
+If system is non-deterministic and $D$ captures at least one non-commutative operation then the necessary condition for exactly once requires atomicity between:\\
+1. Releasing all descendants of an input element:\\ $\forall a\in \Gamma, n \in {\mathbb{N}},m \in {\mathbb{N}}: ||\bigcup^{n+m}_{t=n}{}b_t|| \leq 1$\\
+2. Including all dependencies of an output element in a snapshot:\\ $\forall t \in \mathbb{N}, b_t \in Cl(a): Cl^{-1}(D)(b_t) \in P_t$.
 \end{theorem}
 \begin{sketch}
 $ $\newline
-Let $a_\tau$ be an input element and $x_1,x_2 \in Cl(D)(a_\tau)$. Let $s \in Cl(D)(x_1) \cap Cl(D)(x_2)$ be an element that is obtained through non-commutative operation. Let $b_{t-1},b_{t}\in{Cl(D)(s)}$ be non-atomically released output elements. Assume that system fails at time $\tau(t-1) < \tau_f < \tau(t)$. There are two possible recover behaviors: replay input element $a_\tau$ or not to replay it. The second case is simple: if system decides not to reprocess element $a_\tau$ then $b_t$ will never be obtained and delivered that is an obvious contradiction to consistent recovery. If system reprocesses $a_\tau$, element $s$ may become different than before replay due to non-commutative operation and possible reorderings in asynchronous and distributed environment. Let us denote it as $s'$. Therefore, after recovery element $b_t$ will be delivered, but it will depend not on $s$, but on $s'$: $b_t\in Cl(D)(s')$. This is a contradiction, because $b_t$ has been already delivered and $P(b_{t}\in Cl(D)(s')|\{a_\tau\},\{b_{t-1} \in Cl(D)(s) \})=0$.
+% Let $a_\tau$ be an input element and $x_1,x_2 \in Cl(D)(a_\tau)$. Let $s \in Cl(D)(x_1) \cap Cl(D)(x_2)$ be an element that is obtained through non-commutative operation. Let $b_{t-1},b_{t}\in{Cl(D)(s)}$ be non-atomically released output elements. Assume that system fails at time $\tau(t-1) < \tau_f < \tau(t)$. There are two possible recover behaviors: replay input element $a_\tau$ or not to replay it. The second case is simple: if system decides not to reprocess element $a_\tau$ then $b_t$ will never be obtained and delivered that is an obvious contradiction to consistent recovery. If system reprocesses $a_\tau$, element $s$ may become different than before replay due to non-commutative operation and possible reorderings in asynchronous and distributed environment. Let us denote it as $s'$. Therefore, after recovery element $b_t$ will be delivered, but it will depend not on $s$, but on $s'$: $b_t\in Cl(D)(s')$. This is a contradiction, because $b_t$ has been already delivered and $P(b_{t}\in Cl(D)(s')|\{a_\tau\},\{b_{t-1} \in Cl(D)(s) \})=0$.
 \end{sketch}
 
-In the proposed theorem, we assume that input element $a_\tau$ is split into elements $x,y$. The same proof can be obviously achieved under the assumption of two input elements $a_\tau$ and $a_{\tau+1}$ which enter a system through asynchronous channels.
+% In the proposed theorem, we assume that input element $a_\tau$ is split into elements $x,y$. The same proof can be obviously achieved under the assumption of two input elements $a_\tau$ and $a_{\tau+1}$ which enter a system through asynchronous channels.
 
-\begin{corollary}
-If system is non-deterministic and $D$ captures at least one non-commutative operation then system must atomically take snapshot and release all descendants of an input element in order to preserve exactly once.
-\end{corollary}
-\begin{sketch}
-$ $\newline
-Let us do all assumptions from the Theorem~\ref{necessary_conditions}. Let us suppose that $s$ is an operation state that system includes in a snapshot. Therefore, $s \in W_t$ after a recovery. By the formula of total probability,
+% \begin{corollary}
+% If system is non-deterministic and $D$ captures at least one non-commutative operation then system must atomically take snapshot and release all descendants of an input element in order to preserve exactly once.
+% \end{corollary}
+% \begin{sketch}
+% $ $\newline
+% Let us do all assumptions from the Theorem~\ref{necessary_conditions}. Let us suppose that $s$ is an operation state that system includes in a snapshot. Therefore, $s \in W_t$ after a recovery. By the formula of total probability,
 
-$P(b_{t}|A_{t},B_{t-1})=\\
-\sum\limits_{W_{t}}P(W_{t}|A_{t+1},B_{t-1})P(b_{t}|A_{t},B_{t-1},W_{t})=\\
-\sum\limits_{W_{t}}P(W_{t}|A_{t+1},B_{t-1})P(b_{t}|W_{t}) > 0
-$,
+% $P(b_{t}|A_{t},B_{t-1})=\\
+% \sum\limits_{W_{t}}P(W_{t}|A_{t+1},B_{t-1})P(b_{t}|A_{t},B_{t-1},W_{t})=\\
+% \sum\limits_{W_{t}}P(W_{t}|A_{t+1},B_{t-1})P(b_{t}|W_{t}) > 0
+% $,
 
-working set $W_{t+1}$ must also be consistent with previous input and output elements to enforce exactly once. Hence, $s$ can be considered as an ordinary output element, and must be saved atomically with releasing of  because of the fact that $s\in Cl(D)(a_\tau)$.
-\end{sketch}
+% working set $W_{t+1}$ must also be consistent with previous input and output elements to enforce exactly once. Hence, $s$ can be considered as an ordinary output element, and must be saved atomically with releasing of  because of the fact that $s\in Cl(D)(a_\tau)$.
+% \end{sketch}
 
-This theorem has a direct practical implication. If a system aims at providing for exactly once, it must output elements $b_t$ only if there exists a snapshot for time $t$. It means that the lower bound of latency in the worst case in such systems is the snapshotting period together with the duration of taking a snapshot. There is a trade-off between latency and the frequency of taking snapshots because too frequent snapshotting can cause high extra load, while rare snapshots lead to high latency.
+% This theorem has a direct practical implication. If a system aims at providing for exactly once, it must output elements $b_t$ only if there exists a snapshot for time $t$. It means that the lower bound of latency in the worst case in such systems is the snapshotting period together with the duration of taking a snapshot. There is a trade-off between latency and the frequency of taking snapshots because too frequent snapshotting can cause high extra load, while rare snapshots lead to high latency.
 
-\begin{corollary}
-If the system is deterministic and $D$ captures non-commutative operations then the system can take a snapshot and release all descendants of an input element non-atomically while preserving exactly once.
-\end{corollary}
-\begin{sketch}
-$ $\newline
+% \begin{corollary}
+% If the system is deterministic and $D$ captures non-commutative operations then the system can take a snapshot and release all descendants of an input element non-atomically while preserving exactly once.
+% \end{corollary}
+% \begin{sketch}
+% $ $\newline
 
-Let us do all assumptions from the Theorem~\ref{necessary_conditions}. In case of a deterministic system, it is guaranteed that $s=s'$. 
-\end{sketch}
+% Let us do all assumptions from the Theorem~\ref{necessary_conditions}. In case of a deterministic system, it is guaranteed that $s=s'$. 
+% \end{sketch}
 
-If a system is deterministic, it is possible to inexpensively achieve a consistent snapshotting mechanism without synchronization between taking snapshots and output elements delivery. Deterministic system can release an element $b_t$ before snapshot $P^{s}_t$ at time $t$ is taken. As we show further in experiments, this relaxation is able to dramatically decrease processing latency, because there is no need to wait until the snapshot is taken in order to release output elements.
+% If a system is deterministic, it is possible to inexpensively achieve a consistent snapshotting mechanism without synchronization between taking snapshots and output elements delivery. Deterministic system can release an element $b_t$ before snapshot $P^{s}_t$ at time $t$ is taken. As we show further in experiments, this relaxation is able to dramatically decrease processing latency, because there is no need to wait until the snapshot is taken in order to release output elements.
 
-To the best of our knowledge, only micro-batching systems support the property of determinism in streaming. However, micro-batching solutions provide higher latency than pure streaming engines due to overhead on input buffering~\cite{karimov2018benchmarking}. We proposed a pure streaming model called {\em drifting state}~\cite{we2018adbis} that allows achieving both determinism and low latency. Therefore, a question arises: is it more efficient in practice to handle non-determinism by atomic snapshotting and releasing than to maintain a fair determinism in order to get exactly once? 
+% To the best of our knowledge, only micro-batching systems support the property of determinism in streaming. However, micro-batching solutions provide higher latency than pure streaming engines due to overhead on input buffering~\cite{karimov2018benchmarking}. We proposed a pure streaming model called {\em drifting state}~\cite{we2018adbis} that allows achieving both determinism and low latency. Therefore, a question arises: is it more efficient in practice to handle non-determinism by atomic snapshotting and releasing than to maintain a fair determinism in order to get exactly once? 
 
-It is important to note that the proposed model is suitable not only for the formal analysis of the properties of exactly once but for a deeper understanding of the other aspects of stream processing. While these topics are promising as well, they are out of the scope of this paper. 
+% It is important to note that the proposed model is suitable not only for the formal analysis of the properties of exactly once but for a deeper understanding of the other aspects of stream processing. While these topics are promising as well, they are out of the scope of this paper. 
 
 \subsection{Examples}
 
