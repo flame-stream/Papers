@@ -6,7 +6,7 @@ In this section, we outline the lightweight deterministic model called {\em drif
 
 Determinism can be achieved in a stream processing system with the following straightforward approach:
 \begin{enumerate}
-    \item Preserve predefined total order of elements before each order-sensitive operation in a data flow
+    \item Preserve predefined total order of elements before each non-commutative operation in a data flow
     \item Preserve the same order of output items
     \item Require all operations to be pure
 \end{enumerate}
@@ -18,7 +18,7 @@ t, & \text{if }x=a_t\\
 min(r(a), a\in Cl^{-1}(x)), & \text{otherwise.}\\
 \end{sqcases}$
 
-According to this notion, reorderings may occur only in a physical graph due to asynchronous distributed execution. However, total order maintenance still seems over-restrictive. It can be achieved, e.g., using buffering before each order-sensitive operation until there is a guarantee that out-of-order elements do not arrive at the operation. This guarantee can be provided in acyclic data flows by punctuations or low watermarks~\cite{Li:2008:OPN:1453856.1453890}, but buffering before multiple operations can dramatically increase latency.
+According to this notion, reorderings may occur only in a physical graph due to asynchronous distributed execution. However, total order maintenance still seems over-restrictive. It can be achieved, e.g., using buffering before each non-commutative operation until there is a guarantee that out-of-order elements do not arrive at the operation. This guarantee can be provided in acyclic data flows by punctuations or low watermarks~\cite{Li:2008:OPN:1453856.1453890}, but buffering before multiple operations can dramatically increase latency.
 
 An underlying idea of drifting state model is a reduced set of available operations which are pure and can enforce order optimistically requiring a single buffer per data flow. On the other hand, these operations are sufficient to implement any stateful streaming computation. 
 \subsection{Basic operations}
@@ -53,7 +53,7 @@ We call this model a drifting state because operation states become ordinary dat
 
 \subsubsection{Properties}
 
-In this setting, map operation is pure and order insensitive, and grouping operation is pure. Grouping operation is order-sensitive because it should group a new element with the exact previous state. Hence, a straightforward approach to achieve determinism is to enforce order before each grouping in a data flow. Fortunately, grouping can be implemented optimistically. It means that grouping can handle out-of-order elements without blocking but possibly generating invalid output. Another useful property is that generated invalid elements and descendants of these elements can be determined and their effects on the state of other groupings can be cleared. The scheme is shown in Figure~\ref{optimistic-grouping}. The numbers on this figure represent the right order of elements. An arriving element 3 is out-of-order. We know that actually invalid pair (1; 5) has been already released. In this case, the system generates valid pairs because the right position of the element 3 is determined. Besides, an invalid pair with a special flag is resent. Let us call such elements {\em sentinels}. While sentinels mostly behave as ordinary data items, their purpose is to seek and destroy previously released invalid pairs. When a sentinel arrives at a grouping, it forces removing a corresponding invalid element from the bucket. Besides, actually valid pairs and new sentinels are sent further. Map functions are required to be pure in order to ensure that sentinels will go through exactly the same path as original pairs. An important property of invalid elements and corresponding sentinels is that they depend on the same input elements. This method is applicable to any number of subsequent groupings and guarantees that all groupings will eventually have a state as if all elements were in-order~\cite{we2018adbis}.
+In this setting, map operation is pure and order insensitive, and grouping operation is pure. Grouping operation is non-commutative because it should group a new element with the exact previous state. Hence, a straightforward approach to achieve determinism is to enforce order before each grouping in a data flow. Fortunately, grouping can be implemented optimistically. It means that grouping can handle out-of-order elements without blocking but possibly generating invalid output. Another useful property is that generated invalid elements and descendants of these elements can be determined and their effects on the state of other groupings can be cleared. The scheme is shown in Figure~\ref{optimistic-grouping}. The numbers on this figure represent the right order of elements. An arriving element 3 is out-of-order. We know that actually invalid pair (1; 5) has been already released. In this case, the system generates valid pairs because the right position of the element 3 is determined. Besides, an invalid pair with a special flag is resent. Let us call such elements {\em sentinels}. While sentinels mostly behave as ordinary data items, their purpose is to seek and destroy previously released invalid pairs. When a sentinel arrives at a grouping, it forces removing a corresponding invalid element from the bucket. Besides, actually valid pairs and new sentinels are sent further. Map functions are required to be pure in order to ensure that sentinels will go through exactly the same path as original pairs. An important property of invalid elements and corresponding sentinels is that they depend on the same input elements. This method is applicable to any number of subsequent groupings and guarantees that all groupings will eventually have a state as if all elements were in-order~\cite{we2018adbis}.
  
 \begin{figure}[htbp]
   \centering
@@ -62,19 +62,20 @@ In this setting, map operation is pure and order insensitive, and grouping opera
   \label {optimistic-grouping}
 \end{figure} 
 
-\subsection{Output consistency}
+\subsection{Dependency tracking}
 
-Invalid grouping items must be destroyed by sentinels to prevent inconsistent output. Hence, the system must hold invalid elements before releasing to end-user until all corresponding sentinels arrive. In drifting state model all output items are buffered in the very last node of the logical graph called {\em barrier}. The problem here is to detect that there are no in-flight sentinels for elements in the barrier and they will not be eventually generated. Invalid items and corresponding sentinels always depend on the same input element. Hence, if a system knows that all elements that depend on an input item are in the barrier, these elements can be delivered to end-user. On the other hand, as it was demonstrated in section~\ref{fs-formalism}, atomic delivery of all dependent elements is a requirement for exactly once. Therefore, the atomic releasing of dependent elements allows us to solve both problems. 
+Invalid grouping items must be destroyed by sentinels to prevent inconsistent output. Hence, the system must hold invalid elements before releasing to end-user until all corresponding sentinels arrive. In drifting state model all output items are buffered in the very last node of the logical graph called {\em barrier}. The problem here is to detect that there are no in-flight sentinels for elements in the barrier and they will not be eventually generated. Invalid items and corresponding sentinels always depend on the same input element. Hence, if a system knows that all elements that depend on an input item are in the barrier, these elements can be delivered to end-user. 
+% On the other hand, as it was demonstrated in section~\ref{fs-formalism}, atomic delivery of all dependent elements is a requirement for exactly once. Therefore, the atomic releasing of dependent elements allows us to solve both problems. 
 
-Figure~\ref{???} illustrates the concept. Elements $b^{1},b^{2},b^{3},b^{4}$ are delivered to end-user only after the element $b^{4}$ has been processed because only in this case they are released atomically. Otherwise, invalid grouping elements may be delivered to end-user. Another possible issue is that some elements can be applied to a system state and delivered twice in case of failure. 
+% Figure~\ref{???} illustrates the concept. Elements $b^{1},b^{2},b^{3},b^{4}$ are delivered to end-user only after the element $b^{4}$ has been processed because only in this case they are released atomically. Otherwise, invalid grouping elements may be delivered to end-user. Another possible issue is that some elements can be applied to a system state and delivered twice in case of failure. 
 
-\subsubsection{Dependency tracking}
+% \subsubsection{Dependency tracking}
 
 Barriers require mechanisms for detecting dependencies between data flow elements. The well-known solution for dependency tracking is to inject special elements in a data flow. These elements go through the same path in a physical graph and "push through" preceding data flow elements. When such element arrives at the barrier, it means that buffered elements do not have in-flight dependencies. Flink checkpointing technique is based on this approach~\cite{Carbone:2017:SMA:3137765.3137777}. While it works well in systems that support only acyclic execution graphs, it is unclear how to handle such "pushing" elements in drifting state cycles. 
 
 To solve this problem, each data item maintains a so-called {\em global time}: 
 
-$\forall{t\in{\mathbb{N}}, x\in{W_t}} : GT(x)=min\Big[\frac{r(x)}{\Delta t}\Big]$. 
+$\forall{t\in{\mathbb{N}}, x\in{W_t}} : GT(x)=\Big[\frac{r(x)}{\Delta t}\Big]$. 
 
 % Global time is the minimal time of arrival among all input elements which affect a given one,  $GT(x)=min\{t:a_t\in Cl^{-1}(D)(x)\}$. 
 Here, $\Delta t$ is the time quantum, that is possible to obtain on real hardware, e.g. 1 ms. The exact algorithms for computing and maintaining global time are detailed in~\cite{we2018adbis}, but the important property is that dependent in-flight elements have the same global time by the definition of $r(x)$. 
