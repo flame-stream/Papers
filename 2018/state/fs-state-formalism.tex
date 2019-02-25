@@ -4,7 +4,7 @@
 
 \begin{definition}{Reference stream processing system}
 \label{reference_system}
-is a tuple of $(\Gamma,D)$, where $\Gamma$ is a set of all possible data flow elements, $D\subseteq{2^{\Gamma}\times2^{\Gamma}}$ is a binary relation on its power set. Computations within the system are defined by the recurrent rules on the set of input elements $A_\tau$, output elements $B_\tau$ and the reference working set $W^{*}_\tau$. On each iteration one of the following steps is chosen:
+is a tuple of $(\Gamma,D)$, where $\Gamma$ is a set of all possible data flow elements, $D\subseteq{2^{\Gamma}\times2^{\Gamma}}$ is a binary relation on its power set. Computations within the system are defined by the recurrent rules on the set of all input elements $A$, all output elements $B$ and the reference working set $W^{*}$. On each iteration one of the following steps is chosen:
 
 \begin{enumerate}
     \item \textbf{Input} $a_\tau\in{\Gamma}$:\\ $A_{\tau+1}=A_\tau \cup \{a_\tau\}, \\ B_{\tau+1}=B_{\tau}, \\ W^{*}_{\tau+1}=W^{*}_{\tau} \cup \{a_\tau\}.$
@@ -21,9 +21,9 @@ In a classical model proposed by Chandy and Lamport~\cite{Chandy:1985:DSD:214451
 The proposed model is a variation of a classical Chandy-Lamport distributed system model with the following properties and modifications:
 
 \begin{itemize}
-    \item Input and output elements $a_\tau$ and $b_\tau$ are special events. This way, {\em storage} and {\em computations} are distinguished. We assume that output elements $B_\tau$ are all data that leaves a system including so-called {\em state snapshots} which are typically used for recovery~\cite{Carbone:2017:SMA:3137765.3137777}. In most state-of-the-art stream processing systems, end-user is external to the system, i.e. a user is able to observe input and output elements, but not the working set.
+    \item Input and output elements $a_\tau$ and $b_\tau$ are special events. This way, {\em storage} and {\em computations} are distinguished. We assume that output elements $B_\tau$ are all data that leaves a system including so-called {\em state snapshots} which are typically used for recovery~\cite{Carbone:2017:SMA:3137765.3137777}. Because of this, we state that $X \subseteq W_\tau \cup B_\tau$ in the transform transition of the working set. In most state-of-the-art stream processing systems, end-user is external to the system, i.e. a user is able to observe input and output elements, but not the working set.
     \item Our notion of a streaming system does not provide a concept of {\em operations state} because as it is shown in~\cite{we2018adbis}, states can be considered as ordinary data items. In this case, a state element is presented in a system until it is transformed into a new state together with new elements. This model allows a binary relation $D$ to capture computations within a graph of processes that is a physical streaming execution graph in our case. Hence, working set $W_\tau$ is a global state with only channel states in terms of Chandy-Lamport.
-    \item Distributed asynchronous computations are modeled through the random choice of an operation that is executed next. Instead of using permutations of data flow elements which fixate an execution route, in the proposed model we suppose that the next transition of the working set is a random variable. For instance, this variable can be distributed uniformly or not according to the level of determinism. 
+    \item Distributed asynchronous computations are modeled through the random choice of an operation that is executed next. Instead of using permutations of data flow elements which fixate an execution route, in the proposed model we suppose that the next transition of the working set is a random variable. The distribution of this variable depends on system architecture. 
 \end{itemize}
 
 % We can imagine a working set as a pool, where some elements are poured in and others are poured out. Inside a pool, each element can be transformed into the other element, which can be transformed as well, and so on. Only survived elements are poured out from the pool. 
@@ -34,7 +34,7 @@ $P(b_{\tau+1}|A_{\tau}, B_\tau)$ is a probability to observe output set $b$ at t
 
 For all output elements from the reference working set, such probabilities are positive, $\forall{b_{\tau+1} \in 2^{\Gamma}: \exists{W^{*}_{\tau+1}=W^{*}_{\tau}\setminus{b_{\tau+1}}}} \Rightarrow P(b_{\tau+1}|A_{\tau}, B_\tau) > 0$. It is important to note that there can be multiple reference working sets $\{W^{*}_{\tau+1}=W^{*}_{\tau}\setminus{b_{\tau+1}}\}$ due to asynchronous distributed processing. 
 
-The reference stream processing system is just an abstract concept because it does not capture possible failures of network and computational units. Failure can be expressed as a loss of the working set or its part. There is a need to extend the reference model by a recovery mechanism that allows a system to transparently pass through the failures.
+The reference stream processing system is just an abstract concept because it does not capture possible failures of network and computational units. We introduced it to denote results which are possible to reach without failures. Failure can be expressed as a loss of the working set or its part. Let us extend the reference model by a recovery mechanism that allows a system to transparently pass through the failures.
 
 \begin{definition}{Stream processing system}
 is a tuple of\\
@@ -50,7 +50,7 @@ In this model, we suppose that {\em snapshots} of operation states taken by real
 
 \begin{itemize}
     \item Snapshots are typically stored in external systems, e.g. in HDFS, Kafka, relational databases, etc. They directly affect output elements after recovery.
-    \item Stream processing systems aim at minimizing information which is needed to recover processing, but their optimizations do not directly affect consistency. The notion of $F(A_\tau,B_\tau)$ makes our concept general enough to describe any state-of-the-art streaming engine while being independent of a specific implementation of $F$.
+    \item Stream processing systems aim at minimizing information which is needed to recover processing, but their optimizations do not directly affect consistency. The notion of $F(A_\tau,B_\tau)$ makes our concept general enough to describe any streaming engine while being independent of a specific implementation of $F$.
 \end{itemize}
 
 \begin{definition}{Probability of output element in system with failures}
@@ -111,7 +111,7 @@ If $D$ contains non-commutative transformation, system supports exactly once if 
 $ $\newline
 $\Rightarrow$
 
-Assume that $b_{\tau_2} \notin Cl(a_\tau) \setminus Cl^{-1}(D)(b_{\tau_1})$ and system fails at time $\tau_1<\tau_f<\tau_2$. Let $\exists c \in Cl(s) \cap Cl^{-1}(D)(B_{\tau_2})$ and $c\neq b_{\tau_1}$. Then, to obtain $b_{\tau_2}$ there is a need to recompute $c$, and, therefore, $s$. However, due to asynchronous distributed processing and non-commutative transformation, system can reach not exactly $s$ such that $((x,y), s) \in D$, but $s':((y,x),s')\in D$. In this case, after recovery element $b_{\tau_2}$ will be delivered, but it will depend not on $s'$, but on $s$: $b_{\tau_2}\in Cl(D)(s')$. This is a contradiction, because $b_\tau$ has been already delivered and $P(b_{\tau_2}\in Cl(D)(s')|\{a_\tau\},\{b_{\tau_1} \in Cl(D)(s) \})=0$.
+Assume that $b_{\tau_2} \notin Cl(a_\tau) \setminus Cl^{-1}(D)(b_{\tau_1})$ and system fails at time $\tau_1<\tau_f<\tau_2$. Let $\exists c \in Cl(s) \cap Cl^{-1}(D)(B_{\tau_2})$ and $c\neq b_{\tau_1}$. Then, to obtain $b_{\tau_2}$ there is a need to recompute $c$, and, therefore, $s$. However, due to asynchronous distributed processing and non-commutative transformation, system can reach not exactly $s$ such that $((x,y), s) \in D$, but $s':((y,x),s')\in D$. In this case, after recovery element $b_{\tau_2}$ will be delivered, but it will depend not on $s$, but on $s'$: $b_{\tau_2}\in Cl(D)(s')$. This is a contradiction, because $b_\tau$ has been already delivered and $P(b_{\tau_2}\in Cl(D)(s')|\{a_\tau\},\{b_{\tau_1} \in Cl(D)(s) \})=0$.
 
 $ $\newline
 $\Leftarrow$
@@ -119,11 +119,11 @@ $\Leftarrow$
 Let system fails at time $\tau_f$. If $\tau_f < \tau_1$ or $\tau_f > \tau_2$, exactly once is obviously satisfied. Assume that $\tau_1<\tau_f<\tau_2$. In this case, $b_{\tau_1}\in B_{\tau_f}\subset B_{\tau_2}$. Hence, $b_{\tau_2}$ can be restored directly from $b_{\tau_1}$ without reprocessing of s, i.e. $F(a_\tau,b_{\tau_1})=b_{\tau_2}$ and $b_{\tau_1}, b_{\tau_2} \in Cl(s)$ after recovery.
 \end{sketch}
 
-In the proposed theorem, we assume that input element $a_\tau$ is split into elements $x,y$. The same behavior can be reproduced if two input elements $a_\tau$ and $a_{\tau+1}$ enter a system through asynchronous channels.
+In the proposed theorem, we assume that input element $a_\tau$ is split into elements $x,y$. The same behavior can be reproduced if two input elements $a_\tau$ and $a_{\tau+1}$ enter a system through asynchronous channels. In general, this behavior is natural for stream processing systems, because elements are processed one-by-one without synchronization and order enforcement. 
 
 This theorem has a direct practical implication. If a system aims at providing exactly once, it must output elements only if there exists a snapshot that contains results of non-commutative operations. The problem here is that a system is usually not aware of user-defined operations and cannot distinguish commutative and non-commutative operations. It means that the lower bound of latency in the worst case in such systems is the snapshotting period together with the duration of taking a snapshot. There is a trade-off between latency and the frequency of taking snapshots because too frequent snapshotting can cause high extra load, while rare snapshots lead to high latency.
 
-The property of determinism obviously allows a system not to satisfy the necessary condition from the Theorem~\ref{necessary_conditions}, because determinism guarantees order enforcement before non-commutative operations. Hence, if a system is deterministic, it is possible to inexpensively achieve a consistent snapshotting mechanism without synchronization between taking snapshots and output elements delivery. A deterministic system can release an element before a snapshot is taken. As we show further in experiments, this relaxation is able to dramatically decrease processing latency, because there is no need to wait until the snapshot is taken in order to release output elements.
+The property of determinism allows a system not to satisfy the necessary condition from the Theorem~\ref{necessary_conditions}, because determinism guarantees order enforcement before non-commutative operations. Hence, if a system is deterministic, it is possible to inexpensively achieve a consistent snapshotting mechanism without synchronization between taking snapshots and output elements delivery. A deterministic system can release an element before a snapshot is taken. As we show further in experiments, this relaxation is able to dramatically decrease processing latency, because there is no need to wait until the snapshot is taken in order to release output elements.
 
 To the best of our knowledge, only micro-batching systems support the property of determinism in streaming. However, micro-batching solutions provide higher latency than pure streaming engines due to overhead on input buffering~\cite{karimov2018benchmarking}. We proposed a pure streaming model called {\em drifting state}~\cite{we2018adbis} that allows achieving both determinism and low latency. Therefore, a question arises: is it more efficient in practice to handle non-determinism by atomic snapshotting and releasing than to maintain a fair determinism in order to get exactly once? 
 
