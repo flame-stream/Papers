@@ -9,7 +9,7 @@ In general, determinism allows us to relax the requirement introduced in the The
 In order to achieve exactly once on top of drifting state model we propose the following way:
 \begin{itemize}
     \item Periodically save (take a snapshot of) grouping buckets affected by the dependencies of the same input elements to persistent storage
-    \item Consistently restore grouping buckets after recovery and replay input elements which are not affected elements in restored buckets
+    \item Consistently restore grouping buckets after recovery, and replay input elements which do not affect elements in restored buckets
     \item Ensure that output elements which have been already released will not be duplicated after recovery and input reprocessing
 \end{itemize}
 
@@ -18,7 +18,8 @@ We do not enforce a strict architecture of the system, but assume that there are
     \item \Acker\ traces the items dependencies and the progress of computations. It sends monotonic in terms of global time notifications about which input elements are completely processed with all their dependencies.
     \item Coordinator listens notifications from~\Acker\ and manages snapshotting and recovery
     \item Cluster state manager (ZooKeeper) is used to keep service information for recovery
-    \item Data producer that is able 
+    \item Data producer that is able to replay some set of previous input elements
+    \item Data consumer that is responsible for output elements receiving. The exact requirements for data consumer are detailed further in this section
 \end{itemize}
 
 \subsection{Snapshotting}
@@ -94,7 +95,6 @@ In case of packet loss or node failure,~\Acker\ can enforce coordinator to begin
 Proposed protocol guarantees the following properties that allow preserving exactly once:
 
 \begin{itemize}
-    \item Processing does not restart until all grouping operations obtain consistent states. The consistency of these states is guaranteed by the state snapshotting protocol
-    \item Duplicates are not produced because, at the moment when processing is restarted, it is ensured that barrier has obtained the last released global time and is able to filter out extra items
-    \item The last released global time cannot be less than the global time of the last snapshot. Therefore, data cannot be lost. This property is guaranteed in conjunction with the state snapshotting protocol
+    \item Processing does not restart until all grouping operations obtain consistent states. The consistency of these states is guaranteed by the state snapshotting protocol. Therefore, elements are not lost.
+    \item Duplicates are not produced because, at the moment when processing is restarted, it is ensured that barrier has obtained the last released global time and is able to filter out extra items.
 \end{itemize}
