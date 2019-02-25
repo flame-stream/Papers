@@ -32,16 +32,16 @@ The proposed model is a variation of a classical Chandy-Lamport distributed syst
 $P(b_{\tau+1}|A_{\tau}, B_\tau)$ is a probability to observe output set $b$ at the time $\tau+1$ considering all previous input and output elements.
 \end{definition}
 
-For all output elements from the reference working set, such probability is positive, $\forall{b_{\tau+1} \in 2^{\Gamma}:\exists{W^{*}_{\tau+1}=W^{*}_{\tau}\setminus{b_{\tau+1}}}} \Rightarrow P(b_{\tau+1}|A_{\tau}, B_\tau) > 0$. It is important to note that there can be multiple reference working sets $\{W^{*}_{\tau+1}=W^{*}_{\tau}\setminus{b_{\tau+1}}\}$ due to asynchronous distributed processing. 
+For all output elements from the reference working set, such probabilities are positive, $\forall{b_{\tau+1} \in 2^{\Gamma}: \exists{W^{*}_{\tau+1}=W^{*}_{\tau}\setminus{b_{\tau+1}}}} \Rightarrow P(b_{\tau+1}|A_{\tau}, B_\tau) > 0$. It is important to note that there can be multiple reference working sets $\{W^{*}_{\tau+1}=W^{*}_{\tau}\setminus{b_{\tau+1}}\}$ due to asynchronous distributed processing. 
 
 The reference stream processing system is just an abstract concept because it does not capture possible failures of network and computational units. Failure can be expressed as a loss of the working set or its part. There is a need to extend the reference model by a recovery mechanism that allows a system to transparently pass through the failures.
 
 \begin{definition}{Stream processing system}
 is a tuple of\\
-$(\Gamma,D,F)$. Sets $\Gamma$ and $D$ define the reference system. Recovery function $F(A_\tau,B_\tau)$ provides logic for restoring of working set in case of system failures. Recurrent rules for computations are extended with a {\em recover transition}:
+$(\Gamma,D,F)$. Sets $\Gamma$ and $D$ define the reference system. Recovery function $F$ provides logic for restoring of working set in case of system failures. Recurrent rules for computations are extended with a {\em recover transition}:
 \begin{enumerate}
     \setcounter{enumi}{3}
-    \item \textbf{Recover} \\  $A_{\tau + 1} = A_{\tau}$,\\ $B_{\tau+1}=B_{\tau}$, \\ $W_{\tau+1} = F(A_\tau,B_\tau)$
+    \item \textbf{Failure and recover} \\  $A_{\tau + 1} = A_{\tau}$,\\ $B_{\tau+1}=B_{\tau}$, \\ $W_{\tau+1} = F(A_\tau,B_\tau)$
 \end{enumerate}
 
 \end{definition}
@@ -59,7 +59,7 @@ $P(b_{\tau+1}|A_{\tau}, B_\tau, F)$ is a probability to observe output element $
 
 \subsection{Consistency guarantees}
 
-The reference system concept allows us to express the notion of valid execution in terms of correspondence between input and output elements. In most real cases, input and output elements are the only data that can be observed by end-user. In real distributed stream processing systems, failures and recoveries can corrupt the output, despite the fact, that in terms of a naive definition of delivery guarantees, all elements are processed exactly once. Let us demonstrate it by an example. Assume that $\Gamma=\mathbb{N}$ and $D$ consists of a single non-commutative operation $V^{i+1}=a_\tau(1+V^{i}),V^{0}=0,V\in{S}$ and $\forall{t},b_t=V$. Upper index denotes an order of transformations. If $F(A_\tau,B_\tau)=F(A_\tau)$ system must set $V^{0}=0$ and reprocess input elements from the very beginning that seems like a naive but a correct approach for restoring. The system does not release output elements during reprocessing to preserve exactly once. However, if input elements arrive from asynchronous input channels, they can be reordered, and results of non-commutative operation may become inconsistent with results before the failure, e.g. the property of output monotonicity can be violated. This example is demonstrated in Figure~\ref{state-inconsistency}. 
+The reference system concept allows us to express the notion of valid execution in terms of correspondence between input and output elements. In most real cases, input and output elements are the only data that can be observed by end-user. In real distributed stream processing systems, failures and recoveries can corrupt the output, despite the fact, that in terms of a naive definition of delivery guarantees, all elements are processed exactly once. Let us demonstrate it by an example. Assume that $\Gamma=\mathbb{N}$ and $D$ consists of a single non-commutative operation $v^{i+1}=a_\tau(1+v^{i}),v^{0}=0$ and $v$ becomes an output element on each iteration. Upper index denotes an order of transformations. Let system set $v^{0}=0$ and reprocess input elements from the very beginning that seems like a correct naive approach for restoring. Assume that the system does not release output elements during reprocessing to avoid duplicates. However, if input elements arrive from asynchronous input channels, they can be reordered, and results of non-commutative operation may become inconsistent with results before the failure, e.g. the property of output monotonicity can be violated. This example is demonstrated in Figure~\ref{state-inconsistency}. 
 
 \begin{figure}[htbp]
   \centering
@@ -70,7 +70,7 @@ The reference system concept allows us to express the notion of valid execution 
 
 \begin{definition}{System provides for exactly once}
 if it is possible to obtain each output element $b_{\tau+1}$ in the reference stream processing system, i.e.,\\ 
-$\forall{\tau \in \mathbb{N}}, b_{\tau+1}\in 2^{\Gamma}: P(b_{\tau+1}|A_{\tau},B_\tau,,F)>0 \Rightarrow \\ P(b_{\tau+1}|A_{\tau},B_\tau)>0$.
+$\forall{\tau \in \mathbb{N}}, b_{\tau+1}\in 2^{\Gamma}: P(b_{\tau+1}|A_{\tau},B_\tau,F)>0 \Rightarrow \\ P(b_{\tau+1}|A_{\tau},B_\tau)>0$.
 \end{definition}
 
 \begin{definition}{System provides for at most once}
@@ -85,7 +85,7 @@ $\exists{A^{*}_{\tau}\subseteq{2^{A_{\tau}}}}$ such that \\
 $\forall{\tau \in \mathbb{N}, {b_{\tau+1} \in 2^{\Gamma}}}: P(b_{\tau+1}|A_{\tau},B_\tau,F)>0 \Rightarrow \\ P(b_{\tau+1}|A^{*}_{\tau},B_\tau)>0$.
 \end{definition}
 
-Exactly once states that observed results cannot be distinguished from one of the possible results produced by the reference system. At most once and at least once guarantees are the relaxations of exactly once. The results within these guarantees can be obtained in the reference system, but with the assumption, that input is not completely correct. At least once can be reproduced if the input contains duplicated items. At most once can be achieved in the reference system if some input elements are missed. It is important to note, that regarding at most once guarantee we require an input element to be processed atomically with all its derivatives or not processed at all. To the best of our knowledge, no one real stream processing engine supports at most once guarantee, so we cannot verify the relevancy of this assumption. It is easy to provide at most once by producing no output at all but if the output is presented, at most once enforcement becomes much more difficult.  
+Exactly once states that observed results cannot be distinguished from one of the possible results produced by the reference system. At most once and at least once guarantees are the relaxations of exactly once. The results within these guarantees can be obtained in the reference system, but with the modification of the input. At least once can be reproduced if the input contains duplicated items. At most once can be achieved in the reference system if some input elements are missed. It is important to note, that regarding at most once guarantee we require an input element to be processed atomically with all its derivatives or not processed at all. To the best of our knowledge, no one real stream processing engine supports at most once guarantee, so we cannot verify the relevancy of this assumption. It is easy to provide at most once by producing no output at all but if the output is presented, at most once enforcement becomes much more difficult.  
 
 In our formal model, the relaxations of exactly once are defined without diving into recovery mechanisms. Instead, they are described through possible input channel flaws in a reference system. This trick allows us to represent invisible system details in terms clear for a user.
 
