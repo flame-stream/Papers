@@ -18,6 +18,7 @@ We do not enforce a strict architecture of the system, but assume that there are
     \item \Acker\ traces the items dependencies and the progress of computations. It sends monotonic in terms of global time notifications about which input elements are completely processed with all their dependencies.
     \item Coordinator listens notifications from~\Acker\ and manages snapshotting and recovery
     \item Cluster state manager (ZooKeeper) is used to keep service information for recovery
+    \item Data producer that is able 
 \end{itemize}
 
 \subsection{Snapshotting}

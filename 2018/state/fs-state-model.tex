@@ -16,7 +16,7 @@ Determinism can be achieved in a stream processing system with the following str
 The order on elements can be defined using a natural order of input elements arrival. More formally, this order can be defined as $r(x) < r(y) \Rightarrow x < y$, where $r(x)$ is:
 
 $\forall{t\in{\mathbb{N}}, x\in{W_t}} : r(x)=\begin{sqcases}
-t \text{if }x=a_t,\\
+t, \text{if }x=a_t,\\
 min(r(a), a\in Cl^{-1}(x)) \text{.}\\
 \end{sqcases}$
 

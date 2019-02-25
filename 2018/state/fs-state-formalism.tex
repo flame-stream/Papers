@@ -9,7 +9,7 @@ is a tuple of $(\Gamma,D)$, where $\Gamma$ is a set of all possible data flow el
 \begin{enumerate}
     \item \textbf{Input} $a_\tau\in{\Gamma}$:\\ $A_{\tau+1}=A_\tau \cup \{a_\tau\}, \\ B_{\tau+1}=B_{\tau}, \\ W^{*}_{\tau+1}=W^{*}_{\tau} \cup \{a_\tau\}.$
     \item \textbf{Output} $b_\tau\in{2^\Gamma}$:\\ $A_{\tau + 1} = A_{\tau}$, \\ $B_{\tau+1}=B_\tau \cup \{b_\tau\}, \\ W^{*}_{\tau+1}=W^{*}_{\tau} \setminus \{b_\tau\}.$
-    \item \textbf{Transform}\\ $A_{\tau + 1} = A_{\tau}$,\\ $B_{\tau+1}=B_{\tau}$, \\ $W^{*}_{\tau+1}=W^{*}_\tau \setminus X_\tau \cup Y_\tau, (X_\tau,Y_\tau) \in D$, \\where\\$X_\tau \thicksim \mathcal{C}(\{X \subseteq W_\tau \cup B_\tau : \exists Y, (X,Y) \in D \}$, $\mathcal{C}$ is an unknown distribution). \label{random_formula}
+    \item \textbf{Transform}\\ $A_{\tau + 1} = A_{\tau}$,\\ $B_{\tau+1}=B_{\tau}$, \\ $W^{*}_{\tau+1}=(W^{*}_\tau \setminus X_\tau) \cup Y_\tau, (X_\tau,Y_\tau) \in D$, \\where\\$X_\tau \thicksim \mathcal{C}(\{X \subseteq W_\tau \cup B_\tau : \exists Y, (X,Y) \in D \}$, $\mathcal{C}$ is an unknown distribution). \label{random_formula}
 \end{enumerate}
 
 \end{definition}
@@ -26,7 +26,7 @@ The proposed model is a variation of a classical Chandy-Lamport distributed syst
     \item Distributed asynchronous computations are modeled through the random choice of an operation that is executed next. Instead of using permutations of data flow elements which fixate an execution route, in the proposed model we suppose that the next transition of the working set is a random variable. For instance, this variable can be distributed uniformly or not according to the level of determinism. 
 \end{itemize}
 
-We can imagine a working set as a pool, where some elements are poured in and others are poured out. Inside a pool, each element can be transformed into the other element, which can be transformed as well, and so on. Only survived elements are poured out from the pool. 
+% We can imagine a working set as a pool, where some elements are poured in and others are poured out. Inside a pool, each element can be transformed into the other element, which can be transformed as well, and so on. Only survived elements are poured out from the pool. 
 
 \begin{definition}{Probability of output element in a reference system}
 $P(b_{\tau+1}|A_{\tau}, B_\tau)$ is a probability to observe output set $b$ at the time $\tau+1$ considering all previous input and output elements.
