@@ -137,9 +137,16 @@ $\forall{\tau\in{\mathbb{N}}, b_{\tau+1}\in{2^{\Gamma}}}:P(b_{\tau+1}|A_{\tau},B
 
 An important property of a deterministic system is that it preserves the same order of elements before non-commutative operations on each run. The following theorem denotes the necessary and sufficient conditions for exactly once in non-deterministic systems with a non-commutative operation in $D$. It demonstrates that if a system is non-deterministic, but supports non-commutative operations, it must save (take a snapshot of) results of non-commutative operations before delivery of output elements that depend on these results.
 
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.48\textwidth]{pics/theorem-pic}
+  \caption{The scheme of $D$ from Theorem~\ref{necessary_conditions}}
+  \label {theorem-pic}
+\end{figure}
+
 \begin{theorem}
 \label{necessary_conditions}
-If $D$ contains non-commutative transformation, system supports exactly once if and only if $\forall F, a_\tau \in \Gamma, (x,y)\in Cl_D(a_\tau), s\in Cl_D(x) \cap Cl_D(y), x\notin Cl_D(y), y\notin Cl_D(x), b_{\tau_1}, b_{\tau_2} \in Cl_D(s), \tau_2 > \tau_1 : b_{\tau_2} \in Cl_D(a_\tau) \setminus Cl_D^{-1}(b_{\tau_1})$, where $s$ is obtained through non-commutative operation. The scheme of $D$ in the form of a graph is shown in Figure~\ref{???}. 
+If $D$ contains non-commutative transformation, system supports exactly once if and only if $\forall F, a_\tau \in \Gamma, (x,y)\in Cl_D(a_\tau), s\in Cl_D(x) \cap Cl_D(y), x\notin Cl_D(y), y\notin Cl_D(x), b_{\tau_1}, b_{\tau_2} \in Cl_D(s), \tau_2 > \tau_1 : b_{\tau_2} \in Cl_D(a_\tau) \setminus Cl_D^{-1}(b_{\tau_1})$, where $s$ is obtained through non-commutative operation. The scheme of $D$ in the form of a graph is shown in Figure~\ref{theorem-pic}. 
 \end{theorem}
 \begin{sketch}
 $ $\newline
