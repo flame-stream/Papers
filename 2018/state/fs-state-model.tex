@@ -20,7 +20,7 @@ t, \text{if }x=a_t,\\
 min(r(a), a\in Cl^{-1}(x)) \text{.}\\
 \end{sqcases}$
 
-According to this notion, reorderings may occur only in a physical graph due to asynchronous distributed execution. However, total order maintenance still seems over-restrictive. It can be achieved, e.g., using buffering before each non-commutative operation until there is a guarantee that out-of-order elements do not arrive at the operation. This guarantee can be provided in acyclic data flows by punctuations or low watermarks~\cite{Li:2008:OPN:1453856.1453890}, but buffering before multiple operations can dramatically increase latency.
+The above definition implies that reorderings may occur only in a physical graph due to asynchronous distributed execution. However, total order maintenance still seems over-restrictive. It can be achieved, e.g., using buffering before each non-commutative operation until there is a guarantee that out-of-order elements do not arrive at the operation. This guarantee can be provided in acyclic data flows by punctuations or low watermarks~\cite{Li:2008:OPN:1453856.1453890}, but buffering before multiple operations can dramatically increase latency.
 
 An underlying idea of drifting state model is a reduced set of available operations which are pure and can enforce order optimistically requiring a single buffer per data flow. On the other hand, these operations are sufficient to implement any stateful streaming computation.
 
@@ -30,7 +30,7 @@ Any logical graph in the drifting state model is constructed using the following
 
 {\bf Map} applies a user-defined function to an input item. It returns a sequence of new data items generated from the input. An output sequence can be empty.
 
-{\bf Grouping} stores input items into distinct buckets by the value of the input balancing function. When the next item arrives at the grouping, it is appended to the corresponding bucket. Each time the grouping outputs window-sized {\it tuple item}, which consists of the most recent (in terms of $r(x)$) items of this bucket. If the size of the bucket is less than the window, all items of the bucket are taken.
+{\bf Grouping} stores input items into distinct buckets by the value of user-defined hash function. When the next item arrives at the grouping, it is inserted to the appropriate bucket and window-sized {\it tuple item} is released. This tuple consists of least recent (in terms of $r(x)$) not yet processed items of the bucket. If the size of the bucket is less than the window, all items of the bucket are taken.
 
 The following example illustrates the semantics of the operation. The grouping accepts items represented as natural numbers: 1,2,3, etc. If the window is set to 3, the output elements are:
 
@@ -38,7 +38,7 @@ The following example illustrates the semantics of the operation. The grouping a
 
 \subsubsection{Functional completeness}
 
-Any stateful transformation can be expressed by decomposing into map and grouping operations with a cycle. This property is detailed in~\cite{we2018adbis}, and in this paper, we aim at providing an intuitive notion. Let us illustrate it by the example of sum operation. In a typical setting, each element is combined with previous state value and released. Then, the state is updated. In our model, firstly each element is grouped with previous state element into the pair. After that, map operation delivers a combined result, updates the state, and returns it to the grouping through the cycle. A comparison between the classical state handling approach and the drifting state model is shown in Figure~\ref{classical-drifting}.
+Any stateful transformation can be expressed as a composition of map and grouping operations with a cycle. This property is detailed in~\cite{we2018adbis}, and in this paper, we aim at providing an intuitive notion. Let us illustrate it by the example of sum operation. In a typical setting, each element is combined with previous state value and released. Then, the state is updated. In our model, firstly each element is grouped with previous state element into the pair. After that, map operation delivers a combined result, updates the state, and returns it to the grouping through the cycle. A comparison between the classical state handling approach and the drifting state model is shown in Figure~\ref{classical-drifting}.
 
 We call this model a drifting state because operation states become ordinary data flow elements. Unlike a common approach, in this model user does not have direct access to state, and state management is done completely on the system side. Let $B$ denote a business logic operation, $x, y$ be input and output items $(x,y)\in D$. Let $h$ be the state handler and $s_\tau$, the state of operation $B$ at time $\tau$. The change in contract is illustrated in (\ref{flink-contract}). In general, such representation of any stateful operation allow us to use {\em binary relations} in the formal framework instead of operations graph.
 
