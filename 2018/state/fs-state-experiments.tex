@@ -4,16 +4,16 @@
 
 The series of experiments were performed in order to analyze the overall performance of the proposed approach. For experiments we use an open-source implementation of drifting state model called~\FlameStream\. \FlameStream\ is a distributed stream processing engine implemented in Java using Akka framework. \FlameStream\ can be deployed on a hardware cluster of computational units that we call nodes. We assume that each node is connected through a network with all other nodes.
 
-Data producers and data consumers are deployed separately and communicate with the system via defined protocols. We require data producers to support replaying input stream from defined points. We also suppose that data consumers are able to return the last received element on request. The requirement regarding data producers and consumers are discussed in details in further sections.
-
-An overview of the \FlameStream\ architecture is shown in Figure~\ref{arch}. The main components are:
-
 \begin{figure*}[htbp]
   \centering
   \includegraphics[scale=0.78]{pics/arch}
   \caption{The overview of \FlameStream\ architecture}
   \label {arch}
 \end{figure*}
+
+Data producers and data consumers are deployed separately and communicate with the system via defined protocols. We require data producers to support replaying input stream from defined points. We also suppose that data consumers are able to return the last received element on request. The requirement regarding data producers and consumers are discussed in details in further sections.
+
+An overview of the \FlameStream\ architecture is shown in Figure~\ref{arch}. The main components are:
 
 {\bf Node} runs a process called {\it worker}. Worker executes user-defined operations. The computational load is balanced through the distribution of data items among workers. A worker for a data item is determined by the value of a hash function of item payload. Such hash functions can be defined by a user before each logical operation. Each worker can be responsible for one or many ranges of values of hash functions called {\it hash units}. The number of hash-units per worker is a user-defined parameter, and it must be set before the start of computations. 
 
@@ -91,14 +91,14 @@ For Apache Flink, the algorithm for building the inverted index is adopted by th
 
 In this paper, we compare $50^{th}$, $75^{th}$, $95^{th}$, and $99^{th}$ percentile of distributions, which clearly represent the performance from the perspective of the users' experience.
 
-Figures~\ref{comparison50}, ~\ref{comparison500}, and ~\ref{comparison1000} demonstrates the comparison of latencies between \FlameStream\ and Flink within distinct times between checkpoints, and different consistency semantics. At the initial point, \FlameStream\ provides lower latency for at most once semantics. Such behavior is explained by the features of the optimistic approach for handling out-of-order items and is investigated in details in~\cite{hiddenSeim}. The latencies of both \FlameStream\ and Flink are slightly higher under at least once semantics. As it was mentioned above, it can be explained by the single-core configuration of the nodes. For at most once and at least once semantics, the latencies of \FlameStream\ and Flink do not vary a lot because both systems do not buffer output items for a long time before releasing. However, for exactly once semantics, Flink's latency is dramatically higher, and it directly depends on the time between checkpoints. Nevertheless, such behavior is expected, because unlike \FlameStream, Flink needs to take state snapshot and release output items within a single transaction to preserve exactly once semantics. As it was discussed above, it is the consequence of the lack of determinism in the computational model. Therefore, output items cannot be released until the transaction is committed and this fact significantly increases the latency. 
-
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=.5\textwidth]{pics/comparison50}
   \caption{The comparison in latencies between \FlameStream\ and Flink with 50 ms delay between checkpoints}
   \label {comparison50}
 \end{figure}
+
+Figures~\ref{comparison50}, ~\ref{comparison500}, and ~\ref{comparison1000} demonstrates the comparison of latencies between \FlameStream\ and Flink within distinct times between checkpoints, and different consistency semantics. At the initial point, \FlameStream\ provides lower latency for at most once semantics. Such behavior is explained by the features of the optimistic approach for handling out-of-order items and is investigated in details in~\cite{hiddenSeim}. The latencies of both \FlameStream\ and Flink are slightly higher under at least once semantics. As it was mentioned above, it can be explained by the single-core configuration of the nodes. For at most once and at least once semantics, the latencies of \FlameStream\ and Flink do not vary a lot because both systems do not buffer output items for a long time before releasing. However, for exactly once semantics, Flink's latency is dramatically higher, and it directly depends on the time between checkpoints. Nevertheless, such behavior is expected, because unlike \FlameStream, Flink needs to take state snapshot and release output items within a single transaction to preserve exactly once semantics. As it was discussed above, it is the consequence of the lack of determinism in the computational model. Therefore, output items cannot be released until the transaction is committed and this fact significantly increases the latency. 
 
 \begin{figure}[htbp]
   \centering
