@@ -52,7 +52,7 @@
 
 % Include information below and uncomment for camera ready
 \vldbTitle{Delivery, consistency, and determinism: rethinking guarantees in distributed stream processing}
-\vldbAuthors{Igor E. Kuralenok, Artem Trofimov, Nikita Marshalkin, Boris Novikov}
+\vldbAuthors{Artem Trofimov, Igor E. Kuralenok, Nikita Marshalkin, Boris Novikov}
 \vldbDOI{https://doi.org/10.14778/xxxxxxx.xxxxxxx}
 \vldbVolume{12}
 \vldbNumber{xxx}
@@ -62,41 +62,28 @@
 
 \title {Delivery, consistency, and determinism: rethinking guarantees in distributed stream processing}
 
-% \author{  Igor E. Kuralenok,$^1$     Artem Trofimov,$^ {1,2}$    Nikita Marshalkin,$^ {1,2}$   and  Boris Novikov$^ {1,2}$ }
-% \affiliation{%
-% \institution{$^1$JetBrains Research}
-%   \city{St. Petersburg} 
-%   \country{Russia}
-% }
-% \affiliation{%
-% \institution{$^2$Saint Petersburg State University}
-%   \city{St. Petersburg} 
-%   \country{Russia}
-% }
-% \email{\string{ikuralenok, trofimov9artem, marnikitta\string}@gmail.com, borisnov@acm.org}
-
 \numberofauthors{4}
 
 \author{
-\alignauthor
-Igor E. Kuralenok\\
-       \affaddr{JetBrains Research}\\
-       \affaddr{Saint Petersburg, Russia}\\
-       \email{ikuralenok@gmail.com}
 \alignauthor
 Artem Trofimov\\
        \affaddr{JetBrains Research}\\
        \affaddr{Saint Petersburg, Russia}\\
        \email{trofimov9artem@gmail.com}
+\alignauthor
+Igor E. Kuralenok\\
+       \affaddr{JetBrains Research}\\
+       \affaddr{Saint Petersburg, Russia}\\
+       \email{ikuralenok@gmail.com}
 \alignauthor 
 Nikita Marshalkin\\
-       \affaddr{JetBrains Research}\\
+       \affaddr{vk.com}\\
        \affaddr{Saint Petersburg, Russia}\\
        \email{marnikitta@gmail.com}
 \and  % use '\and' if you need 'another row' of author names
 \alignauthor 
 Boris Novikov\\
-       \affaddr{JetBrains Research}\\
+       \affaddr{National Research University Higher School of Economics}\\
        \affaddr{Saint Petersburg, Russia}\\
        \email{borisnov@acm.org}
 }
@@ -104,7 +91,7 @@ Boris Novikov\\
 \maketitle
 
 \begin{abstract}
-Currently, large-scale distributed stream processing is a hot area of research that has a variety of applications in industry. Guarantees on data provided by state-of-the-art stream processing are defined in terms of so-called delivery guarantees. Exactly once is the strongest one and the most desirable for end-user. However, there are several issues regarding this concept. Firstly, mechanisms that are commonly used to enforce exactly once requires significant performance overhead. Secondly, the notion of exactly once is informal and does not capture all properties that provide stream processing systems supporting this guarantee. In this paper, we introduce a formal framework that allows us to define streaming guarantees in a more regular way. We demonstrate that the properties of delivery, consistency, and determinism are tightly connected within distributed stream processing. We also show that having lightweight determinism it is possible to provide exactly once with almost no performance overhead. Experiments show that the proposed approach can significantly outperform an alternative industrial solution.
+Guarantees on data provided by state-of-the-art stream processing systems are defined in terms of so-called delivery guarantees. Exactly once is the strongest one and the most desirable for end-user. However, there are several issues regarding this concept. Mechanisms that are commonly used to enforce exactly once requires significant performance overhead. Besides, the notion of exactly once is informal and does not capture all properties that provide stream processing systems supporting this guarantee. In this paper, we introduce a formal framework that allows us to define streaming guarantees in a more regular way. We demonstrate that the properties of delivery, consistency, and determinism are tightly connected within distributed stream processing. We also show that having lightweight determinism it is possible to provide exactly once with almost no performance overhead. Experiments show that the proposed approach can significantly outperform an alternative industrial solution.
 \end{abstract}
 
 \section {Introduction}
@@ -115,9 +102,6 @@ Currently, large-scale distributed stream processing is a hot area of research t
 
 \section {Formal Model}
 \input {fs-state-formalism.tex}
-
-% \section {Discussion}
-% \input {fs-state-discussion.tex}
 
 \section {Deterministic streaming model}
 \input {fs-state-model.tex}
