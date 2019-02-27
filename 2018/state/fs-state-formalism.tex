@@ -44,7 +44,7 @@ is a tuple of $(\Gamma,D)$, where $\Gamma$ is a set of all possible data flow el
 \begin{enumerate}
     \item \textbf{Input} $a_\tau\in{\Gamma}$:\\ $A_{\tau+1}=A_\tau \cup \{a_\tau\}, \\ B_{\tau+1}=B_{\tau}, \\ W^{*}_{\tau+1}=W^{*}_{\tau} \cup \{a_\tau\}.$
     \item \textbf{Output} $b_\tau\in{2^\Gamma}$:\\ $A_{\tau + 1} = A_{\tau}$, \\ $B_{\tau+1}=B_\tau \cup \{b_\tau\}, \\ W^{*}_{\tau+1}=W^{*}_{\tau} \setminus \{b_\tau\}.$
-    \item \textbf{Transform}\\ $A_{\tau + 1} = A_{\tau}$,\\ $B_{\tau+1}=B_{\tau}$, \\ $W^{*}_{\tau+1}=(W^{*}_\tau \setminus X_\tau) \cup Y_\tau, (X_\tau,Y_\tau) \in D$, \\where\\$X_\tau \thicksim \mathcal{F}(X\mid X \subseteq W_\tau \cup B_\tau , \exists Y : (X,Y) \in D)$, \\ distribution $\mathcal{F}$ depends on a system architecture. \label{random_formula}
+    \item \textbf{Transform}\\ $A_{\tau + 1} = A_{\tau}$,\\ $B_{\tau+1}=B_{\tau}$, \\ $W^{*}_{\tau+1}=(W^{*}_\tau \setminus X_\tau) \cup Y_\tau, (X_\tau,Y_\tau) \in D$, \\where\\$X_\tau \thicksim \mathcal{F}(X\mid X \subseteq W^{*}_\tau \cup B_\tau , \exists Y : (X,Y) \in D)$, \\ distribution $\mathcal{F}$ depends on a system architecture. \label{random_formula}
 \end{enumerate}
 
 \end{definition}
