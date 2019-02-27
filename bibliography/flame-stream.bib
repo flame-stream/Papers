@@ -395,7 +395,7 @@ Amazon Kinesis makes it easy to collect, process, and analyze real-time, streami
 }
 
 @online{samza:state,
-  month = march,
+  month = mar,
   year = {2018},
   title = {Samza documentation, State Management},
   url = {https://samza.apache.org/learn/documentation/0.7.0/container/state-management.html}
@@ -405,13 +405,15 @@ Amazon Kinesis makes it easy to collect, process, and analyze real-time, streami
   month = oct,
   year = {2017},
   title={Apache Hadoop},
+  key={Apache Hadoop},
   url = {http://hadoop.apache.org/}
 }
 
 @online{apache:storm:trident,
   month = mar,
-  year = {2018},
   title={Trident},
+  year = {2018},
+  key ={ storm Trident},
   url = {http://storm.apache.org/releases/current/Trident-tutorial.html}
 }
 
@@ -986,7 +988,6 @@ month={March},}
   title={The Design of the Borealis Stream Processing Engine.},
   author={Abadi, Daniel J and Ahmad, Yanif and Balazinska, Magdalena and Cetintemel, Ugur and Cherniack, Mitch and Hwang, Jeong-Hyon and Lindner, Wolfgang and Maskey, Anurag and Rasin, Alex and Ryvkina, Esther and others},
   booktitle={Cidr},
-  volume={5},
   number={2005},
   pages={277--289},
   year={2005}
@@ -1036,17 +1037,27 @@ Guaranteed tuple processing has become critically important for many streaming a
 Facebook recently deployed Facebook Messages, its first ever user-facing application built on the Apache Hadoop platform. Apache HBase is a database-like layer built on Hadoop designed to support billions of messages per day. This paper describes the reasons why Facebook chose Hadoop and HBase over other systems such as Apache Cassandra and Voldemort and discusses the application's requirements for consistency, availability, partition tolerance, data model and scalability. We explore the enhancements made to Hadoop to make it a more effective realtime system, the tradeoffs we made while configuring the system, and how this solution has significant advantages over the sharded MySQL database scheme used in other applications at Facebook and many other web-scale companies. We discuss the motivations behind our design choices, the challenges that we face in day-to-day operations, and future capabilities and improvements still under development. We offer these observations on the deployment as a model for other companies who are contemplating a Hadoop-based solution over traditional sharded RDBMS deployments.
 
 @inproceedings{we2018seim,
-author={Kuralenok, Igor E. and Marshalkin, Nikita and Trofimov, Artem and Novikov, Boris},
-title={An optimistic approach to handle out-of-order events within analytical stream processing},
-publisher={Accepted at SEIM},
-year={2018},
-url = {http://seim-conf.org/en/about/accepted-papers/}
+title = {An optimistic approach to handle out-of-order events within analytical stream processing},
+author = {Igor Kuralenok and Nikita Marshalkin and Artem Trofimov and Boris Novikov},
+pages = {22--29},
+url = {http://ceur-ws.org/Vol-2135/#SEIM_2018_paper_16},
+booktitle = {Third Conference on Software Engineering and Information Management (SEIM-2018) (full papers)},
+year = 2018,
+editor = {Yurii Litvinov and Marat Akhin and Boris Novikov and Vladimir Itsykson},
+number = 2135,
+series = {CEUR Workshop Proceedings},
+address = {Aachen},
+issn = {1613-0073},
+venue = {Saint Petersburg, Russia},
+eventdate = {2018-04-14},
 }
 
+
 @online{rocksdb,
-  month = march,
+  month = mar,
   year = {2018},
   title = {RocksDB},
+  key = {RocksDB},
   url = {http://rocksdb.org/}
 }
 
@@ -1222,12 +1233,14 @@ Schemas, and more generally metadata specifying structural and semantic constrai
 
 @misc{JerryPengStreamIO,
   title = {Exactly once is NOT exactly the same},
+  key  = {Exactly once is NOT exactly the same},
   howpublished = {\url{https://streaml.io/blog/exactly-once}},
   year = {2017},
   note = {Accessed: 2018-10-08}
 }
 
 @misc{PaperTrail,
+key = {PaperTrail},
   title = {Exactly-once or not, atomic broadcast is still impossible in Kafka - or anywhere},
   howpublished = {\url{https://www.the-paper-trail.org/post/2017-07-28-exactly-not-atomic-broadcast-still-impossible-kafka/}},
   year = {2017},
