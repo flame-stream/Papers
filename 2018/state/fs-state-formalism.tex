@@ -147,18 +147,33 @@ An important property of a deterministic system is that it preserves the same or
 
 \begin{theorem}
 \label{necessary_conditions}
-If $D$ contains non-commutative transformation, system supports exactly once if and only if $\forall F, a_\tau \in \Gamma, (x,y)\in Cl_D(a_\tau), s\in Cl_D(x) \cap Cl_D(y), x\notin Cl_D(y), y\notin Cl_D(x), b_{\tau_1}, b_{\tau_2} \in Cl_D(s), \tau_2 > \tau_1 : b_{\tau_2} \in Cl_D(a_\tau) \setminus Cl_D^{-1}(b_{\tau_1})$, where $s$ is obtained through non-commutative operation. The scheme of $D$ in the form of a graph is shown in Figure~\ref{theorem-pic}. This behavior is similar to the issue shown in Figure~\ref{state-inconsistency} if we set $b_{\tau_1}=v$.
+If $D$ contains non-commutative transformation and has the following dependencies for some $a_\tau \in \Gamma$:
+
+\begin{enumerate}
+    \item[(i)] $(x,y)\in Cl_D(a_\tau)$
+    \item[(ii)] $((x,y),s)\in D$ through non-commutative operation
+    \item[(iii)] $b_{\tau_1}, b_{\tau_2} \in Cl_D(s), \tau_1 < \tau_2$
+\end{enumerate}
+
+\noindent then non-deterministic system supports exactly once if and only if:
+
+\begin{equation}
+\label{theorem_conditions}
+b_{\tau_2} \in Cl_D(b_{\tau_1}), b_{\tau_2} \notin Cl^{-1}_D(b_{\tau_1})    
+\end{equation}
+
+The scheme of $D$ in the form of a graph is shown in Figure~\ref{theorem-pic}. Basically, the theorem conditions mean that each result of non-commutative operation must be snapshotted before the delivery of output that depends on this result. This behavior is similar to the issue shown in Figure~\ref{state-inconsistency} if we set $b_{\tau_1}=v$.
 \end{theorem}
 \begin{sketch}
 $ $\newline
 $\Rightarrow$
 
-Assume that $b_{\tau_2} \notin Cl_D(a_\tau) \setminus Cl^{-1}_D(b_{\tau_1})$ and system fails at time $\tau_1<\tau_f<\tau_2$. Let $\exists c \in Cl_D(s) \cap Cl^{-1}_D(B_{\tau_2})$ and $c\neq b_{\tau_1}$. Then, to obtain $b_{\tau_2}$ there is a need to recompute $c$, and, therefore, $s$. However, due to asynchronous distributed processing and non-commutative transformation, system can reach not exactly $s$ such that $((x,y), s) \in D$, but $s':((y,x),s')\in D$. In this case, after recovery element $b_{\tau_2}$ will be delivered, but it will depend not on $s$, but on $s'$: $b_{\tau_2}\in Cl_D(s')$. This is a contradiction, because $b_\tau$ has been already delivered and $P(b_{\tau_2}\in Cl_D(s')|\{a_\tau\},\{b_{\tau_1} \in Cl_D(s) \})=0$.
+Assume that conditions~\ref{theorem_conditions} are not satisfied, $b_{\tau_2} \notin Cl_D(b_{\tau_1}), \\ b_{\tau_2} \in Cl^{-1}_D(b_{\tau_1})$, and system fails at time $\tau_1<\tau_f<\tau_2$.  Then, to obtain $b_{\tau_2}$ there is a need to recompute $s$. However, due to asynchronous distributed processing and non-commutative transformation, system can reach not exactly $s$ such that $((x,y), s) \in D$, but $s':((y,x),s')\in D$. In this case, after recovery element $b_{\tau_2}$ will be delivered, but it will depend not on $s$, but on $s'$: $b_{\tau_2}\in Cl_D(s')$. This is a contradiction, because $b_\tau$ has been already delivered and $P(b_{\tau_2}\in Cl_D(s')|\{a_\tau\},\{b_{\tau_1} \in Cl_D(s) \})=0$.
 
 $ $\newline
 $\Leftarrow$
 
-Let system fails at time $\tau_f$. If $\tau_f < \tau_1$ or $\tau_f > \tau_2$, exactly once is obviously satisfied. Assume that $\tau_1<\tau_f<\tau_2$. In this case, $b_{\tau_1}\in B_{\tau_f}\subset B_{\tau_2}$. Hence, $b_{\tau_2}$ can be restored directly from $b_{\tau_1}$ without reprocessing of s, i.e. $F(a_\tau,b_{\tau_1})=b_{\tau_2}$ and $b_{\tau_1}, b_{\tau_2} \in Cl_D(s)$ after recovery.
+Let system fails at time $\tau_f$. If $\tau_f < \tau_1$ or $\tau_f > \tau_2$, exactly once is obviously satisfied. Assume that $\tau_1<\tau_f<\tau_2$. In this case, $b_{\tau_1}\in B_{\tau_f}\subset B_{\tau_2}$. Hence, $b_{\tau_2}$ can be restored directly from $b_{\tau_1}$ without reprocessing of s, i.e. $F(a_\tau,b_{\tau_1})=b_{\tau_2}$ and $b_{\tau_1}, b_{\tau_2} \in Cl_D(s)$ after recovery, thus $P(b_{\tau_2}\in Cl_D(s)|\{a_\tau\},\{b_{\tau_1} \in Cl_D(s) \})>0$.
 \end{sketch}
 
 In the proposed theorem, we assume that input element $a_\tau$ is split into elements $x,y$. The same behavior can be reproduced if two input elements $a_\tau$ and $a_{\tau+1}$ enter a system through asynchronous channels. In general, this behavior is natural for stream processing systems, because elements are processed one-by-one without synchronization and order enforcement. 
