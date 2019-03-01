@@ -1,5 +1,7 @@
 \label{fs-formalism}
 
+In this section we introduce a formal model of a distributed stream processing system. After that, we define the notions of delivery guarantees in a regular way. We demonstrate that in a general case, non-deterministic systems must save results of non-commutative operations before output delivery. It is illustrated how state-of-the-art stream processing systems fit the requirements that we formulate.
+
 \subsection{Distributed streaming model}
 
 \begin{table}[!b]
@@ -39,7 +41,7 @@
 
 \begin{definition}{Stream processing system}
 \label{reference_system}
-is a tuple of $(\Gamma,D,F)$, where $\Gamma$ is a set of all possible data flow elements, $D\subseteq{2^{\Gamma}\times2^{\Gamma}}$ is a binary relation on its power set. Recovery function $F$ provides logic for restoring of working set in case of system failures. Computations within the system are defined by the recurrent rules on the set of all input elements $A$, all output elements $B$ and the transient working set $W$. On each iteration one of the following steps is chosen:
+is a tuple of $(\Gamma,D,F)$, where $\Gamma$ is a set of all possible data flow elements, $D\subseteq{2^{\Gamma}\times2^{\Gamma}}$ is a binary relation on its power set. $F$ is a recovery function that restores working set in case of system failures. Computations within the system are defined by the recurrent rules on the set of input elements $A$, output elements $B$ and the transient working set $W$. On each iteration one of the following steps is chosen:
 
 \begin{enumerate}
     \item \textbf{Input} $a_\tau\in{\Gamma}$:\\ $A_{\tau+1}=A_\tau \cup \{a_\tau\}, \\ B_{\tau+1}=B_{\tau}, \\ W_{\tau+1}=W_{\tau} \cup \{a_\tau\}.$
@@ -50,12 +52,12 @@ is a tuple of $(\Gamma,D,F)$, where $\Gamma$ is a set of all possible data flow 
 
 \end{definition}
 
-Within our model, one can define a streaming system using only data flow elements and operations. Index $\tau\in{\mathbb{N}}$ can be considered as an exact global discrete time. We assume that only one event can happen at any single point in time $\tau$. We also suppose that output elements can be used in system transformations. This property is needed for snapshot and recovery mechanism introduced further. 
+Within our model, one can define a streaming system using only data flow elements and operations. Index $\tau\in{\mathbb{N}}$ can be considered as an exact global discrete time. We assume that only one event can happen at any single point in time $\tau$. 
 
-We suppose that {\em snapshots} of operation states taken by real stream processing systems become ordinary output elements. Thus, output elements can be used in system transformations. The retionale for  this assumption is the following:
+We suppose that {\em snapshots} of operation states taken by real stream processing systems become ordinary output elements. Thus, we allow using output elements in system transformations. The rational for this assumption is the following:
 
 \begin{itemize}
-    \item Snapshots shoe be considered as an output as thaey are usually  stored in external systems, (such as in HDFS, Kafka, relational databases)   and are read back during recovery. 
+    \item Snapshots shoe be considered as an output as they are usually  stored in external systems, (such as in HDFS, Kafka, relational databases)   and are read back during recovery. 
     
     \item Stream processing systems aim at minimizing information which is needed to recover processing, but their optimizations do not directly affect consistency. The notion of $F(A_\tau,B_\tau)$ makes our concept general enough to describe any streaming engine while being independent of a specific implementation of $F$.
 \end{itemize}
@@ -65,8 +67,8 @@ In a classical model proposed by Chandy and Lamport~\cite{Chandy:1985:DSD:214451
 The proposed model is a variation of a classical Chandy-Lamport distributed system model with the following properties and modifications:
 
 \begin{itemize}
-    \item Input and output elements $a_\tau$ and $b_\tau$ are special events. This way, {\em storage} and {\em computations} are distinguished. We assume that output elements $B_\tau$ are all data that leaves a system including so-called {\em state snapshots} which are typically used for recovery~\cite{Carbone:2017:SMA:3137765.3137777}. Because of this, we state that $X \subseteq W_\tau \cup B_\tau$ in the transform transition of the working set. In most state-of-the-art stream processing systems, end-user is external to the system, i.e. a user is able to observe input and output elements, but not the working set.
     \item Our notion of a streaming system does not provide a concept of {\em operations state} because as it is shown in~\cite{we2018adbis}, states can be considered as ordinary data items. In this case, a state element is presented in a system until it is transformed into a new state together with new elements. This model allows a binary relation $D$ to capture computations within a graph of processes that is a physical streaming execution graph in our case. Hence, working set $W_\tau$ is a global state with only channel states in terms of Chandy-Lamport.
+    \item Input and output elements $a_\tau$ and $b_\tau$ are special events. This way, {\em storage} and {\em computations} are distinguished. We assume that output elements $B_\tau$ are all data that leaves a system including so-called {\em state snapshots} which are typically used for recovery~\cite{Carbone:2017:SMA:3137765.3137777}. Because of this, we state that $X \subseteq W_\tau \cup B_\tau$ in the transform transition of the working set. In most state-of-the-art stream processing systems, end-user is external to the system, i.e. a user is able to observe input and output elements, but not the working set.
     \item Distributed asynchronous computations are modeled through the random choice of an operation that is executed next. Instead of using permutations of data flow elements which fixate an execution route, in the proposed model we suppose that the next transition of the working set is a random variable. The distribution of this variable depends on system architecture. 
 \end{itemize}
 
@@ -89,7 +91,7 @@ $P(b_{\tau+1}|A_{\tau}, B_\tau, F^{*})$ is a probability to observe output eleme
 Using the notion of a reference recovery function, one can simply define the correct output. 
 
 \begin{definition}{Output element $b_{\tau+1}$ is consistent}
-with all previous input and output elements $A_\tau$ and $B_\tau$ if the probability to observe them is positive in a system with reference recovery: $P(b_{\tau+1} \mid A_\tau,B_\tau,F^{*})>0$.
+with all previous input and output elements $A_\tau$ and $B_\tau$ if the probability to observe it is non-zero in a system with reference recovery: $P(b_{\tau+1} \mid A_\tau,B_\tau,F^{*})>0$.
 \end{definition}
 
 \subsection{Consistency guarantees}
@@ -130,6 +132,8 @@ Operations that are presented in $D$ can directly affect the complexity of consi
 if\\ 
 $\exists (x,y), s_1, s_2 \in \Gamma, s_1 \neq s_2: \\ ((x,y),s_1)\in D, \\ ((y,x),s_1)\notin D, \\ ((y,x),s_2)\in D$.
 \end{definition}
+
+The are many non-commutative operations that are commonly used in practice: concatenation, matrix multiplication, cross product,  etc. Hence, general-purpose stream processing systems should support them.
 
 \begin{definition}{System is deterministic}
 if\\ 

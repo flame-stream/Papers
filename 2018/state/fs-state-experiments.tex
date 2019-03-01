@@ -3,7 +3,7 @@
 \label {fs-experiments-seciton}
 
 \subsection{Setup}
-A series of experiments were performed in order to analyze the overall performance of the proposed approach. For experiments, we use an open-source implementation of the drifting state model called~\FlameStream\ . \FlameStream\ is a distributed stream processing engine implemented in Java using Akka framework. \FlameStream\ can be deployed on a hardware cluster of computational units that we call nodes. We assume that each node is connected through a network with all other nodes.
+A series of experiments were performed in order to analyze the overall performance of the proposed approach. For experiments, we use an open-source implementation of the drifting state model called~\FlameStream. \FlameStream\ is a distributed stream processing engine implemented in Java using Akka framework. \FlameStream\ can be deployed on a hardware cluster of computational units that we call nodes. We assume that each node is connected through a network with all other nodes.
 
 We  used a problem of incremental inverted index maintenance over a stream of text items. 
 Building inverted index is implemented as a MapReduce transformation in a streaming manner. The scheme is shown in Figure~\ref{index}: 
@@ -22,7 +22,7 @@ The Reduce phase produces  the change records of the inverted index structure, t
   \label {index}
 \end{figure}
 
-We chose the problme  of  an inverted index maintenance  because it satisfies the following properties:
+We choose the problem  of  an inverted index maintenance  because it satisfies the following properties:
 
 \begin{itemize}
     \item Operation that generates change records is non-commutative
