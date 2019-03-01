@@ -22,6 +22,21 @@ We do not enforce a strict architecture of the system, but assume that there are
     \item Data consumer that is responsible for output elements receiving. The exact requirements for data consumer are detailed further in this section
 \end{itemize}
 
+\begin{figure*}[htbp]
+  \centering
+  \includegraphics[scale=0.78]{pics/arch}
+  \caption{The overview of \FlameStream\ architecture}
+  \label {arch}
+\end{figure*}
+
+An overview of the \FlameStream\ architecture is shown in Figure~\ref{arch}. The roles of the barrier, \Acker\ , coordinator, cluster state manager, data producers, and data consumers are detailed in the previous sections. The other components are:
+
+{\bf Node} runs a process called {\it worker}. Worker executes user-defined operations. The computational load is balanced through the distribution of data items among workers. A worker for a data item is determined by the value of a hash function of item payload. Such hash functions can be defined by a user before each logical operation. Each worker can be responsible for one or many ranges of values of hash functions called {\it hash units}. The number of hash-units per worker is a user-defined parameter, and it must be set before the start of computations. 
+
+{\bf Execution graph} is an Akka-based representation of a user-defined logical graph. Execution graph is run by each worker. A data item can be sent to another worker before each operation due to balancing technique and the distribution of hash units. The communication within a node is done via messaging or direct function calls depending on runtime heuristics. A delivery that crosses node boundaries is performed by means of TCP.
+
+{\bf Persistent storage} is needed for reliable storing of state snapshot. In case of failures, the state snapshot is recovered from persistent storage. It can be a distributed file system or database (e.g., HDFS, S3, MongoDB, GFS, HBase, etc.).
+
 \subsection{Snapshotting}
 
 \subsubsection{Grouping buckets}
