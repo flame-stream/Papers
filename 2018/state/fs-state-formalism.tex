@@ -24,32 +24,40 @@
         \hline
         $B_\tau \subseteq 2^{\Gamma}$ & All output elements by the time $\tau$ \\
         \hline
-        $W^{*}_\tau \subseteq 2^{\Gamma}$ & Reference working set at the time $\tau$ \\
-        \hline
         $W_\tau \subseteq 2^{\Gamma}$ & Working set at the time $\tau$ \\
         \hline
         $F$ & Recovery function \\
         \hline
-        $P(b_{\tau+1}|A_{\tau}, B_\tau)$ & Probability of output element in a reference system \\
+        $F$ & Reference recovery function \\
         \hline
-        $P(b_{\tau+1}|A_{\tau}, B_\tau, F)$ & Probability of output element in a system with failures \\
+        $P(b_{\tau+1}|A_{\tau}, B_\tau, F)$ & Probability of output element \\
+        \hline
+        $P(b_{\tau+1}|A_{\tau}, B_\tau, F^{*})$ & Probability of output element in a system with a reference recovery function \\
     \end{tabular}
     \label{notations}
 \end{table}
 
-\begin{definition}{Reference stream processing system}
+\begin{definition}{Stream processing system}
 \label{reference_system}
-is a tuple of $(\Gamma,D)$, where $\Gamma$ is a set of all possible data flow elements, $D\subseteq{2^{\Gamma}\times2^{\Gamma}}$ is a binary relation on its power set. Computations within the system are defined by the recurrent rules on the set of all input elements $A$, all output elements $B$ and the reference working set $W^{*}$. On each iteration one of the following steps is chosen:
+is a tuple of $(\Gamma,D,F)$, where $\Gamma$ is a set of all possible data flow elements, $D\subseteq{2^{\Gamma}\times2^{\Gamma}}$ is a binary relation on its power set. Recovery function $F$ provides logic for restoring of working set in case of system failures. Computations within the system are defined by the recurrent rules on the set of all input elements $A$, all output elements $B$ and the transient working set $W$. On each iteration one of the following steps is chosen:
 
 \begin{enumerate}
-    \item \textbf{Input} $a_\tau\in{\Gamma}$:\\ $A_{\tau+1}=A_\tau \cup \{a_\tau\}, \\ B_{\tau+1}=B_{\tau}, \\ W^{*}_{\tau+1}=W^{*}_{\tau} \cup \{a_\tau\}.$
-    \item \textbf{Output} $b_\tau\in{2^\Gamma}$:\\ $A_{\tau + 1} = A_{\tau}$, \\ $B_{\tau+1}=B_\tau \cup \{b_\tau\}, \\ W^{*}_{\tau+1}=W^{*}_{\tau} \setminus \{b_\tau\}.$
-    \item \textbf{Transform}\\ $A_{\tau + 1} = A_{\tau}$,\\ $B_{\tau+1}=B_{\tau}$, \\ $W^{*}_{\tau+1}=(W^{*}_\tau \setminus X_\tau) \cup Y_\tau, (X_\tau,Y_\tau) \in D$, \\where\\$X_\tau \thicksim \mathcal{F}(X\mid X \subseteq W^{*}_\tau \cup B_\tau , \exists Y : (X,Y) \in D)$, \\ distribution $\mathcal{F}$ depends on a system architecture. \label{random_formula}
+    \item \textbf{Input} $a_\tau\in{\Gamma}$:\\ $A_{\tau+1}=A_\tau \cup \{a_\tau\}, \\ B_{\tau+1}=B_{\tau}, \\ W_{\tau+1}=W_{\tau} \cup \{a_\tau\}.$
+    \item \textbf{Output} $b_\tau\in{2^\Gamma}$:\\ $A_{\tau + 1} = A_{\tau}$, \\ $B_{\tau+1}=B_\tau \cup \{b_\tau\}, \\ W_{\tau+1}=W_{\tau} \setminus \{b_\tau\}.$
+    \item \textbf{Transform}\\ $A_{\tau + 1} = A_{\tau}$,\\ $B_{\tau+1}=B_{\tau}$, \\ $W_{\tau+1}=(W_\tau \setminus X_\tau) \cup Y_\tau, (X_\tau,Y_\tau) \in D$, \\where\\$X_\tau \thicksim \mathcal{\Psi}(X\mid X \subseteq W_\tau \cup B_\tau , \exists Y : (X,Y) \in D)$, \\ distribution $\mathcal{\Psi}$ depends on a system architecture. \label{random_formula}
+    \item \textbf{Failure and recover} \\  $A_{\tau + 1} = A_{\tau}$,\\ $B_{\tau+1}=B_{\tau}$, \\ $W_{\tau+1} = F(A_\tau,B_\tau)$
 \end{enumerate}
 
 \end{definition}
 
 Within our model, one can define a streaming system using only data flow elements and operations. Index $\tau\in{\mathbb{N}}$ can be considered as an exact global discrete time. We assume that only one event can happen at any single point in time $\tau$. We also suppose that output elements can be used in system transformations. This property is needed for snapshot and recovery mechanism introduced further. 
+
+In this model, we suppose that {\em snapshots} of operation states taken by real stream processing systems become ordinary output elements. Thus, output elements can be used in system transformations. The motivation behind this assumption is the following:
+
+\begin{itemize}
+    \item Snapshots are typically stored in external systems, e.g. in HDFS, Kafka, relational databases, etc. They directly affect output elements after recovery.
+    \item Stream processing systems aim at minimizing information which is needed to recover processing, but their optimizations do not directly affect consistency. The notion of $F(A_\tau,B_\tau)$ makes our concept general enough to describe any streaming engine while being independent of a specific implementation of $F$.
+\end{itemize}
 
 In a classical model proposed by Chandy and Lamport~\cite{Chandy:1985:DSD:214451.214456}, a distributed system is represented as a graph of processes, which can be connected to each other via channels. Each process can own a modifiable internal state, generate {\em events} and send them to other processes through the channels. {\em Global system state} in this model contains processes states and channel states, e.g., elements, which are in-flight at the moment. Distributed asynchronous processing is simulated using permutations of events.
 
@@ -61,40 +69,31 @@ The proposed model is a variation of a classical Chandy-Lamport distributed syst
     \item Distributed asynchronous computations are modeled through the random choice of an operation that is executed next. Instead of using permutations of data flow elements which fixate an execution route, in the proposed model we suppose that the next transition of the working set is a random variable. The distribution of this variable depends on system architecture. 
 \end{itemize}
 
-% We can imagine a working set as a pool, where some elements are poured in and others are poured out. Inside a pool, each element can be transformed into the other element, which can be transformed as well, and so on. Only survived elements are poured out from the pool. 
+Parallel asynchronous nature of distributed stream processing allows us to handle only a {\em probability} of an output element, because it can be different from run to run due to element reorderings.
 
-\begin{definition}{Probability of output element in a reference system}
-$P(b_{\tau+1}|A_{\tau}, B_\tau)$ is a probability to observe output set $b$ at the time $\tau+1$ considering all previous input and output elements.
+\begin{definition}{Probability of output element}
+$P(b_{\tau+1}|A_{\tau}, B_\tau, F)$ is a probability to observe output element $b_{\tau+1}$ considering all previous input and output elements, and recovery function.
 \end{definition}
 
-For all output elements from the reference working set, such probabilities are positive, $\forall{b_{\tau+1} \in 2^{\Gamma}: \exists{W^{*}_{\tau+1}=W^{*}_{\tau}\setminus{b_{\tau+1}}}} \Rightarrow P(b_{\tau+1}|A_{\tau}, B_\tau) > 0$. It is important to note that there can be multiple reference working sets $\{W^{*}_{\tau+1}=W^{*}_{\tau}\setminus{b_{\tau+1}}\}$ due to asynchronous distributed processing. 
+The problem here is that it is hard to define the correct output, because it may significantly vary. Inconsistencies may arise only in case of failure and incorrect recovery. Let us introduce a {\em reference} recovery function that allows us to denote results which are possible to reach without failures.
 
-The reference stream processing system is just an abstract concept because it does not capture possible failures of network and computational units. We introduced it to denote results which are possible to reach without failures. Failure can be expressed as a loss of the working set or its part. Let us extend the reference model by a recovery mechanism that allows a system to transparently pass through the failures.
-
-\begin{definition}{Stream processing system}
-is a tuple of\\
-$(\Gamma,D,F)$. Sets $\Gamma$ and $D$ define the reference system. Recovery function $F$ provides logic for restoring of working set in case of system failures. Recurrent rules for computations are extended with a {\em recover transition}:
-\begin{enumerate}
-    \setcounter{enumi}{3}
-    \item \textbf{Failure and recover} \\  $A_{\tau + 1} = A_{\tau}$,\\ $B_{\tau+1}=B_{\tau}$, \\ $W_{\tau+1} = F(A_\tau,B_\tau)$
-\end{enumerate}
-
+\begin{definition}{Reference}
+$F^{*}$ is a recovery function that restores exactly the same working set as before the failure, $\forall \tau \in \mathbb{N}, F^{*}(A_\tau,B_\tau)=W_\tau$.
 \end{definition}
 
-In this model, we suppose that {\em snapshots} of operation states taken by real stream processing systems are ordinary output elements. The motivation behind this assumption is the following:
+\begin{definition}{Probability of output element with a reference recovery function}
+$P(b_{\tau+1}|A_{\tau}, B_\tau, F^{*})$ is a probability to observe output element $b_{\tau+1}$ considering all previous input and output elements, and a reference recovery function.
+\end{definition}
 
-\begin{itemize}
-    \item Snapshots are typically stored in external systems, e.g. in HDFS, Kafka, relational databases, etc. They directly affect output elements after recovery.
-    \item Stream processing systems aim at minimizing information which is needed to recover processing, but their optimizations do not directly affect consistency. The notion of $F(A_\tau,B_\tau)$ makes our concept general enough to describe any streaming engine while being independent of a specific implementation of $F$.
-\end{itemize}
+Using the notion of a reference recovery function, one can simply define the correct output. 
 
-\begin{definition}{Probability of output element in system with failures}
-$P(b_{\tau+1}|A_{\tau}, B_\tau, F)$ is a probability to observe output element $b$ at the time $\tau+1$ considering all previous input and output elements, and recovery function.
+\begin{definition}{Output element $b_{\tau+1}$ is consistent}
+with all previous input and output elements $A_\tau$ and $B_\tau$ if the probability to observe them is positive in a system with reference recovery: $P(b_{\tau+1} \mid A_\tau,B_\tau,F^{*})>0$.
 \end{definition}
 
 \subsection{Consistency guarantees}
 
-The reference system concept allows us to express the notion of valid execution in terms of correspondence between input and output elements. In most real cases, input and output elements are the only data that can be observed by end-user. In real distributed stream processing systems, failures and recoveries can corrupt the output, despite the fact, that in terms of a naive definition of delivery guarantees, all elements are processed exactly once. Let us demonstrate it by an example. Assume that $\Gamma=\mathbb{N}$ and $D$ consists of a single non-commutative operation $v^{i+1}=a_\tau(1+v^{i}),v^{0}=0$ and $v$ becomes an output element on each iteration. Upper index denotes an order of transformations. Let $F$ set $v^{0}=0$ and reprocess input elements from the very beginning that seems like a correct naive approach for restoring. Assume that the system does not release output elements during reprocessing to avoid duplicates. However, if input elements arrive from asynchronous input channels, they can be reordered, and results of non-commutative operation may become inconsistent with results before the failure, e.g. the property of output monotonicity can be violated. This example is demonstrated in Figure~\ref{state-inconsistency}. 
+The reference recovery function allows us to express the notion of valid execution in terms of correspondence between input and output elements. In most real cases, input and output elements are the only data that can be observed by end-user. In real distributed stream processing systems, failures and recoveries can corrupt the output, despite the fact, that in terms of a naive definition of delivery guarantees, all elements are processed exactly once. Let us demonstrate it by an example. Assume that $\Gamma=\mathbb{N}$ and $D$ consists of a single non-commutative operation $v^{i+1}=a_\tau(1+v^{i}),v^{0}=0$ and $v$ becomes an output element on each iteration. Upper index denotes an order of transformations. Let $F$ set $v^{0}=0$ and reprocess input elements from the very beginning that seems like a correct naive approach for restoring. Assume that the system does not release output elements during reprocessing to avoid duplicates. However, if input elements arrive from asynchronous input channels, they can be reordered, and results of non-commutative operation may become inconsistent with results before the failure, e.g. the property of output monotonicity can be violated. This example is demonstrated in Figure~\ref{state-inconsistency}. 
 
 \begin{figure}[htbp]
   \centering
@@ -104,25 +103,25 @@ The reference system concept allows us to express the notion of valid execution 
 \end{figure}
 
 \begin{definition}{System provides for exactly once}
-if it is possible to obtain each output element $b_{\tau+1}$ in the reference stream processing system, i.e.,\\ 
-$\forall{\tau \in \mathbb{N}}, b_{\tau+1}\in 2^{\Gamma}: P(b_{\tau+1}|A_{\tau},B_\tau,F)>0 \Rightarrow \\ P(b_{\tau+1}|A_{\tau},B_\tau)>0$.
+if it is possible to obtain each output element $b_{\tau+1}$ in a system with a reference recovery fucntion, i.e.,\\ 
+$\forall{\tau \in \mathbb{N}}, b_{\tau+1}\in 2^{\Gamma}: P(b_{\tau+1}|A_{\tau},B_\tau,F)>0 \Rightarrow \\ P(b_{\tau+1}|A_{\tau},B_\tau,F^{*})>0$.
 \end{definition}
 
 \begin{definition}{System provides for at most once}
 if \\
 $\exists{A^{0}_{\tau}\subseteq{A_{\tau}}}$ such that \\
-$\forall{\tau \in \mathbb{N},{b_{\tau+1}\in 2^{\Gamma}}}: P(b_{\tau+1}|A_{\tau},B_\tau,F)>0 \Rightarrow \\ P(b_{\tau+1}|A^{0}_{\tau},B_\tau)>0$.
+$\forall{\tau \in \mathbb{N},{b_{\tau+1}\in 2^{\Gamma}}}: P(b_{\tau+1}|A_{\tau},B_\tau,F)>0 \Rightarrow \\ P(b_{\tau+1}|A^{0}_{\tau},B_\tau,F^{*})>0$.
 \end{definition}
 
 \begin{definition}{System provides for at least once}
 if \\
 $\exists{A^{*}_{\tau}\subseteq{2^{A_{\tau}}}}$ such that \\
-$\forall{\tau \in \mathbb{N}, {b_{\tau+1} \in 2^{\Gamma}}}: P(b_{\tau+1}|A_{\tau},B_\tau,F)>0 \Rightarrow \\ P(b_{\tau+1}|A^{*}_{\tau},B_\tau)>0$.
+$\forall{\tau \in \mathbb{N}, {b_{\tau+1} \in 2^{\Gamma}}}: P(b_{\tau+1}|A_{\tau},B_\tau,F)>0 \Rightarrow \\ P(b_{\tau+1}|A^{*}_{\tau},B_\tau,F^{*})>0$.
 \end{definition}
 
-Exactly once states that observed results cannot be distinguished from one of the possible results produced by the reference system. At most once and at least once guarantees are the relaxations of exactly once. The results within these guarantees can be obtained in the reference system, but with the modification of the input. At least once can be reproduced if the input contains duplicated items. At most once can be achieved in the reference system if some input elements are missed. It is important to note, that regarding at most once guarantee we require an input element to be processed atomically with all its derivatives or not processed at all. To the best of our knowledge, no one real stream processing engine supports at most once guarantee, so we cannot verify the relevancy of this assumption. It is easy to provide at most once by producing no output at all but if the output is presented, at most once enforcement becomes much more difficult.  
+Exactly once states that observed results cannot be distinguished from one of the possible results produced by a system with a reference recovery function. At most once and at least once guarantees are the relaxations of exactly once. The results within these guarantees can be obtained without failures, but with the modification of the input. At least once can be reproduced if the input contains duplicated items. At most once can be achieved with a reference recovery if some input elements are missed. It is important to note, that regarding at most once guarantee we require an input element to be processed atomically with all its derivatives or not processed at all. To the best of our knowledge, no one real stream processing engine supports at most once guarantee, so we cannot verify the relevancy of this assumption. It is easy to provide at most once by producing no output at all but if the output is presented, at most once enforcement becomes much more difficult.  
 
-In our formal model, the relaxations of exactly once are defined without diving into recovery mechanisms. Instead, they are described through possible input channel flaws in a reference system. This trick allows us to represent invisible system details in terms clear for a user.
+In our formal model, the relaxations of exactly once are defined without diving into recovery mechanisms. Instead, they are described through possible input channel flaws in a system with a reference recovery. This trick allows us to represent invisible system details in terms clear for a user.
 
 Operations that are presented in $D$ can directly affect the complexity of consistency enforcement mechanisms. For example, if all operations are idempotent, exactly once can be obviously achieved~\cite{Akidau:2013:MFS:2536222.2536229}. On the other hand, if $D$ consists of non-idempotent and non-commutative, exactly once becomes challenging.
 
@@ -151,7 +150,7 @@ If $D$ contains non-commutative transformation and has the following dependencie
 
 \begin{enumerate}
     \item[(i)] $(x,y)\in Cl_D(a_\tau)$
-    \item[(ii)] $((x,y),s)\in D$ through non-commutative operation
+    \item[(ii)] $((x,y),s)\in D$ through a non-commutative operation
     \item[(iii)] $b_{\tau_1}, b_{\tau_2} \in Cl_D(s), \tau_1 < \tau_2$
 \end{enumerate}
 
@@ -159,16 +158,19 @@ If $D$ contains non-commutative transformation and has the following dependencie
 
 \begin{equation}
 \label{theorem_conditions}
-b_{\tau_2} \in Cl_D(b_{\tau_1}), b_{\tau_2} \notin Cl^{-1}_D(b_{\tau_1})    
+b_{\tau_2} \in Cl_D(a_\tau) \setminus Cl^{-1}_D(b_{\tau_1})   
 \end{equation}
 
-The scheme of $D$ in the form of a graph is shown in Figure~\ref{theorem-pic}. Basically, the theorem conditions mean that each result of non-commutative operation must be snapshotted before the delivery of output that depends on this result. This behavior is similar to the issue shown in Figure~\ref{state-inconsistency} if we set $b_{\tau_1}=v$.
 \end{theorem}
 \begin{sketch}
 $ $\newline
+
+The scheme of $D$ in the form of a graph is shown in Figure~\ref{theorem-pic}. Basically, the theorem conditions mean that each result of non-commutative operation must be snapshotted before the delivery of output that depends on this result. This behavior is similar to the issue shown in Figure~\ref{state-inconsistency} if we set $b_{\tau_1}=v$.
+
+$ $\newline
 $\Rightarrow$
 
-Assume that conditions~\ref{theorem_conditions} are not satisfied, $b_{\tau_2} \notin Cl_D(b_{\tau_1}), \\ b_{\tau_2} \in Cl^{-1}_D(b_{\tau_1})$, and system fails at time $\tau_1<\tau_f<\tau_2$.  Then, to obtain $b_{\tau_2}$ there is a need to recompute $s$. However, due to asynchronous distributed processing and non-commutative transformation, system can reach not exactly $s$ such that $((x,y), s) \in D$, but $s':((y,x),s')\in D$. In this case, after recovery element $b_{\tau_2}$ will be delivered, but it will depend not on $s$, but on $s'$: $b_{\tau_2}\in Cl_D(s')$. This is a contradiction, because $b_\tau$ has been already delivered and $P(b_{\tau_2}\in Cl_D(s')|\{a_\tau\},\{b_{\tau_1} \in Cl_D(s) \})=0$.
+Assume that conditions~\ref{theorem_conditions} are not satisfied, i.e. $\exists c \in Cl_D(s) \cap Cl^{-1}(b_{\tau_2})$, and system fails at time $\tau_1<\tau_f<\tau_2$. Then, to obtain $b_{\tau_2}$ there is a need to recompute $s$. However, due to asynchronous distributed processing and non-commutative transformation, system can reach not exactly $s$ such that $((x,y), s) \in D$, but $s':((y,x),s')\in D$. In this case, after recovery element $b_{\tau_2}$ will be delivered, but it will depend not on $s$, but on $s'$: $b_{\tau_2}\in Cl_D(s')$. This is a contradiction, because $b_\tau$ has been already delivered and $P(b_{\tau_2}\in Cl_D(s')|\{a_\tau\},\{b_{\tau_1} \in Cl_D(s) \})=0$.
 
 $ $\newline
 $\Leftarrow$
