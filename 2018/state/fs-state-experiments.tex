@@ -2,7 +2,7 @@
 
 \label {fs-experiments-seciton}
 
-The series of experiments were performed in order to analyze the overall performance of the proposed approach. For experiments, we use an open-source implementation of the drifting state model called~\FlameStream\ . \FlameStream\ is a distributed stream processing engine implemented in Java using Akka framework. \FlameStream\ can be deployed on a hardware cluster of computational units that we call nodes. We assume that each node is connected through a network with all other nodes.
+A series of experiments were performed in order to analyze the overall performance of the proposed approach. For experiments, we use an open-source implementation of the drifting state model called~\FlameStream\ . \FlameStream\ is a distributed stream processing engine implemented in Java using Akka framework. \FlameStream\ can be deployed on a hardware cluster of computational units that we call nodes. We assume that each node is connected through a network with all other nodes.
 
 \begin{figure*}[htbp]
   \centering
@@ -61,7 +61,7 @@ The performance of the proposed deterministic model within the same stream proce
 
 Figures~\ref{comparison50}, ~\ref{comparison500}, and ~\ref{comparison1000} show   the latencies of \FlameStream\ within distinct times between checkpoints. As expected, the overhead on exactly once enforcement is low (less than 10 ms), and it does not depend on the time between checkpoints. Slight overhead can be explained by the fact that asynchronous state snapshotting is executed on single-core nodes. The time between checkpoints does not influence latency because output elements delivery and state snapshotting mechanisms are independent in our model.
 
-System behavior in case of failures and recoveries is demonstrated in Figure~\ref{recovery}. It is shown that the system can perform recovery processes in an adequate time. Existing latency spikes are caused by the replay process, JVM restart, etc.
+The system behavior in case of failures and recoveries is demonstrated in Figure~\ref{recovery}. It is shown that the system can perform recovery processes in an adequate time. Existing latency spikes are caused by the replay process, JVM restart, etc.
 
 \begin{figure}[htbp]
   \centering
