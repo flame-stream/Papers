@@ -5,7 +5,7 @@
 \subsection{Setup}
 A series of experiments were performed in order to analyze the overall performance of the proposed approach. For experiments, we use an open-source implementation of the drifting state model called~\FlameStream. \FlameStream\ is a distributed stream processing engine implemented in Java using Akka framework. \FlameStream\ can be deployed on a hardware cluster of computational units that we call nodes. We assume that each node is connected through a network with all other nodes.
 
-We  used a problem of incremental inverted index maintenance over a stream of text items. 
+We used a problem of incremental inverted index maintenance over a stream of text items. 
 Building inverted index is implemented as a MapReduce transformation in a streaming manner. The scheme is shown in Figure~\ref{index}: 
 
 \begin{itemize}
@@ -13,7 +13,7 @@ Building inverted index is implemented as a MapReduce transformation in a stream
     \item Reduce phase consists of combining word positions for the corresponding word into the single index structure 
 \end{itemize}
 
-The Reduce phase produces  the change records of the inverted index structure, to make this algorithm suitable for stream processing systems. It implies that each input page triggers the output of the corresponding change records of the full index. In \FlameStream\ this algorithm is implemented as the typical conversion of MapReduce transformation, which is shown in~\cite{we2018seim}.
+The Reduce phase produces the change records of the inverted index structure, to make this algorithm suitable for stream processing systems. It implies that each input page triggers the output of the corresponding change records of the full index. In \FlameStream\ this algorithm is implemented as the typical conversion of MapReduce transformation, which is shown in~\cite{we2018seim}.
 
 \begin{figure}[htbp]
   \centering
@@ -40,7 +40,7 @@ By the notion of {\it latency} we assume the time between two events:
     \item All the change records for the page leave the stream
 \end{enumerate}
 
-Our experiments were performed on the cluster of 10 Amazon EC2 micro instances with 1GB RAM and 1 core CPU. We used Wikipedia articles as a dataset. Documents per second input rate is 50, because higher rates lead to trigger of backpressure mechanisms in an industrial system that we compare with. RocksDB~\cite{rocksdb} is used as a storage for the state. The role of data producer and data consumer is played by a custom server application that sends and receives data through socket and measures the latency.
+Our experiments were performed on the cluster of 10 Amazon EC2 micro instances with 1GB RAM and 1 core CPU. We used Wikipedia articles as a dataset. Documents per second input rate is 50 because higher rates lead to enabling of backpressure mechanisms in an industrial system that we compare with. RocksDB~\cite{rocksdb} is used as a storage for the state. The role of data producer and data consumer is played by a custom server application that sends and receives data through socket and measures the latency.
 
 \subsection{Overhead and recovery}
 The performance of the proposed deterministic model within the same stream processing task is deeply analyzed in~\cite{we2018seim}. In this paper, we aim to evaluate the overhead on providing consistency guarantees and the time needed for the full recovery.
@@ -59,7 +59,7 @@ The system behavior in case of failures and recoveries with 1000 ms between chec
 \subsection{Comparison with an industrial system}
 One of the most important goals of the experiments is the performance comparison with an industrial solution regarding latency. Apache Flink has been chosen for evaluation because it is a state-of-the-art stream processing system that provides similar functionality and achieves low latency in the real-world scenarios~\cite{S7530084}. 
 
-For Apache Flink, the algorithm for building the inverted index is relies on  the usage of {\it FlatMapFunction} for map step and stateful {\it RichMapFunction} for reduce step and for producing the change records. The network buffer timeout is set to 0 to minimize latency. Custom {\it TwoPhaseCommitSinkFunction} that buffers output items in memory until a transaction is committed is used for experiments that require exactly-once semantics. 
+For Apache Flink, the algorithm for building the inverted index is relies on the usage of {\it FlatMapFunction} for map step and stateful {\it RichMapFunction} for reduce step and for producing the change records. The network buffer timeout is set to 0 to minimize latency. Custom {\it TwoPhaseCommitSinkFunction} that buffers output items in memory until a transaction is committed is used for experiments that require exactly-once semantics. 
 
 {\it FsStateBackend} with the local file system is used for storing the state, because {\it RocksDBStateBackend} requires saving state to RocksDB on each update that leads to additional overhead. {\it FsStateBackend} stores state on the disk only on checkpoints and do not provide an additional overhead against RocksDB storage in \FlameStream, so it is fairer to use it rather than {\it RocksDBStateBackend} for comparison purposes.
 
@@ -80,7 +80,7 @@ In this paper, we compare $50^{th}$, $75^{th}$, $95^{th}$, and $99^{th}$ percent
 \end{figure}
 
 Figures~\ref{comparison50}, ~\ref{comparison500}, and ~\ref{comparison1000} demonstrate      the comparison of latencies between \FlameStream\ and Flink within distinct times between checkpoints, and different guarantees on data. Without guarantees, the latencies of \FlameStream\ and Flink do not significantly differ. However, for exactly once, Flink's latency is dramatically higher, and it directly depends on the time between checkpoints. Nevertheless, such behavior is expected, because Flink needs to take state snapshot and release output items within a single transaction to ensure that all states of non-commutative operations are persistently saved. There are no hints implemented in Flink which could mark an operation as commutative, hence it waits until states of all operations are stored before output delivery. 
-On the other hand, the property of determinism allows \FlameStream\ to avoid synchronization  state snapshotting and output delivery. This fact makes it possible to achieve exactly once with low overhead.
+On the other hand, the property of determinism allows \FlameStream\ to avoid synchronization state snapshotting and output delivery. This fact makes it possible to achieve exactly once with low overhead.
 
 \begin{figure}[htbp]
   \centering

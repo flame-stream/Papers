@@ -8,33 +8,33 @@ However, there are plenty of scenarios where processing results are most valuabl
 
 One of the most challenging tasks for streaming systems is to provide guarantees on data processing. 
 %Unlike batch systems, 
-Streaming systems must release output elements before processing has finished, because input data is assumed to be unbounded. This requirement makes failure recovery mechanisms more complex. Streaming systems face a need to recover computations consistently with previous input data, the current system state, and with the elements which have been already delivered to  a consumer. 
+Streaming systems must release output elements before processing has finished because input data is assumed to be unbounded. This requirement makes failure recovery mechanisms more complex. Streaming systems face a need to recover computations consistently with previous input data, the current system state, and with the elements which have been already delivered to a consumer. 
 
 A contract regarding {\em which data} will be eventually processed and released in case of failures is usually described in terms of so-called {\em delivery guarantees}. They include {\em at most once}, {\em at least once}, and {\em exactly once}. Exactly once is the strongest and the most valuable guarantee from the user perspective because it mitigates efforts on output consistency enforcement. These notions are seemingly simple but have important flaws. Typically, an output item depends not only on the corresponding input item but also on the system state. 
-The above  implies that a system can process each element exactly once, but in practice can release completely invalid results due to inconsistencies in the state or in-flight elements.
+The above implies that a system can process each element exactly once, but in practice can release completely invalid results due to inconsistencies in the state or in-flight elements.
 
-The  problem shows up  if a data flow contains a non-commutative operation. Let us consider a data flow with an operation that concatenates input strings and delivers the result of each iteration. 
-After a failure, the system must restore its state, in this case  a concatenation of strings. 
-A straightforward  approach to restoring state is to replay missing input elements. 
+The problem shows up if a data flow contains a non-commutative operation. Let us consider a data flow with an operation that concatenates input strings and delivers the result of each iteration. 
+After a failure, the system must restore its state, in this case, a concatenation of strings. 
+A straightforward approach to restoring state is to replay missing input elements. 
 However, these elements can be reordered in an asynchronous distributed environment. 
-Such  behavior may lead to the concatenation  affected by several input elements exactly once but is inconsistent with elements  released before the failure.
+Such behavior may lead to the concatenation being affected by several input elements exactly once but is inconsistent with elements released before the failure.
 
 This example illustrates that naive definitions of delivery guarantees are not sufficient to provide output consistency. 
-Most  of existing implementations prevent anomalies illustrated by the example above. Flink ensures atomicity between state updates and output elements delivery using a protocol based on distributed transactions. This protocol prevents inconsistencies but leads to a significant increase of latency. 
+Most of the existing implementations prevent anomalies illustrated by the example above. Flink ensures atomicity between state updates and output elements delivery using a protocol based on distributed transactions. This protocol prevents inconsistencies but leads to a significant increase of latency. 
 Google MillWheel~\cite{Akidau:2013:MFS:2536222.2536229} enforces consistency between state and output elements by writing results of each operation to persistent external storage. 
-The lower bound of latency  is a duration of all external writes within routes of an input element and its descendants. 
+The lower bound of latency is a duration of all external writes within routes of an input element and its descendants. 
 Micro-batching engines like Storm Trident~\cite{apache:storm:trident} and Spark Streaming~\cite{Zaharia:2012:DSE:2342763.2342773} process data in small-sized blocks. 
-Each block is atomically processed on each stage of a data flow that givesproperties  similar to batch processing.
+Each block is atomically processed on each stage of a data flow that provides properties similar to batch processing.
  The main downside of this approach is high latency, about a few seconds~\cite{7530084, 7474816}.
 
 The huge gap between the notion of exactly once and the properties of its implementations indicates the lack of formalization. Misunderstandings of streaming delivery guarantees frequently cause debates and discussions~\cite{JerryPengStreamIO, PaperTrail}. Without a formal model, it is hard to observe similarities and distinctions between existing solutions and to recognize their limitations.
 
-Another property inherent in  batch processing systems  but  hard to achieve in streaming engines is {\em  a determinism}. 
-The determinism means that repeated  runs  of the system on the same data produces the same results. It is commonly considered as a challenging task~\cite{Zacheilas:2017:MDS:3093742.3093921}. 
+Another property inherent in batch processing systems but hard to achieve in streaming engines is {\em a determinism}. 
+The determinism means that repeated runs of the system on the same data produce the same results. It is commonly considered as a challenging task~\cite{Zacheilas:2017:MDS:3093742.3093921}. 
 On the other hand, this property is desirable, because it implies reproducibility and predictability. 
 Intuitively, determinism is connected with consistency~\cite{Stonebraker:2005:RRS:1107499.1107504}, but, to the best of our knowledge, this relation has not been deeply investigated. 
 
-In this work, we introduce a formal model of stream processing that captures delivery guarantees existing in most of  state-of-the-art systems. We show that the concepts of delivery guarantees are closely related to output data {\em consistency}. We demonstrate that determinism is tightly connected with both delivery and consistency. In a deterministic system, a state of a non-commutative operation can be reprocessed consistently with the previous output elements. Hence, there is no need to save results of non-commutative operations before output delivery. This property opens a wide range for performance optimizations.
+In this work, we introduce a formal model of stream processing that captures delivery guarantees existing in most of the state-of-the-art systems. We show that the concepts of delivery guarantees are closely related to output data {\em consistency}. We demonstrate that determinism is tightly connected with both delivery and consistency. In a deterministic system, a state of a non-commutative operation can be reprocessed consistently with the previous output elements. Hence, there is no need to save the results of non-commutative operations before output delivery. This property opens a wide range for performance optimizations.
 
 In order to prove the feasibility of efficient exactly once over determinism, we design fault tolerance protocols on top of {\em drifting state} model~\cite{we2018adbis}. Unlike naive expectations, this optimistic technique provides determinism with low overhead. We show that lightweight determinism together with the results of the formal inference allows achieving exactly once with almost no extra cost. It is verified by the experiments on a realistic problem.
 
