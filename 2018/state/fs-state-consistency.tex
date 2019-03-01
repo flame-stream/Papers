@@ -35,6 +35,13 @@ We do not enforce a strict architecture of the system, but assume that there are
 
 \subsubsection{Grouping buckets}
 
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.5\columnwidth]{pics/substate}
+  \caption{Grouping bucket won't be modified up to element that corresponds to current minimal $t(x)$}	
+  \label {immutable}	
+\end{figure}
+
 In order to periodically save grouping buckets, there is a need to determine which part of them is stable and sufficient for recovery. It is convenient to use~\Acker\ notifications for this purpose. Let $t_{min}$ be the right bound of the last received notification from~\Acker\ . It means that all elements that have given $t(x)$ been completely processed. In other words, it is the {\em minimal} $t(x)$ of elements which are still in the system.  
 Grouping's buckets in practice are lists sorted by $t(x)$. Because of the guarantees provided by~\Acker\ notifications, these lists will not be modified at any position before the item with $t(x)=t_min$. The immutable prefix and mutable suffix of grouping bucket are shown at Figure~\ref{immutable}. At the same time, because of the grouping semantics, state that is reached after consuming all data items with $t(x)$ in range $[0..t_{min})$ is just a window-sized sublist that is located in the immutable part of the bucket, the example is shown in figure~\ref{substate}. Thereby, state snapshotting of different groupings can be done asynchronously with each other and with the computational process of the current operation. 
 
