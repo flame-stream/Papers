@@ -4,7 +4,7 @@
 
 In this section, we outline the lightweight deterministic model called {\em drifting state}. While it is described in details in~\cite{we2018adbis}, in this paper we mention properties, which play important roles in consistency enforcement techniques.
 
-This section we begin with basic concepts that allow achieving determinism within a pure streaming engine. Model in terms of the proposed formal framework is described at the end of the section.
+We start with basic concepts that allow achieving determinism within a pure streaming engine. Model in terms of the proposed formal framework is described at the end of the section.
 
 Determinism can be achieved in a stream processing system with the following straightforward approach:
 \begin{enumerate}
@@ -13,7 +13,7 @@ Determinism can be achieved in a stream processing system with the following str
     \item Require all operations to be pure
 \end{enumerate}
 
-The order on elements can be defined using a natural order of input elements arrival. Let us denote it as $t(x)$, $\forall \tau \in \mathbb{N}, a_\tau :  t(a_\tau)=\tau$. The way how $t(x)$ is propagated when an element is transformed into a new one in data flow operations is detailed in section~\ref{ops}.
+The order on elements can be defined using a natural order of   arrival of input elements. Let us denote it as $t(x)$, $\forall \tau \in \mathbb{N}, a_\tau :  t(a_\tau)=\tau$. The way how $t(x)$ is propagated when an element is transformed into a new one in data flow operations is detailed in section~\ref{ops}.
 
 Drifting state model allows us to efficiently achieve total order enforcement. An underlying idea of drifting state is a reduced set of available operations which are pure and allow system to deliver output elements as all computations were in order. On the other hand, these operations are sufficient to implement any stateful streaming computation.
 
@@ -36,14 +36,14 @@ Any stateful transformation can be expressed as a composition of a map, a groupi
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=.49\textwidth]{pics/classical-drifting}
+  \includegraphics[width=\columnwidth]{pics/classical-drifting}
   \caption{Typical state handling approach}
   \label {classical-drifting}
 \end{figure}
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=.49\textwidth]{pics/classical-drifting2}
+  \includegraphics[width=\columnwidth]{pics/classical-drifting2}
   \caption{Drifting state model}
   \label {classical-drifting2}
 \end{figure}
@@ -61,7 +61,7 @@ In this setting, map operation is pure and order insensitive, and grouping opera
  
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=.35\textwidth]{pics/grouping-invalidation}
+  \includegraphics[width=\columnwidth]{pics/grouping-invalidation}
   \caption{An idea of optimistic grouping implementation}
   \label {optimistic-grouping}
 \end{figure} 
@@ -78,7 +78,7 @@ Figure~\ref{acker} illustrates~\Acker\ functionality. Different shapes mean diff
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=.49\textwidth]{pics/acker}
+  \includegraphics[width=\columnwidth]{pics/acker}
   \caption{The example of tracking dependencies using~\Acker\ }
   \label {acker}
 \end{figure}

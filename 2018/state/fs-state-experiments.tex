@@ -63,8 +63,6 @@ For Apache Flink, the algorithm for building the inverted index is relies on  th
 
 {\it FsStateBackend} with the local file system is used for storing the state, because {\it RocksDBStateBackend} requires saving state to RocksDB on each update that leads to additional overhead. {\it FsStateBackend} stores state on the disk only on checkpoints and do not provide an additional overhead against RocksDB storage in \FlameStream, so it is fairer to use it rather than {\it RocksDBStateBackend} for comparison purposes.
 
-In this paper, we compare $50^{th}$, $75^{th}$, $95^{th}$, and $99^{th}$ percentile of distributions, which clearly represent the performance from the perspective of the users' experience.
-
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=.5\textwidth]{pics/comparison50}
@@ -72,8 +70,7 @@ In this paper, we compare $50^{th}$, $75^{th}$, $95^{th}$, and $99^{th}$ percent
   \label {comparison50}
 \end{figure}
 
-Figures~\ref{comparison50}, ~\ref{comparison500}, and ~\ref{comparison1000} demonstrate      the comparison of latencies between \FlameStream\ and Flink within distinct times between checkpoints, and different guarantees on data. Without guarantees, the latencies of \FlameStream\ and Flink do not significantly differ. However, for exactly once, Flink's latency is dramatically higher, and it directly depends on the time between checkpoints. Nevertheless, such behavior is expected, because Flink needs to take state snapshot and release output items within a single transaction to ensure that all states of non-commutative operations are persistently saved. There are no hints implemented in Flink which could mark an operation as commutative, hence it waits until states of all operations are stored before output delivery. 
-On the other hand, the property of determinism allows \FlameStream\ to avoid synchronization  state snapshotting and output delivery. This fact makes it possible to achieve exactly once with low overhead.
+In this paper, we compare $50^{th}$, $75^{th}$, $95^{th}$, and $99^{th}$ percentile of distributions, which clearly represent the performance from the perspective of the users' experience.
 
 \begin{figure}[htbp]
   \centering
@@ -81,6 +78,9 @@ On the other hand, the property of determinism allows \FlameStream\ to avoid syn
   \caption{The comparison in latencies between \FlameStream\ and Flink with 500 ms delay between checkpoints}
   \label {comparison500}
 \end{figure}
+
+Figures~\ref{comparison50}, ~\ref{comparison500}, and ~\ref{comparison1000} demonstrate      the comparison of latencies between \FlameStream\ and Flink within distinct times between checkpoints, and different guarantees on data. Without guarantees, the latencies of \FlameStream\ and Flink do not significantly differ. However, for exactly once, Flink's latency is dramatically higher, and it directly depends on the time between checkpoints. Nevertheless, such behavior is expected, because Flink needs to take state snapshot and release output items within a single transaction to ensure that all states of non-commutative operations are persistently saved. There are no hints implemented in Flink which could mark an operation as commutative, hence it waits until states of all operations are stored before output delivery. 
+On the other hand, the property of determinism allows \FlameStream\ to avoid synchronization  state snapshotting and output delivery. This fact makes it possible to achieve exactly once with low overhead.
 
 \begin{figure}[htbp]
   \centering
