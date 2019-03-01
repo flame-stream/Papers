@@ -40,19 +40,19 @@ By the notion of {\it latency} we assume the time between two events:
     \item All the change records for the page leave the stream
 \end{enumerate}
 
-Our experiments were performed on the cluster of 10 Amazon EC2 micro instances with 1GB RAM and 1 core CPU. We used Wikipedia articles as a dataset. Documents per second input rate is 50. RocksDB~\cite{rocksdb} is used as a storage for the state. The role of data producer and data consumer is played by a custom server application that sends and receives data through socket and measures the latency.
+Our experiments were performed on the cluster of 10 Amazon EC2 micro instances with 1GB RAM and 1 core CPU. We used Wikipedia articles as a dataset. Documents per second input rate is 50, because higher rates lead to trigger of backpressure mechanisms in an industrial system that we compare with. RocksDB~\cite{rocksdb} is used as a storage for the state. The role of data producer and data consumer is played by a custom server application that sends and receives data through socket and measures the latency.
 
 \subsection{Overhead and recovery}
 The performance of the proposed deterministic model within the same stream processing task is deeply analyzed in~\cite{we2018seim}. In this paper, we aim to evaluate the overhead on providing consistency guarantees and the time needed for the full recovery.
 
-Figures~\ref{comparison50}, ~\ref{comparison500}, and ~\ref{comparison1000} show   the latencies of \FlameStream\ within distinct times between checkpoints. As expected, the overhead on exactly once enforcement is low (less than 10 ms), and it does not depend on the time between checkpoints. Slight overhead can be explained by the fact that asynchronous state snapshotting is executed on single-core nodes. The time between checkpoints does not influence latency because output elements delivery and state snapshotting mechanisms are independent in our model.
+Figures~\ref{comparison50}, ~\ref{comparison500}, and ~\ref{comparison1000} show the latencies of \FlameStream\ within distinct times between checkpoints. As expected, the overhead on exactly once enforcement is low (less than 10 ms), and it does not depend on the time between checkpoints. Slight overhead can be explained by the fact that asynchronous state snapshotting is executed on single-core nodes. The time between checkpoints does not influence latency because output elements delivery and state snapshotting mechanisms are independent in our model.
 
-The system behavior in case of failures and recoveries is demonstrated in Figure~\ref{recovery}. It is shown that the system can perform recovery processes in an adequate time. Existing latency spikes are caused by the replay process, JVM restart, etc.
+The system behavior in case of failures and recoveries with 1000 ms between checkpoints is demonstrated in Figure~\ref{recovery}. It is shown that the system can perform recovery processes in an adequate time. Existing latency spikes are caused by the replay process, JVM restart, etc.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.48\textwidth]{pics/blink}
-  \caption{The latencies of \FlameStream\ during three failures and recoveries}
+  \caption{The latencies of \FlameStream\ during three artificially reproduced failures and recoveries with 1000 ms between checkpoints}
   \label {recovery}
 \end{figure}
 
@@ -66,7 +66,7 @@ For Apache Flink, the algorithm for building the inverted index is relies on  th
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=.5\textwidth]{pics/comparison50}
-  \caption{The comparison in latencies between \FlameStream\ and Flink with 50 ms delay between checkpoints}
+  \caption{The comparison in latencies between \FlameStream\ and Flink with 50 ms between checkpoints}
   \label {comparison50}
 \end{figure}
 
@@ -75,7 +75,7 @@ In this paper, we compare $50^{th}$, $75^{th}$, $95^{th}$, and $99^{th}$ percent
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=.5\textwidth]{pics/comparison500}
-  \caption{The comparison in latencies between \FlameStream\ and Flink with 500 ms delay between checkpoints}
+  \caption{The comparison in latencies between \FlameStream\ and Flink with 500 ms between checkpoints}
   \label {comparison500}
 \end{figure}
 
@@ -85,6 +85,6 @@ On the other hand, the property of determinism allows \FlameStream\ to avoid syn
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=.5\textwidth]{pics/comparison1000}
-  \caption{The comparison in latencies between \FlameStream\ and Flink with 1000 ms delay between checkpoints}
+  \caption{The comparison in latencies between \FlameStream\ and Flink with 1000 ms between checkpoints}
   \label {comparison1000}
 \end{figure}
