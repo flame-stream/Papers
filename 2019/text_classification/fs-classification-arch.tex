@@ -34,7 +34,7 @@ Concept drift is a phenomenon of changing users' interests from time to time, wh
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[scale=0.38]{pics/physical-graph}
+  \includegraphics[scale=0.375]{pics/physical-graph}
   \caption{The physical pipeline}
   \label {physical graph}
 \end{figure}
@@ -45,21 +45,28 @@ In addition, the two figures above provide a scheme for a partial fitting. Some 
 
 \subsection{ML model}
 
-The classifier's model can be chosen independently from other computations. In our case, we use Multinomial Logistic Regression. The initial classifier weights provided by a pretrain process. 
+The classifier's model can be chosen independently from other computations. In our case, we use Multinomial Logistic Regression. The initial classifier parameters such as weights provided by a pretrain process, which can be executed using sklearn library. We vectorise texts using TfidfTransformer class and the model fits the documents by SGDClassifier class with l1 regularization. The regularization provides us weights as sparse matrix.
 
-Fitting process can be described as follows. Cost function is illustrated below:
+The following fitting process can be described in terms of optimization of a cost function. This function in our case is written below:
 
 \begin{center}
 
 $$ J(W) = -\frac{1}{m} \sum \limits_{i = 1}^{m} \sum \limits_{j = 1}^{k} \mathbbm{1}_{\{y^{(i)} == j\}} \cdot \log \frac{\exp\left({W_{j}^Tx^{(i)}}\right) }{\sum \limits_{l = 1}^{k}  \exp\left({W_{l}^Tx^{(i)}}\right) }$$ 
- $$ + \; \lambda_1 ||W||_1 + \lambda_2 ||W - W_{prev}||_2 $$
+ $$ +  \lambda_1 ||W||_1 + \lambda_2 ||W - W_{prev}||_2 $$
 
 \end{center} 
 
-The number of points in new dataset is denoted as $m$. The number of classes is $k$. New weights are designated as $W$ and previous weights are $W_{prev}$.
+The number of points in new dataset is denoted as $m$. The point with index $i$ showed as $x^{(i)}$. The number of classes is $k$. New weights are designated as $W$ and previous weights are $W_{prev}$.
 
-The gradient of the cost function can be put as:
+The formula provides the goal of the training. The first component is standard softmax function for multiple classes. The second component keeps the l1 regularization of the weights. To use previous history of the classifier weights we apply l2 regularization as the third component. Fitting new points and the consideration of the previous weights ensure better accuracy of the classifier.
+
+We interested in finding such $W$ that minimizes $J(W)$. Taking derivatives, one can show that the gradient for each class component is:
+
+\begin{center}
 
 $$ \nabla_{W_j} \; J(W) = -\frac{1}{m} \sum \limits_{i = 1}^{m} \left[ x^{(i)} \left( \mathbbm{1}_{\{y^{(i)} == j\} } - \frac{\exp\left({W_{j}^Tx^{(i)}}\right)}{\sum \limits_{l = 1}^{k}  \exp\left({W_{l}^Tx^{(i)}}\right)} \right) \right] $$
+$$ - \; \lambda_1 sign(W) - \frac{\lambda_2}{2} \left(W - W_{prev} \right), j = [1..k] $$
 
-We calculate the gradient of each component and update the weights in one iteraton of the gradient descent. Maximum number of iterations of the descent is 100.
+\end{center} 
+
+After that, several steps of gradient descent are executed and new models' parameters is distributed among shards for further classification.
