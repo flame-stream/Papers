@@ -19,7 +19,7 @@ Similar to other stream processing systems, FlameStream is doing its calculation
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[scale=0.45]{pics/logical-graph}
+  \includegraphics[scale=0.48]{pics/logical-graph}
   \caption{The logical pipeline}
   \label {logical graph}
 \end{figure}
@@ -34,7 +34,7 @@ Concept drift is a phenomenon of changing users' interests from time to time, wh
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[scale=0.375]{pics/physical-graph}
+  \includegraphics[scale=0.38]{pics/physical-graph}
   \caption{The physical pipeline}
   \label {physical graph}
 \end{figure}
@@ -47,14 +47,19 @@ In addition, the two figures above provide a scheme for a partial fitting. Some 
 
 The classifier's model can be chosen independently from other computations. In our case, we use Multinomial Logistic Regression. The initial classifier weights provided by a pretrain process. 
 
-Fitting process can be described as follows. Cost function is illustrated below(FIX THE FORMULA):
+Fitting process can be described as follows. Cost function is illustrated below:
 
-$$J(W) = -\frac{1}{m} \cdot \sum \limits_{i = 1}^{m} \sum \limits_{j = 1}^{k} \mathbbm{1}_{y^{(i)} == j} \cdot \log \frac{e^{W_{j}^Tx^{(i)}}}{\sum \limits_{l = 1}^{k}  e^{W_{l}^Tx^{(i)}}} + \lambda_1 ||W||_1 + \lambda_2 ||W - W_{prev}||_2 $$
+\begin{center}
+
+$$ J(W) = -\frac{1}{m} \sum \limits_{i = 1}^{m} \sum \limits_{j = 1}^{k} \mathbbm{1}_{\{y^{(i)} == j\}} \cdot \log \frac{\exp\left({W_{j}^Tx^{(i)}}\right) }{\sum \limits_{l = 1}^{k}  \exp\left({W_{l}^Tx^{(i)}}\right) }$$ 
+ $$ + \; \lambda_1 ||W||_1 + \lambda_2 ||W - W_{prev}||_2 $$
+
+\end{center} 
 
 The number of points in new dataset is denoted as $m$. The number of classes is $k$. New weights are designated as $W$ and previous weights are $W_{prev}$.
 
-The gradient of the cost function can be put as(FIX TOO):
+The gradient of the cost function can be put as:
 
-$$ \nabla_{W_j}  J(W) = -\frac{1}{m} \cdot \sum \limits_{i = 1}^{m} [ x^{(i)} ( \mathbbm{1}_{y^{(i)} == j} - \frac{e^{W_{j}^Tx^{(i)}}}{\sum \limits_{l = 1}^{k}  e^{W_{l}^Tx^{(i)}}} ) ] $$
+$$ \nabla_{W_j} \; J(W) = -\frac{1}{m} \sum \limits_{i = 1}^{m} \left[ x^{(i)} \left( \mathbbm{1}_{\{y^{(i)} == j\} } - \frac{\exp\left({W_{j}^Tx^{(i)}}\right)}{\sum \limits_{l = 1}^{k}  \exp\left({W_{l}^Tx^{(i)}}\right)} \right) \right] $$
 
 We calculate the gradient of each component and update the weights in one iteraton of the gradient descent. Maximum number of iterations of the descent is 100.
