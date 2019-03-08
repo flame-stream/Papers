@@ -1,21 +1,25 @@
 
+Our task is to create a service, which analyzes user messages in real-time, also during the process the service is intended to train on a dataset of incoming labelled texts. The final solution should have a scalablity and a low latency.
+
 \subsection{Distributed stream processing}
 
-In order to solve real life tasks with high-velocity data, the stream processing systems can be used as a solution. The main idea of these systems is as follows. Every piece of data is enters and exists the system one by one. After entering, every element then evenly distributed using sharding technique for balancing the workload. This allows to produce a low latency and provide scalablity. The examples of such systems are Apache Flink [?], Google's MillWheel [?], Spark Streaming[?] or Apache Storm[?].
+In order to solve real life tasks with high-velocity data, the stream processing systems can be used as a solution. The examples of such systems are Apache Flink [?], Google's MillWheel [?], Spark Streaming[?] or Apache Storm[?]. In these systems every piece of data enters and exists the system one by one. Unlike batch-processing systems, this is done without any bufferization during the processing, which provides a low latency for the elements. After entering, the elements are being transformed from one state to another by a map operation. For a scalablity, these systems are running on clusters of computers. To maximize the performance, calculations are evenly distributed among all computers. This method is called sharding technique. Usually each element in streaming systems has a balancing function for determining the shard, where further map transformations will be done with this element. That is, after each transormation every element can be sent to another machine. 
+
+Stream processing systems have several issues to deal with. Most of them have a lack of determinism, which means that the result of computing is not the same between independent launches. Another issue is connected with exactly-once delivery guarantee. This guarantee provides processing each element by exactly one time. Another cases are processing it at most one time and at least one time. The exactly-once guarantee is desirable, because valuable data should not be lost and, on the other hand, multiple processing of the same data causes latency.
 
 In this work, our computations based on FlameStream \cite{kuralenok2018flamestream} distributed model, which provides the following advantages:
 
-\textbf{Determinism.} The result of computing is determined only by input data and remain the same between independent launches. This makes whole classifying process more predictable as it was discussed in \cite{stonebraker20058} Rule 4. In addition, the concept ensures an opportunity for tests that validate the whole pipeline. FlameStream determinism is considered as lightweight.
+\textbf{Determinism.} This makes whole classifying process more predictable as it was discussed in \cite{stonebraker20058} Rule 4. In addition, the concept ensures an opportunity for tests that validate the whole pipeline. FlameStream determinism is considered as lightweight.
 
-\textbf{Exactly-once.} Unlike the others stream processing systems, FlameStream produces results with lower latency using the same data processing. FlameStream process data in exactly-once manner, which ensures a low latency with almost no overhead.
+\textbf{Exactly-once.} FlameStream process data in exactly-once manner by default, which the same data processing on the Spark systems will be at better performance. The exactly-once guarantee ensures a low latency with almost no overhead.
 
-These advantages allows us to create a classifier with better performance and due to the determinism and exactly-once delivery guarantee ensure consistent results.
+These advantages allows us to create a classifier with better performance and due to the determinism and exactly-once delivery guarantee provide consistent results.
 
 \subsection{Data flow}
 
 \subsubsection{Computational pipeline}
 
-Similar to other stream processing systems, FlameStream is doing its calculations using a computational graph. This graph is  commonly referred to as logical graph. Logical graph transforms into actutal physical for processing computations. The graph provides a scheme of data flow and can be presented like this:
+Similar to other stream processing systems, FlameStream set calculations scheme by a computational graph. This graph is  commonly referred to as logical graph. Logical graph maps into actual physical for processing computations. The graph provides a scheme of data flow and can be presented like this:
 
 \begin{figure}[htbp]
   \centering
@@ -28,7 +32,7 @@ The Figure 1 illustrates the principle pipeline. An oriented edge indicates the 
 
 \subsubsection{Dealing with concept drift}
 
-Concept drift is a phenomenon of changing users' interests from time to time, which usually depends on recent events, and results in shifting the distribution of text classes to particular ones. Essentially, this may affect correctness of the pipeline, more specifically, the computing of the IDF features. To overcome the issue, we use windowed IDF calculation: concrete IDF values will be provided based on input within the window. For instance, the window can be set to a day or a week. This scheme allows to deal with the sudden changes of the topics.
+Concept drift is a phenomenon of changing users' interests from time to time, which usually depends on recent events, and results in shifting the distribution of text classes to particular ones. Essentially, this may affect correctness of the pipeline, more specifically, the computing of the IDF features. To overcome the issue, we use windowed IDF calculation: concrete IDF values will be provided based on input within a timed window. For instance, the window can be set to a day or a week. This scheme allows to deal with the sudden changes of the topics.
 
 \subsubsection{Partial fit}
 
@@ -69,4 +73,4 @@ $$ - \; \lambda_1 sign(W) - \frac{\lambda_2}{2} \left(W - W_{prev} \right), j = 
 
 \end{center} 
 
-After that, several steps of gradient descent are executed and new models' parameters is distributed among shards for further classification.
+This formula is applied to each component during one step of gradient descent. There are a few steps of the gradient is executed and new models' parameters is distributed among shards for further classification.
