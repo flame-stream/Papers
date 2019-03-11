@@ -1,62 +1,62 @@
 
-Our task is to design a framework for end-to-end text streams multi-classification that is able to overcome the challenges mentioned above. We assume that there are two types of input stream elements: labeled and unlabeled texts. The framework should predict and deliver labels for raw texts, while labeled ones must be used for additional training. In section~\ref{DSP}, we introduce a processing engine used for computations and explain the rationale behind the choice. Data flow and its properties are explained in detail in~\ref{DF}. We touch upon the ML model that can be applied to the task in~\ref{ML}.
+
+Our task is to design a framework for end-to-end text streams multi-classification that is able to overcome the challenges mentioned above. We assume that there are two types of input stream elements: labeled and unlabeled texts. Every text its unique identificator. The framework should predict and deliver labels for raw texts, while labeled ones must be used for additional training. In section~\ref{DSP}, we introduce a processing engine used for computations and explain the rationale behind the choice. Data flow and its properties are explained in detail in~\ref{DF}. We touch upon the ML model that can be applied to the task in~\ref{ML}.
 
 \subsection{Distributed stream processing\label{DSP}}
 
 In order to process high-velocity data at scale, the stream processing systems are commonly used as a solution. The examples of such systems are Apache Flink~\cite{Carbone:2017:SMA:3137765.3137777}, Google's MillWheel~\cite{Akidau:2013:MFS:2536222.2536229}, Spark Streaming~\cite{Zaharia:2012:DSE:2342763.2342773}, and Apache Storm~\cite{apache:storm}. In these systems, every piece of data enters and exits the system one by one or within small-sized blocks. Inside a system, elements are also transformed independently from each other or with slight buffering, e.g. within time windows. Unlike batch-processing systems, next processing stages do not wait until previous ones are completed. 
 
-% Надо переписать этот абзац
-For scalability, these systems are running on clusters of computers. To maximize the performance, calculations are evenly distributed among all computers. This method is called sharding technique. Usually, each element in streaming systems has a balancing function, which can be set by a user, for determining the shard, where further map transformations will be done with this element. That is, after each transformation every element can be sent to another machine using this scheme.
+For scalability, these systems are running on clusters of computers. Calculations are evenly distributed among all computers. Usually, each operation in streaming systems has a balancing function for determining the shard, where further transformations will be done with each element. The function can be set by a user. That is, after each transformation every element can be sent to another machine using this scheme. For example, for distributed IDF processing the function should send same words to same shard.
 
-Such computational model provides low latency between an input element arrival and the delivery of results, but also makes it hard to obtain predictable deterministic results. Another issue is providing consistency guarantees on data in case of failures. The lack of determinism, which means that the result of computing is not the same between independent launches. Another issue is connected with the exactly-once delivery guarantee. This guarantee provides processing of each element by exactly one time. Other cases of processing it are at most one time and at least one time. The exactly-once guarantee is desirable, because valuable data should not be lost and, on the other hand, multiple processing of the same data causes latency.
+Such computational model provides low latency between an input element arrival and the delivery of results, however it is hard to provide consistency guarantees on data in case of failures. Most of the stream processing systems have a lack of determinism, which means that the result of computing is not the same between independent launches. Hence, it is challenging to create a stable framework with testing and validating final results as it was discussed in \cite{stonebraker20058} Rule 4. Another issue is connected with the exactly-once delivery guarantee. This guarantee ensures processing of each element by exactly one time. Batch-processing systems provide full fault tolerance and consistency, however in stream processing exactly-once is a challenging problem that solved with big overhead. This affect the latency and make it less then one second, which is commonly is unacceptable.
 
-In this work, our computations based on FlameStream \cite{kuralenok2018flamestream} distributed model, which provides the following advantages:
+In this work, our computations based on FlameStream \cite{kuralenok2018flamestream} distributed engine, which provides the following advantages:
 
-\textbf{Determinism.} This makes the whole classifying process more predictable as it was discussed in \cite{stonebraker20058} Rule 4. In addition, the concept ensures an opportunity for tests that validate the whole pipeline. FlameStream determinism is considered as lightweight.
+\textbf{Determinism.} FlameStream results are determined only by input and remain the same between independent runs.
 
-\textbf{Exactly-once.} FlameStream process data in the exactly-once manner by default, which the same data processing on the Spark systems, for example, will be at a worse performance. The exactly-once guarantee ensures a low latency with almost no overhead.
+\textbf{Exactly-once.} FlameStream process data in the exactly-once manner by default, which the same data processing on the Spark systems, for example, will be at a worse performance.
 
-These advantages allow us to create a classifier with predictable results and due to the exactly-once delivery guarantee provide low latency.
+The mentioned problems are solved in FlameStream with almost no overhead. This allow us to create a classifier with predictable results and due to the exactly-once delivery guarantee provide low latency.
 
 \subsection{Data flow \label{DF}}
 
 \subsubsection{Computational pipeline}
 
-Similar to other stream processing systems, FlameStream sets scheme of calculations by a computational graph. This graph is commonly referred to as a logical graph. For our task, the calculations can be illustrated as a logical graph below:
+Similar to other stream processing systems, FlameStream sets scheme of calculations by a logical directed graph. Every vertex in the graph represents a transform operation. An oriented edge indicates the flow and kind of data.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[scale=0.48]{pics/logical-graph}
   \caption{The logical pipeline}
-  \label {logical graph}
+  \label {logical_graph}
 \end{figure}
 
-An oriented edge indicates the flow and kind of data. Every vertex in the graph represents a transform operation with the data. Text Document vertex receives incoming texts, calculates term frequencies and transfers it to the TF-IDF vertex. Also, for each text, this vertex obtains a word list in the text and sends it to IDF vertex. The results of the IDF vertex are delivered to the TF-IDF vertex, where TF-IDF features of the text are joined together with TF features, which were calculated in the previous step. After that, the unlabelled text is sent to Text Classifier vertex, where its topic is obtained and the result is delivered to the user.
+For our task, the calculations can be illustrated as a logical graph illustrated in Figure~\ref{logical_graph}. Input vertex receives incoming texts, calculates term frequencies and transfers them to the TF-IDF vertex. It also sends words from the text to IDF vertex. IDF computes inverse frequency of the words and delivers them to the TF-IDF vertex. TF-IDF joins corresponding iverse documents frequencies together with term frequencies within a given text. After that, the complete TF-IDF features are sent to Text Classifier vertex. Classifier predicts the label and delivers the result to the user.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[scale=0.375]{pics/physical-graph}
   \caption{The physical pipeline}
-  \label {physical graph}
+  \label {physical_graph}
 \end{figure}
 
-These computations map into a physical graph of the pipeline, which showed in Figure ~\ref{physical graph}. This graph defines the real flow of data. Every vertex here is a single machine. Each rectangle denotes the same cluster of computers.
+When the pipeline is deployed, the logical graph maps into a physical graph(Figure ~\ref{physical_graph}). Each logical task is mapped to a number of physical tasks. This is, every vertex here is a single computational unit. Each rectangle denotes the same cluster of computers.
 
-For evenly spread workload the Stream processing systems apply a balancing function for each element. The function is set by a user. In FlameStream case, we use a hash function for the distributing. The range $[0, 2^{32}-1]$ is divided into equal parts by the number of the shards. Every single shard is responsible for its own range. Hash of each element defines what shard will be used for further computation.
+Input texts are received by all machines. Shuffle before IDF vertex are defined by a hash function of a word. Partitionong before TF-IDF physical vertices is determined by a text id. There is no network shuffle between TF-IDF and Text Classifier vertices, so they are simply chained. Partial Fit operation is located on a single machine, and broadcasts model parameters to Classifier vertices.
 
-That is, real calculations are defined by the physical graph and can be described as follows. Input text can be received by any machine. Then Text Document vertex produces a list of words for the text and the list is distributed among all shards using the described scheme. In case of words with a high frequency such as conjunctions or prepositions, we add to them salt to the end thereby spreading all the words between the shards evenly. After that, a list of words distributed among all shards for IDF processing using the technique. In the TF-IDF stage, IDF features of the same document accumulate on a particular shard using the scheme. In the IDF and TF-IDF stages the same sharding method is used, however, the difference is during IDF processing sharding is done by a word and during TF-IDF -- by a text document. Accumulated IDF features join with the corresponding TF features. In the Text Classifier stage, classifier obtains a label for the text and returns it to the user. During this stage, the classifying process is done on the same machine, where TF-IDF features were gathered together.
+%That is, real calculations are defined by the physical graph and can be described as follows. Input text can be received by any machine. Then Text Document vertex produces a list of words for the text and the list is distributed among all shards using the described scheme. In case of words with a high frequency such as conjunctions or prepositions, we add to them salt to the end thereby spreading all the words between the shards evenly. After that, a list of words distributed among all shards for IDF processing using the technique. In the TF-IDF stage, IDF features of the same document accumulate on a particular shard using the scheme. In the IDF and TF-IDF stages the same sharding method is used, however, the difference is during IDF processing sharding is done by a word and during TF-IDF -- by a text document. Accumulated IDF features join with the corresponding TF features. In the Text Classifier stage, classifier obtains a label for the text and returns it to the user. During this stage, the classifying process is done on the same machine, where TF-IDF features were gathered together.
 
 \subsubsection{Dealing with concept drift}
 
-Concept drift is a phenomenon of changing users' interests from time to time, which usually depends on recent events, and results in shifting the distribution of text classes to particular ones. Essentially, this may affect the correctness of the pipeline, more specifically, the computing of the IDF features. To overcome the issue, we use windowed IDF calculation: concrete IDF values will be provided based on input within a time window. For instance, the window can be set to a day or a week. This scheme allows us to deal with sudden changes in the topics.
+Concept drift is a phenomenon of changing users' interests from time to time, which usually depends on recent events, and results in shifting the distribution of text classes to particular ones. Essentially, this may affect the correctness of the pipeline, more specifically, the computing of the IDF features. To overcome the issue, we use windowed IDF calculation: concrete IDF values will be provided based on input within a time window. For instance, the window can be set to a day or a week. This scheme allows us to deal with sudden changes in the topics. Similar approaches are applied in [?].
 
 \subsubsection{Partial fit}
 
-Figures ~\ref{logical graph}, ~\ref{physical graph} provide a scheme for a partial fitting. Some of the text documents labeled and such documents accumulate in the Partial Fit vertex. Additional training is triggered by a special element, which is submitted to the input as text documents. However, this element is not processed as text and the vertices push the element further. This process is similar to punctuation processing \cite{tucker2003exploiting}. The conditions, when the partial fitting starts, can be chosen arbitrarily by a system administrator, for example, train on every 10000 documents. During this process, the existing classifier's parameters can be updated.
+Figures ~\ref{logical_graph}, ~\ref{physical_graph} provide a scheme for a partial fitting. Labeled input documents accumulate in the Partial Fit vertex. Additional training is triggered by a special element, which is submitted to the input as an ordinary element. However, this element is not processed as a text and the vertices just push the element further. This process is similar to punctuation processing \cite{tucker2003exploiting}. The conditions, when the partial fitting starts, can be chosen arbitrarily by a system administrator. For example, one can update machine learning model on every 1000 labeled documents.
 
 \subsection{ML model \label{ML}}
 
-The classifier's model can be chosen independently from other computations. In our case, we use Multinomial Logistic Regression. At the start of the system, the initial classifier parameters such as weights can be provided by a pre-train process, which is, in our case, executed using the sklearn library. We vectorize texts using TfidfTransformer class and the model fits the documents by SGDClassifier class with l1 regularization. The regularization provides us weights as a sparse matrix.
+The classifier's model can be chosen independently from other computations. In our case, we use Multinomial Logistic Regression. At the start of the system, the initial classifier parameters such as weights can be provided by a pre-train process.
 
 Every time, when the Partial Fit is triggered, the following process occurs, which can be described in terms of the optimization of a cost function. This function in our case is written below:
 
@@ -67,9 +67,9 @@ $$ J(W) = -\frac{1}{m} \sum \limits_{i = 1}^{m} \sum \limits_{j = 1}^{k} \mathbb
 
 \end{center} 
 
-The number of points in a new dataset is denoted as $m$. The point with index $i$ showed as $x^{(i)}$. The number of classes is $k$. New weights are designated as $W$. The weights, that computed in the previous step, are $W_{prev}$. At the first time of triggering the process, $W_{prev}$ are the weights, that received fromfrom sklearn script. 
+The number of points in a new dataset is denoted as $m$. The point with index $i$ showed as $x^{(i)}$. The number of classes is $k$. New weights are designated as $W$. The weights, that computed in the previous step, are $W_{prev}$. At the first time of triggering the process, $W_{prev}$ are the pre-trained weights. 
 
-The formula provides the goal of the training. The first component is the standard softmax function for multiple classes. The second component keeps the l1 regularization of the weights. To use the previous history of the classifier weights we apply l2 regularization as the third component. Fitting new points and the consideration of the previous weights ensure better accuracy of the classifier.
+The formula provides the goal of the training. The first component is the standard softmax function for multiple classes. The second component keeps the l1 regularization of the weights. The important aspect is the regularization provides sparsity, hence, the model has a small size -- about 15 Mb, which can be stored and updated with low cost. To use the previous history of the classifier weights we apply l2 regularization as the third component. Fitting new points and the consideration of the previous weights ensure better accuracy of the classifier.
 
 We are interested in finding such $W$ that minimizes $J(W)$. Taking derivatives, one can show that the gradient for each class component is:
 
@@ -80,4 +80,4 @@ $$ - \; \lambda_1 sign\left(W\right) - \frac{\lambda_2}{2} \left(W - W_{prev} \r
 
 \end{center} 
 
-This formula is applied to each component during one step of gradient descent. There are a few steps of the gradient is executed and new models' parameters are distributed among shards for further classification.
+We use Stochastic Gradient Descent for optimization. In experiments ~\ref{fs-short-experiments} section, model performance is presented.
