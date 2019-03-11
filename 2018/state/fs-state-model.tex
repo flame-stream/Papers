@@ -48,12 +48,12 @@ Any stateful transformation can be expressed as a composition of a map, a groupi
   \label {classical-drifting2}
 \end{figure}
 
-We call this model a drifting state because operation states become ordinary data flow elements. Unlike a common approach, in this model user does not have direct access to state, and state management is done completely on the system side. Let $B$ denote a business logic operation, $x, y$ be input and output items $(x,y)\in D$. Let $h$ be the state handler and $s_\tau$, the state of operation $B$ at time $\tau$. The change in contract is illustrated in (\ref{flink-contract}). In general, such representation of any stateful operation allows us to use {\em binary relations} in the formal framework instead of operations graph.
-
 \begin{equation}
   \label{flink-contract}
   B(x, h) = y \qquad\Longrightarrow\qquad B(x, s_{\tau}) = (y, s_{\tau+1}) 
 \end{equation}
+
+We call this model a drifting state because operation states become ordinary data flow elements. Unlike a common approach, in this model user does not have direct access to state, and state management is done completely on the system side. Let $B$ denote a business logic operation, $x, y$ be input and output items $(x,y)\in D$. Let $h$ be the state handler and $s_\tau$, the state of operation $B$ at time $\tau$. The change in contract is illustrated in (\ref{flink-contract}). In general, such representation of any stateful operation allows us to use {\em binary relations} in the formal framework instead of operations graph.
 
 \subsubsection{Properties}
 
