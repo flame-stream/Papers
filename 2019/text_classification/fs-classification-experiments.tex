@@ -7,7 +7,9 @@
   \label {latencies}
 \end{figure}
 
-We launched FlameStream on different clusters, containing 2, 4 and 8 nodes respectively. The clusters tested workload of 10000 lenta.ru documents. It is expected a linear increase in performance, however, in reality, it is hardly achievable. Figure ~\ref{latencies} shows, that mean latency of classifier prediction is less than 25 ms. Figure ~\ref{throughput} illustrates the system's linear throughput increase, where 8 machines are able to handle 100 docs per second.
+To prove the feasibility of our pipeline we conducted series of experiments. As the dataset, we used russian news articles provided by lenta.ru. The dataset contains about 700 000 documents, which labeled by about 90 different kinds of topics. 
+
+We deployed FlameStream on different clusters, containing 2, 4 and 8 nodes respectively. These nodes are Amazon AC2 small nodes with 2 GB of RAM and 1 core CPU. The results are shown in Figure ~\ref{latencies} and ~\ref{throughput}. There is a linear trend in performance, which proves the scalability of our pipeline. On the other hand, we can observe, that mean latency of classifier prediction have a slight increase. For each deployment the median is less then 25 ms and 99 percentile is less that 100 ms, which is reasonable result for the deterministic system with exactly-once support.
 
 \begin{figure}[htbp]
   \centering
