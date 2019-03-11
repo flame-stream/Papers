@@ -46,7 +46,7 @@ Input texts are received by all machines. Shuffle before {\em IDF} vertex are de
 
 \subsubsection{Dealing with concept drift}
 
-Concept drift is a phenomenon of changing users' interests from time to time, which usually depends on recent events, and results in shifting the distribution of text classes to particular ones. Essentially, this may affect the correctness of the pipeline, more specifically, the computing of the IDF features. To overcome the issue, we use windowed IDF calculation: concrete IDF values will be provided based on input within a time window. For instance, the window can be set to a day or a week. This scheme allows us to deal with sudden changes in the topics. Similar approaches are applied in [?].
+Concept drift is a phenomenon of changing users' interests from time to time, which usually depends on recent events, and results in shifting the distribution of text classes to particular ones. Essentially, this may affect the correctness of the pipeline, more specifically, the computing of the IDF features. To overcome the issue, we use windowed IDF calculation: concrete IDF values will be provided based on input within a time window. For instance, the window can be set to a day or a week. This scheme allows us to deal with sudden changes in the topics. Similar approaches are applied in~\cite{klinkenberg2000detecting}.
 
 \subsubsection{Partial fit}
 
