@@ -1,28 +1,6 @@
 
 
-Our task is to design a framework for end-to-end text streams multi-classification that is able to overcome the challenges mentioned above. We assume that there are two types of input stream elements: labeled and unlabeled texts. Every text its unique identificator. The framework should predict and deliver labels for raw texts, while labeled ones must be used for additional training. In section~\ref{DSP}, we introduce a processing engine used for computations and explain the rationale behind the choice. Data flow and its properties are explained in detail in~\ref{DF}. We touch upon the ML model that can be applied to the task in~\ref{ML}.
-
-\subsection{Distributed stream processing\label{DSP}}
-
-In order to process high-velocity data at scale, the stream processing systems are commonly used as a solution. The examples of such systems are Apache Flink~\cite{Carbone:2017:SMA:3137765.3137777}, Google's MillWheel~\cite{Akidau:2013:MFS:2536222.2536229}, Spark Streaming~\cite{Zaharia:2012:DSE:2342763.2342773}, and Apache Storm~\cite{apache:storm}. In these systems, every piece of data enters and exits the system one by one or within small-sized blocks. Inside a system, elements are also transformed independently from each other or with slight buffering, e.g. within time windows. Unlike batch-processing systems, the next processing stages do not wait until previous ones are completed. 
-
-For scalability, these systems are running on clusters of computers. Calculations are evenly distributed among all computers. Usually, each operation in streaming systems has a balancing function for determining the shard, where further transformations will be done with each element. The function can be set by a user. That is, after each transformation every element can be sent to another machine using this scheme. For example, for distributed IDF processing the function should send the same words to the same shard.
-
-Such computational model provides low latency between an input element arrival and the delivery of results, however, it is hard to provide consistency guarantees on data in case of failures. Most of the stream processing systems have a lack of determinism, which means that the result of computing is not the same between independent launches. Hence, it is challenging to create a stable framework with testing and validating final results as it was discussed in \cite{stonebraker20058} Rule 4. Another issue is connected with the exactly-once delivery guarantee. This guarantee ensures processing of each element by exactly one time. Batch-processing systems provide full fault tolerance and consistency, however in stream processing exactly-once is a challenging problem that solved with big overhead. This affects the latency and makes it less than one second which is commonly unacceptable.
-
-In this work, our computations based on FlameStream \cite{kuralenok2018flamestream} distributed engine, which provides the following advantages:
-
-\textbf{Determinism.} FlameStream results are determined only by input and remain the same between independent runs.
-
-\textbf{Exactly-once.} FlameStream process data in an exactly-once manner by default, which the same data processing on the Spark systems, for example, will be at a worse performance.
-
-The mentioned problems are solved in FlameStream with almost no overhead. This allows us to create a classifier with predictable results and due to the exactly-once delivery guarantee provide low latency.
-
-\subsection{Data flow \label{DF}}
-
-\subsubsection{Computational pipeline}
-
-Similar to other stream processing systems, FlameStream sets scheme of calculations by a logical directed graph. Every vertex in the graph represents a transform operation. An oriented edge indicates the flow and kind of data.
+Our task is to design a framework for end-to-end text streams multi-classification that is able to overcome the challenges mentioned above. We assume that there are two types of input stream elements: labeled and unlabeled texts. Every text has a unique identifier. The framework should predict and deliver labels for raw texts, while labeled ones must be used for additional training. In section~\ref{DSP}, we introduce a processing engine used for computations and explain the rationale behind the choice. Data flow and its properties are explained in detail in~\ref{DF}. We touch upon the ML model that can be applied to the task in~\ref{ML}.
 
 \begin{figure}[htbp]
   \centering
@@ -31,7 +9,29 @@ Similar to other stream processing systems, FlameStream sets scheme of calculati
   \label {logical_graph}
 \end{figure}
 
-For our task, the calculations can be illustrated as a logical graph illustrated in Figure~\ref{logical_graph}. Input vertex receives incoming texts, calculates term frequencies and transfers them to the TF-IDF vertex. It also sends words from the text to IDF vertex. IDF computes the inverse frequency of the words and delivers them to the TF-IDF vertex. TF-IDF joins corresponding inverse documents frequencies together with term frequencies within a given text. After that, the complete TF-IDF features are sent to Text Classifier vertex. Classifier predicts the label and delivers the result to the user.
+\subsection{Distributed stream processing\label{DSP}}
+
+In order to process high-velocity data at scale, the stream processing systems are commonly used as a solution. The examples of such systems are Apache Flink~\cite{Carbone:2017:SMA:3137765.3137777}, Google's MillWheel~\cite{Akidau:2013:MFS:2536222.2536229}, Spark Streaming~\cite{Zaharia:2012:DSE:2342763.2342773}, and Apache Storm~\cite{apache:storm}. In these systems, every piece of data enters and exits the system one by one or within small-sized blocks. Inside a system, elements are also transformed independently from each other or with slight buffering, e.g. within time windows. Unlike batch-processing systems, the next processing stages do not wait until previous ones are completed. 
+
+For scalability, these systems are running on clusters of computers. Calculations are evenly distributed among all computers. Usually, each operation in a data flow has a user-defined balancing function for determining the shard where an element will be processed. That is, after each transformation every element can be sent to another machine using this scheme. For example, for distributed IDF processing the function should send the same words to the same shard.
+
+Such computational model provides low latency between an input element arrival and the delivery of results, however, it is hard to provide consistency guarantees on data in case of failures. Most of the stream processing systems have a lack of determinism, which means that the result of computing is not the same between independent launches. Hence, it is challenging to create a stable framework with testing and validating final results as it was discussed in~\cite{stonebraker20058}. Another issue is connected with the exactly-once delivery guarantee. This guarantee ensures processing of each element by exactly one time. Batch-processing systems provide full fault tolerance and consistency, however in stream processing exactly-once is a challenging problem that solved with big overhead. This affects the latency and makes it less than one second~\cite{S7530084, we2018beyondmr} which is commonly unacceptable.
+
+In this work, our computations based on~\FlameStream\ ~\cite{we2018beyondmr} distributed engine, which provides the following advantages:
+
+\textbf{Determinism.} Results are determined only by input and remain the same between independent runs.
+
+\textbf{Exactly-once.} Process data in an exactly-once manner by default, which the same data processing on the Spark systems, for example, will be at a worse performance.
+
+The mentioned problems are solved in~\FlameStream\ with almost no overhead. This allows us to create a classifier with predictable results and due to the exactly-once delivery guarantee provide low latency.
+
+\subsection{Data flow \label{DF}}
+
+\subsubsection{Computational pipeline}
+
+Similar to other stream processing systems,~\FlameStream\ sets scheme of calculations by a logical directed graph. Every vertex in the graph represents a transform operation. An oriented edge indicates the flow and kind of data.
+
+For our task, the calculations can be illustrated as a logical graph illustrated in Figure~\ref{logical_graph}. Input vertex receives incoming texts, calculates term frequencies and transfers them to the {\em TF-IDF} vertex. It also sends words from the text to {\em IDF} vertex. {\em IDF} computes the inverse frequency of the words and delivers them to the {\em TF-IDF} vertex. {\em TF-IDF} joins corresponding inverse documents frequencies together with term frequencies within a given text. After that, the complete {\em TF-IDF} features are sent to {\em Text Classifier} vertex. {\em Text Classifier} predicts the label and delivers the result to the user.
 
 \begin{figure}[htbp]
   \centering
@@ -42,9 +42,7 @@ For our task, the calculations can be illustrated as a logical graph illustrated
 
 When the pipeline is deployed, the logical graph maps into a physical graph(Figure ~\ref{physical_graph}). Each logical task is mapped to a number of physical tasks. This is, every vertex here is a single computational unit. Each rectangle denotes the same cluster of computers.
 
-Input texts are received by all machines. Shuffle before IDF vertex are defined by a hash function of a word. Partitioning before TF-IDF physical vertices are determined by a text id. There is no network shuffle between TF-IDF and Text Classifier vertices, so they are simply chained. The partial Fit operation is located on a single machine and broadcasts model parameters to Classifier vertices.
-
-%That is, real calculations are defined by the physical graph and can be described as follows. Input text can be received by any machine. Then Text Document vertex produces a list of words for the text and the list is distributed among all shards using the described scheme. In case of words with a high frequency such as conjunctions or prepositions, we add to them salt to the end thereby spreading all the words between the shards evenly. After that, a list of words distributed among all shards for IDF processing using the technique. In the TF-IDF stage, IDF features of the same document accumulate on a particular shard using the scheme. In the IDF and TF-IDF stages the same sharding method is used, however, the difference is during IDF processing sharding is done by a word and during TF-IDF -- by a text document. Accumulated IDF features join with the corresponding TF features. In the Text Classifier stage, classifier obtains a label for the text and returns it to the user. During this stage, the classifying process is done on the same machine, where TF-IDF features were gathered together.
+Input texts are received by all machines. Shuffle before {\em IDF} vertex are defined by a hash function of a word. Partitioning before {\em TF-IDF} physical vertices are determined by a text id. There is no network shuffle between {\em TF-IDF} and {\em Text Classifier} vertices, so they are simply chained. The {\em Partial Fit} operation is located on a single machine and broadcasts model parameters to {\em Text Classifier} vertices.
 
 \subsubsection{Dealing with concept drift}
 
@@ -69,7 +67,7 @@ $$ J(W) = -\frac{1}{m} \sum \limits_{i = 1}^{m} \sum \limits_{j = 1}^{k} \mathbb
 
 The number of points in a new dataset is denoted as $m$. The point with index $i$ showed as $x^{(i)}$. The number of classes is $k$. New weights are designated as $W$. The weights, that computed in the previous step, are $W_{prev}$. At the first time of triggering the process, $W_{prev}$ are the pre-trained weights. 
 
-The formula provides the goal of the training. The first component is the standard softmax function for multiple classes. The second component keeps the l1 regularization of the weights. The important aspect is the regularization provides sparsity, hence, the model has a small size -- about 15 Mb, which can be stored and updated with low cost. To use the previous history of the classifier weights we apply l2 regularization as the third component. Fitting new points and the consideration of the previous weights ensure better accuracy of the classifier.
+The formula provides the goal of the training. The first component is the standard softmax function for multiple classes. The second component keeps the l1 regularization of the weights. The important aspect is the regularization provides sparsity, hence, the model has a small size -- about 1 Mb, which can be stored and updated with low cost. To use the previous history of the classifier weights we apply l2 regularization as the third component. Fitting new points and the consideration of the previous weights ensure better accuracy of the classifier.
 
 We are interested in finding such $W$ that minimizes $J(W)$. Taking derivatives, one can show that the gradient for each class component is:
 
