@@ -4,9 +4,9 @@ Multi-classification of large text streams is hard, but important task that rese
 
 \textbf{Low latency.} The key performance metric in most streaming applications is the latency between input element arrival and result delivery. There is a need to achieve as small latency as possible.
 
-\textbf{Scalability.} On the other hand, the classification framework must be scalable in terms of throughput in order to handle high-volume streams. Text features must be computed in a distributed manner, otherwise, this part of the pipeline would be a bottleneck.
+\textbf{Scalability.} On the other hand, the classification framework must be scalable in terms of throughput in order to handle high-volume streams.
 
-\textbf{Online model updating.} Solution should be able to update a machine learning model with new training data on the fly. Redeployments with a new model can cause significant latency spikes.
+\textbf{Online model updating.} Machine learning model should be updated with new training data on the fly. Redeployments of a new model can cause significant latency spikes.
 
 \textbf{Predictability of results.} In order to build a stable framework that is easy to test and validate, there is a need to obtain deterministic predictable results. 
 
