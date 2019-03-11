@@ -52,7 +52,7 @@ Concept drift is a phenomenon of changing users' interests from time to time, wh
 
 Figures ~\ref{logical_graph}, ~\ref{physical_graph} provide a scheme for a partial fitting. Labeled input documents accumulate in the Partial Fit vertex. Additional training is triggered by a special element, which is submitted to the input as an ordinary element. However, this element is not processed as a text and the vertices just push the element further. This process is similar to punctuation processing \cite{tucker2003exploiting}. The conditions, when the partial fitting starts, can be chosen arbitrarily by a system administrator. For example, one can update machine learning model on every 1000 labeled documents.
 
-\subsection{ML model \label{ML}}
+\subsection{Machine learning model \label{ML}}
 
 The classifier's model can be chosen independently from other computations. In our case, we use Multinomial Logistic Regression. At the start of the system, the initial classifier parameters such as weights can be provided by a pre-train process.
 
