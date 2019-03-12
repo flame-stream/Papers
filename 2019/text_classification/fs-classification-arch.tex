@@ -1,6 +1,6 @@
 
 
-Our task is to design a framework for end-to-end text streams multi-classification that is able to overcome the challenges mentioned above. We assume that there are two types of input stream elements: labeled and unlabeled texts. Every text has a unique identifier. The framework should predict and deliver labels for raw texts, while labeled ones must be used for additional training. In section~\ref{DSP}, we introduce a processing engine used for computations and explain the rationale behind the choice. Data flow and its properties are explained in detail in~\ref{DF}. We touch upon the ML model that can be applied to the task in~\ref{ML}.
+Our task is to design a framework for end-to-end text streams multi-classification that is able to overcome the challenges mentioned above. We assume that there are two types of input stream elements: labeled and unlabeled texts. Every text has a unique identifier. The framework should predict and deliver labels for raw texts, while labeled ones must be used for additional training.
 
 \begin{figure}[htbp]
   \centering
@@ -9,29 +9,13 @@ Our task is to design a framework for end-to-end text streams multi-classificati
   \label {logical_graph}
 \end{figure}
 
-\subsection{Distributed stream processing\label{DSP}}
-
-In order to process high-velocity data at scale, the stream processing systems are commonly used as a solution. The examples of such systems are Apache Flink~\cite{Carbone:2017:SMA:3137765.3137777}, Google's MillWheel~\cite{Akidau:2013:MFS:2536222.2536229}, Spark Streaming~\cite{Zaharia:2012:DSE:2342763.2342773}, and Apache Storm~\cite{apache:storm}. In these systems, every piece of data enters and exits the system one by one or within small-sized blocks. Inside a system, elements are also transformed independently from each other or with slight buffering, e.g. within time windows. Unlike batch-processing systems, the next processing stages do not wait until previous ones are completed. 
-
-For scalability, these systems are running on clusters of computers. Calculations are evenly distributed among all computers. Usually, each operation in a data flow has a user-defined balancing function for determining the shard where an element will be processed. That is, after each transformation every element can be sent to another machine using this scheme. For example, for distributed IDF processing the function should send the same words to the same shard.
-
-Such computational model provides low latency between an input element arrival and the delivery of results, however, it is hard to provide consistency guarantees on data in case of failures. Most of the stream processing systems have a lack of determinism, which means that the result of computing is not the same between independent launches. Hence, it is challenging to create a stable framework with testing and validating final results as it was discussed in~\cite{stonebraker20058}. Another issue is connected with the exactly-once delivery guarantee. This guarantee ensures processing of each element by exactly one time. Batch-processing systems provide full fault tolerance and consistency, however in stream processing exactly-once is a challenging problem that solved with big overhead. This affects the latency and makes it less than one second~\cite{S7530084, we2018beyondmr} which is commonly unacceptable.
-
-In this work, our computations based on~\FlameStream\ ~\cite{we2018beyondmr} distributed engine, which provides the following advantages:
-
-\textbf{Determinism.} Results are determined only by input and remain the same between independent runs.
-
-\textbf{Exactly-once.} Process data in an exactly-once manner by default, which the same data processing on the Spark systems, for example, will be at a worse performance.
-
-The mentioned problems are solved in~\FlameStream\ with almost no overhead. This allows us to create a classifier with predictable results and due to the exactly-once delivery guarantee provide low latency.
-
 \subsection{Data flow \label{DF}}
 
 \subsubsection{Computational pipeline}
 
-Similar to other stream processing systems,~\FlameStream\ sets scheme of calculations by a logical directed graph. Every vertex in the graph represents a transform operation. An oriented edge indicates the flow and kind of data.
+Usually, texts classification consists of the two most important steps. The first is obtaining a documents collection and computing TF-IDF features of the collection, where TF stands for term frequency and IDF for inverse document frequency. The second is training a classifier on these features.
 
-For our task, the calculations can be illustrated as a logical graph illustrated in Figure~\ref{logical_graph}. Input vertex receives incoming texts, calculates term frequencies and transfers them to the {\em TF-IDF} vertex. It also sends words from the text to {\em IDF} vertex. {\em IDF} computes the inverse frequency of the words and delivers them to the {\em TF-IDF} vertex. {\em TF-IDF} joins corresponding inverse documents frequencies together with term frequencies within a given text. After that, the complete {\em TF-IDF} features are sent to {\em Text Classifier} vertex. {\em Text Classifier} predicts the label and delivers the result to the user.
+There is a need for mapping these simple steps into a stream environment. The logical directed graph(Figure~\ref{logical_graph}) serves this purpose in the mentioned systems. A vertex is an operation with the data and an edge indicates the flow. Incoming texts enter Input vertex, where computes TF features and sends them further. {\em IDF} features calculations based on the current document collection, which is updated by each text. {\em TF-IDF} vertex joins both features together and passes to the {\em Text Classifier}, where a label obtaining occurs.
 
 \begin{figure}[htbp]
   \centering
@@ -40,9 +24,7 @@ For our task, the calculations can be illustrated as a logical graph illustrated
   \label {physical_graph}
 \end{figure}
 
-When the pipeline is deployed, the logical graph maps into a physical graph(Figure ~\ref{physical_graph}). Each logical task is mapped to a number of physical tasks. This is, every vertex here is a single computational unit. Each rectangle denotes the same cluster of computers.
-
-Input texts are received by all machines. Shuffle before {\em IDF} vertex are defined by a hash function of a word. Partitioning before {\em TF-IDF} physical vertices are determined by a text id. There is no network shuffle between {\em TF-IDF} and {\em Text Classifier} vertices, so they are simply chained. The {\em Partial Fit} operation is located on a single machine and broadcasts model parameters to {\em Text Classifier} vertices.
+Scalability is achieved due to data partitioning by keys in a physical graph(Figure ~\ref{physical_graph}). All operations executed on all nodes, which is designated by vertices. Each rectangle denotes the same shards cluster. Input before {\em IDF} operation is partitioned by words and before {\em TF-IDF} by text identifier. The classifier executed with the same partitioning as TF-IDF operations. Hence, all operations are scalable. 
 
 \subsubsection{Dealing with concept drift}
 
@@ -50,7 +32,7 @@ Concept drift is a phenomenon of changing users' interests from time to time, wh
 
 \subsubsection{Partial fit}
 
-Figures ~\ref{logical_graph}, ~\ref{physical_graph} provide a scheme for a partial fitting. Labeled input documents accumulate in the Partial Fit vertex. Additional training is triggered by a special element, which is submitted to the input as an ordinary element. However, this element is not processed as a text and the vertices just push the element further. This process is similar to punctuation processing \cite{tucker2003exploiting}. The conditions, when the partial fitting starts, can be chosen arbitrarily by a system administrator. For example, one can update machine learning model on every 1000 labeled documents.
+Figures ~\ref{logical_graph}, ~\ref{physical_graph} provide a scheme for a partial fitting. Partial Fit vertex buffers parts of the stream with labeled text. Additional training is triggered by a special element, which submitted to the Input and every vertex pass this element through to Partial Fit without processing. This process is similar to punctuation~\cite{tucker2003exploiting}. The vertex flushes the buffer and updates the parameters of the model, which described in the next section. After that, updated parameters are saved for further training and broadcasted to all shards.
 
 \subsection{Machine learning model \label{ML}}
 
