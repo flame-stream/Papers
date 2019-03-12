@@ -1,6 +1,6 @@
 \label{fs-framework}
 
-Our task is to design a framework for end-to-end text streams multi-classification that is able to overcome the challenges mentioned above. We assume that there are two types of input stream elements: labeled and unlabeled texts. Every text has a unique identifier. The framework should predict and deliver labels for raw texts, while labeled ones must be used for additional training.
+Our task is to design a framework for end-to-end text streams multi-classification that is able to overcome the challenges mentioned above. We assume that there are two types of input stream elements: labeled and unlabeled texts. The framework should predict and deliver labels for raw texts, while labeled ones must be used for additional training.
 
 \begin{figure}[htbp]
   \centering
@@ -13,9 +13,9 @@ Our task is to design a framework for end-to-end text streams multi-classificati
 
 \subsubsection{Computational pipeline}
 
-Usually, texts classification consists of the two most important steps. The first is obtaining a documents collection and computing TF-IDF features of the collection, where TF stands for term frequency and IDF for inverse document frequency. The second is training a classifier on these features.
+Usually, texts classification consists of the two most important steps. The first is obtaining a documents collection and computing TF-IDF features of it, where TF stands for term frequency and IDF for inverse document frequency. The second is training a classifier on these features.
 
-There is a need for mapping these simple steps into a stream environment. The logical directed graph(Figure~\ref{logical_graph}) serves this purpose in the mentioned systems. A vertex is an operation with the data and an edge indicates the flow. Incoming texts enter Input vertex, where computes TF features and sends them further. {\em IDF} features calculations based on the current document collection, which is updated by each text. {\em TF-IDF} vertex joins both features together and passes to the {\em Text Classifier}, where a label obtaining occurs.
+There is a need for mapping these simple steps into a stream environment. The logical directed graph(Figure~\ref{logical_graph}) serves this purpose in the mentioned systems. A vertex is an operation with the data, and an edge indicates the flow.  Incoming texts enter {\em Input} vertex, which computes TF features and sends them to the next vertex. IDF features calculations based on the current document collection, which is updated by each text. {\em TF-IDF} vertex joins both features together and passes to the {\em Text Classifier}, where a label obtaining occurs.
 
 \begin{figure}[htbp]
   \centering
