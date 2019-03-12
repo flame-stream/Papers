@@ -1,0 +1,32 @@
+%% It is just an empty TeX file.
+%% Write your code here.
+
+Classification Framework.
+
+Task description. 
+
+Text processing on streams => kinds of streams: labeled, unlabeled => how do we plan to use them
+
+Data flow 
+
+Computational pipeline.
+
+Typical computations for text classification (like sklearn) => how do we map them to streaming system? logical computational graph => How does computations scales? By keys (word or text id) => every operation in pipeline is scalable
+
+Sklearn: all texts => TF-IDF transformer => Classifier
+
+Streaming, logical graph: text => TF + update/get current IDF => Join TF and current IDFs => Classifier
+
+Physical graph: Scalability is achieved due to data partitioning. Partitioning is done using keys. All operations are executed on all nodes. Sources receive input texts. Input before IDF operation is partitioned by words. Input before TF-IDF is partitioned by text identifier. Classifier is executed with the same partitioning as TF-IDF operations. Hence, all operations are scalable. 
+
+Concept drift?
+
+what is it => how to deal with => why it works? link
+
+Partial fit
+
+special lebeled stream for training => operation buffers parts of this stream => training is triggered on special input elements like punctuations, buffer is flushed => updated parameters are saved for further training and broadcasted
+
+Machine learning model
+
+Kekekek
