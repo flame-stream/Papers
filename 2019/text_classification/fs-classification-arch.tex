@@ -1,6 +1,6 @@
 \label{fs-framework}
 
-Our task is to design a framework for end-to-end text streams multi-classification that is able to overcome the challenges mentioned above. We assume that there are two types of input stream elements: labeled and unlabeled texts. The framework should predict and deliver labels for raw texts and labeled documents must be used for additional training.
+Our task is to design a framework for end-to-end text streams multi-classification that overcomes the challenges mentioned above. We assume that there are two types of input stream elements: labeled and unlabeled texts. The framework must use the first ones for additional training. For the others, labels should be predicted and delivered to the user.
 
 \begin{figure}[htbp]
   \centering
@@ -15,7 +15,7 @@ Our task is to design a framework for end-to-end text streams multi-classificati
 
 Usually, texts classification consists of the two most important steps. The first is obtaining a documents collection and computing TF-IDF features of it, where TF stands for term frequency and IDF for inverse document frequency. The second is training a classifier on these features.
 
-There is a need for mapping these simple steps into a stream environment. The logical directed graph(Figure~\ref{logical_graph}) serves this purpose in the mentioned systems. A vertex is an operation with the data, and an edge indicates the flow.  Incoming texts enter {\em Input} vertex, which computes TF features and sends them to the next vertex. IDF features calculations based on the current document collection, which is updated by each text. {\em TF-IDF} vertex joins both features together and passes to the {\em Text Classifier}, where a label obtaining occurs.
+There is a need for mapping these steps into a stream environment. TF features are straightforward to compute. On the other hand, the IDF calculation is a stateful operation, where text collection updated by each text. The logical directed graph(Figure~\ref{logical_graph}) serves this purpose in the FlameStream. A vertex is an operation with the data, and an edge indicates the flow. Incoming texts enter {\em Input} vertex, which computes TF features and sends them to the next vertex. IDF features calculations based on the current document collection, which is updated by each text. {\em TF-IDF} vertex joins both features together and passes to the {\em Text Classifier}, where a label obtaining occurs.
 
 \begin{figure}[htbp]
   \centering
@@ -24,15 +24,15 @@ There is a need for mapping these simple steps into a stream environment. The lo
   \label {physical_graph}
 \end{figure}
 
-Scalability is achieved due to data partitioning by keys in a physical graph(Figure ~\ref{physical_graph}). All operations executed on all nodes, which is designated by vertices. Each rectangle denotes the same shards cluster. Input before {\em IDF} operation is partitioned by words and before {\em TF-IDF} by text identifier. The classifier executed with the same partitioning as TF-IDF operations. Hence, all operations are scalable. 
+All actual operations executed on all nodes. Scalability is achieved due to data partitioning by keys, which shown in Figure ~\ref{physical_graph}. A node designated by vertex and each rectangle denotes the same cluster. Input before {\em IDF} operation is partitioned by words and before {\em TF-IDF} by text identifier. The classifier executed with the same partitioning as TF-IDF operations. Hence, all operations are scalable. 
 
 \subsubsection{Dealing with concept drift}
 
-Concept drift is a phenomenon of changing users' interests from time to time, which usually depends on recent events, and results in shifting the distribution of text classes to particular ones. Essentially, this may affect the correctness of the pipeline, more specifically, the computing of the IDF features. To overcome the issue, we use windowed IDF calculation: concrete IDF values will be provided based on input within a time window. For instance, the window can be set to a day or a week. This scheme allows us to deal with sudden changes in the topics. Similar approaches are applied in~\cite{klinkenberg2000detecting}.
+Concept drift refers to the particular meaning of words, which changes over time. This aspect may affect the correctness of the pipeline, more specifically, the computing of the IDF features. To overcome the issue, we use windowed IDF calculation: IDF values will be provided based on input within a time window. For instance, the window can be a day or a week. Similar approaches are applied in~\cite{klinkenberg2000detecting}.
 
 \subsubsection{Partial fit}
 
-Figures ~\ref{logical_graph}, ~\ref{physical_graph} provide a scheme for a partial fitting. Partial Fit vertex buffers parts of the stream with labeled text. Additional training is triggered by a special element, which submitted to the Input and every vertex pass this element through to Partial Fit without processing. This process is similar to punctuation~\cite{tucker2003exploiting}. The vertex flushes the buffer and updates the parameters of the model, which described in the next section. After that, updated parameters are saved for further training and broadcasted to all shards.
+Figures ~\ref{logical_graph}, ~\ref{physical_graph} provide a scheme for a partial fitting. Partial Fit vertex buffers parts of the stream with labeled text. Additional training is triggered by a special element, which submitted to the Input and every vertex pass this element through to Partial Fit without processing. This process is similar to punctuation~\cite{tucker2003exploiting} handling. The vertex flushes the buffer and updates the parameters of the model. After that, updated parameters are saved for further training and broadcasted to all {\em Text Classifier} vertices.
 
 \subsection{Machine learning model \label{ML}}
 
