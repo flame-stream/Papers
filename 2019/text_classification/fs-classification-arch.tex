@@ -15,7 +15,7 @@ Our task is to design a framework for end-to-end text streams multi-classificati
 
 Typical texts classification pipeline consists of two steps. The first one is computing TF-IDF features, where TF is a term frequency, and IDF is an inverse document frequency. The second one is training a classifier on these features. For the adaptation of this pipeline for~\FlameStream\ processing engine, there is a need to represent it in the form of so-called {\em logical graph}. It serves as a descriptive language for defining streaming computations. Vertices of a logical graph denote operations, while edges indicate data subscriptions between them. 
 
-The initial point in our data flow is a {\em Input} vertex. It receives input texts from data producers and computes term frequencies right away. Computing of inverse document frequencies is a separate operation because it maintains a state and requires different data partitioning in a physical execution that we touch upon further. {\em TF-IDF} vertex joins features corresponding to the same text and passes them to the {\em Text Classifier}. {\em Text Classifier} is the very last vertex that predicts a label and delivers it to a data consumer. The scheme of the proposed logical graph is shown in Figure~\ref{logical_graph}.
+The initial point in our data flow is an {\em Input} vertex. It receives input texts from data producers and computes term frequencies right away. Computing of inverse document frequencies is a separate operation because it maintains a state and requires different data partitioning in a physical execution that we touch upon further. {\em TF-IDF} vertex joins features corresponding to the same text and passes them to the {\em Text Classifier}. {\em Text Classifier} is the very last vertex that predicts a label and delivers it to a data consumer. The scheme of the proposed logical graph is shown in Figure~\ref{logical_graph}.
 
 \begin{figure}[htbp]
   \centering
@@ -36,9 +36,9 @@ Concept drift refers to the particular meaning of words, which changes over time
 
 \subsection{Machine learning model \label{ML}}
 
-The classifier's model can be chosen independently from other computations. In our case, we use Multinomial Logistic Regression. At the start of the system, the initial classifier parameters such as weights can be provided by a pre-train process.
+The pipeline implies a few restrictions to the model. First of all, it involves setting up the prior parameters. The classifier's model itself should be able to train fast enough for real-time processing. The fast performance also includes a small size of the model for storing and updating operations in reasonable time and space.
 
-Every time, when the Partial Fit is triggered, the following process occurs, which can be described in terms of the optimization of a cost function. This function in our case is written below:
+The classifier's model can be chosen independently from other computations. In our case, we use Multinomial Logistic Regression. The training consists of the following formula:
 
 \begin{center}
 
@@ -47,9 +47,9 @@ $$ J(W) = -\frac{1}{m} \sum \limits_{i = 1}^{m} \sum \limits_{j = 1}^{k} \mathbb
 
 \end{center} 
 
-The number of points in a new dataset is denoted as $m$. The point with index $i$ showed as $x^{(i)}$. The number of classes is $k$. New weights are designated as $W$. The weights, that computed in the previous step, are $W_{prev}$. At the first time of triggering the process, $W_{prev}$ are the pre-trained weights. 
+The number of points in a new dataset is denoted as $m$. The point with index $i$ is shown as $x^{(i)}$. The number of classes is $k$. New weights are designated as $W$. The weights that computed in the previous step are $W_{prev}$. At the first time of triggering the process, $W_{prev}$ can be provided by a pre-train process.  
 
-The formula provides the goal of the training. The first component is the standard softmax function for multiple classes. The second component keeps the l1 regularization of the weights. The important aspect is the regularization provides sparsity, hence, the model has a small size -- about 1 Mb, which can be stored and updated with low cost. To use the previous history of the classifier weights we apply l2 regularization as the third component. Fitting new points and the consideration of the previous weights ensure better accuracy of the classifier.
+The formula provides the goal of the training. The first component is the standard softmax function for multiple classes. The second component keeps the l1 regularization of the weights, and provides sparsity, hence, the model has a small size -- about 1 Mb, which can be stored and updated with low cost. To use the previous history of the classifier weights, we apply l2 regularization as the third component. 
 
 We are interested in finding such $W$ that minimizes $J(W)$. Taking derivatives, one can show that the gradient for each class component is:
 
