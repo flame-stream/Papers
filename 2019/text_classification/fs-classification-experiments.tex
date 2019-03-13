@@ -1,5 +1,7 @@
 \label {fs-experiments}
 
+To prove the feasibility of the proposed framework we conducted a series of experiments. We show the efficiency and scalability of the distributed streaming dataflow using latency and throughput as performance metrics. We also demonstrate that the introduced machine learning model is able to provide high accuracy together with reasonable training time. As a dataset, we used an open corpus of news articles from Russian media resource lenta.ru~\cite{lentaru}. This dataset contains about 700 000 documents, which are labeled by one of 90 different topics. In the experiments, we generated a stream consisted of articles from the dataset sorted by the time of publishing.
+
 \begin{figure}[htbp]
   \centering
   \includegraphics[scale=0.1]{pics/classifier_latencies}
@@ -7,13 +9,40 @@
   \label {latencies}
 \end{figure}
 
-To prove the feasibility of our pipeline we conducted series of experiments. As the dataset, we used russian news articles provided by lenta.ru. The dataset contains about 700 000 documents, which labeled by about 90 different kinds of topics. 
-
-We deployed FlameStream on different clusters, containing 2, 4 and 8 nodes respectively. These nodes are Amazon AC2 small nodes with 2 GB of RAM and 1 core CPU. The results are shown in Figure ~\ref{latencies} and ~\ref{throughput}. There is a linear trend in performance, which proves the scalability of our pipeline. On the other hand, we can observe, that mean latency of classifier prediction have a slight increase. For each deployment the median is less then 25 ms and 99 percentile is less that 100 ms, which is reasonable result for the deterministic system with exactly-once support.
-
 \begin{figure}[htbp]
   \centering
   \includegraphics[scale=0.2]{pics/classifier_throughput}
   \caption{Classifier throughput}
   \label {throughput}
 \end{figure}
+
+\subsection{Data flow evaluation}
+
+For evaluation, we deployed FlameStream on clusters, containing 2, 4 and 8 Amazon EC2 small instances with 2 GB of RAM and 1 core CPU. Exactly once guarantee was enabled and the period between state snapshots was 1 second. We measured throughput that is possible to achieve and the corresponding latency for prediction pipeline. The results are shown in Figures~\ref{latencies} and~\ref{throughput}. As we can see, there is a linear trend in throughput, which proves the scalability of the framework. On the other hand, one can observe, that latency increases moderately and keeps under 25 ms for a median and under 100 ms for 99th percentile. Insights on such an extremely low latency together with determinism and exactly once are given in~\cite{we2018beyondmr, we2018adbis}.
+
+\subsection{Classifier evaluation}
+
+To demonstrate the performance of the proposed machine learning model we compared two approaches. The first one is multinomial logistic regression with TF-IDF features computed on a complete dataset without $l2$ regularization. We denote it as a {\em static training}. The second one is dividing training dataset into relatively small batches and consequent applying MLR with $l2$ regularization to each batch with windowed TF-IDF features. The latter case demonstrates the behavior of our streaming classification approach. The results are shown in Table~\ref{accuracy}. The sizes of training and validations sets are ? and ?. The size of the batch is ?. As we can see, streaming approach outperforms static training. It indicates that our framework is able to handle the streaming nature of the news dataset including concept drift. The more formal rationale behind this fact is out of scope of this paper and relates to our future work.
+
+\begin{table}[htbp]
+\begin{tabular}{ll}
+Method          & Accuracy \% \\
+Static training  & NA          \\
+Streaming training & NA         
+\end{tabular}
+\caption{Accuracy comparison between static and stream training}
+\label{accuracy}
+\end{table}
+
+We also measured the time needed for model fitting on a ?-core machine with ? GB of RAM. Table~\ref{training_time} shows that the time needed for training process is reasonable for efficient real-life deployment.
+
+\begin{table}[htbp]
+\begin{tabular}{ll}
+Train size          & Training time (sec) \\
+1000  & NA          \\
+10000 & NA          \\
+100000 & NA          
+\end{tabular}
+\caption{Training time for different dataset sizes}
+\label{training_time}
+\end{table}
