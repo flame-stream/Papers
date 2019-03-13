@@ -13,7 +13,7 @@ Our task is to design a framework for end-to-end text streams multi-classificati
 
 \subsubsection{Predicting pipeline}
 
-Typical texts classification pipeline consists of two steps. The first one is computing TF-IDF features, where TF is a term frequency, and IDF is an inverse document frequency. The second one is training a classifier on these features. For the adaptation of this pipeline for~\FlameStream\ processing engine, there is a need to represent it in the form of so-called {\em logical graph}. It serves as a descriptive language for defining streaming computations. Vertices of a logical graph denote operations, while edges indicate data subscriptions between them. 
+Typical text pipeline consists of the following steps. The first one is processing by Bag-of-words model. For these vectors, computing TF-IDF features is applied, where TF is a term frequency, and IDF is an inverse document frequency. The last one is training a classifier on these features. In order to adapt this pipeline of this pipeline for stream processing engine, there is a need to represent it in the form of so-called {\em logical graph}. It serves as a descriptive language for defining streaming computations. Vertices of a logical graph denote operations, while edges indicate data subscriptions between them. 
 
 The initial point in our data flow is an {\em Input} vertex. It receives input texts from data producers and computes term frequencies right away. Computing of inverse document frequencies is a separate operation because it maintains a state and requires different data partitioning in a physical execution that we touch upon further. {\em TF-IDF} vertex joins features corresponding to the same text and passes them to the {\em Text Classifier}. {\em Text Classifier} is the very last vertex that predicts a label and delivers it to a data consumer. The scheme of the proposed logical graph is shown in Figure~\ref{logical_graph}.
 
@@ -24,7 +24,7 @@ The initial point in our data flow is an {\em Input} vertex. It receives input t
   \label {physical_graph}
 \end{figure}
 
-In~\FlameStream\, all operations from a logical graph execute on all computational units. Scalability achieves due to data partitioning before each operation. Figure ~\ref{physical_graph} captures the scheme of a physical execution for the proposed logical graph. Each vertex on the scheme denotes the same computational cluster consisted of multiple units. Data partitioning before {\em IDF} and {\em TF-IDF} operations is defined by keys. Data elements with the same keys process on a single computational unit. For {\em IDF} operation the key is a word, while {\em TF-IDF} aggregates items with the same text identifier. As we can see, all operations that take part in predicting pipeline scales among all computational units. 
+Usually, in stream processing systems, all operations from a logical graph execute on all computational units. Scalability is achieved due to data partitioning before each operation. Figure ~\ref{physical_graph} captures the scheme of a physical execution for the proposed logical graph. Each vertex on the scheme denotes the same computational cluster consisted of multiple units. Data partitioning before {\em IDF} and {\em TF-IDF} operations is defined by keys. Data elements with the same keys process on a single computational unit. For {\em IDF} operation the key is a word, while {\em TF-IDF} aggregates items with the same text identifier. As we can see, all operations that take part in predicting pipeline scales among all computational units. 
 
 \subsubsection{Training pipeline}
 
@@ -34,9 +34,35 @@ Training pipeline is a separate branch within the logical graph introduced above
 
 Concept drift refers to the particular meaning of words, which changes over time. This aspect may affect the quality of a prediction, especially for data from news and social media sources. To handle this trait, we compute inverse document frequencies within a sliding window. The length of a window must coincide with a period of the additional training. Similar approach demonstrates its effectiveness in~\cite{klinkenberg2000detecting}.
 
-\subsubsection{Determinism and exactly once}
+\subsubsection{Stream processing engines}
 
-As it was mentioned above deterministic results and fault tolerance are desirable properties for a classification pipeline. Determinism helps to interpret training and predicting results, because there is a guarantee that independent runs on the same data will produce the same results. Exactly once delivery ensures that training set is not biased and data for predictions is not lost. \FlameStream\ is able to provide both determinism and exactly once guarantee under low latency requirements. The mechanisms behind these features are detailed in~\cite{we2018adbis, we2018beyondmr}.
+The execution of the physical graph in the mentioned stream systems contains difficulties. The two data partitions may produce the non-deterministic results, which means no guarantee that independent runs on the same data will produce the same results. Also, due to the described above reasons, our pipeline requires exactly-once processing. 
+
+In the Table~\ref{comparison} state-of-the-art stream systems are presented. As we can see, most of the systems demonstrate a lack of the needed properties or high latency for having them. FlameStream and MillWheel are two exceptions, however, the latter is a proprietary project, which cannot be used by anyone. Hence, our computations based on \FlameStream\, which provides both determinism and exactly once guarantee under low latency requirements. The mechanisms behind these features are detailed in~\cite{we2018adbis, we2018beyondmr}.
+
+\begin{table}[htbp]
+
+
+\begin{threeparttable}
+\begin{tabular}{llll}
+
+System             & Determinism & Exactly-once & Latency    \\
+\hline
+FlameStream        &      +     &    +    &   low            \\
+MillWheel          &      +     &    +    &   NA             \\
+Spark Streaming    &      +     &    +    &   high           \\
+Flink              &      -     &    +    &   high$^*$       \\
+Storm              &      -     &    -    &   low            \\
+
+\end{tabular}
+
+* with enabled exactly-once
+
+\end{threeparttable}
+
+\caption{Stream processing systems comparison}
+\label{comparison}
+\end{table}
 
 \subsection{Machine learning model \label{ML}}
 

@@ -27,6 +27,10 @@ Partial fit
 
 special lebeled stream for training => operation buffers parts of this stream => training is triggered on special input elements like punctuations, buffer is flushed => updated parameters are saved for further training and broadcasted
 
+Stream processing engines
+
+difficulties with the pipeline => non-deterministic results => exactly once => compare engine => FS + MW => FS 
+
 Machine learning model
 
 pipeline restrictions to the model => 1) setting up prior => 2) fast training => 3) small sized for updating and storing => using MLR: the formula => L1 regularization: sparse => L2: same => softmax because MLR
