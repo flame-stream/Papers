@@ -34,6 +34,10 @@ Training pipeline is a separate branch within the logical graph introduced above
 
 Concept drift refers to the particular meaning of words, which changes over time. This aspect may affect the quality of a prediction, especially for data from news and social media sources. To handle this trait, we compute inverse document frequencies within a sliding window. The length of a window must coincide with a period of the additional training. Similar approach demonstrates its effectiveness in~\cite{klinkenberg2000detecting}.
 
+\subsubsection{Determinism and exactly once}
+
+As it was mentioned above deterministic results and fault tolerance are desirable properties for a classification pipeline. Determinism helps to interpret training and predicting results, because there is a guarantee that independent runs on the same data will produce the same results. Exactly once delivery ensures that training set is not biased and data for predictions is not lost. \FlameStream\ is able to provide both determinism and exactly once guarantee under low latency requirements. The mechanisms behind these features are detailed in~\cite{we2018adbis, we2018beyondmr}.
+
 \subsection{Machine learning model \label{ML}}
 
 The pipeline implies a few restrictions to the model. First of all, it involves setting up the prior parameters. The classifier's model itself should be able to train fast enough for real-time processing. The fast performance also includes a small size of the model for storing and updating operations in reasonable time and space.
