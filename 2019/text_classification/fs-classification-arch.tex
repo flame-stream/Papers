@@ -40,7 +40,7 @@ As it was mentioned above deterministic results and fault tolerance are desirabl
 
 \subsection{Machine learning model \label{ML}}
 
-The pipeline implies a few restrictions to the model. First of all, it involves setting up the prior parameters. The classifier's model itself should be able to train fast enough for real-time processing. The fast performance also includes a small size of the model for storing and updating operations in reasonable time and space.
+In order to be efficiently embedded in the proposed data flow, several properties of machine learning model are desirable. A model should support the prior parameters and be able to train fast enough for real-time processing. The fast performance also includes a small size of the model for storing and updating operations in reasonable time and space.
 
 The model can be chosen independently from other computations. In our case, we use Multinomial Logistic Regression. The training consists of the following formula:
 
