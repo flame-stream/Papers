@@ -32,7 +32,7 @@ Training pipeline is a separate branch within the logical graph introduced above
 
 \subsubsection{Dealing with concept drift}
 
-Concept drift refers to the particular meaning of words, which changes over time. This aspect may affect the quality of a prediction, especially for data from news and social media sources. To handle this trait, we compute inverse document frequencies within a sliding window of a user-defined length. Similar approach demonstrates its effectiveness in~\cite{klinkenberg2000detecting}.
+Concept drift refers to the particular meaning of words, which changes over time. This aspect may affect the quality of a prediction, especially for data from news and social media sources. To handle this trait, we compute inverse document frequencies within a sliding window. The length of a window must coincide with a period of the additional training. Similar approach demonstrates its effectiveness in~\cite{klinkenberg2000detecting}.
 
 \subsection{Machine learning model \label{ML}}
 
