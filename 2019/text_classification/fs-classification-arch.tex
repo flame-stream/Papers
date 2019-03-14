@@ -42,17 +42,16 @@ In the Table~\ref{comparison} state-of-the-art stream systems are presented. As 
 
 \begin{table}[htbp]
 
-
 \begin{threeparttable}
-\begin{tabular}{llll}
+\begin{tabular}{lccl}
 
 System             & Determinism & Exactly-once & Latency    \\
 \hline
 FlameStream        &      +     &    +    &   low            \\
 MillWheel          &      +     &    +    &   NA             \\
 Spark Streaming    &      +     &    +    &   high           \\
-Flink              &      -     &    +    &   high$^*$       \\
-Storm              &      -     &    -    &   low            \\
+Flink              &      --     &    +    &   high$^*$       \\
+Storm              &      --     &    --    &   low            \\
 
 \end{tabular}
 
