@@ -2,7 +2,9 @@
 
 Let us consider the news topic classification as an illustration of a text stream multi-classification task. There are two types of input streams: pre-labeled and raw. The latter stream elements must be labeled by a classifier and delivered to end-user. The pre-labeled stream is used for updating a machine learning model with new data. The ultimate purpose is to achieve the distribution of news topics that is changed over time. This task is a typical representative of the text stream classification problem that can be generalized to almost any other one.
 
-As the main requirement to a stream processing engine we denote the following: each output elements must depend only on the corresponding input one. In other words, node failures and execution environment parameters must not affect the results, similar to batch systems. As we show further, without this requirement, it is hard to design a solution that provides reproducible and interpretable classification results at scale.
+As the main requirement to a stream processing engine we denote the following: each output element must depend only on the corresponding input one. In other words, node failures and execution environment parameters must not affect the results, similar to batch systems. Without this requirement, it is hard to design a solution that provides reproducible and interpretable classification results at scale. It is also convenient for end-user if a distributed classification data flow behave like it is executed on a single machine.
+
+The introduced requirement affects the choice of a delivery guarantee. If a stream processing system provides {\em at least once}, some input texts can be processed more than one time in case of failures. This behavior may lead to biased prediction results. For example, if a single sports article is processed many times due to multiple failures, the resulted topics distribution will show that sport is a hot news topic right now. Hence, the only suitable delivery guarantee is {\em exactly once}.
 
 \subsection{Straightforward data flow}
 
@@ -18,8 +20,6 @@ Typical classification pipeline based on bag-of-words text representation consis
 The initial point in our data flow is an {\em Input} vertex. It receives input texts from data producers and computes term frequencies right away. Computing of inverse document frequencies is a separate operation because it maintains a state and requires different data partitioning in a physical execution that we touch upon further. {\em TF-IDF} vertex joins features corresponding to the same text and passes them to the {\em Text Classifier}. {\em Text Classifier} is the very last vertex that predicts a label and delivers it to a data consumer. The scheme of the proposed logical graph is shown in Figure~\ref{logical_graph}.
 
 Training pipeline is a separate branch within the logical graph introduced above. For already labeled text its features are sent to a {\em Partial fit} vertex instead of the {\em Classifier}. {\em Partial fit} vertex buffers all input elements until training is triggered. After training, the buffer flushes. Updated parameters of a machine learning model are saved for further training and broadcasted to all {\em Text Classifier} vertices.
-
-This pipeline illustrates that the only suitable delivery guarantee is {\em exactly once}. If a stream processing system provides {\em at least once}, some input texts can be processed more than one time in case of failures. This behavior may lead to biased prediction results. For example, if a single sports article is processed many times due to multiple failures, the resulted topics distribution will show that sport is a hot news topic right now.
 
 An issue regarding this pipeline is that the training process may be time-consuming. If we synchronize training and prediction processes, there will be significant latency spikes, e.g. if a training process lasts for several minutes, then spikes may be 10 000 times greater than latency for prediction. However, without synchronization, there will be no reproducible correspondence between texts and applied model. Hence, it would be almost impossible to achieve the same results within a new run on the same data, because the training time becomes a hidden parameter that influences output.
 
@@ -44,7 +44,7 @@ In this work, we apply the second approach, while the first one is related to ou
 \begin{figure}[htbp]
   \centering
   \includegraphics[scale=0.375]{pics/physical-graph}
-  \caption{The physical graph}
+  \caption{The physical prediction graph}
   \label {physical_graph}
 \end{figure}
 
