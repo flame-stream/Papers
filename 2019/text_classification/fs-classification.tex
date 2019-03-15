@@ -29,7 +29,7 @@
 % \acmDOI{10.1145/3206333.3209273}
 % \acmISBN{978-1-4503-5703-6/18/06}
 
-\title {Distributed Classification of Multi-Labelled Text Streams}
+\title {Distributed classification of text streams: challenges and limitations}
 
 \author{Artem Trofimov,$^ {1}$    Mikhail Shavkunov,$^2$    Sergey Reznick,$^3$     Nikita Sokolov,$^{4}$   Mikhail Yutman,$^2$ \\   Igor E. Kuralenok,$^1$    and  Boris Novikov$^ {2}$ }
 \affiliation{%
@@ -50,7 +50,7 @@
 
 \begin{abstract}
 
-Large-scale classification of text streams is a problem that is hard to solve using state-of-the-art data processing systems. Among the main challenges are requirements for low latency, scalability, online model updating, fault tolerance, the interpretability of results, concept drift handling etc. In this work, we propose a framework on top of~\FlameStream\ processing engine that is able to overcome the mentioned problems. We demonstrate the feasibility of the proposed solution with a series of experiments on a stream of real-world news articles.
+Distributed stream processing engines seem as suitable platforms for large-scale text classification with low latency requirements. However, this straightforward approach has important pitfalls that are easy to miss. In this work, we emphasize the challenges that a developer of text stream classification pipeline face and propose a data flow on top of~\FlameStream\ processing engine that is able to overcome most of the issues. We demonstrate the feasibility of the proposed solution with a series of experiments on a stream of real-world news articles.
 
 \end{abstract}
 
