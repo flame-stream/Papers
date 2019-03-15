@@ -1,98 +1,78 @@
 \label{fs-framework}
 
-Let us as consider  an illustration of text stream classification.
+Let us consider the news topic classification as an illustration of a text stream multi-classification task. There are two types of input streams: pre-labeled and raw. The latter stream elements must be labeled by a classifier and delivered to end-user. The pre-labeled stream is used for updating a machine learning model with new data. The ultimate purpose is to achieve the distribution of news topics that is changed over time. This task is a typical representative of the text stream classification problem that can be generalized to almost any other one.
 
-% Our task is to design a framework for end-to-end text streams multi-classification that overcomes the challenges mentioned above. We assume that there are two types of input streams: pre-labeled and raw. The latter stream elements must be labeled by a classifier and delivered to end-user. The pre-labeled stream is used for updating a machine learning model with new data.
+As the main requirement to a stream processing engine we denote the following: each output elements must depend only on the corresponding input one. In other words, node failures and execution environment parameters must not affect the results, similar to batch systems. As we show further, without this requirement, it is hard to design a solution that provides reproducible and interpretable classification results at scale.
 
-% \begin{figure}[htbp]
-%   \centering
-%   \includegraphics[scale=0.48]{pics/logical-graph}
-%   \caption{The logical graph}
-%   \label {logical_graph}
-% \end{figure}
+\subsection{Straightforward data flow}
 
-% \subsection{Data flow \label{DF}}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[scale=0.48]{pics/logical-graph}
+  \caption{The straightforward data flow}
+  \label {logical_graph}
+\end{figure}
 
-% \subsubsection{Predicting pipeline}
+Typical classification pipeline based on bag-of-words text representation consists of two steps. The first one is computing TF-IDF features, where TF is a term frequency, and IDF is an inverse document frequency. The second one is training a classifier on these features. For the adaptation of this pipeline for a stream processing engine, there is a need to represent it in the form of a {\em logical graph}. It serves as a descriptive language for defining streaming computations. Vertices of a logical graph denote operations, while edges indicate data subscriptions between them. 
 
-% Typical classification pipeline based on bag-of-words text representation consists of the two steps. The first one is computing TF-IDF features, where TF is a term frequency, and IDF is an inverse document frequency. The second one is training a classifier on these features. For the adaptation of this pipeline for a stream processing engine, there is a need to represent it in the form of a {\em logical graph}. It serves as a descriptive language for defining streaming computations. Vertices of a logical graph denote operations, while edges indicate data subscriptions between them. 
+The initial point in our data flow is an {\em Input} vertex. It receives input texts from data producers and computes term frequencies right away. Computing of inverse document frequencies is a separate operation because it maintains a state and requires different data partitioning in a physical execution that we touch upon further. {\em TF-IDF} vertex joins features corresponding to the same text and passes them to the {\em Text Classifier}. {\em Text Classifier} is the very last vertex that predicts a label and delivers it to a data consumer. The scheme of the proposed logical graph is shown in Figure~\ref{logical_graph}.
 
-% The initial point in our data flow is an {\em Input} vertex. It receives input texts from data producers and computes term frequencies right away. Computing of inverse document frequencies is a separate operation because it maintains a state and requires different data partitioning in a physical execution that we touch upon further. {\em TF-IDF} vertex joins features corresponding to the same text and passes them to the {\em Text Classifier}. {\em Text Classifier} is the very last vertex that predicts a label and delivers it to a data consumer. The scheme of the proposed logical graph is shown in Figure~\ref{logical_graph}.
+Training pipeline is a separate branch within the logical graph introduced above. For already labeled text its features are sent to a {\em Partial fit} vertex instead of the {\em Classifier}. {\em Partial fit} vertex buffers all input elements until training is triggered. After training, the buffer flushes. Updated parameters of a machine learning model are saved for further training and broadcasted to all {\em Text Classifier} vertices.
 
-% \begin{figure}[htbp]
-%   \centering
-%   \includegraphics[scale=0.375]{pics/physical-graph}
-%   \caption{The physical graph}
-%   \label {physical_graph}
-% \end{figure}
+This pipeline illustrates that the only suitable delivery guarantee is {\em exactly once}. If a stream processing system provides {\em at least once}, some input texts can be processed more than one time in case of failures. This behavior may lead to biased prediction results. For example, if a single sports article is processed many times due to multiple failures, the resulted topics distribution will show that sport is a hot news topic right now.
 
-% Usually, in stream processing systems, all operations from a logical graph execute on all computational units. Scalability is achieved due to data partitioning before each operation. Figure ~\ref{physical_graph} captures the scheme of a physical execution for the proposed logical graph. Each vertex on the scheme denotes the same computational cluster consisted of multiple units. Data partitioning before {\em IDF} and {\em TF-IDF} operations is defined by keys. Data elements with the same keys process on a single computational unit. For {\em IDF} operation the key is a word, while {\em TF-IDF} aggregates items with the same text identifier. As we can see, all operations that take part in predicting pipeline scales among all computational units. 
+An issue regarding this pipeline is that the training process may be time-consuming. If we synchronize training and prediction processes, there will be significant latency spikes, e.g. if a training process lasts for several minutes, then spikes may be 10 000 times greater than latency for prediction. However, without synchronization, there will be no reproducible correspondence between texts and applied model. Hence, it would be almost impossible to achieve the same results within a new run on the same data, because the training time becomes a hidden parameter that influences output.
 
-% \subsubsection{Stream processing engines}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[scale=0.300]{pics/pipeline}
+  \caption{Improved data flow}
+  \label {pipeline}
+\end{figure}
 
-% The physical graph provides requirements to a stream processing engine. Data partitioning by two distinct keys (). Also, due to the described above reasons, our pipeline requires exactly-once processing. 
+\subsection{Improved training data flow}
 
-% In the Table~\ref{comparison} state-of-the-art stream systems are presented. As we can see, most of the systems demonstrate a lack of the needed properties or high latency for having them. FlameStream and MillWheel are two exceptions, however, the latter is a proprietary project, which cannot be used by anyone. Hence, our computations based on \FlameStream\, which provides both determinism and exactly once guarantee under low latency requirements. The mechanisms behind these features are detailed in~\cite{we2018adbis, we2018beyondmr}.
+We propose two solutions for the mentioned issue:
 
-% \begin{table}[htbp]
+\begin{itemize}
+    \item Use online learning algorithms. In this case, model updating is smooth and does not cause latency spikes.
+    \item Consider model parameters as special input elements that are stored with other input elements in a persistent queue, e.g. Kafka~\cite{kreps2011kafka}. To reproduce results, there is just a need to replay elements from this queue.
+\end{itemize}
 
-% \begin{threeparttable}
-% \begin{tabular}{lccl}
+In this work, we apply the second approach, while the first one is related to our future work. Model parameters are computed as another pipeline in the same streaming system. The scheme is shown in Figure~\ref{pipeline}. This solution also requires enforcing the order in a data flow. Let us demonstrate it by a typical execution of the proposed logical graph that is captured in Figure~\ref{physical_graph}. Each vertex on the scheme denotes the same computational cluster consisted of multiple units. Data partitioning before {\em IDF} and {\em TF-IDF} operations is defined by keys. Data elements with the same keys process on a single computational unit. For {\em IDF} operation the key is a word, while {\em TF-IDF} aggregates items with the same text identifier. 
 
-% System             & Determinism & Exactly-once & Latency    \\
-% \hline
-% FlameStream        &      +     &    +    &   low            \\
-% MillWheel          &      +     &    +    &   NA             \\
-% Spark Streaming    &      +     &    +    &   high           \\
-% Flink              &      --     &    +    &   high$^*$       \\
-% Storm              &      --     &    --    &   low            \\
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[scale=0.375]{pics/physical-graph}
+  \caption{The physical graph}
+  \label {physical_graph}
+\end{figure}
 
-% \end{tabular}
+The issue here is that there can be a race between model updates and computing of {\em TF-IDF}. Even if the correspondence between model parameters and input texts is defined by a persistent queue, they can be reordered during the physical execution. The solution to this problem is specific for a concrete streaming engine.
 
-% * with enabled exactly-once
+\subsection{Stream processing systems}
 
-% \end{threeparttable}
+As it was demonstrated above, {\em exactly once} is a strong requirement for the text classification pipeline. On the other hand, the key performance metric in streaming applications is latency, so there is a need to achieve as small latency as possible. Table~\ref{comparison} shows if a system supports exactly once and low latency (less than 500 ms). As we can see, among open systems only~\FlameStream\ provides for both low latency and exactly once. This property is achieved using optimistic order enforcement that implies system-wide idempotence. The details of this approach are discussed in~\cite{we2018adbis, we2018beyondmr}. Further, in experiments, we use~\FlameStream\ engine.
 
-% \caption{Stream processing systems comparison}
-% \label{comparison}
-% \end{table}
+\begin{table}[htbp]
 
-% \subsubsection{Training pipeline}
+\begin{threeparttable}
+\begin{tabular}{lccl}
 
-% A naive idea how to embed training on labeled data is to add an additional branch between {\em TF-IDF} and {\em Text Classifier}. For already labeled text its features are sent to a {\em Partial fit} vertex instead of the {\em Classifier}. {\em Partial fit} vertex buffers all input elements until training is triggered. After training, the buffer flushes. Updated parameters of a machine learning model are saved for further training and broadcasted to all {\em Text Classifier} vertices. 
+System             & Exactly-once & Latency    \\
+\hline
+Storm,Heron,Samza        &    --   &   low            \\
+Spark Streaming    &    +    &   high           \\
+Flink              &    +     &    high$^*$       \\
+MillWheel          &    +    &   NA             \\
+FlameStream        &    +    &   low            \\
 
-% The proposed solution has important pitfalls. Firstly, to achieve determinism there is a need to ensure that the same machine learning model is applied to the same texts within different deployments. However, even if model training process is pure, training time may vary between different runs.
+\end{tabular}
 
-% % Training pipeline is a separate branch within the logical graph introduced above. For already labeled text its features are sent to a {\em Partial fit} vertex instead of the {\em Classifier}. {\em Partial fit} vertex buffers all input elements until training is triggered. It is done using a distinct input stream element, which is submitted directly to the {\em Input}. Every vertex except the {\em Partial fit} passes this element through without processing. This behavior is similar to punctuations handling~\cite{tucker2003exploiting}. After training, the buffer flushes. Updated parameters of a machine learning model are saved for further training and broadcasted to all {\em Text Classifier} vertices.
+* with enabled exactly-once~\cite{we2018beyondmr}
 
-% \subsubsection{Dealing with concept drift}
+\end{threeparttable}
 
-% Concept drift refers to the particular meaning of words, which changes over time. This aspect may affect the quality of a prediction, especially for data from news and social media sources. To handle this trait, we compute inverse document frequencies within a sliding window. The length of a window must coincide with a period of the additional training. Similar approach demonstrates its effectiveness in~\cite{klinkenberg2000detecting}.
-
-% \subsection{Machine learning model \label{ML}}
-
-% In order to be efficiently embedded in the proposed data flow, several properties of machine learning model are desirable. A model should support the prior parameters and be able to train fast enough for real-time processing. The fast performance also includes a small size of the model for storing and updating operations in reasonable time and space.
-
-% The model can be chosen independently from other computations. In our case, we use Multinomial Logistic Regression. The training consists of the following formula:
-
-% \begin{center}
-
-% $$ J(W) = -\frac{1}{m} \sum \limits_{i = 1}^{m} \sum \limits_{j = 1}^{k} \mathbbm{1}_{\left\{y^{(i)} == j\right\}} \cdot \log \frac{\exp\left({W_{j}^Tx^{(i)}}\right) }{\sum \limits_{l = 1}^{k}  \exp\left({W_{l}^Tx^{(i)}}\right) }$$ 
-%  $$ +  \lambda_1 ||W||_1 + \lambda_2 ||W - W_{prev}||_2 $$
-
-% \end{center} 
-
-% The number of points in a new dataset is denoted as $m$. The point with index $i$ is shown as $x^{(i)}$. The number of classes is $k$. New weights are designated as $W$. The weights that computed in the previous step are $W_{prev}$. At the first time of triggering the process, $W_{prev}$ can be provided by a pre-train process.  
-
-% The formula provides the goal of the training. The first component is the standard softmax function for multiple classes. The second component keeps the l1 regularization of the weights, and provides sparsity, hence, the model has a small size -- about 1 Mb, which can be stored and updated with low cost. To use the previous history of the classifier weights, we apply l2 regularization as the third component. 
-
-% We are interested in finding such $W$ that minimizes $J(W)$. Taking derivatives, one can show that the gradient for each class component is:
-
-% \begin{center}
-
-% $$ \nabla_{W_j} \; J(W) = -\frac{1}{m} \sum \limits_{i = 1}^{m} \left[ x^{(i)} \left( \mathbbm{1}_{\left\{y^{(i)} == j\right\} } - \frac{\exp\left({W_{j}^Tx^{(i)}}\right)}{\sum \limits_{l = 1}^{k}  \exp\left({W_{l}^Tx^{(i)}}\right)} \right) \right] $$
-% $$ - \; \lambda_1 sign\left(W\right) - \frac{\lambda_2}{2} \left(W - W_{prev} \right), \; j = [1..k] $$
-
-% \end{center} 
-
-% We use Stochastic Gradient Descent for optimization. In experiments ~\ref{fs-short-experiments} section, model performance is presented.
+\caption{Stream processing systems comparison}
+\label{comparison}
+\end{table}
