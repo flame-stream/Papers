@@ -55,10 +55,8 @@ The issue here is that there can be a race between model updates and computing o
 As it was demonstrated above, {\em exactly once} is a strong requirement for the text classification pipeline. On the other hand, the key performance metric in streaming applications is latency, so there is a need to achieve as small latency as possible. Table~\ref{comparison} shows if a system supports exactly once and low latency (less than 500 ms). As we can see, among open systems only~\FlameStream\ provides for both low latency and exactly once. This property is achieved using optimistic order enforcement that implies system-wide idempotence. The details of this approach are discussed in~\cite{we2018adbis, we2018beyondmr}. Further, in experiments, we use~\FlameStream\ engine.
 
 \begin{table}[htbp]
-
 \begin{threeparttable}
 \begin{tabular}{lccl}
-
 System             & Exactly-once & Latency    \\
 \hline
 Storm,Heron,Samza        &    --   &   low            \\
@@ -66,13 +64,9 @@ Spark Streaming    &    +    &   high           \\
 Flink              &    +     &    high$^*$       \\
 MillWheel          &    +    &   NA             \\
 FlameStream        &    +    &   low            \\
-
 \end{tabular}
-
 * with enabled exactly-once~\cite{we2018beyondmr}
-
 \end{threeparttable}
-
 \caption{Stream processing systems comparison}
 \label{comparison}
 \end{table}
