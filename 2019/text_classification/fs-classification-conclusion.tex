@@ -1,5 +1,5 @@
 \label {fs-short-conclusion}
 
-In this work, we introduced distributed multi-labelled text classification system on non-static dataset, which is able to provide a low latency between obtaining text an getting its label. Furthermore, without compromising the latency of the pipeline continues training on the input stream data, which leads to improved accuracy of results. By designing the computational model, we have dealt with the problems of distributed TF-IDF computing, concept drift, additional training and model updating. The experiments demonstrate latency results and increasing accuracy due to the real-time training.
+In this work, we investigated the suitability of distributed stream processing engines to the problem of text streams classification. We demonstrated that there are several pitfalls with a straightforward approach. In particular, it was shown that exactly once is a strong requirement for unbiased reliable results. We also revealed that training pipeline cannot be straightforwardly embedded in a prediction pipeline. 
 
-In the future, this work can be applied to the real services for analyzing users interests and visualize them in a neat form.
+We proposed a data flow on a top of~\FlameStream\ processing system that mitigates the highlighted issues. We demonstrated that the proposed solution provides for low latency and linear scalability together with reasonable classification accuracy in a real-life scenario.
