@@ -50,7 +50,7 @@
 
 \begin{abstract}
 
-Distributed stream processing engines seem as suitable platforms for large-scale text classification with low latency requirements. However, this straightforward approach has important pitfalls that are easy to miss. In this work, we emphasize the challenges that a developer of text stream classification pipeline face and propose a data flow on top of~\FlameStream\ processing engine that is able to overcome most of the issues. We demonstrate the feasibility of the proposed solution with a series of experiments on a stream of real-world news articles.
+Large-scale classification of text streams is a substantial problem that is hard to solve. Batch processing systems are scalable and proved their effectiveness for machine learning but do not provide for low latency. On the other hand, state-of-the-art distributed stream processing systems are able to ensure low latency but do not support the same level of fault tolerance and determinism. In this work, we show how the distributed streaming computational model and fault tolerance mechanisms can affect the correctness of text classification data flow. We also propose a pipeline that mitigates the revealed pitfalls. The feasibility of the proposed solution is demonstrated with a series of experiments on a stream of real-world news articles.
 
 \end{abstract}
 
