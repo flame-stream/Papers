@@ -1,5 +1,5 @@
 \label{fs-related}
 
-Most related prior works were implemented on Apache Spark \cite{semberecki2016distributed, 8029336, Nodarakis2016LargeSS, baltas2016apache, svyatkovskiy2016large} or Apache Storm \cite{khumoyun2016real}. These platforms use micro-batching technique for processing data. However, such method provides high latency between obtaining a text and labelling it. In addition, all the methods above does not consider a concept drift as an issue.
+Some works on classification on text streams classification do not consider problems regarding scalability at all~\cite{zhang2008one}. There are a plenty of projects that apply batch or micro-batch processing systems to scalable distributed text classification~\cite{semberecki2016distributed, 8029336, Nodarakis2016LargeSS, baltas2016apache, svyatkovskiy2016large, berral2015aloja}. However, as it was mentioned above, these methods are not suitable for streaming classification due to low latency requirements. 
 
-Next work takes into account the concept drift and related to stream data nature \cite{zhang2008one}. However, the final solution is hard to scale into a cluster of machines efficiently.
+Despite the fact that machine learning on top of distributed stream processing is a hot topic, previous works in this field do not consider issues related to the delivery guarantees and distributed environment~\cite{khumoyun2016real, morales2015samoa}. In TFX project~\cite{Baylor:2017:TTP:3097983.3098021} similar problems are denoted, but they are not directly connected to a distributed stream processing. 
