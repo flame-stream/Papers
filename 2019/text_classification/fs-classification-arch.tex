@@ -6,12 +6,12 @@ As the main requirement to a stream processing engine we denote the following: e
 
 The introduced requirement affects the choice of a delivery guarantee. If a stream processing system provides {\em at least once}, some input texts can be processed more than one time in case of failures. This behavior may lead to biased prediction results. For example, if a single sports article is processed many times due to multiple failures, the resulted topics distribution will show that sport is a hot news topic right now. Hence, the only suitable delivery guarantee is {\em exactly once}.
 
-\subsection{Straightforward data flow}
+\subsection{Na\"ive data flow}
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[scale=0.38]{pics/logical-graph}
-  \caption{The straightforward data flow}
+  \caption{The na\"ive data flow}
   \label {logical_graph}
 \end{figure}
 
@@ -69,4 +69,5 @@ FlameStream        &    +          &   low            \\
 \end{threeparttable}
 \caption{Support of exactly and low latency (less than 500ms) by stream processing systems}
 \label{comparison}
+\vspace{-6mm}
 \end{table}
