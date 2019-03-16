@@ -56,14 +56,14 @@ As it was demonstrated above, {\em exactly once} is a strong requirement for the
 
 \begin{table}[htbp]
 \begin{threeparttable}
-\begin{tabular}{lccl}
+\begin{tabular}{lcl}
 System             & Exactly-once & Latency    \\
 \hline
-Storm,Heron,Samza        &    --   &   low            \\
-Spark Streaming    &    +    &   high           \\
-Flink              &    +     &    high$^*$       \\
-MillWheel          &    +    &   NA             \\
-FlameStream        &    +    &   low            \\
+Storm,Heron,Samza  &    --         &   low            \\
+Spark Streaming    &    +          &   high           \\
+Flink              &    +          &   high$^*$       \\
+MillWheel          &    +          &   NA             \\
+FlameStream        &    +          &   low            \\
 \end{tabular}
 * with enabled exactly-once~\cite{we2018beyondmr}
 \end{threeparttable}
