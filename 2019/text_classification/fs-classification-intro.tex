@@ -5,7 +5,7 @@ Classification of large text streams is hard, but important task for researchers
 An immediate idea is to employ a distributed stream processing engine such as Flink~\cite{Carbone:2017:SMA:3137765.3137777} or Storm~\cite{apache:storm}. However, unlike batch engines, stream processing systems have several distinctive features: 
 
 \begin{itemize}
-    \item In a general case, failure and recovery is not transparent for a user. The guarantees on data in case of failures are defined in terms of delivery guarantees: {\em at least once} and {\em exactly once}. The choice of a guarantee may affect the correctness of a text classification pipeline.
+    \item In a general case, failure and recovery are not transparent for a user. The guarantees on data in case of failures are defined in terms of delivery guarantees: {\em at least once} and {\em exactly once}. The choice of a guarantee may affect the correctness of a text classification pipeline.
     \item Most of streaming systems are inherently non-deterministic. It means that different runs on the same data may produce different results. This property can influence the classification process as well.
 \end{itemize}
 
