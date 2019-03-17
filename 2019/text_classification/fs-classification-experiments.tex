@@ -36,13 +36,13 @@ $X$ denoted as a training dataset and the number of classes is $k$. Also, $x$ de
 
 The first component is the standard softmax function for multiple classes. The second component keeps the $L1$ regularization of the weights, and provides sparsity, hence, the model has a small size -- about 1 Mb. We apply $L2$ regularization as the third component in order to use previous weights for on-the-fly model update.
 
-We compared two approaches to the performance demonstration of the proposed machine learning model. The first one is training on the complete dataset with $\lambda_2 = 0$. We call this approach a {\em static training}. The second one consists in dividing training dataset into relatively small batches and consequent applying MLR with $L2$ regularization to each batch. The latter case demonstrates the behavior of our streaming classification approach. The results are shown in Table~\ref{accuracy}. The sizes of train and test datasets are 14 000 and 3000. Dividing into trains and test are done randomly within documents for a fixed time range. As one can see, streaming approach performance is slightly better than the static. It indicates that our framework is able to handle the streaming nature of the news dataset including so-called {\em concept drift}. The more formal rationale behind the effectiveness of our model is out of the scope of this paper and relates to our future work.
+We compared two approaches to the performance demonstration of the proposed machine learning model. The first one is training on the complete dataset with $\lambda_2 = 0$. We call this approach a {\em static training}. The second one consists in dividing training dataset into relatively small batches and consequent applying MLR with $L2$ regularization to each batch. The latter case demonstrates the behavior of our streaming classification approach. The results are shown in Table~\ref{accuracy}. The sizes of train and test datasets are 10 500 and 1500. Dividing into trains and test are done randomly within documents for a fixed time range. As one can see, the streaming approach has only a slight regret in comparison with the static. The achieved accuracy is also reasonable considering the number of classes. These results indicate that our framework is able to efficiently solve the text multi-classification problem.
 
 \begin{table}[htbp]
 \begin{tabular}{lc}
 Method             & Accuracy \% \\
-Static training    & 0.667       \\
-Streaming training & 0.671         
+Static training    & 0.647       \\
+Streaming training & 0.644         
 \end{tabular}
 \caption{Accuracy comparison between static and stream training}
 \label{accuracy}
