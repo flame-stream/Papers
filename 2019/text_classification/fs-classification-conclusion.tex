@@ -1,12 +1,12 @@
 \label {fs-short-conclusion}
 
-In this work, we investigated the suitability of distributed stream processing engines to the problem of text streams classification. We demonstrated that there are several pitfalls with a straightforward approach. In particular, it was shown that exactly once is a strong requirement for unbiased reliable results. We also revealed that embedding of time-consuming train process in the prediction logical graph leads to a trade-off between reproducibility and significant latency spikes. 
+In this work, we investigated the suitability of distributed stream processing engines to the problem of text streams classification. We demonstrated that there are several pitfalls with a straightforward approach. In particular, it was shown that exactly once is a strong requirement for unbiased reliable results. We also revealed that embedding of time-consuming train process in the prediction pipeline leads to a trade-off between reproducibility and significant latency spikes. 
 
-To mitigate the highlighted issues, we proposed a text classification data flow on top of~\FlameStream\ processing system that is explicitly divided into {\em predicting} and {\em training} logical graphs. The predictions obtained through the proposed data flow are:
+To mitigate the highlighted issues, we proposed a text classification data flow on top of~\FlameStream\ processing system that is explicitly divided into {\em predicting} and {\em training} pipelines. The predictions obtained through the proposed data flow are:
 
 \begin{itemize}
     \item Unbiased by distributed environment: node failures or races do not affect the ultimate result distribution.
     \item Reproducible: if input elements are stored in persistent storage, the same predictions are obtained on each new run.
 \end{itemize}
 
-We demonstrated that the proposed solution provides for low latency and linear scalability together with reasonable classification accuracy in a real-life scenario.
+We demonstrated that the proposed solution provides for low latency and linear scalability together with reasonable classification accuracy.
