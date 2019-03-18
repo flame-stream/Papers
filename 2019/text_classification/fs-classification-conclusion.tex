@@ -1,6 +1,6 @@
 \label {fs-short-conclusion}
 
-In this work, we investigated the suitability of distributed stream processing engines to the problem of text streams classification. We demonstrated that there are several pitfalls with a straightforward approach. In particular, it was shown that exactly once is a strong requirement for unbiased reliable results. We also revealed that embedding of time-consuming train process in the prediction pipeline leads to a trade-off between reproducibility and significant latency spikes. 
+In this work, we investigated the suitability of distributed stream processing engines to the problem of text streams classification. We demonstrated that there are several pitfalls with a straightforward approach. In particular, it was shown that exactly once is a strong requirement for unbiased reliable results. We also revealed that embedding of time-consuming train process in the prediction pipeline leads to a trade-off between reproducibility and significant latency spikes. The way how the training and prediction pipelines can be efficiently combined together is the usage of online learning algorithms. We leave the investigation of this task as future work.
 
 To mitigate the highlighted issues, we proposed a text classification data flow on top of~\FlameStream\ processing system that is explicitly divided into {\em predicting} and {\em training} pipelines. The predictions obtained through the proposed data flow are:
 
