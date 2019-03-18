@@ -4,7 +4,7 @@ In this work, we investigated the suitability of distributed stream processing e
 
 \begin{itemize}
     \item Exactly once becomes a strong requirement.
-    \item Embedding of time-consuming train process in the prediction pipeline leads to a trade-off between reproducibility and significant latency spikes.
+    \item Embedding of time-consuming train process in the prediction pipeline leads to significant latency spikes.
 \end{itemize}
 
 To mitigate the highlighted issues, we proposed a text classification data flow on top of~\FlameStream\ processing system that is explicitly divided into {\em predicting} and {\em training} pipelines. The predictions obtained through the proposed data flow are:
