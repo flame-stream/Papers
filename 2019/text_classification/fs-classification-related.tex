@@ -1,6 +1,6 @@
 \label{fs-related}
 
-While the classification of text streams is a well-studied problem, it is challenging to solve it at scale. There are plenty of projects that apply batch or micro-batch processing systems to distributed text classification~\cite{semberecki2016distributed, 8029336, baltas2016apache, svyatkovskiy2016large, Nodarakis2016LargeSS}. However, as it was mentioned above, these methods are not suitable for streaming classification due to low latency requirements. 
+While the classification of text streams is a well-studied problem, it is challenging to solve this task at scale. There are plenty of projects that apply batch or micro-batch processing systems to distributed text classification~\cite{semberecki2016distributed, 8029336, baltas2016apache, svyatkovskiy2016large, Nodarakis2016LargeSS}. However, as it was mentioned above, these methods are not suitable for streaming classification due to low latency requirements. 
 
 Despite the fact that machine learning on top of distributed stream processing is a hot topic, previous works in this field do not consider issues related to the delivery guarantees and distributed environment~\cite{khumoyun2016real}. A SAMOA framework~\cite{morales2015samoa} provides implementations of several popular algorithms which can be executed on Flink, Storm or Samza but does not take responsibility for reproducible results and correctness in case of failures.
 
