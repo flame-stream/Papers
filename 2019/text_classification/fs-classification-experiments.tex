@@ -30,7 +30,16 @@ In order to be efficiently embedded in the proposed data flow, several propertie
 
 We use Multinomial Logistic Regression as a classification method. Model parameters (weights) are denoted as $W$. The training process is the maximization of the following formula in terms of $W$:
 
-$$ logP(W | X) = \frac{1}{|X|} \sum \limits_{(x, y) \in X} \log \frac{e^{{W_y^T \cdot \; x}}}{\sum \limits_{l = 1}^{k}  e^{{W_{l}^T \cdot \; x}}} - \lambda_1 ||W||_1 - \lambda_2 ||W - W_{prev}||_2 $$ 
+$$ 
+\begin{array}{rcl}
+\log P(W | X)   & = &
+ \frac 
+      {1}{|X|} \sum \limits_{(x, y) \in X} \log \frac{e^{{W_y^T \cdot \; x}}}
+      {\sum \limits_{l = 1}^{k}  e^{{W_{l}^T \cdot \; x}}}                  \\
+  & & - \lambda_1 \parallel  W\parallel _1 
+   - \lambda_2 \parallel  W - W_{prev} \parallel _2 
+   \end {array}
+   $$ 
 
 $X$ denoted as a training dataset and the number of classes is $k$. Also, $x$ designated as a point in the dataset and $y$ as a label for it. To change the model over time, we use weights that are computed in the previous step -- $W_{prev}$. At the first step, $W_{prev}$ can be provided by a pre-train process.
 
