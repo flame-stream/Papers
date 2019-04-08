@@ -1,0 +1,69 @@
+\documentclass[sigconf]{acmart}
+
+\usepackage{graphicx}
+\usepackage{algorithm} % for algorithms
+\usepackage{algpseudocode}
+\usepackage{booktabs} % For formal tables
+\usepackage{amsthm} % For claims
+
+\theoremstyle{remark}
+
+\settopmatter{printacmref=false, printccs=true, printfolios=true}
+\pagestyle{empty} % removes running headers
+
+\newcommand{\PicScale}{0.5}
+\newcommand {\FlameStream} {FlameStream}
+\begin{document}
+
+% \copyrightyear{2018} 
+% \acmYear{2018} 
+% \setcopyright{acmcopyright}
+% \acmConference[BeyondMR'18]{Algorithms and Systems for MapReduce and Beyond }{June 15, 2018}{Houston, TX, USA}
+% \acmBooktitle{BeyondMR'18: Algorithms and Systems for MapReduce and Beyond , June 15, 2018, Houston, TX, USA}
+% \acmPrice{15.00}
+% \acmDOI{10.1145/3206333.3209273}
+% \acmISBN{978-1-4503-5703-6/18/06}
+
+\title {Poster: decentralized validation of statistical properties in distributed stream processing}
+
+% \author{  Igor E. Kuralenok,$^1$     Artem Trofimov,$^ {1,2}$    Artem Permiakov,$^ {2}$   Andrey Pirozhkov,$^ {2}$    Semen Kutuzov,$^ {2}$     Artur,$^ {2}$    and  Boris Novikov$^ {1,2}$ }
+% \affiliation{%
+% \institution{$^1$JetBrains Research}
+%   \city{St. Petersburg} 
+%   \country{Russia}
+% }
+% \affiliation{%
+% \institution{$^2$Saint Petersburg State University}
+%   \city{St. Petersburg} 
+%   \country{Russia}
+% }
+% \email{\string{ikuralenok, trofimov9artem\string}@gmail.com, borisnov@acm.org}
+
+\begin{abstract}
+Streaming applications often require validation of statistical properties. The satisfaction of such properties can directly influence the correctness of the final results. For example, in A/B testing task, there is a need to ensure that users are uniformly distributed among application versions. Otherwise, experiment results may lead to inaccurate business decisions. There are a lot of statistical tools that aim to solve this problem. Most of them assume that the whole data is processed on a single computational unit. However, this approach does not fit in distributed stream processing, because merging all data to a single machine limits throughput and causes extra communication cost. In this work, we investigate the decentralized method for statistical data validation of data streams: each computational unit independently verifies data that is assigned to it. We demonstrate statistical limitations and challenges that we recognized during experiments on a uniform and discrete data. We also show that the API of state-of-the-art stream processing systems is not enough to solve this problem efficiently. Possible solutions to the mentioned issues and open problems are discussed.      
+\end {abstract}
+
+% \keywords{Data streams, exactly-once, drifting state, optimistic OOP}
+
+\maketitle
+
+\thispagestyle{empty}
+
+\section {Introduction}
+\input {fs-short-intro.tex}
+
+\section {Decentralized statistical validation}
+\input {fs-short-model.tex}
+
+\section {Experiments}
+\input {fs-short-experiments.tex}
+
+\section {Conclusion}
+\input {fs-short-conclusion.tex}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{../../bibliography/flame-stream}
+
+\end {document}
+
+\endinput
