@@ -1,1 +1,18 @@
 \label {fs-short-model}
+
+Assume that streaming data is partitioned among multiple independent computational units. Data partitioning is defined by business logic and we cannot affect it. In this case, each computational unit processes a sample of the whole input data. We consider two approaches for testing that data fits a given probability distribution:
+
+\begin{itemize}
+    \item Merge all data to a single computational node and apply the test on it.
+    \item Test data independently on each unit.
+\end{itemize}
+
+As we show further, the first approach limits throughput and causes extra communication cost. In this paper, we concentrate on independent testing because this approach provides minimal overhead. The following questions and challenges arise regarding the implementation of this method:
+
+\begin{itemize}
+    \item Despite the fact that each computational unit processes only its own sample, these samples still can be infinite due to streaming nature. Therefore, there is a need to make tests without storing the whole arrived data.
+    \item Samples can be distributed slightly different due to unbalanced partitioning. Hence, distribution parameters must be computed independently on each node.
+    \item It is unclear how independent testing influences the time of detection of unexpected distribution.
+    \item Each computational node can process only a limited subset of all possible values. For example, each node can receive only values with defined values of balancing hash function~\cite{carbone2015apache}.
+    \item State-of-the-art stream processing systems~\cite{Carbone:2017:SMA:3137765.3137777, apache:storm, Zaharia:2012:DSE:2342763.2342773} provide API for working with {\em logical} partitions, but do not have standard tools for working with data arrived at computational nodes.
+\end{itemize}
