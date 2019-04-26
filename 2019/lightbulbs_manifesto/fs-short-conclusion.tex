@@ -1,16 +1,16 @@
 \label {fs-short-conclusion}
 
-In this work, we highlighted the problem of efficient testing that data fits a given probability distribution within distributed stream processing. We performed several preliminary experiments and achieved the following results:
-\begin{itemize}
-    \item There is a trade-off between scalability and detection time: naive approach with testing all data on a single node limits throughput, while independent testing reveals changes slowly.
-    \item Data partitioning matters: if each node receives only a limited subset of possible values, e.g. elements with a given range of balancing function values, then it can significantly influence detection time and may possibly affect accuracy.
-    \item Method of aggregation of testing results from independent computational units plays an important role in detection time and accuracy.
-\end{itemize}
+% In this work, we highlighted the problem of efficient testing that data fits a given probability distribution within distributed stream processing. We performed several preliminary experiments and achieved the following results:
+% \begin{itemize}
+%     \item There is a trade-off between scalability and detection time: naive approach with testing all data on a single node limits throughput, while independent testing reveals changes slowly.
+%     \item Data partitioning matters: if each node receives only a limited subset of possible values, e.g. elements with a given range of balancing function values, then it can significantly influence detection time and may possibly affect accuracy.
+%     \item Method of aggregation of testing results from independent computational units plays an important role in detection time and accuracy.
+% \end{itemize}
 
-Our ultimate intent is to design a framework for statistical validation within distributed stream processing. Regarding this task the following open problems exist:
+% Our ultimate intent is to design a framework for statistical validation within distributed stream processing. Regarding this task the following open problems exist:
 
-\begin{itemize}
-    \item Adjust existing statistical tests for working with incomplete subsets of streaming data.
-    \item Design an intelligent protocol that makes decisions based on testing results from each node may reduce detection time and ensure better accuracy.
-    \item Implement an intuitive API for working with the framework.
-\end{itemize}
+% \begin{itemize}
+%     \item Adjust existing statistical tests for working with incomplete subsets of streaming data.
+%     \item Design an intelligent protocol that makes decisions based on testing results from each node may reduce detection time and ensure better accuracy.
+%     \item Implement an intuitive API for working with the framework.
+% \end{itemize}

@@ -1,11 +1,22 @@
 \label {fs-short-intro}
 
-Streaming applications often work with data that can be considered as values of some random variable with a given probability distribution. For example, user identifiers may be distributed uniformly or word frequencies from social networks text posts can fit Zipf distribution. The unexpected probability distribution of streaming data can directly influence the correctness of the final results:
+There are stream processing applications which require validation of not only individual stream elements, but the general properties of the whole input data. Let us consider two particular examples, which are important in many practical scenarios:
 
 \begin{itemize}
-    \item In machine learning it is often assumed that training data fits a known distribution, e.g. a Gaussian. If this assumption is not satisfied, the model can provide poor performance.
-    \item In A/B testing task, there is a need to ensure that users are uniformly distributed among application versions. Otherwise, experiment results may lead to inaccurate business decisions.
-    \item ...
+    \item {\bf A/B testing}. Assume that we deployed a variety of application versions for different groups of users. Now we have a stream of tuples $(user\_id,application\_version,metric)$ and we wish to aggregate metrics by $application\_version$ to find out the most profitable one. A tricky point here is a need to ensure that approximately the same number of users have experienced each application version. Otherwise, the comparison between versions may be unreliable, because results based on a smaller number of users are typically more biased. This issue can lead to erroneous business decisions, an increase of churn rate, and financial losses.
+    \item {\bf Text classification}. This is a common problem with a lot of applications: spam detection, news aggregation, sentiment analysis, etc. In most cases, there is an assumption that input data contains natural language utterances. If this assumption is not satisfied, e.g. all input texts contain a single word ``cat'', it can be an evidence of issues in data producers or in a data preparation pipeline. Such data inconsistency may lead to unreliable results achieved by text classification consumers. On the other hand, this type of failure is hard to recognize with only individual elements filtering. 
 \end{itemize}
 
-In this paper, we highlight the challenges of testing that streaming data fits a given distribution in {\em distributed} stream processing. In this case, the whole data is not processed on a single machine: it is partitioned among computational units in a cluster based on business-logic requirements. We demonstrate trade-offs between a naive and more complicated approach and discuss the preliminary results.
+Both mentioned problems can be solved using statistical hypothesis testing. In the first case, we can check that the number of users per application version has a uniform probability distribution, while in the second case one can examine if word frequencies fit Zipf law. Despite the fact that statistical hypothesis testing on streams is well-studied topic~\cite{???}, it becomes much more challenging if a stream is processed on different networked computers. In this case, individual stream elements may be processed by independent computational units. Merging data on a single unit for validation may limit throughput and increase latency due to extra network shuffle. However, independent testing on each computer can result in inaccurate results on some of them and requires decision-making protocols based on individual decisions of each computer.
+
+In this work, we highlight the problem of statistical hypothesis testing on streaming data that is distributed among computational units. The main challenges and trade-offs that we discovered are discussed. We also share preliminary results and possible solutions to the mentioned problem.
+
+% Streaming applications often work with data that can be considered as values of some random variable with a given probability distribution. For example, user identifiers may be distributed uniformly or word frequencies from social networks text posts can fit Zipf distribution. The unexpected probability distribution of streaming data can directly influence the correctness of the final results:
+
+% \begin{itemize}
+%     \item In machine learning it is often assumed that training data fits a known distribution, e.g. a Gaussian. If this assumption is not satisfied, the model can provide poor performance.
+%     \item In A/B testing task, there is a need to ensure that users are uniformly distributed among application versions. Otherwise, experiment results may lead to inaccurate business decisions.
+%     \item ...
+% \end{itemize}
+
+% In this paper, we highlight the challenges of testing that streaming data fits a given distribution in {\em distributed} stream processing. In this case, the whole data is not processed on a single machine: it is partitioned among computational units in a cluster based on business-logic requirements. We demonstrate trade-offs between a naive and more complicated approach and discuss the preliminary results.
