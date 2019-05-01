@@ -1,19 +1,7 @@
 \label {fs-short-model}
 
-% Assume that streaming data is partitioned among multiple independent computational units. Data partitioning is defined by business logic and we cannot affect it. In this case, each computational unit receives only a sample of all data stream elements. We consider two approaches for testing that data fits a given probability distribution:
+Let $X^{+\infty}=\{x_t\}_{t=1}^{+\infty}$ be an input stream. If this stream is partitioned among $n$ computational units, it can be represented as $X^{+\infty}=\bigsqcup_{i=1}^n X_i^{+\infty}$, where $X_i^{+\infty}=\{x_t^i\}_{t=1}^{+\infty}$. Let $F_0$ and $F_1$ are different families of probability distributions, and $F_1$ is not known. 
 
-% \begin{itemize}
-%     \item Merge all data to a single computational node and apply the test on it.
-%     \item Test data independently on each unit.
-% \end{itemize}
+Our task is for each $T\in \mathbb{N}$ have a result (probably approximate) of testing a hypothesis that $X^T=\{x_t\}_{t=1}^{T} \sim G(z)$, where $G(z) \in F_0$. Let $y_T$ be a vector of test statistics from all computational nodes,  $y_T = (S(X_1^T),..,S(X_n^T))$ , where $S(X_i^T)$ is a statistic of a chosen test. Hence, to solve this task, there is a need to design decision-making function $\varphi(y_T)$ such that $\varphi(y_T) = 0$, if $X^T \sim G(z)$  and $\varphi(y_T) = 1$ otherwise.
 
-% As we show further, the first approach limits throughput and causes extra communication cost. In our work, we concentrate on independent testing. It has minimal performance overhead because data is tested on a node that it has already arrived at. The following questions and challenges arise regarding the implementation of this method:
-
-% \begin{itemize}
-%     \item Despite the fact that each computational unit processes only its own sample, these samples still can be infinite due to streaming nature of data. Therefore, there is a need to make tests without storing the whole arrived data.
-%     \item It is unclear how independent testing influences the time of detection of unexpected distribution. There is a need to investigate the limits of applicability of the proposed method.
-%     \item Each computational node can process only a limited subset of all possible values. For example, each node can receive only values with defined values of balancing hash function~\cite{carbone2015apache}. It is important to find out how this fact can influence the results for different types of probability distributions.
-%     \item Test results from a single computational node may be inaccurate due to the issues mentioned above. To overcome this issue, protocols for making decisions based on the outcome of each independent unit are required.
-%     % \item Samples can be distributed slightly different due to unbalanced partitioning. Hence, distribution parameters must be computed independently on each node.
-%     \item State-of-the-art stream processing systems~\cite{Carbone:2017:SMA:3137765.3137777, apache:storm, Zaharia:2012:DSE:2342763.2342773} provide API for working with {\em logical} partitions, but do not have standard tools for working with data arrived at computational nodes. There is a need to extend standard APIs to apply the proposed approach on top of these systems.
-% \end{itemize}
+The proposed problem is similar to decentralized change detection approaches mentioned in~\cite{tartakovsky2008asymptotically, tran2014change}. However, these techniques consider a change from one unknown data distribution to another unknown one, while our task is to detect a change of a particular distribution family. Besides, these works do not take into account different data partition strategies peculiar to distributed streaming pipelines and important performance characteristics, e.g. latency and throughput.
