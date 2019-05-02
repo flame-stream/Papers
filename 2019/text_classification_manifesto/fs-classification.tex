@@ -1,0 +1,83 @@
+\documentclass[sigconf]{acmart}
+
+\usepackage{graphicx}
+\usepackage{algorithm} % for algorithms
+\usepackage{algpseudocode}
+\usepackage{booktabs} % For formal tables
+\usepackage{amsthm} % For claims
+\usepackage{bbm} % indicator function
+
+% table
+\usepackage[flushleft]{threeparttable} % http://ctan.org/pkg/threeparttable
+\usepackage{booktabs,caption}
+
+\theoremstyle{remark}
+
+\settopmatter{printacmref=false, printccs=true, printfolios=true}
+\pagestyle{empty} % removes running headers
+
+\newcommand{\PicScale}{0.5}
+\newcommand {\FlameStream} {FlameStream}
+\begin{document}
+
+\copyrightyear{2019} 
+\acmYear{2019} 
+\setcopyright{acmcopyright}
+% \acmConference[BeyondMR'18]{Algorithms and Systems for MapReduce and Beyond }{June 15, 2018}{Houston, TX, USA}
+% \acmBooktitle{BeyondMR'18: Algorithms and Systems for MapReduce and Beyond , June 15, 2018, Houston, TX, USA}
+% \acmPrice{15.00}
+% \acmDOI{10.1145/3206333.3209273}
+% \acmISBN{978-1-4503-5703-6/18/06}
+
+\title {Poster: distributed classification of text streams: challenges, limitations, and solutions}
+
+\author{Artem Trofimov,$^ {1}$    Mikhail Shavkunov,$^2$    Sergey Reznick,$^3$     Nikita Sokolov,$^{4}$   Mikhail Yutman,$^2$ \\   Igor E. Kuralenok,$^1$    and  Boris Novikov$^ {2}$ }
+\affiliation{%
+\institution{$^1$JetBrains Research}
+}
+\affiliation{%
+\institution{$^2$National Research University Higher School of Economics}
+}
+\affiliation{%
+\institution{$^3$ Kofax}
+}
+\affiliation{%
+\institution{$^4$ ITMO University}
+  \city{St. Petersburg} 
+  \country{Russia}
+}
+\email{\string{trofimov9artem, mv.shavkunov, sergey.reznick, faucct, myutman, ikuralenok\string}@gmail.com, borisnov@acm.org}
+
+\begin{abstract}
+
+Large-scale classification of text streams is an essential problem that is hard to solve. Batch processing systems are scalable and proved their effectiveness for machine learning but do not provide for low latency. On the other hand, state-of-the-art distributed stream processing systems are able to ensure low latency but do not support the same level of fault tolerance and determinism. In this work, we argue how the distributed streaming computational model and fault tolerance mechanisms can affect the correctness of text classification data flow. We also propose solutions that can mitigate the revealed pitfalls.
+
+\end{abstract}
+
+% \keywords{Data streams, exactly-once, drifting state, optimistic OOP}
+
+\maketitle
+
+\thispagestyle{empty}
+
+\section {Introduction}
+\input {fs-classification-intro.tex}
+
+\section {Problem statement}
+\input {fs-classification-problem.tex}
+
+\section {Data flow}
+\input {fs-classification-dataflow.tex}
+
+\section {Challenges}
+\input {fs-classification-challenges.tex}
+
+\section {Conclusion}
+\input {fs-classification-conclusion.tex}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{../../bibliography/flame-stream}
+
+\end {document}
+
+\endinput

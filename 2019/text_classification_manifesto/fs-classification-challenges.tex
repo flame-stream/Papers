@@ -1,0 +1,30 @@
+\label {fs-challenges}
+
+\indent
+
+{\bf Online training.} An issue regarding the mentioned pipeline is that the training process may be time-consuming. If training and prediction processes run consequently, there will be significant latency spikes, e.g. if a training process lasts for several minutes, then spikes may be 10 000 times greater than latency for prediction. However, without synchronization, there will be no reproducible correspondence between texts and applied model. It is almost impossible to achieve the same results within a new run on the same data because the training time becomes a hidden parameter that influences output. For instance, assume that we make two runs. On the first run model update consumes 70 seconds, but on the second run 75 seconds due to extra CPU load. If training and predicting are not synchronized, more unlabeled input elements are processed by an updated model in the first case, so the distribution of news topics may be completely different between these two runs. We propose two solutions for the mentioned issue:
+
+\begin{itemize}
+    \item Use online learning algorithms. In this case, model updating is smooth and its synchronization with training does not cause latency spikes.
+    \item Consider model parameters as special input elements that are stored with other input elements in a persistent queue, e.g. using Kafka~\cite{kreps2011kafka}. To reproduce results, there is just a need to replay elements from this queue.
+\end{itemize}
+
+{\bf Delivery guarantees.} Requirements on reproducibility and predictability of classification results affect the choice of a delivery guarantee. If a stream processing system provides {\em at least once}, some input texts can be processed more than one time in case of failures. This behavior may lead to biased prediction results. For example, if a single sports article is processed many times due to multiple failures, the resulted topics distribution will show that sport is a hot news topic right now. Hence, the only suitable delivery guarantee is {\em exactly once}. The problem here is that it is hard to achieve both low latency (less than 500 ms) and exactly once. Table~\ref{comparison} shows if a state-of-the-art system supports both features. As we can see, among open systems only~\FlameStream\ provides for both low latency and exactly once. This property is achieved using optimistic order enforcement that implies system-wide idempotence. The details of this approach are discussed in~\cite{we2018adbis, we2018beyondmr}.
+
+\begin{table}[htbp]
+\caption{Support of exactly and low latency (less than 500ms) by stream processing systems}
+\begin{threeparttable}
+\begin{tabular}{lcl}
+System             & Exactly-once & Latency    \\
+\hline
+Storm,Heron,Samza  &    --         &   low            \\
+Spark Streaming    &    +          &   high           \\
+Flink              &    +          &   high$^*$       \\
+MillWheel          &    +          &   NA             \\
+FlameStream        &    +          &   low            \\
+\end{tabular}
+* with enabled exactly-once~\cite{we2018beyondmr}
+\end{threeparttable}
+\label{comparison}
+\vspace{-6mm}
+\end{table}

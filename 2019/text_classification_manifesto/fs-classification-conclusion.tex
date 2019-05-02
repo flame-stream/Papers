@@ -1,0 +1,17 @@
+\label {fs-short-conclusion}
+
+In this work, we investigated the suitability of distributed stream processing engines to the problem of text streams classification with the following requirements:
+
+\begin{itemize}
+    \item Unbiased by distributed environment: node failures or races do not affect the ultimate result distribution.
+    \item Reproducible: if input elements are stored in persistent storage, the same predictions are obtained on each new run.
+\end{itemize}
+
+We discussed several pitfalls with a straightforward approach and highlight several limitations regarding the choice of a processing engine and the structure of data flow:
+
+\begin{itemize}
+    \item Exactly once is a strong requirement.
+    \item Embedding of time-consuming train process in the prediction pipeline leads to significant latency spikes.
+\end{itemize}
+
+As future work, we plan to implement a text classification framework that satisfies the proposed requirements and provides for low latency.
