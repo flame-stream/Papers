@@ -4,13 +4,13 @@ In this work, we considered the problem of decentralized validation of statistic
 \begin{itemize}
     \item Proposed technique ensures scalability, unlike centralized approach. However, it may reveal changes slower.
     \item Data partitioning matters: if each node receives only a limited subset of possible values, it can significantly influence detection time.
-    \item A method for making the decision based on local decisions of computational units affects performance a lot.
+    \item A method for making the decision based on local decisions of computational units requires further investigation.
 \end{itemize}
 
-Our ultimate intent is to design a framework for statistical validation within distributed stream processing. Regarding this task the following open problems exist:
+Our ultimate intent is to design a framework for statistical validation within distributed stream processing. Regarding this task the following open problems are identified:
 
 \begin{itemize}
-    \item Investigate how data partitioning and decision-making approaches affect false positive and false negative rates.
+    \item Study how data partitioning and decision-making approaches affect false positive and false negative rates.
     \item Adjust existing statistical tests for working with incomplete subsets of streaming data.
     \item Design an intelligent protocol that makes decisions based on local results and reduces detection time.
 \end{itemize}
