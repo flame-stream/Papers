@@ -50,7 +50,7 @@
 
 \begin{abstract}
 
-Large-scale classification of text streams is an essential problem that is hard to solve. Batch processing systems are scalable and proved their effectiveness for machine learning but do not provide for low latency. On the other hand, state-of-the-art distributed stream processing systems are able to ensure low latency but do not support the same level of fault tolerance and determinism. In this work, we argue how the distributed streaming computational model and fault tolerance mechanisms can affect the correctness of text classification data flow. We also propose a pipeline that mitigates the revealed pitfalls. The feasibility of the proposed solution is demonstrated with a series of experiments on a stream of real-world news articles.
+% Large-scale classification of text streams is an essential problem that is hard to solve. Batch processing systems are scalable and proved their effectiveness for machine learning but do not provide for low latency. On the other hand, state-of-the-art distributed stream processing systems are able to ensure low latency but do not support the same level of fault tolerance and determinism. In this work, we argue how the distributed streaming computational model and fault tolerance mechanisms can affect the correctness of text classification data flow. We also propose a pipeline that mitigates the revealed pitfalls. The feasibility of the proposed solution is demonstrated with a series of experiments on a stream of real-world news articles.
 
 \end{abstract}
 
@@ -60,20 +60,23 @@ Large-scale classification of text streams is an essential problem that is hard 
 
 \thispagestyle{empty}
 
-\section {Introduction}
-\input {fs-classification-intro.tex}
+% \section {Introduction}
+% \input {fs-classification-intro.tex}
 
-\section {Classifying text streams}
-\input {fs-classification-arch.tex}
+% \section {Classifying text streams}
+% \input {fs-classification-arch.tex}
 
-\section {Experiments}
-\input {fs-classification-experiments.tex}
+\section {Na\"ive data flow evaluation}
+\input {fs-classification-discussion.tex}
 
-\section{Related Work}
-\input {fs-classification-related.tex}
+% \section {Experiments}
+% \input {fs-classification-experiments.tex}
 
-\section {Conclusion}
-\input {fs-classification-conclusion.tex}
+% \section{Related Work}
+% \input {fs-classification-related.tex}
+
+% \section {Conclusion}
+% \input {fs-classification-conclusion.tex}
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{../../bibliography/flame-stream}
