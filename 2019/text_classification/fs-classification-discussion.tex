@@ -4,7 +4,7 @@ In this section, we discuss and demonstrate the main pitfalls which arise with t
 
 For experiments, we used an implementation of the proposed data flow on top of Apache Flink. The experiments were performed on a single 4 core CPU 8GB RAM machine with 2 Flink workers. Such setting is chosen to show that issues can be faced even in a deployment with a limited asynchrony. As a dataset, we used an open corpus of news articles from Russian media resource lenta.ru~\cite{lentaru}. This dataset contains documents, which are labeled by one of 90 different topics such as {\em sport}, {\em politics}, {\em science}, etc. In the experiments, we generated a stream consisted of articles from the dataset.
 
-We used multinomial logistic regression model as a classifier. We considered the multi-label classification problem: each news article can be labeled by multiple topics. For instance, text about novel research in sports food may be denoted as 70\% about sport, 20\% about science and 10\% about food. 
+We used multinomial logistic regression model as a classifier. We considered the multi-classification problem: each news article can be labeled by multiple topics with various probabilities. For instance, text about novel research in sports food may be denoted as 70\% about sport, 20\% about science and 10\% about food. 
 
 \subsection{Reproducibility}
 
@@ -43,9 +43,33 @@ Top labels for comparison    & \% of varied results & std    \\
 
 \subsection{Fault tolerance}
 
-As we demonstrated above, if machine learning pipeline is run on multiple computational units, there can be issues with reproducibility. Unfortunately, it is not the only challenge: computational nodes and the network may fail and potentially cause shifted or even incorrect results. Hence, in large-scale production deployments it is important to ensure that nodes and network failures do not {\em invisibly} influence outcome.
+As we demonstrated above, if machine learning pipeline runs on multiple computational units, there can be issues with reproducibility. Unfortunately, it is not the only challenge: computational nodes and network failures may potentially cause shifted or even incorrect results. Hence, in large-scale production deployments, it is important to ensure that nodes and network failures do not influence the outcome.
 
-In stream processing systems guarantees on data in case of failure are typically described in terms of {\em delivery guarantees}: at least once and exactly once. If a system provides exactly once, it is guaranteed that a streaming element is applied to data flow operators and released exactly one time. With at least once, it is ensured that an element is not lost, but it can influence operator states and be delivered to end-user multiple times. At least once may be preferred, because it typically has lower performance overhead. However, in the following experiments, we demonstrate that at least once guarantee may not be acceptable in some cases.  
+In stream processing systems, guarantees on data in case of failure are typically described in terms of {\em delivery guarantees}: at least once and exactly once. If a system provides exactly once, it is guaranteed that a streaming element is applied to data flow operators and released exactly one time. With at least once, it is ensured that an element is not lost, but it can influence operator states and be delivered to end-user multiple times. At least once may be preferred, because it typically has lower performance overhead. However, in the following experiments, we demonstrate that at least once guarantee may not be acceptable in some cases. 
+
+For the experiments, we set up 1 second between checkpoints in Flink, {\em RocksDB} as a state backend, and at least once as a delivery guarantee. It is worth to note that 1 second is the minimal snapshotting period that we were able to reproduce. The larger period can imply even more significant effects because in this case more elements are processed more than one time if a failure occurs.
+
+\subsubsection{Biased results distribution}
+
+In this experiment, we used a stream with 4000 articles. Articles are grouped in 4 blocks: 1st and 3rd contain news about football, and 2nd and 4th consisted of science news stories. We simulated a single node failure in both football and science groups. We denote that an article is classified into topic {\em Z} if this topic has the largest probability among all of them. Results are shown in Table~\ref{biased_results}. As one can notice, the classifier has an error: it labels approximately 40\% of articles as football or science, while others are mistakenly classified as other topics. Nevertheless, it is important that results indicate a small difference between the number of football and news articles. The failure causes a significant shift of this distribution: as expected, a failure during football or science news implies repeated processing of the same articles. In both cases, there were repeated about 600 texts. As a result, we can see that the biased distribution, that is hardly similar to the original.  
+
+\begin{table}[htbp]
+\caption{Biased classification results due to failure within at least once guarantee}
+\begin{threeparttable}
+\begin{tabular}{lcl}
+Experiment scenario    & \% of football articles & \% of science articles    \\
+\hline
+Ground truth   &   0.500    &   0.500    \\
+No failures/exactly once   &   $0.418\pm 0.001$    &   $0.404\pm 0.001$    \\
+Failure during football news   &   0.467    &   0.355    \\
+Failure during science news   &   0.377    &   0.445    \\
+\end{tabular}
+\end{threeparttable}
+\label{biased_results}
+\end{table}
+
+\subsubsection{Invalid threshold}
+
 
 
 
