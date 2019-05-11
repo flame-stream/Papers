@@ -2,7 +2,7 @@
 
 In this section, we discuss and demonstrate the main pitfalls which arise with the na\"ive data flow. The purpose of our evaluation is not to compare various machine learning models, but to investigate the applicability of stream processing systems as a {\em tool} for building text classification pipelines. We concentrate on a question on how distributed stream processing features may affect reproducibility and reliability of classification results.
 
-For experiments, we used an implementation of the proposed data flow on top of Apache Flink. The experiments were performed on a single 4 core CPU 8GB RAM machine with 2 Flink workers. Such setting is chosen to show that issues can be faced even in a deployment with a limited asynchrony. As a dataset, we used an open corpus of news articles from Russian media resource lenta.ru~\cite{lentaru}. This dataset contains documents, which are labeled by one of 90 different topics such as {\em sport}, {\em politics}, {\em science}, etc. In the experiments, we generated a stream consisted of articles from the dataset.
+For experiments, we used an implementation of the proposed data flow on top of Apache Flink. The experiments were performed on a single 4 core CPU 8GB RAM machine with 2 Flink workers. Such setting is chosen to show that issues can be faced even in a deployment with a limited asynchrony. As a dataset, we used an open corpus of news articles from Russian media resource lenta.ru~\cite{lentaru}. This dataset contains documents, which are labeled by one of 90 different topics such as {\em sport}, {\em politics}, {\em science}, etc. For the experiments, we generated a stream consisted of articles from the dataset.
 
 We used multinomial logistic regression model as a classifier. We considered the multi-classification problem: each news article can be labeled by multiple topics with various probabilities. For instance, text about novel research in sports food may be denoted as 70\% about sport, 20\% about science and 10\% about food. 
 
@@ -23,7 +23,7 @@ The issue is that there is a race between documents in the data flow before IDF 
 
 To show how this behavior affects text classification results we made 10 runs on a stream consisted of 10 000 news articles. We compared the most probable 1,2,3,4,5 obtained labels for the same documents between runs. Our comparison was order-sensitive: if top 2 labels for the document on the first run is [sport (50\%), science (20\%)], but on the second run [science (50\%), sport (20\%)], then we denoted these results as varied. 
 
-Table~\ref{race_table} demonstrates the results of the experiment. As we can see, approximately 56 out of 10 000 articles obtained distinct top 1 label. With the growth of considering the top, the percent of varied results significantly increases: 1270 articles achieved different top 5 labels on the average. These results indicate that the issue may influence the classification results and makes them hardly reproducible between independent runs. The solution to this problem is to determine the order of input documents and preserve this order before IDF computation. An implementation of this fix is specific for a concrete streaming engine.
+Table~\ref{race_table} demonstrates the results of the experiment. As we can see, approximately 56 out of 10 000 articles obtained different the most probable label. With the growth of the number of the labels that we consider, the percent of varied results significantly increases: 1270 articles achieved different top 5 labels on the average. These results indicate that the issue may influence the classification results and makes them hardly reproducible between independent runs. The solution to this problem is to determine the order of input documents and preserve this order before IDF computation. An implementation of this fix is specific for a concrete streaming engine.
 
 \begin{table}[htbp]
 \caption{Effects of races in the data flow}
@@ -51,7 +51,7 @@ For the experiments, we set up 1 second between checkpoints in Flink, {\em Rocks
 
 \subsubsection{Biased results distribution}
 
-In this experiment, we used a stream with 4000 articles. Articles are grouped in 4 blocks: 1st and 3rd contain news about football, and 2nd and 4th consisted of science news stories. We simulated a single node failure in both football and science groups. We denote that an article is classified into topic {\em Z} if this topic has the largest probability among all of them. Results are shown in Table~\ref{biased_results}. As one can notice, the classifier has an error: it labels approximately 40\% of articles as football or science, while others are mistakenly classified as other topics. Nevertheless, it is important that results indicate a small difference between the number of football and news articles. The failure causes a significant shift of this distribution: as expected, a failure during football or science news implies repeated processing of the same articles. In both cases, there were repeated about 600 texts. As a result, we can see that the biased distribution, that is hardly similar to the original.  
+In this experiment, we used a stream with 4000 articles. Articles are grouped in 4 blocks: 1st and 3rd contain news about football, and 2nd and 4th consisted of science news stories. We simulated a single node failure in both football and science groups. We denote that an article is classified into topic {\em Z} if it has the largest probability among all topics. Results are shown in Table~\ref{biased_results}. As one can notice, the classifier has an error: it labels approximately 42\% of articles as football and 40\% as science stories, while others are mistakenly classified as other topics. Nevertheless, it is important that results indicate a small difference between the number of football and news articles - about 1.5\%. The failure causes a significant shift of this distribution: as expected, a failure during football or science news implies repeated processing of the same articles. In both cases, there were repeated about 600 texts. As a result, we can see that the biased distribution, that is hardly similar to the original: the difference between the number of articles labeled as football and science becomes 7-10\%. 
 
 \begin{table}[htbp]
 \caption{Biased classification results due to failure within at least once guarantee}
@@ -69,8 +69,3 @@ Failure during science news   &   0.377    &   0.445    \\
 \end{table}
 
 \subsubsection{Invalid threshold}
-
-
-
-
-
