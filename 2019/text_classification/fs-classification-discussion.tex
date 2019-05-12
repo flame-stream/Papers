@@ -4,7 +4,7 @@ In this section, we discuss and demonstrate the main pitfalls which arise with t
 
 For experiments, we used an implementation of the proposed data flow on top of Apache Flink. The experiments were performed on a single 4 core CPU 8GB RAM machine with 2 Flink workers. Such setting is chosen to show that issues can be faced even in a deployment with a limited asynchrony. As a dataset, we used an open corpus of news articles from Russian media resource lenta.ru~\cite{lentaru}. This dataset contains documents, which are labeled by one of 90 different topics such as {\em sport}, {\em politics}, {\em science}, etc. For the experiments, we generated a stream consisted of articles from the dataset.
 
-We used multinomial logistic regression model as a classifier. We considered the multi-classification problem: each news article can be labeled by multiple topics with various probabilities. For instance, text about novel research in sports food may be denoted as 70\% about sport, 20\% about science and 10\% about food. 
+We used multinomial logistic regression model as a classifier. We mainly considered the multi-classification problem, but also saw into the label probability distribution obtained by an article. For instance, text about novel research in sports food may be denoted as 70\% about sport, 20\% about science and 10\% about food. In this case, it may be interesting to take into consideration not only the winner topic (sport) but top $n$ most probable labels.
 
 \subsection{Reproducibility}
 
@@ -69,3 +69,5 @@ Failure during science news   &   0.377    &   0.445    \\
 \end{table}
 
 \subsubsection{Invalid threshold}
+
+In the previous experiment, we demonstrated that failures can noticeably influence the distribution of classification results. In this once, we show  
