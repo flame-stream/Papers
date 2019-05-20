@@ -50,7 +50,7 @@
 
 \begin{abstract}
 
-% Large-scale classification of text streams is an essential problem that is hard to solve. Batch processing systems are scalable and proved their effectiveness for machine learning but do not provide for low latency. On the other hand, state-of-the-art distributed stream processing systems are able to ensure low latency but do not support the same level of fault tolerance and determinism. In this work, we argue how the distributed streaming computational model and fault tolerance mechanisms can affect the correctness of text classification data flow. We also propose a pipeline that mitigates the revealed pitfalls. The feasibility of the proposed solution is demonstrated with a series of experiments on a stream of real-world news articles.
+Large-scale classification of text streams is an essential problem that is hard to solve. Batch processing systems are scalable and proved their effectiveness for machine learning but do not provide low latency. On the other hand, state-of-the-art distributed stream processing systems are able to achieve low latency but do not support the same level of fault tolerance and determinism. In this work, we discuss how the distributed streaming computational model and fault tolerance mechanisms can affect the correctness of text classification data flow.  We also propose a pipeline that mitigates the revealed pitfalls. The feasibility of the proposed solution is demonstrated with a series of experiments on a stream of real-world news articles.
 
 \end{abstract}
 
@@ -60,14 +60,17 @@
 
 \thispagestyle{empty}
 
-% \section {Introduction}
-% \input {fs-classification-intro.tex}
+\section {Introduction}
+\input {fs-classification-intro.tex}
 
-% \section {Classifying text streams}
-% \input {fs-classification-arch.tex}
+\section {Data flow}
+\input {fs-classification-arch.tex}
 
-\section {Na\"ive data flow evaluation}
+\section {Data flow evaluation}
 \input {fs-classification-discussion.tex}
+
+\section {Data flow enhacements}
+\input {fs-classification-enhacement.tex}
 
 % \section {Experiments}
 % \input {fs-classification-experiments.tex}
