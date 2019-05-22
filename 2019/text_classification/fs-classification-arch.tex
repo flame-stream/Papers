@@ -1,14 +1,14 @@
 \label{fs-framework}
 
-Let us consider the news topic classification as an illustration of a text stream multi-classification task. There are two input streams: pre-labeled and raw. The latter stream elements must be labeled by a classifier and delivered to end-user. The pre-labeled stream is used for updating a machine learning model with new data in order to adapt it to current events. The ultimate purpose is to achieve the distribution of news topics that is changing over time. This task is a typical representative of the text stream classification problem.
+Let us consider the news topic classification as an illustration of a text stream multi-classification task. Input stream contains raw article texts that must be labeled by a classifier and delivered to end-user. The ultimate purpose is to achieve the distribution of news topics that is changing over time. This task is a typical representative of the text stream classification problem.
 
-A widespread classification pipeline used in batch processing systems~\cite{semberecki2016distributed} is based on bag-of-words text representation and consists of three steps. The first one is computing TF-IDF features. The second one is training a classifier on these features or making a prediction. Such pipelines are commonly represented it in the form of a {\em logical execution graph}. It serves as a language for defining pipelined computations in the majority of popular batch and stream processing systems~\cite{Carbone:2017:SMA:3137765.3137777, Zaharia:2016:ASU:3013530.2934664, apache:storm}. Vertices of the logical graph denote operations, while edges indicate data subscriptions between them. 
+A widespread classification pipeline used in batch processing systems~\cite{semberecki2016distributed} is based on bag-of-words text representation and consists of three steps. The first one is computing TF-IDF features. The second one is training a classifier on these features or making a prediction. Such pipelines are commonly represented it in the form of a {\em logical execution graph}. It serves as a language for defining pipelined computations in the majority of popular batch and stream processing systems~\cite{Carbone:2017:SMA:3137765.3137777, Zaharia:2016:ASU:3013530.2934664, apache:storm, Kulkarni:2015:THS:2723372.2742788, Noghabi:2017:SSS:3137765.3137770}. Vertices of the logical graph denote operations, while edges indicate data subscriptions between them. 
 
 The initial point in text classification graph is a {\em Source} vertex. It receives input texts from data producers and computes term frequencies. Computation of inverse document frequencies is a separate operation because it maintains a state and requires different data partitioning in a physical execution. {\em TF-IDF} vertex joins features corresponding to the same text and passes them to the {\em Text Classifier}. {\em Text Classifier} is the very last vertex that predicts a label and delivers it to a data consumer. The scheme of the proposed logical graph is shown in Figure~\ref{logical_graph}. It is important to note that this data flow only provides for prediction. The way how to embed online training into this graph is discussed in section~\ref{fs-solution}.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[scale=0.38]{pics/logical-graph}
+  \includegraphics[scale=0.44]{pics/logical-graph}
   \caption{Text classification data flow}
   \label {logical_graph}
 \end{figure}
