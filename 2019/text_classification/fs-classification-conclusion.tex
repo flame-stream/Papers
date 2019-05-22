@@ -1,17 +1,19 @@
 \label {fs-conclusion}
 
-In this work, we investigated the suitability of distributed stream processing engines to the problem of text streams classification. We demonstrated that there are several pitfalls with a straightforward approach. If we claim that output must depend on input only, but not on possible failures or processing environment features, the following limitations arise:
+In this work, we investigated the suitability of distributed stream processing engines to the problem of text streams classification. We demonstrated that there are several pitfalls with an adaptation of data flow commonly used in batch systems for a stream processing:
 
 \begin{itemize}
-    \item Exactly once becomes a strong requirement.
-    \item Embedding of time-consuming train process in the prediction pipeline leads to significant latency spikes.
+    \item Races in a physical data flow lead to non-reproducible results: labels provided by a classifier may vary from run to run on the same test data. 
+    \item Failures within {\em at least once} delivery guarantee can cause a biased distribution of classification results.
+    \item Streaming data is rapidly changing, so there is a need to embed on-the-fly machine learning model updates into the data flow. 
 \end{itemize}
 
-To mitigate the highlighted issues, we proposed a text classification data flow on top of~\FlameStream\ processing system that is explicitly divided into {\em predicting} and {\em training} pipelines. The predictions obtained through the proposed data flow are:
+It was shown that straightworfard solutions to the mentioned issues imply significant performance overhead. There were proposed potential solutions: to use~\FlameStream\ processing system with built-in determinism and efficient exactly once and to embed online learning into the data flow. 
+
+As future work, we plan to implement a text classification framework that satisfies the following requiremnts:
 
 \begin{itemize}
     \item Unbiased by distributed environment: node failures or races do not affect the ultimate result distribution.
     \item Reproducible: if input elements are stored in persistent storage, the same predictions are obtained on each new run.
+    \item Concept drift conscious: changes in streaming data must be reflected in a machine learning model.  
 \end{itemize}
-
-We demonstrated that the proposed solution provides for low latency and linear scalability together with reasonable classification accuracy. We also realized that the way how the training and prediction pipelines can be efficiently combined together is the usage of online learning algorithms. We leave the investigation of this task as future work.
