@@ -1,2 +1,30 @@
-%% It is just an empty TeX file.
-%% Write your code here.
+% 3 scenes: stream information, comparison real distribution and static learning, comparison real distribution and online learning
+
+Structure description.
+
+% describe the general process
+% run and resume idea
+\subsection{Demo scenarios}
+
+For the illustration of the concept drift, we introducing two demonstration scenarios -- long-term and short-term drift. Both of them are dedicated to showing the shift in predictions on a timed window explicitly when some hot topic arises. For the former scenario timed window is 1-2 months and for the latter -- several days. The live presentation consists of processing one of these two documents sets in ascending order. 
+
+\subsection{Setup}
+
+The demo is represented with the graphical user interface in Figure ?. This interface incorporates 3 scenes: stream information, comparison of the topic distributions and word weights information. The user is able to switch between the scenes. 
+
+Before starting the demonstration, the user also can set initial parameters on the first scene. .The parameters are including one of the two scenarios and the number of nodes for scalability simulation. Once the parameters are set, the "Start" button can be pressed. After that, the documents will be processed according to the logical graph. The process is visualized on all scenes simultaneously. The user can pause the running at any moment and see the actual results at this time. After the pause, the system can be resumed by pressing the same button again.
+
+On the same first scene, general information about the documents stream is shown on the left. The numerical characteristics such as the amount of the processed documents, the accuracy of the classifier, mean latency in milliseconds, and throughput in documents per second. These characteristics are visualized in graphs.
+
+During the process more detailed information of some input element is shown for 7-10 seconds. This allows examining actual data handling. The visualization contains computed result for text by the pipeline and prediction data of the classifier. The former is presented by input text itself, calculated TF-IDF features, weights of most important words. The latter includes predicted and true labels, prediction probabilities. Also, the latter comprises the version of the classifier model -- the number of times the model was updated.
+
+\subsection{Topic distributions}
+
+The second tab in the GUI is devoted to comparisons of topic distributions. For the input documents, it is known their real distribution among topics. The bar chart of such topics is shown in the graph on the top, which is updated in real-time. The goal is to achieve as much the same graph as possible. 
+
+Here we show two other graphs formed by two kinds of classifiers as well. First one is an illustration of the static learning approach. A classifier, which is trained on some part of the dataset is put to the system without any further updates. Its predictions are used to plot a graph on the left. The static classifier is not adapting to the new data and therefore it is expected to have a notable shift in the distributions. The second classifier is introducing our online learning algorithm, which is using incoming texts' labels for updating. The bar chart of the online classifier is located on the right of static one for better comparing.
+
+\subsection{Word weights}
+
+Each topic is characterized by a set of most common words. During concept drift, it is expected to see increased importance to these words. We chose several topics and the set of words for them. For each topic independent graph is made. Axis X represents the timeline and axis Y contains the average value of the set. Concept drift shows, that this value is increased for hot topics.
+
