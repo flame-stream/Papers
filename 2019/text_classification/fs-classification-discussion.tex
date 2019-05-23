@@ -33,6 +33,19 @@ Top labels for comparison    & \% of varied results & std    \\
 \label{race_table}
 \end{table}
 
+\subsubsection{Overhead on enforcing reproducibility}
+
+A straightforward technique to avoid races before IDF update is to define a synthetic total order on input documents and to enforce such order before the operation that modifies IDF. In Flink, the order can be defined using timestamps assigned to input elements. Order enforcement is implemented using custom {\it ProcessFunction} that buffers all words before IDF update. In order to flush this buffer, there is a need to ensure that all words from the document with a particular timestamp have arrived. Such guarantee can be provided by {\em low watermarks} mechanism. Low watermarks are service stream elements which go through the same network channels as ordinary elements and guarantee that there are no items with a given or less timestamp up to the stream. Hence, we can flush parts of the buffer when a corresponding watermark arrives. Such implementation follows a typical {\em out-of-order} processing approach~\cite{Li:2008:OPN:1453856.1453890}.
+
+Figure~\ref{reproducibility} demonstrates the comparison in latency between reproducible and irreproducible data flows. We compare $50^{th}$, $75^{th}$, $95^{th}$, and $99^{th}$ percentile of distributions, which clearly represent the performance from the perspective of the users' experience. Latency overhead is slight for low percentiles but is about 20\% for the 99th percentile. This behavior indicates that the overhead is quite low in a general case. However, it may be sensitive for applications with extremely low latency requirements. The overhead can be more significant within large-scale setup due to the greater probability of reorderings.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[scale=0.1]{pics/reproducibility}
+  \caption{Latency comparison between reproducible and irreproducible data flows}
+  \label {reproducibility}
+\end{figure}
+
 \subsection{Fault tolerance}
 
 As we demonstrated above, if machine learning pipeline runs on multiple computational units, there can be issues with reproducibility. Unfortunately, it is not the only challenge: computational nodes and network failures may potentially cause shifted or even incorrect results. Despite the fact that failures are typically considered as edge cases, incorrect results obtained due to even rare instabilities may affect service reputation and lead to financial losses. Hence, in large-scale production deployments, it is important to ensure that nodes and network failures do not influence the outcome.
@@ -91,4 +104,13 @@ Failure   &   Football(0.108),Politics(0.103),Animals({\bf 0.094})    \\
 \end{threeparttable}
 \label{biased_threshold}
 \end{table}
+
+\subsubsection{Overhead on fault tolerance}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[scale=0.1]{pics/fault_tolerance}
+  \caption{Latency overhead on fault tolerance}
+  \label {fault_tolerance}
+\end{figure}
 
