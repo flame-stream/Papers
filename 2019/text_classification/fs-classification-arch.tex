@@ -13,7 +13,7 @@ The initial point in text classification graph is a {\em Source} vertex. It rece
   \label {logical_graph}
 \end{figure}
 
-Typical execution of this logical graph is captured in Figure~\ref{physical_graph}. Each vertex on the scheme denotes the same computational cluster consisted of multiple units. The data partition is defined by a key, which is a word for {\em IDF} operation and text identifier for {\em TF-IDF} aggregator. Data elements with the same keys are processed on a single computational unit.
+Typical execution of this logical graph is illustrated in Figure~\ref{physical_graph}. Each vertex on the scheme denotes the same computational cluster consisted of multiple units. The data partition is defined by a key, which is a word for {\em IDF} operation and text identifier for {\em TF-IDF} aggregator. Data elements with the same keys are processed on a single computational unit.
 
 \begin{figure}[htbp]
   \centering
@@ -29,4 +29,4 @@ Despite the fact that the proposed data flow is commonly used for batch processi
     \item Unlike batch processing systems, streaming engines usually do not provide the same level of fault tolerance, e.g. within at least once guarantee, some input texts may be processed multiple times. Such behavior can potentially cause biased results. On the other hand, existing approaches to achieve exactly once provide high performance overhead~\cite{we2018beyondmr} that can be unacceptable for applications which require extremely low latency.
 \end{itemize}
 
-In the next section, we dive into details of the mentioned issues and investigate how they affect the correctness and reproducibility of classification results. We also evaluate straightforward approaches to mitigate these issues and demonstrate revealed trade-offs.
+In the next section, we dive into details of the mentioned issues and investigate how they affect the correctness and reproducibility of classification results. We also evaluate straightforward approaches to address these issues and demonstrate revealed trade-offs.
