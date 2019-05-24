@@ -60,7 +60,7 @@ In order to demonstrate how the choice of a delivery guarantee affects text clas
 
 % In the following experiments, we demonstrate that at least once guarantee may not be acceptable in some cases. 
 
-For the experiments, we set up 1 second between checkpoints in Flink, {\em File System State Backend} as a state backend, and at least once as a delivery guarantee. It is worth to note that 1 second is the minimal snapshotting period that we were able to reproduce. The larger period can imply even more significant effects because in this case more elements are processed more than one time if a failure occurs.
+For the experiments, we set up 1 second between checkpoints in Flink, {\em RocksDB} as a state backend, and at least once as a delivery guarantee. It is worth to note that 1 second is the minimal snapshotting period that we were able to reproduce. The larger period can imply even more significant effects because in this case more elements are processed more than one time if a failure occurs.
 
 \subsubsection{Biased results distribution}
 
