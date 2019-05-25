@@ -25,7 +25,7 @@ Typical execution of this logical graph is illustrated in Figure~\ref{physical_g
 Despite the fact that the proposed data flow is commonly used for batch processing systems~\cite{semberecki2016distributed}, it has several potential issues regarding its execution on top of distributed stream processing engine:
 
 \begin{itemize}
-    \item There can be a race between elements before the update of {\em IDF} due to multiple asynchronous network channels as it is shown in~\ref{physical_graph}. Unlike batch processing systems, where sorting data before an operation is natural, in stream processing systems such behavior is not commonly used due to strong low latency requirements. It is unclear how such reorderings during the physical execution influence classification results.
+    \item There can be a race between elements before the update of {\em IDF} due to multiple asynchronous network channels as it is shown in Figure~\ref{physical_graph}. Unlike batch processing systems, where sorting data before an operation is natural, in stream processing systems such behavior is not commonly used due to strong low latency requirements. It is unclear how such reorderings during the physical execution influence classification results.
     \item In contrast with batch processing systems, streaming engines usually do not provide the same level of fault tolerance, e.g. within at least once guarantee, some input texts may be processed multiple times. Such behavior can potentially cause biased results. On the other hand, existing approaches to achieve exactly once provide high performance overhead~\cite{we2018beyondmr} that can be unacceptable for applications which require extremely low latency.
 \end{itemize}
 
