@@ -1,6 +1,6 @@
 \label {fs-solution}
 
-\subsection{Reproducibility and fault tolerance with low overhead}
+\subsection{Reproducibility and Fault Tolerance with Low Overhead}
 
 As it was demonstrated in the previous section, {\em exactly once} and determinism are desirable properties for the text classification data flow. On the other hand, one of the key performance metrics in streaming applications is latency, so there is a need to achieve as small latency as possible. Table~\ref{comparison} shows if a system supports exactly once, built-in determinism, and low latency (less than 500 ms). To the best of our knowledge, among open systems only~\FlameStream\ provides for both low latency, determinism, and exactly once. This property is achieved using optimistic order enforcement that implies system-wide idempotence. The details of this approach are discussed in~\cite{we2018adbis, we2018beyondmr, we2018seim}. Therefore, implementation of the text classification data flow on top of~\FlameStream\ can potentially resolve the trade-offs between reliability and performance.
 
@@ -23,7 +23,7 @@ FlameStream        &    +       &   +        &   low            \\
 \label{comparison}
 \end{table}
 
-\subsection{Concept drift}
+\subsection{Concept Drift}
 
 Streaming applications often experience {\em concept drift}: the statistical properties of the target, which the machine learning model is trying to predict, change over time. Regarding news articles classification, concept drift may lead to the following effects:
 
