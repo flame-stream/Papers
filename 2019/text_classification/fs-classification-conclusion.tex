@@ -3,9 +3,9 @@
 In this work, we investigated the suitability of distributed stream processing engines to the problem of text streams classification. We demonstrated that there are several pitfalls with an adaptation of data flow commonly used in batch systems for a stream processing:
 
 \begin{itemize}
-    \item Races in a physical data flow lead to non-reproducible results: labels provided by a classifier may vary from run to run on the same test data. 
+    \item Races in a physical data flow lead to irreproducible results: labels provided by a classifier may vary from run to run on the same test data. 
     \item Failures within {\em at least once} delivery guarantee can cause a biased distribution of classification results.
-    \item Streaming data is rapidly changing, so there is a need to embed on-the-fly machine learning model updates into the data flow. 
+    \item Streaming data is rapidly changing, so there is a need to update the machine learning model on-the-fly. 
 \end{itemize}
 
 It was shown that straightforward solutions to the mentioned issues imply significant performance overhead. There were proposed potential solutions: to use~\FlameStream\ processing system with built-in determinism and efficient exactly once and to embed online learning into the data flow. 

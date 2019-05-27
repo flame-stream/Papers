@@ -1,25 +1,32 @@
 % 3 scenes: stream information, comparison real distribution and static learning, comparison real distribution and online learning
 
-Structure description.
+% Structure description.
 
 % describe the general process
 % run and resume idea
-\subsection{Demo scenarios}
+% \subsection{Demo scenarios}
 
-For the illustration of the concept drift, we introducing two demonstration scenarios -- long-term and short-term drift. Both of them are dedicated to showing the shift in predictions on a timed window explicitly when some hot topic arises. For the former scenario timed window is 1-2 months and for the latter -- several days. The live presentation consists of processing one of these two documents sets in ascending order. 
+% For the illustration of the concept drift, we introducing two demonstration scenarios -- long-term and short-term drift. Both of them are dedicated to showing the shift in predictions on a timed window explicitly when some hot topic arises. For the former scenario timed window is 1-2 months and for the latter -- several days. The live presentation consists of processing one of these two documents sets in ascending order. 
 
 % TODO: describe the content of these two datasets and their purposes:
 % FIFA WORLD CUP 2018 and Notre-Dame de Paris accident
 
 \subsection{Setup}
 
-The demo is represented with the graphical user interface in Figure ?. This interface incorporates 3 scenes: stream information, comparison of the topic distributions and word weights information. The user is able to switch between the scenes. 
+The demo consists of laptop and a graphical user interface shown in Figures~\ref{gui_1, gui_2}. This interface incorporates 3 scenes: distributed stream processing layout, comparison of the obtained topics distribution between oflline and online learning setups, and illustration of changing an online machine learning model over time. The user is able to switch between the scenes. 
 
-Before starting the demonstration, the user also can set initial parameters on the first scene. .The parameters are including one of the two scenarios and the number of nodes for scalability simulation. Once the parameters are set, the "Start" button can be pressed. After that, the documents will be processed according to the logical graph. The process is visualized on all scenes simultaneously. The user can pause the running at any moment and see the actual results at this time. After the pause, the system can be resumed by pressing the same button again.
+Before starting the demonstration, users can set the initial parameters. These parameters include the choice of drift scenario and the number of nodes for layout demonstration. There are two drift scenarios: long-term and short-term. For the former scenario properties of the stream is changing within is 1-2 months and for the latter -- within several days. Once the parameters are set, the "Start" button can be pressed. After that, the input articles stream starts to be processed. The execution is visualized on all scenes simultaneously. The user can pause the running at any moment and see the actual results at this time. After the pause, the system can be resumed by pressing the same button again.
 
-On the same first scene, general information about the documents stream is shown on the left. The numerical characteristics such as the amount of the processed documents, the accuracy of the classifier, mean latency in milliseconds, and throughput in documents per second. These characteristics are visualized in graphs.
+As a dataset for demonstration, we use an open corpus of news articles from Russian media resource lenta.ru~\cite{lentaru}. This dataset contains documents, which are labeled by one of 90 different topics such as {\em sport}, {\em politics}, {\em science}, etc. For the experiments, we generated a stream consisting of articles from the dataset. For long-term drift illustration we use articles between May and August 2018 which capture news stories before and during football world cup. For short-term drift news during a week...?
 
-During the process more detailed information of some input element is shown for 7-10 seconds. This allows examining actual data handling. The visualization contains computed result for text by the pipeline and prediction data of the classifier. The former is presented by input text itself, calculated TF-IDF features, weights of most important words. The latter includes predicted and true labels, prediction probabilities. Also, the latter comprises the version of the classifier model -- the number of times the model was updated.
+Conference attendees will be able to choose the convenient speed of processing.
+
+% On the same first scene, general information about the documents stream is shown on the left. The numerical characteristics such as the amount of the processed documents, the accuracy of the classifier, mean latency in milliseconds, and throughput in documents per second. These characteristics are visualized in graphs.
+
+% During the process more detailed information of some input element is shown for 7-10 seconds. This allows examining actual data handling. The visualization contains computed result for text by the pipeline and prediction data of the classifier. The former is presented by input text itself, calculated TF-IDF features, weights of most important words. The latter includes predicted and true labels, prediction probabilities. Also, the latter comprises the version of the classifier model -- the number of times the model was updated.
+
+\subsection{Processing layout}
+Figure 2 illustrates the GUI for demonstrating execution of text classification data flow on top of~\FlameStream processing system. 
 
 \subsection{Topic distributions}
 
