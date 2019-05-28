@@ -32,5 +32,5 @@ Despite the fact that the proposed data flow is commonly used for batch processi
     It is  not    clear how such reorderings during the physical execution influence classification results.
     
     \item 
-    In contrast with batch processing systems, streaming engines usually do not provide the same level of fault tolerance, e.g. within at least once guarantee, some input texts may be processed multiple times. Such behavior can potentially cause biased results. On the other hand, existing approaches to achieve exactly once provide high performance overhead~\cite{we2018beyondmr} that can be unacceptable for applications which require extremely low latency.
+    In contrast with batch processing systems, streaming engines usually do not provide the same level of fault tolerance, e.g. within at least once guarantee, some input texts may be processed multiple times. Such behavior can potentially cause biased results. On the other hand, existing approaches to achieve exactly once provide high performance overhead~\cite{we2018beyondmr} that can be unacceptable for applications which require extremely low latency (less than 500 ms).
 \end{itemize}
