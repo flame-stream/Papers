@@ -28,9 +28,6 @@ Despite the fact that the proposed data flow is commonly used for batch processi
 
 \begin{itemize}
     \item There can be a race between elements before the update of {\em IDF} due to multiple asynchronous network channels as it is shown in Figure~\ref{physical_graph}. 
-     sorting data before an operation is natural for batch processing systems,     It  is not appropriate in stream processing systems      due to strong low latency requirements.
-    It is  not    clear how such reorderings during the physical execution influence classification results.
-    
-    \item 
-    In contrast with batch processing systems, streaming engines usually do not provide the same level of fault tolerance, e.g. within at least once guarantee, some input texts may be processed multiple times. Such behavior can potentially cause biased results. On the other hand, existing approaches to achieve exactly once provide high performance overhead~\cite{we2018beyondmr} that can be unacceptable for applications which require extremely low latency (less than 500 ms).
+     While sorting data before an operation is natural for batch processing systems, it is not appropriate in stream processing systems due to strong low latency requirements. It is not clear how such reorderings during the physical execution influence classification results.
+    \item In contrast with batch processing systems, streaming engines usually do not provide the same level of fault tolerance, e.g. within at least once guarantee, some input texts may be processed multiple times. Such behavior can potentially cause biased results. On the other hand, existing approaches to achieve exactly once provide high performance overhead~\cite{we2018beyondmr} that can be unacceptable for applications which require extremely low latency (less than 500 ms).
 \end{itemize}
