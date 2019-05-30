@@ -19,7 +19,7 @@ To show how this behavior affects text classification results we made 10 runs on
 
 Tables~\ref{race_table},\ref{race_table_2},\ref{race_table_3} represent the results of the experiments. With the growth of the cluster size, the percent of documents which obtained various labels increases, e.g. from approximately 1\% on 2 nodes to about 2\% on 8 nodes within multi-class model. The number of such documents directly depends on classifier accuracy: for multi-class model that has the minimal accuracy this value is the highest (2\%), while the lowest value () is observed for binary model trained on {\em Weapons} topic.
 
-Classifier accuracy itself is not changed in all experiments. Such behavior indicates that documents with varied labels are classified incorrectly anyway. While races in the data flow make classifier outcome partially irreproducible, it may not affect accuracy at all. Therefore, non-determinism has limited negative effects but it is desirable to take this issue into account during the design of distributed streaming classifier.
+Classifier accuracy itself is not significantly changed in all experiments. Such behavior indicates that documents with varied labels are classified incorrectly anyway. While races in the data flow make classifier outcome partially irreproducible, it almost does not affect accuracy. Therefore, non-determinism has limited negative effects but it is desirable to take this issue into account during the design of distributed streaming classifier.
 
 \begin{table}[htbp]
 \caption{Race effects within multi-class model}
@@ -27,9 +27,9 @@ Classifier accuracy itself is not changed in all experiments. Such behavior indi
 \begin{tabular}{lcl}
 Cluster size    & \% of varied labels (mean$\pm$std) & Accuracy    \\
 \hline
-2   &   $0.9\pm0.2$    &   $0.773\pm0.002$    \\
-4   &   $1.7\pm0.4$    &   $0.773\pm0.002$    \\
-8   &   $1.9\pm0.5$    &   $0.773\pm0.002$    \\
+2   &   $0.9\pm0.2$    &   $77.3\pm0.2$    \\
+4   &   $1.7\pm0.4$    &   $77.3\pm0.2$    \\
+8   &   $1.9\pm0.5$    &   $77.3\pm0.2$    \\
 \end{tabular}
 \end{threeparttable}
 \label{race_table}
@@ -41,9 +41,9 @@ Cluster size    & \% of varied labels (mean$\pm$std) & Accuracy    \\
 \begin{tabular}{lcl}
 Cluster size    & \% of varied labels (mean$\pm$std) & Accuracy    \\
 \hline
-2   &   $0.9\pm0.2$    &   $0.773\pm0.002$    \\
-4   &   $1.7\pm0.4$    &   $0.773\pm0.002$    \\
-8   &   $1.9\pm0.5$    &   $0.773\pm0.002$    \\
+2   &   $0.3\pm0.1$    &   $88.9\pm0.1$    \\
+4   &   $0.4\pm0.2$    &   $89.0\pm0.1$    \\
+8   &   $0.6\pm0.2$    &   $89.0\pm0.1$    \\
 \end{tabular}
 \end{threeparttable}
 \label{race_table_2}
@@ -55,9 +55,9 @@ Cluster size    & \% of varied labels (mean$\pm$std) & Accuracy    \\
 \begin{tabular}{lcl}
 Cluster size    & \% of varied labels (mean$\pm$std) & Accuracy    \\
 \hline
-2   &   $0.9\pm0.2$    &   $0.773\pm0.002$    \\
-4   &   $1.7\pm0.4$    &   $0.773\pm0.002$    \\
-8   &   $1.9\pm0.5$    &   $0.773\pm0.002$    \\
+2   &   $0.2\pm0.1$    &   $98.0\pm0.1$    \\
+4   &   $0.3\pm0.1$    &   $97.6\pm0.1$    \\
+8   &   $0.6\pm0.2$    &   $97.4\pm0.2$    \\
 \end{tabular}
 \end{threeparttable}
 \label{race_table_3}
