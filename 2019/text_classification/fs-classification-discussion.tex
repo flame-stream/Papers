@@ -15,16 +15,16 @@ Users of popular open-source machine learning libraries like sklearn~\cite{sklea
 \subsubsection{Races in the data flow}
 The issue is that there is a race between documents in the data flow before IDF update. Hence, IDF features of the words in articles may vary from run to run. For example, let us consider two documents stream. Both documents contain a single word {\em cat}. Based on the order of processing, one document will obtain $IDF=1$ for the word {\em cat}, while the other document will obtain $IDF=2$.
 
-To show how this behavior affects text classification results we made 10 runs on a stream consisted of 1000 news articles. Such experiment was performed on clusters consisted of 2,4,8 Amazon EC2 small instances with 1 core CPU and 2GB RAM. We compare classifier accuracy and the mean number of documents which are labeled differently between runs.
+To show how this behavior affects text classification results we made 10 runs on a stream consisted of 1000 news articles. We emloyed three different classifiers: multi-class multinimial regression model and two binary classifiers trained to detect news about {\em Society} and {\em Weapons}. Such experiment was performed on clusters consisted of 2,4,8 Amazon EC2 small instances with 1 core CPU and 2GB RAM. We compare classifier accuracy and the mean number of documents which are labeled differently between runs.
 
 % We compared the most probable 1,2,3,4,5 labels for the same documents between runs. Our comparison was order-sensitive: if top 2 labels for the document on the first run is [sport, science], but on the second run [science, sport], then we denoted these results as varied. 
 
-Table~\ref{race_table} represents the results of the experiments. With the growth of the cluster size, the percent of documents which obtained various labels increases from approximately 1\% on 2 nodes to about 2\% on 8 nodes. On the other hand, classifier accuracy is not changed. Such behavior indicates that documents with varied labels are classified incorrectly anyway. While races in the data flow make classifier outcome partially irreproducible, it may not affect accuracy at all. Therefore, non-determinism has limited negative effects but it is desirable to take this issue into account during the design of distributed streaming classifier.   
+Tables~\ref{race_table, race_table_2, race_table_3} represent the results of the experiments. With the growth of the cluster size, the percent of documents which obtained various labels increases from approximately 1\% on 2 nodes to about 2\% on 8 nodes. On the other hand, classifier accuracy is not changed. Such behavior indicates that documents with varied labels are classified incorrectly anyway. While races in the data flow make classifier outcome partially irreproducible, it may not affect accuracy at all. Therefore, non-determinism has limited negative effects but it is desirable to take this issue into account during the design of distributed streaming classifier.   
 
 % Table~\ref{race_table} represents the results of the experiment. Most probable labels were assigned differently for 56 out of 10 000 articles. With the growth of the number of the labels that we consider, the percent of varied results significantly increases: 1270 articles achieved different top 5 labels on the average. Such behavior indicates that the issue may influence the classification outcome and makes them hardly reproducible between independent runs. Another negative effect of non-deterministic data flow is an increase in results variance. It may be unclear which reason causes accuracy changes: modification of the model or just another order of IDF updates.
 
 \begin{table}[htbp]
-\caption{Effects of races in the data flow}
+\caption{Effects of races within multi-class model}
 \begin{threeparttable}
 \begin{tabular}{lcl}
 Cluster size    & \% of varied labels (mean$\pm$std) & Accuracy    \\
@@ -35,6 +35,34 @@ Cluster size    & \% of varied labels (mean$\pm$std) & Accuracy    \\
 \end{tabular}
 \end{threeparttable}
 \label{race_table}
+\end{table}
+
+\begin{table}[htbp]
+\caption{Effects of races within binary model for topic {\em Society}}
+\begin{threeparttable}
+\begin{tabular}{lcl}
+Cluster size    & \% of varied labels (mean$\pm$std) & Accuracy    \\
+\hline
+2   &   $0.9\pm0.2$    &   $0.773\pm0.002$    \\
+4   &   $1.7\pm0.4$    &   $0.773\pm0.002$    \\
+8   &   $1.9\pm0.5$    &   $0.773\pm0.002$    \\
+\end{tabular}
+\end{threeparttable}
+\label{race_table_2}
+\end{table}
+
+\begin{table}[htbp]
+\caption{Effects of races within binary model for topic {\em Weapons}}
+\begin{threeparttable}
+\begin{tabular}{lcl}
+Cluster size    & \% of varied labels (mean$\pm$std) & Accuracy    \\
+\hline
+2   &   $0.9\pm0.2$    &   $0.773\pm0.002$    \\
+4   &   $1.7\pm0.4$    &   $0.773\pm0.002$    \\
+8   &   $1.9\pm0.5$    &   $0.773\pm0.002$    \\
+\end{tabular}
+\end{threeparttable}
+\label{race_table_3}
 \end{table}
 
 \subsubsection{Overhead on enforcing reproducibility}
