@@ -2,11 +2,11 @@
 
 In this section, we discuss and demonstrate the main pitfalls which arise with the data flow. The purpose of our evaluation is to investigate the applicability of stream processing systems as a {\em tool} for building text classification pipelines rather than to compare various machine learning models. We concentrate on a question on how distributed stream processing features may affect reproducibility and reliability of classification results.
 
-For experiments, we used an implementation of the proposed data flow on top of Apache Flink~\cite{Carbone:2017:SMA:3137765.3137777}. Apache Flink is a state-of-the-art industrial stream processing engine that is one of the most performant among competitors~\cite{karimov2018benchmarking, S7530084}. The experiments were performed on a single 4 core CPU 8GB RAM machine with 2 Flink workers. Such setting is chosen to show that issues can be faced even in a deployment with a limited asynchrony. 
+For experiments, we used an implementation of the proposed data flow on top of Apache Flink~\cite{Carbone:2017:SMA:3137765.3137777}. Apache Flink is a state-of-the-art industrial stream processing engine that is one of the most performant among competitors~\cite{karimov2018benchmarking, S7530084}. 
 
 As a dataset, we used an open corpus of news articles from Russian media resource lenta.ru~\cite{lentaru}. This dataset contains documents, which are labeled by one of 90 different topics such as {\em sport}, {\em politics}, {\em science}, etc. For the experiments, we generated a stream consisting of articles from the dataset. Processing {\em latency} in such setting is a time period between article arrives at the system entry and a corresponding label given by a classifier is released. 
 
-We used multinomial logistic regression model as a classifier. Within the dataset, this model provides a comparable accuracy (regret is less than 1\%) with SVM that is considered as the most suitable method for text classification~\cite{Kuralenok:2018:CEV:3269206.3271789}. We mainly considered the multi-classification problem, but also observed the label probability distribution obtained by an article. For instance, text about novel research in sports food may be denoted as 70\% about sport, 20\% about science and 10\% about food. In this case, it may be reasonable to take into consideration the top $n$ most probable labels rather than only the winner topic (sport).
+We mainly considered the multi-classification problem and used a multinomial logistic regression model as a classifier. Within the dataset, this model provides a comparable accuracy (regret is less than 1\%) with SVM that is considered as the most suitable method for text classification~\cite{Kuralenok:2018:CEV:3269206.3271789}.
 
 \subsection{Reproducibility}
 
@@ -15,21 +15,23 @@ Users of popular open-source machine learning libraries like sklearn~\cite{sklea
 \subsubsection{Races in the data flow}
 The issue is that there is a race between documents in the data flow before IDF update. Hence, IDF features of the words in articles may vary from run to run. For example, let us consider two documents stream. Both documents contain a single word {\em cat}. Based on the order of processing, one document will obtain $IDF=1$ for the word {\em cat}, while the other document will obtain $IDF=2$.
 
-To show how this behavior affects text classification results we made 10 runs on a stream consisted of 10 000 news articles. We compared the most probable 1,2,3,4,5 labels for the same documents between runs. Our comparison was order-sensitive: if top 2 labels for the document on the first run is [sport, science], but on the second run [science, sport], then we denoted these results as varied. 
+To show how this behavior affects text classification results we made 10 runs on a stream consisted of 1000 news articles. Such experiment was performed on clusters consisted of 2,4,8 Amazon EC2 small instances with 1 core CPU and 2GB RAM. We compare classifier accuracy and the mean number of documents which are labeled differently between runs.
 
-Table~\ref{race_table} represents the results of the experiment. Most probable labels were assigned differently for 56 out of 10 000 articles. With the growth of the number of the labels that we consider, the percent of varied results significantly increases: 1270 articles achieved different top 5 labels on the average. Such behavior indicates that the issue may influence the classification outcome and makes them hardly reproducible between independent runs. Another negative effect of non-deterministic data flow is an increase in results variance. It may be unclear which reason causes accuracy changes: modification of the model or just another order of IDF updates.
+% We compared the most probable 1,2,3,4,5 labels for the same documents between runs. Our comparison was order-sensitive: if top 2 labels for the document on the first run is [sport, science], but on the second run [science, sport], then we denoted these results as varied. 
+
+Table~\ref{race_table} represents the results of the experiments. With the growth of the cluster size, the percent of documents which obtained various labels increases from approximately 1\% on 2 nodes to about 2\% on 8 nodes. On the other hand, classifier accuracy is not changed. Such behavior indicates that documents with varied labels are classified incorrectly anyway. While races in the data flow make classifier outcome partially irreproducible, it may not affect accuracy at all. Therefore, non-determinism has limited negative effects but it is desirable to take this issue into account during the design of distributed streaming classifier.   
+
+% Table~\ref{race_table} represents the results of the experiment. Most probable labels were assigned differently for 56 out of 10 000 articles. With the growth of the number of the labels that we consider, the percent of varied results significantly increases: 1270 articles achieved different top 5 labels on the average. Such behavior indicates that the issue may influence the classification outcome and makes them hardly reproducible between independent runs. Another negative effect of non-deterministic data flow is an increase in results variance. It may be unclear which reason causes accuracy changes: modification of the model or just another order of IDF updates.
 
 \begin{table}[htbp]
 \caption{Effects of races in the data flow}
 \begin{threeparttable}
 \begin{tabular}{lcl}
-Top labels for comparison    & \% of varied results & std    \\
+Cluster size    & \% of varied labels (mean$\pm$std) & Accuracy    \\
 \hline
-1   &   0.56    &   0.06    \\
-2   &   2.38    &   0.14    \\
-3   &   5.27    &   0.22    \\
-4   &   9.27    &   0.35    \\
-5   &   13.7    &   0.53    \\
+2   &   $0.9\pm0.2$    &   $0.773\pm0.002$    \\
+4   &   $1.7\pm0.4$    &   $0.773\pm0.002$    \\
+8   &   $1.9\pm0.5$    &   $0.773\pm0.002$    \\
 \end{tabular}
 \end{threeparttable}
 \label{race_table}
@@ -41,7 +43,7 @@ A straightforward technique to avoid races before IDF update is to define a synt
 
 Low watermarks are service stream elements which go through the same network channels as ordinary elements and guarantee that there are no items with a given or less timestamp up to the stream. Hence, we can flush parts of the buffer when a corresponding watermark arrives. Such implementation follows an {\em out-of-order} processing approach~\cite{Li:2008:OPN:1453856.1453890}.
 
-Figure~\ref{reproducibility} demonstrates the comparison in latency between reproducible and irreproducible data flows. We compare $50^{th}$, $75^{th}$, $95^{th}$, and $99^{th}$ percentile of distributions, which clearly represent the performance from the perspective of the users' experience. Latency overhead is 50\% (11 ms) for the median and 24\% (28 ms) for the 99th percentile. This behavior indicates that the overhead is moderate in a general case. However, it may be sensitive for applications with extremely low latency requirements.
+Figure~\ref{reproducibility} demonstrates the comparison in latency between reproducible and irreproducible data flows on 2 computational units. We compare $50^{th}$, $75^{th}$, $95^{th}$, and $99^{th}$ percentile of distributions, which clearly represent the performance from the perspective of the users' experience. Latency overhead is 50\% (11 ms) for the median and 24\% (28 ms) for the 99th percentile. The same shape of the overhead is observed on clusters consisted of 4 and 8 nodes. This behavior indicates that the overhead is moderate in a general case. However, it may be sensitive for applications with extremely low latency requirements.
 
 \begin{figure}[htbp]
   \centering
@@ -52,17 +54,17 @@ Figure~\ref{reproducibility} demonstrates the comparison in latency between repr
 
 \subsection{Fault Tolerance}
 
-As we demonstrated above, if a machine learning pipeline is executed on multiple computational units, there can be issues with reproducibility. Unfortunately, it is not the only challenge: computational nodes and network failures may potentially cause shifted or even incorrect results. Despite the fact that failures are typically considered as edge cases, incorrect results obtained due to even rare instabilities may affect service reputation and lead to financial losses. Hence, in large-scale production deployments, it is important to ensure that nodes and network failures do not influence the outcome.
+As we demonstrated above, if a machine learning pipeline is executed on multiple computational units, there can be issues with reproducibility. Unfortunately, it is not the only challenge: computational nodes and network failures may potentially cause shifted or even incorrect results. Despite the fact that failures are typically considered as edge cases, incorrect results obtained due to even rare instabilities may affect service reputation and lead to financial losses. Hence, in production deployments, it is important to ensure that nodes and network failures do not influence the outcome.
 
 In stream processing systems, guarantees on data in case of failure are typically described in terms of {\em delivery guarantees}: at least once and exactly once. If a system provides exactly once, it is guaranteed that a streaming element is processed by data flow operators and released exactly one time. In other words, a system ensures that failure would be transparent for end-user. With at least once, it is ensured that an element is not lost, but it can influence operator states and be delivered to end-user multiple times. At least once may be preferred, because it typically has lower performance overhead. However, the degree of the influence of such relaxation on the classification results is not clear.
 
 In order to demonstrate how the choice of a delivery guarantee affects text classification pipeline, we model two scenarios that can be faced, e.g. in news aggregators:
 \begin{enumerate}
     \item There are two equally important events at the same time, e.g. football world cup and the G20 summit. Arriving news stories are grouped by these events: $n$ texts about football, then $n$ texts about politics and so on. This arrangement simulates articles from multiple sources. We expect that the proportion between the number of texts labeled as football and number of texts labeled as politics would be similar to the real distribution. Otherwise, news aggregator can make wrong conclusions about event importance and impact. The arose question is: can failure within at least once guarantee bias such distribution?
-    \item Assume that news aggregator denotes topic as {\em popular} if the relative number of articles labeled by this topic exceeds a certain pre-defined threshold. For instance, in a day of Olympics opening ceremony, we expect that topic {\em sport} becomes popular as well as usual prevalent themes like politics and business. The design of our experiment ensures that the number of articles on a theme exceeds the threshold during execution without failures or execution under exactly once guarantee. The goal of the experiment is to check if a failure during execution under at least once guarantee can cause loss of popular status (as defined above), that is, the theme does not reach the threshold. 
+    \item Assume that news aggregator denotes topic as {\em popular} if the relative number of articles labeled by this topic exceeds a certain pre-defined threshold. For instance, in a day of Olympics opening ceremony, we expect that topic {\em sport} becomes popular as well as usual prevalent themes like politics and business. The design of our experiment ensures that the number of articles on a theme exceeds the threshold during execution without failures or execution under exactly once guarantee. The goal of the experiment is to check if a failure during execution under at least once guarantee can cause loss of popular status (as defined above), that is, the theme does not reach the threshold due to reprocessing of documents with other topics. 
 \end{enumerate}
 
-For the experiments, we set up 1 second between checkpoints in Flink, {\em RocksDB} as a state backend, and at least once as a delivery guarantee. It is worth to note that 1 second is the minimal snapshotting period that we were able to reproduce. The larger period can imply even more significant effects because in this case more elements are processed more than one time if a failure occurs.
+The experiments were performed on a single 4 core CPU 8GB RAM machine with 2 Flink workers. Such setting is chosen to show that issues can be faced even in a basic deployment. We set up 1 second between checkpoints in Flink, {\em RocksDB} as a state backend, and at least once as a delivery guarantee. It is worth to note that 1 second is the minimal snapshotting period that we were able to reproduce. The larger period can imply even more significant effects because in this case more elements are processed more than one time if a failure occurs.
 
 \subsubsection{Biased results distribution}
 
@@ -117,7 +119,7 @@ Failure**   &   Football(10.8),Politics(10.3),Animals({\bf 9.4})    \\
 In order to avoid results inconsistencies in case of failures, there is a need to enable exactly once delivery guarantee. 
 Exactly once is implemented in Flink using a modification of the 2PC transactional protocol. A transaction starts when Flink injects a special element called {\em checkpoint} into the input stream. Each operation independently prepares data to save at the moment of checkpoint arrival. Prepared data is committed to external storage when checkpoint passes through the whole data flow. Output elements are released only after the transaction is committed. Because of the fact that a transaction begins once per snapshotting period, this period directly influences the latency of individual streaming elements.
 
-Figure~\ref{fault_tolerance} shows latency comparison between runs within at least once and exactly once guarantees in Flink. As expected, latency in exactly once mode depends on the snapshotting period. Overhead on latency is significant even with 1 second between checkpoints: it is more than a second for all considered percentiles. Such behavior can be unacceptable in many real-life applications. Hence, there is a trade-off between latency of individual elements and a guarantee that failures do not affect classification results.
+Figure~\ref{fault_tolerance} shows latency comparison between runs within at least once and exactly once guarantees in Flink. As expected, latency in exactly once mode depends on the snapshotting period. Overhead on latency is significant even with 1 second between checkpoints: it is more than a second for all considered percentiles. Such overhead is also observed in larger deployments~\cite{we2018beyondmr}. This behavior can be unacceptable in many real-life applications. Hence, there is a trade-off between latency of individual elements and a guarantee that failures do not affect classification results.
 
 \begin{figure}[htbp]
   \centering
