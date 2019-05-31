@@ -2,7 +2,7 @@
 
 \subsection{Reproducibility and Fault Tolerance}
 
-As it was demonstrated in the previous section, {\em exactly once} and determinism are desirable properties for the text classification data flow. On the other hand, one of the key performance metrics in streaming applications is latency, so there is a need to achieve as small latency as possible. Table~\ref{comparison} shows if a system supports exactly once, built-in determinism, and low latency (less than 500 ms). To the best of our knowledge, among open systems only~\FlameStream\ provides for both low latency, determinism, and exactly once. This property is achieved using optimistic order enforcement that implies system-wide idempotence. The details of this approach are discussed in~\cite{we2018adbis, we2018beyondmr, we2018seim}. Therefore, implementation of the text classification data flow on top of~\FlameStream\ can potentially resolve the trade-offs between reliability and performance.
+As it was demonstrated in the previous section, {\em exactly once} and determinism are desirable properties for the text classification data flow. On the other hand, one of the key performance metrics in streaming applications is latency, so there is a need to achieve as small latency as possible. Table~\ref{comparison} shows if a system supports exactly once, built-in determinism, and low latency (less than 500 ms). To the best of our knowledge, among open systems only~\FlameStream\ provides for both low latency, determinism, and exactly once. This property is achieved using optimistic order enforcement that implies system-wide idempotence. The details of this approach are discussed in~\cite{we2018adbis, we2018beyondmr}. Therefore, implementation of the text classification data flow on top of~\FlameStream\ can potentially resolve the trade-offs between reliability and performance.
 
 \begin{table}[htbp]
 \caption{Support of exactly once, built-in determinism, and low latency (less than 500ms) by stream processing systems}
@@ -10,9 +10,7 @@ As it was demonstrated in the previous section, {\em exactly once} and determini
 \begin{tabular}{lccc}
 System & Exactly-once & Determinism & Latency    \\
 \hline
-Storm  &    --      &   --       &   low            \\
-Heron  &    --      &   --       &   low            \\
-Samza  &    --      &   --       &   low            \\
+Storm, Heron, Samza  &    --      &   --       &   low            \\
 Spark Streaming    &    +       &   +        &   high           \\
 Flink              &    +       &   -        &   high$^*$       \\
 MillWheel          &    +       &   +        &   NA             \\
@@ -36,7 +34,7 @@ A streaming classifier must handle such behavior in order to automatically fit i
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[scale=0.43]{pics/logical-graph}
+  \includegraphics[scale=0.38]{pics/logical-graph}
   \caption{Data flow with online training}
   \label {training_graph}
 \end{figure}
