@@ -17,7 +17,7 @@ The issue is that there is a race between documents in the data flow before IDF 
 
 To show how this behavior affects text classification results we made 10 runs on a stream consisted of 1000 news articles. We employed three different classifiers: multi-class multinomial regression model and two binary classifiers trained to detect news about {\em Society} and {\em Weapons}. The ground truth accuracies of these classifiers on the test data are 77.3\%, 89.0\%, and 98.0\% correspondingly. The experiment was performed on clusters consisted of 2,4,8 Amazon EC2 small instances with 1 core CPU and 2GB RAM. We compare classifier accuracy and the mean number of documents which are labeled differently between runs.
 
-Tables~\ref{race_table},\ref{race_table_2},\ref{race_table_3} represent the results of the experiments. With the growth of the cluster size, the percent of documents which obtained various labels increases, e.g. from approximately 1\% on 2 nodes to about 2\% on 8 nodes within the multi-class model. Classifier accuracy itself is not significantly changed in the majority of experiments. This behavior indicates that documents with varied labels are classified incorrectly anyway. However, the most precise classifier (binary for topic {\em Weapons}) experiences almost 1\% accuracy fluctuations. Such accuracy difference may be important in some text classification problems~\cite{Kuralenok:2018:CEV:3269206.3271789}.
+Table~\ref{race_table} represents the results of the experiments. With the growth of the cluster size, the percent of documents which obtained various labels increases, e.g. from approximately 1\% on 2 nodes to about 2\% on 8 nodes within the multi-class model. Classifier accuracy itself is not significantly changed in the majority of experiments. This behavior indicates that documents with varied labels are classified incorrectly anyway. However, the most precise classifier (binary for topic {\em Weapons}) experiences almost 1\% accuracy fluctuations. Such accuracy difference may be important in some text classification problems~\cite{Kuralenok:2018:CEV:3269206.3271789}.
 
 % The number of such documents directly depends on classifier accuracy: for a multi-class model that has the minimal accuracy these values are the highest (1-2\%), while the lowest values (0.3-0.8\%) are observed for a binary model trained to detect {\em Weapons} topic.
 
@@ -26,25 +26,25 @@ Hence, there is evidence that non-determinism has negative effects, so it is des
 \begin{table}[htbp]
 \caption{Race effects }
 \begin {tabular} {r | r | r}
-Cluster size    & \% of varied labels (mean$\pm$std) & Accuracy \% (77.3)   \\
+Cluster size    & \% of varied labels (mean$\pm$std) & Accuracy \%   \\
 \hline
-\multicolumn {3}{c} {Mmulti-class model}  \\
+\multicolumn {3}{c} {Multi-class model (accuracy 77.3)}  \\
 2   &   $0.9\pm0.2$    &   $77.3\pm0.2$    \\
 4   &   $1.7\pm0.4$    &   $77.3\pm0.2$    \\
 8   &   $1.9\pm0.5$    &   $77.3\pm0.2$    \\
 \hline
-\multicolumn {3}{c} {Binary model for topic {\em Society}}  \\
+\multicolumn {3}{c} {Binary model for topic {\em Society} (accuracy 89.0)}  \\
 2   &   $0.3\pm0.1$    &   $88.9\pm0.1$    \\
 4   &   $0.4\pm0.2$    &   $89.0\pm0.1$    \\
 8   &   $0.6\pm0.2$    &   $89.0\pm0.1$    \\
 \hline
-\multicolumn {3}{c} {Binary model for topic {\em Weapons}}  \\
+\multicolumn {3}{c} {Binary model for topic {\em Weapons} (accuracy 98.0)}  \\
 2   &   $0.2\pm0.1$    &   $98.0\pm0.1$    \\
 4   &   $0.3\pm0.1$    &   $97.6\pm0.1$    \\
 8   &   $0.6\pm0.2$    &   $97.4\pm0.2$    \\
 \end{tabular}
+\label{race_table}
 \end {table}
-
 
 \subsubsection{Overhead on enforcing reproducibility}
 
