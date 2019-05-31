@@ -24,46 +24,27 @@ Tables~\ref{race_table},\ref{race_table_2},\ref{race_table_3} represent the resu
 Hence, there is evidence that non-determinism has negative effects, so it is desirable to take this issue into account during the design of distributed streaming classifier. However, the question about which parameters influence the degree of these effects requires further investigation. The study on the dependency between classifier settings and issues related to non-deterministic behavior is in the scope of our future work.
 
 \begin{table}[htbp]
-\caption{Race effects within multi-class model}
-\begin{threeparttable}
-\begin{tabular}{ccc}
+\caption{Race effects }
+\begin {tabular} {r | r | r}
 Cluster size    & \% of varied labels (mean$\pm$std) & Accuracy \% (77.3)   \\
 \hline
+\multicolumn {3}{c} {Mmulti-class model}  \\
 2   &   $0.9\pm0.2$    &   $77.3\pm0.2$    \\
 4   &   $1.7\pm0.4$    &   $77.3\pm0.2$    \\
 8   &   $1.9\pm0.5$    &   $77.3\pm0.2$    \\
-\end{tabular}
-\end{threeparttable}
-\label{race_table}
-\end{table}
-
-\begin{table}[htbp]
-\caption{Race effects within binary model for topic {\em Society}}
-\begin{threeparttable}
-\begin{tabular}{ccc}
-Cluster size    & \% of varied labels (mean$\pm$std) & Accuracy \% (89.0)   \\
 \hline
+\multicolumn {3}{c} {Binary model for topic {\em Society}}  \\
 2   &   $0.3\pm0.1$    &   $88.9\pm0.1$    \\
 4   &   $0.4\pm0.2$    &   $89.0\pm0.1$    \\
 8   &   $0.6\pm0.2$    &   $89.0\pm0.1$    \\
-\end{tabular}
-\end{threeparttable}
-\label{race_table_2}
-\end{table}
-
-\begin{table}[htbp]
-\caption{Race effects within binary model for topic {\em Weapons}}
-\begin{threeparttable}
-\begin{tabular}{ccc}
-Cluster size    & \% of varied labels (mean$\pm$std) & Accuracy \% (98.0)  \\
 \hline
+\multicolumn {3}{c} {Binary model for topic {\em Weapons}}  \\
 2   &   $0.2\pm0.1$    &   $98.0\pm0.1$    \\
 4   &   $0.3\pm0.1$    &   $97.6\pm0.1$    \\
 8   &   $0.6\pm0.2$    &   $97.4\pm0.2$    \\
 \end{tabular}
-\end{threeparttable}
-\label{race_table_3}
-\end{table}
+\end {table}
+
 
 \subsubsection{Overhead on enforcing reproducibility}
 
