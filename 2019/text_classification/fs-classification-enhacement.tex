@@ -10,7 +10,9 @@ As it was demonstrated in the previous section, {\em exactly once} and determini
 \begin{tabular}{lccc}
 System & Exactly-once & Determinism & Latency    \\
 \hline
-Storm, Heron, Samza  &    --      &   --       &   low            \\
+Storm  &    --      &   --       &   low            \\
+Heron  &    --      &   --       &   low            \\
+Samza  &    --      &   --       &   low            \\
 Spark Streaming    &    +       &   +        &   high           \\
 Flink              &    +       &   -        &   high$^*$       \\
 MillWheel          &    +       &   +        &   NA             \\
