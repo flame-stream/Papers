@@ -1,17 +1,16 @@
 \label {fs-conclusion}
 
-In this work, we investigated the suitability of distributed stream processing engines to the problem of text streams classification. We demonstrated that there are several pitfalls with an adaptation of data flow commonly used in batch systems for a stream processing:
+In this work, we investigated the suitability of distributed stream processing engines to the problem of text streams classification. We demonstrated that distributed text stream classification has several peculiarities:
 
 \begin{itemize}
     \item Races in a physical data flow may lead to partially reproducible results: labels provided by a classifier may vary from run to run on the same test data.
-    \item Irreproducible classifier outcome in terms of individual elements may not influence the reproducibility in terms of classifier accuracy. 
+    \item Irreproducibility of the classifier outcome in terms of individual elements does not imply the irreproducibility in terms of classifier accuracy. 
     \item Failures within {\em at least once} delivery guarantee can cause a biased distribution of classification results.
-    \item Streaming data is rapidly changing, so there is a need to update the machine learning model on-the-fly. 
 \end{itemize}
 
-It was shown that straightforward solutions to the mentioned issues imply significant performance overhead. There were proposed potential solutions: to use~\FlameStream\ processing system with built-in determinism and efficient exactly once and to embed online learning into the data flow. 
+It was shown that a straightforward approach to the mentioned issues implies significant performance overhead. A potential solution to this problem is to apply speculative optimistic approaches to enforce total order of processing that can lead to both determinism and exactly once with low performance overhead. 
 
-As future work, we plan to implement a text classification framework that satisfies the following requirements:
+A machine learning model needs to be updated on-the-fly to capture rapid changes of the stream. As future work, we plan to implement a text classification framework that satisfies the following requirements:
 
 \begin{itemize}
     \item Unbiased by distributed environment: node failures or races do not affect the ultimate result distribution.
