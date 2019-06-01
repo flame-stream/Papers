@@ -3,7 +3,8 @@
 In this work, we investigated the suitability of distributed stream processing engines to the problem of text streams classification. We demonstrated that there are several pitfalls with an adaptation of data flow commonly used in batch systems for a stream processing:
 
 \begin{itemize}
-    \item Races in a physical data flow may lead to partially reproducible results: labels provided by a classifier may vary from run to run on the same test data. 
+    \item Races in a physical data flow may lead to partially reproducible results: labels provided by a classifier may vary from run to run on the same test data.
+    \item Irreproducible classifier outcome in terms of individual elements may not influence the reproducibility in terms of classifier accuracy. 
     \item Failures within {\em at least once} delivery guarantee can cause a biased distribution of classification results.
     \item Streaming data is rapidly changing, so there is a need to update the machine learning model on-the-fly. 
 \end{itemize}
