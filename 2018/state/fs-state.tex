@@ -1,4 +1,5 @@
-\documentclass{vldb}
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
 
 \usepackage{graphicx}
 \usepackage{balance}
@@ -18,7 +19,7 @@
 
 %\usepackage{amssymb} %for nice emptyset
 
-\usepackage{amsmath}
+\usepackage{amsmath,amssymb,amsfonts}
 \DeclareMathOperator{\rank}{rank}
 \makeatletter
 \newenvironment{sqcases}{%
@@ -52,51 +53,59 @@
 \newcommand {\FlameStream} {FlameStream}
 \newcommand {\Acker} {trAcker}
 
-% Include information below and uncomment for camera ready
-\vldbTitle{Delivery, consistency, and determinism: rethinking guarantees in distributed stream processing}
-\vldbAuthors{Artem Trofimov, Igor E. Kuralenok, Nikita Marshalkin, Boris Novikov}
-\vldbDOI{https://doi.org/10.14778/xxxxxxx.xxxxxxx}
-\vldbVolume{12}
-\vldbNumber{xxx}
-\vldbYear{2018}
-
 \begin{document}
 
 \title {Delivery, consistency, and determinism: rethinking guarantees in distributed stream processing}
 
-\numberofauthors{4}
-
-\author{
-\alignauthor
-Artem Trofimov\\
-       \affaddr{JetBrains Research}\\
-       \affaddr{Saint Petersburg, Russia}\\
-       \email{trofimov9artem@gmail.com}
-\alignauthor
-Igor E. Kuralenok\\
-       \affaddr{JetBrains Research}\\
-       \affaddr{Saint Petersburg, Russia}\\
-       \email{ikuralenok@gmail.com}
-\alignauthor 
-Nikita Marshalkin\\
-       \affaddr{VK}\\
-       \affaddr{Saint Petersburg, Russia}\\
-       \email{n.marshalkin@corp.vk.com}
-\and  % use '\and' if you need 'another row' of author names
-\alignauthor 
-Boris Novikov\\
-       \affaddr{National Research University Higher School of Economics}\\
-       \affaddr{Saint Petersburg, Russia}\\
-       \email{borisnov@acm.org}
+\author{\IEEEauthorblockN{1\textsuperscript{st} Artem Trofimov}
+\IEEEauthorblockA{\textit{JetBrains Research} \\
+Saint Petersburg, Russia \\
+trofimov9artem@gmail.com}
+\and
+\IEEEauthorblockN{2\textsuperscript{nd} Igor E. Kuralenok}
+\IEEEauthorblockA{\textit{JetBrains Research} \\
+Saint Petersburg, Russia \\
+ikuralenok@gmail.com}
+\and
+\IEEEauthorblockN{3\textsuperscript{rd}  Nikita Marshalkin}
+\IEEEauthorblockA{\textit{VK} \\
+Saint Petersburg, Russia \\
+n.marshalkin@corp.vk.com}
+\and
+\IEEEauthorblockN{4\textsuperscript{th} Boris Novikov}
+\IEEEauthorblockA{\textit{National Research University Higher School of Economics} \\
+Saint Petersburg, Russia \\
+n.marshalkin@corp.vk.com}
 }
+
+% \author{
+% \alignauthor
+% Artem Trofimov\\
+%       \affaddr{JetBrains Research}\\
+%       \affaddr{Saint Petersburg, Russia}\\
+%       \email{trofimov9artem@gmail.com}
+% \alignauthor
+% Igor E. Kuralenok\\
+%       \affaddr{JetBrains Research}\\
+%       \affaddr{Saint Petersburg, Russia}\\
+%       \email{ikuralenok@gmail.com}
+% \alignauthor 
+% Nikita Marshalkin\\
+%       \affaddr{VK}\\
+%       \affaddr{Saint Petersburg, Russia}\\
+%       \email{n.marshalkin@corp.vk.com}
+% \and  % use '\and' if you need 'another row' of author names
+% \alignauthor 
+% Boris Novikov\\
+%       \affaddr{National Research University Higher School of Economics}\\
+%       \affaddr{Saint Petersburg, Russia}\\
+%       \email{borisnov@acm.org}
+% }
 
 \maketitle
 
 \begin{abstract}
-Guarantees on data provided by state-of-the-art stream processing systems are defined in terms of so-called delivery guarantees. Exactly once is the strongest one and the most desirable for end-user. However, there are several issues regarding this concept. 
-Mechanisms that are commonly used to enforce exactly once  produce  significant performance overhead. 
-Besides, the notion of exactly once is informal and does not capture all properties that provide stream processing systems supporting this guarantee. 
-In this paper, we introduce a formal framework that allows us to define streaming guarantees in a more regular way. We demonstrate that the properties of delivery, consistency, and determinism are tightly connected within distributed stream processing. We also show that having lightweight determinism it is possible to provide exactly once with almost no performance overhead. Experiments show that the proposed approach can significantly outperform an alternative industrial solution.
+Guarantees on data provided by state-of-the-art stream processing systems are defined in terms of so-called delivery guarantees. Exactly once is the strongest one and the most desirable for end-user. However, there are several issues regarding this concept. Mechanisms that are commonly used to enforce exactly once produce significant performance overhead. Besides, the notion of exactly once is informal and does not capture all properties that provide stream processing systems supporting this guarantee. In this paper, we introduce a formal framework that allows us to define streaming guarantees in a more regular way. We demonstrate that the properties of delivery, consistency, and determinism are tightly connected within distributed stream processing. We also show that having lightweight determinism it is possible to provide exactly once with almost no performance overhead. Experiments show that the proposed approach can significantly outperform an alternative industrial solution.
 \end{abstract}
 
 \section {Introduction}
@@ -107,6 +116,9 @@ In this paper, we introduce a formal framework that allows us to define streamin
 
 \section {Formal Model}
 \input {fs-state-formalism.tex}
+
+\section {Exactly once implementations}
+\input {fs-state-eo-impl.tex}
 
 \section {Deterministic streaming model}
 \input {fs-state-model.tex}
@@ -125,8 +137,7 @@ In this paper, we introduce a formal framework that allows us to define streamin
 
 \balance
 
-%   \bibliographystyle{abbrv}
-\bibliographystyle{abbrvurl}
+\bibliographystyle{IEEEtran}
 \bibliography{../../bibliography/flame-stream}
 \end {document}
 
