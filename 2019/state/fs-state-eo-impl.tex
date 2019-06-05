@@ -12,18 +12,25 @@ The necessary condition of the theorem implies that each element $s \in \Gamma$ 
   \centering
   \includegraphics[width=0.48\textwidth]{pics/millwheel}
   \caption{Strong productions mechanism}
-  \label {millwheel}
+  \label{millwheel}
 \end{figure}
 
 Such behavior is also called {\em effective determinism}~\cite{akidau2018streaming}, because computations become deterministic until the persistent storage is cleared. Strong productions method guarantees that even if multiple possible results of a non-commutative operation may be obtained due to races, only one of them is actually computed and saved. The price for such exactly once enforcement technique is an overhead on external writes on each transformation in a physical graph.
 
 \subsection{Spark streaming}
 
-The  $\Gamma$ is a set of all possible {\em RDD} records. Unlike pure streaming engines like Flink and MillWheel, where input elements arrive one by one, RDD is a small collection of data that is atomically processed. Dependency relation on the power set of $\Gamma$ is also defined using a directed acyclic graph of user operations. Spark inherits main properties form batch processing systems including the fact that each new stage of computations is started only after the previous one is completed. 
+In Spark, the  $\Gamma$ is a set of all possible {\em RDD} records. Unlike pure streaming engines like Flink and MillWheel, where input elements arrive one by one, RDD is a small collection of data that is atomically processed. Dependency relation on the power set of $\Gamma$ is also defined using a directed acyclic graph of user operations. Spark inherits main properties form batch processing systems including the fact that each new stage of computations is started only after the previous one is completed. Recovery function $F$ starts reprocessing of a micro-batch from the beginning in case of failure.
 
-Hence, the conditions of Theorem~\ref{necessary_conditions} are satisfied and determinism is simply achieved. Recovery function $F$ restores just the last non-complete stage.
+The necessary condition of Theorem~\ref{necessary_conditions} is satisfied because all elements within the micro-batch are released atomically. Elements from various micro-batches can interact only through persistently stored state. Therefore, if two output elements $b_{\tau_1},b_{\tau_2} \in Cl_D(s)$ depend on a single item $s$, it is guaranteed that $\tau_1=\tau_2$. The illustration of this behavior is shown in Figure~\ref{spark_flink}. The main disadvantage of this technique is that output elements which are ready to be delivered to end-user must wait until the whole micro-batch is completely processed. Such behavior significantly increases the processing latency of individual elements~\cite{karimov2018benchmarking}.
  
-To the best of our knowledge, spark streaming is the only state-of-the-art stream processing system that provides for deterministic results. However, an architecture based on the processing of collections of buffered input elements ({\em micro-batching}) makes it hard to achieve latency lower than several seconds~\cite{7530084, 7474816}. 
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.48\textwidth]{pics/spark-flink}
+  \caption{Micro-batching and transactional approach}
+  \label{spark_flink}
+\end{figure}
+ 
+Micro-batching technique ensures determinism as well. To the best of our knowledge, spark streaming is the only state-of-the-art stream processing system that provides for deterministic results. However, an architecture based on the processing of collections of buffered input elements makes it hard to achieve latency lower than several seconds~\cite{7530084, 7474816}. 
 
 % \subsection{Flink}
 
