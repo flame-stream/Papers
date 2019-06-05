@@ -198,21 +198,3 @@ because determinism guarantees order enforcement before non-commutative operatio
 To the best of our knowledge, only micro-batching systems support the property of determinism in streaming. However, micro-batching solutions provide higher latency than pure streaming engines due to overhead on input buffering~\cite{karimov2018benchmarking}. We proposed a pure streaming model called {\em drifting state}~\cite{we2018adbis} that allows achieving both determinism and low latency. Therefore, a question arises: is it more efficient in practice to handle non-determinism by atomic snapshotting and releasing than to maintain a fair determinism in order to get exactly once? 
 
 It is important to note that the proposed model is suitable not only for the formal analysis of the properties of exactly once but for a deeper understanding of the other aspects of stream processing. While these topics are promising as well, they are out of the scope of this paper.
-
-\subsection{Examples}
-
-\subsubsection{MillWheel}
-
-The  $\Gamma$ is all possible {\em records}. Dependency relation $D$ is set through a graph of user-defined transformations. In order to achieve exactly once, MillWheel atomically writes input and produced records of each operation to external storage. This behavior guarantees that results of all non-commutative operations are saved before delivery of its dependencies. Therefore, the conditions of the Theorem~\ref{necessary_conditions} are satisfied. Recovery function $F$ resends all saved records, but each operation deduplicates input records that have been already processed. The price for this exactly once enforcement technique is an overhead on external writes on each $\tau$~\cite{Akidau:2013:MFS:2536222.2536229}.    
-
-\subsubsection{Flink}
-
-The  $\Gamma$ is represented as all {\em StreamRecords}. Relation $D$ is defined in the form of a directed acyclic graph consisted of user operations. Flink periodically saves information needed for recovery by injecting special elements called {\em checkpoints} into the input stream. Checkpoints go through the same network channels as ordinary elements and push all inverted dependencies of inputs through the system. Each operation prepares data to save independently at the moment of checkpoint arrival. Prepared data is committed to external storage when checkpoint passes through the whole data flow. Output elements are delivered to end-user only after the commit. This mechanism ensures that the results of non-commutative operations are saved before delivery of their dependencies that allows Flink to satisfy the Theorem~\ref{necessary_conditions}, but dramatically increases latency as we show further. Recovery function $F$ restores operation states and replays only input items which do not affect these states.
-
-Besides overhead on snapshotting and delivery synchronization, checkpoints cause extra latency overhead because an operation with multiple inputs must wait until checkpoints arrive from each input. Only after that, an operation can safely send checkpoint further. This behavior is known as {\em checkpoints alignment}.
-
-\subsubsection{Spark streaming}
-
-The  $\Gamma$ is a set of all possible {\em RDD} records. Unlike pure streaming engines like Flink and MillWheel, where input elements arrive one by one, RDD is a small collection of data that is atomically processed. Dependency relation on the power set of $\Gamma$ is also defined using a directed acyclic graph of user operations. Spark inherits main properties form batch processing systems including the fact that each new stage of computations is started only after the previous one is completed. Hence, the conditions of Theorem~\ref{necessary_conditions} are satisfied and determinism is simply achieved. Recovery function $F$ restores just the last non-complete stage.
- 
-To the best of our knowledge, spark streaming is the only state-of-the-art stream processing system that provides for deterministic results. However, an architecture based on the processing of collections of buffered input elements ({\em micro-batching}) makes it hard to achieve latency lower than several seconds~\cite{7530084, 7474816}. 
