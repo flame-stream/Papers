@@ -12,7 +12,20 @@ The consistency concept is traditionally expressed in terms of  the transactiona
 
 The consistency of delivery is usually expressed in terms of guarantees  such as  {at least once}  ensuring that  input data are not lost, {\em atmost once}  that eliminates duplicate processing, and {\em exactly once} combining both and ensuring absence of  input data losses and repeated delivery of results.   
 
-An implementation of exactly once behavior based on persistent queues is described in~\cite{DBLP:books/mk/WeikumV2002}. 
+An implementation of exactly once behavior based on persistent queues is described in~\cite{DBLP:books/mk/WeikumV2002}.  
+
+Transactions are considered irrelevant for distributed alaytical batch systems  because 
+
+\begin {itemize}
+\item The data are not updated guring processing and hence concurrency control is not needed.
+\item An atomicity besed on complete roll-back after any single failure is too restrictive. 
+\end {itemize}
+
+Instead, the consistency is achieved by re-processing of all suspected failures and use of persistent storage for all intermediate results.
+
+An alternative set of relaxed consistency models and protocols was developed by the distributed systems community. These protocols provide certain degree of consistency for each client but do not attempt to achive global consistency of a distributed system.
+
+A desirable consistency model should provide for both system state consistency and delivery's guarantees. 
 
 THE FOLLOWING PARAGRAPH SEEMS TO BE TOO INFORMAL .      
 
