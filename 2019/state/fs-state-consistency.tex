@@ -38,7 +38,7 @@ Implementation of this architecture in~\FlameStream\ processing engine is demons
 
 In order to periodically save operation states, there is a need to determine which input elements affect them. In other words, we are interested in reversed dependencies: for each state element $s$ we desire to determine such input elements $\{a_i\}$ that $\forall i, s \in Cl_D^{-1}(a_i)$. Otherwise, it may be unclear, which input elements must be reprocessed during recovery. In Apache Flink, it is implemented through special streaming elements which play the role of notifications that a determined set of input elements have been processed. In~\FlameStream\ this mechanism is implemented using a modification of {\em Acker} agent from Apache Storm~\cite{apache:storm}. 
 
-Assuming that the mechanism for detection of which input elements influence states is implemented, the protocol of state snapshotting for {\em Coordinator} and {\em Nodes} is the following:
+Assuming that the mechanism for detection of which input elements influence states is implemented, the protocol of state snapshotting for {\em coordinator} and {\em nodes} is the following:
 
 \begin{itemize}
     \item Coordinator decides that snapshot should be taken and enables a mechanism to detect which input elements have been processed since the previous snapshot.

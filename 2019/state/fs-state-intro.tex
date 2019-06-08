@@ -6,28 +6,28 @@ Distributed batch processing systems, such as Google's MapReduce~\cite{Dean:2008
 
 However, there are plenty of scenarios where processing results are most valuable at the time of data arrival, for example, IoT, news processing, financial analysis, anti-fraud, network monitoring, etc. Such problems cannot be directly addressed by classical MapReduce~\cite{Doulkeridis:2014:SLA:2628707.2628782}. State-of-the-art stream processing systems, such as Flink \cite{carbone2015apache}, Samza \cite{Noghabi:2017:SSS:3137765.3137770}, Storm \cite{apache:storm}, Spark Streaming~\cite{Zaharia:2012:DSE:2342763.2342773}, aim at filling this gap by introducing another computational model. According to this model, a system receives a record or a set of records, updates internal state if any, and sends out new records. 
 
-One of the most challenging tasks for streaming systems is to provide consistency  guarantees on data processing. 
+One of the most challenging tasks for streaming systems is to provide consistency guarantees on data processing. 
 %Unlike batch systems, 
-The consistency concept is traditionally expressed in terms of  the transactional behavior, known as ACID properties of transactions in the database management systems. These properties unsure that  the (database) state is consistent to the degree required by the specified isolation level, providing consistency of processing.   However, the ACID properties do not provide for the consistency of  delivery.  According to~\cite{DBLP:books/mk/WeikumV2002}, a client may not deliver any results as long as the transaction commit is not confirmed. Together with the atomicity property this ensures that any transaction arrived to the system is processed  {\em at most once} as a transaction  might be aborted due to system failure or due to impossibility to schedule it under specified isolation level. Note that duplicate incoming transactions are considered different in this context.   
+The consistency concept is traditionally expressed in terms of the transactional behavior, known as ACID properties of transactions in the database management systems. These properties unsure that the (database) state is consistent to the degree required by the specified isolation level, providing consistency of processing.   However, the ACID properties do not provide for the consistency of delivery.  According to~\cite{DBLP:books/mk/WeikumV2002}, a client may not deliver any results as long as the transaction commit is not confirmed. Together with the atomicity property, this ensures that any transaction arrived at the system is processed  {\em at most once} as a transaction might be aborted due to system failure or due to an impossibility to schedule it under specified isolation level. Note that duplicate incoming transactions are considered different in this context.   
 
-The consistency of delivery is usually expressed in terms of guarantees  such as  {at least once}  ensuring that  input data are not lost, {\em atmost once}  that eliminates duplicate processing, and {\em exactly once} combining both and ensuring absence of  input data losses and repeated delivery of results.   
+The consistency of delivery is usually expressed in terms of guarantees such as  {\em at least once}  ensuring that input data are not lost, {\em at most once}  that eliminates duplicate processing, and {\em exactly once} combining both and ensuring the absence of input data losses and repeated delivery of results.   
 
 An implementation of exactly once behavior based on persistent queues is described in~\cite{DBLP:books/mk/WeikumV2002}.  
 
-Transactions are considered irrelevant for distributed alaytical batch systems  because 
+Transactions are considered irrelevant for distributed analytical batch systems  because 
 
 \begin {itemize}
-\item The data are not updated guring processing and hence concurrency control is not needed.
-\item An atomicity besed on complete roll-back after any single failure is too restrictive. 
+\item The data are not updated during processing and hence concurrency control is not needed.
+\item An atomicity based on complete roll-back after any single failure is too restrictive. 
 \end {itemize}
 
 Instead, the consistency is achieved by re-processing of all suspected failures and use of persistent storage for all intermediate results.
 
-An alternative set of relaxed consistency models and protocols was developed by the distributed systems community. These protocols provide certain degree of consistency for each client but do not attempt to achive global consistency of a distributed system.
+An alternative set of relaxed consistency models and protocols was developed by the distributed systems community. These protocols provide a certain degree of consistency for each client but do not attempt to achieve the global consistency of a distributed system.
 
 A desirable consistency model should provide for both system state consistency and delivery's guarantees. 
 
-THE FOLLOWING PARAGRAPH SEEMS TO BE TOO INFORMAL .      
+THE FOLLOWING PARAGRAPH SEEMS TO BE TOO INFORMAL.      
 
 Streaming systems must release output elements before processing has finished because input data is assumed to be unbounded. This requirement makes failure recovery mechanisms more complex. Streaming systems face a need to recover computations consistently with previous input data, the current system state, and with the elements which have been already delivered to a consumer. 
 
@@ -42,7 +42,7 @@ However, these elements can be reordered in an asynchronous distributed environm
 Such behavior may lead to the concatenation being affected by several input elements exactly once but is inconsistent with elements released before the failure.
 
 This example illustrates that naive definitions of delivery guarantees are not sufficient to provide output consistency. 
-Most of the existing implementations prevent anomalies illustrated by the example above. Flink ensures atomicity between state updates and output elements delivery using a protocol based on distributed transactions. This protocol prevents inconsistencies but leads to a significant increase of latency. 
+Most of the existing implementations prevent anomalies illustrated by the example above. Flink ensures atomicity between state updates and output elements delivery using a protocol based on distributed transactions. This protocol prevents inconsistencies but leads to a significant latency increase. 
 Google MillWheel~\cite{Akidau:2013:MFS:2536222.2536229} enforces consistency between state and output elements by writing results of each operation to persistent external storage. 
 The lower bound of latency is a duration of all external writes within routes of an input element and its descendants. 
 Micro-batching engines like Storm Trident~\cite{apache:storm:trident} and Spark Streaming~\cite{Zaharia:2012:DSE:2342763.2342773} process data in small-sized blocks. 
@@ -65,7 +65,7 @@ The contributions of this paper are the following:
     \item Formalization of streaming delivery guarantees 
     \item Demonstration that the property of determinism is tightly related to exactly once
     \item Techniques for lightweight implementation of exactly once guarantee on top of the deterministic engine
-    \item Study of practical feasibility of the proposed approaches
+    \item Study of the practical feasibility of the proposed approaches
 \end{itemize}
 
-The rest of the paper is structured as follows: section~\ref{fs-preliminaries} recalls basic concepts of stream processing, we introduce our formal framework in section~\ref{fs-formalism}, lightweight deterministic model is explained in section~\ref{fs-model-section}, implementation details of exactly once over determinism are mentioned in section~\ref{fs-consistency-section}, experiments that demonstrate feasibility of the proposed concept are detailed in section~\ref{fs-experiments-seciton}, and we discuss prior works on the topic in section~\ref{fs-related-seciton}. 
+The rest of the paper is structured as follows: section~\ref{fs-preliminaries} recalls basic concepts of stream processing, we introduce our formal framework in section~\ref{fs-formalism}, existing implementations of exactly once in terms of the proposed formal framework are described in section~\ref{fs-eo-impl}, implementation details of exactly once over determinism are mentioned in section~\ref{fs-consistency-section}, experiments that demonstrate feasibility of the proposed concept are detailed in section~\ref{fs-experiments-seciton}, and we discuss prior works on the topic in section~\ref{fs-related-seciton}. 
