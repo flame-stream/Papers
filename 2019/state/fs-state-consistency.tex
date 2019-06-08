@@ -4,7 +4,7 @@
 
 In general, determinism allows us to relax the requirement introduced in the Theorem~\ref{necessary_conditions}: output elements in a deterministic system can be delivered to end-user before results of non-commutative operations are written to persistent external storage. Hence, if data for recovery is periodically saved, the duration of this period will not affect latency. It means that even if elements are divided into the epochs like in Apache Flink, and a snapshot is taken once per epoch, ready-to-release output elements should not wait until epoch is committed in order to be delivered. 
 
-To bridge the gap between the determinism and exactly once we need to design protocols for recovery function $F$ and saving data needed for correct restoring. In this section, we describe protocols for exactly once enforcement on top of a lightweight deterministic model for distributed stream processing called {\em drifting state}~\cite{we2018adbis}. This model is implemented in~\FlameStream\ processing system~\cite{we2018beyondmr}. While we exploit some features of this model, proposed protocols can be generalized to any deterministic stream processing engine.
+To bridge the gap between the determinism and exactly once we need to design protocols for recovery function $F$ and saving data needed for correct restoring. In this section, we describe protocols for exactly once enforcement on top of a lightweight deterministic model for distributed stream processing called {\em drifting state}~\cite{we2018adbis}. This model is implemented in~\FlameStream\ processing system~\cite{we2018beyondmr}.
 
 Deterministic computations require defined total order on elements. The order can be defined using various methods~\cite{we2018seim}, and we assume that $\forall x_1,x_2\in \Gamma, \exists t(x): x_1 < x_2 \Longleftrightarrow t(x_1) < t(x_2)$. In order to achieve exactly once on top of a deterministic stream processing system we propose the following way:
 \begin{itemize}
@@ -13,12 +13,12 @@ Deterministic computations require defined total order on elements. The order ca
     \item Ensure that output elements which have been already released will not be duplicated after recovery and input reprocessing
 \end{itemize}
 
-We do not enforce a strict architecture of the system, but assume that there are several functional agents which are demonstrated in Figure~\ref{arch}:
+We do not enforce a strict architecture of the system, but assume that there are several functional agents:
 \begin{itemize}
     \item Coordinator manages snapshotting and recovery.
-    \item Cluster state manager (ZooKeeper) is used to keep service information for recovery.
-    \item Persistent storage is needed for reliable storing of state snapshot. In case of failures, the state snapshot is recovered from persistent storage. It can be a distributed file system or database (e.g., HDFS, S3, MongoDB, GFS, HBase, etc.).
-    \item Data producer that is able to replay some set of previous input elements with the same $t(a)$. The role of $t(a)$ can be played by any monotonic sequence, e.g. offsets in Kafka.
+    \item Cluster state manager is used to keep service information for recovery.
+    \item Persistent storage is needed for reliable storing of state snapshot. In case of failures, the state snapshot is recovered from persistent storage.
+    \item Data producer that is able to replay some set of previous input elements with the same $t(a)$.
     \item Data consumer that is responsible for output elements receiving. The exact requirements for data consumer are detailed further in this section.
     \item Node is an executor of user-defined operations. The computation can be balanced through the distribution of data elements among nodes. Each node has a {\em barrier} that deliver output elements to end-user.
 \end{itemize}
@@ -30,17 +30,19 @@ We do not enforce a strict architecture of the system, but assume that there are
   \label {arch}
 \end{figure*}
 
+Implementation of this architecture in~\FlameStream\ processing engine is demonstrated in Figure~\ref{arch}. Apache ZooKeeper is used for cluster state management. As persistent storage, one can use a distributed file system or database (e.g., HDFS, S3, MongoDB, GFS, HBase, etc.). Data producers may vary as well: the role of $t(a)$ can be played by any monotonic sequence, e.g. offsets in Kafka.
+
 \subsection{Snapshotting}
 
 \subsubsection{Operation states}
 
 In order to periodically save operation states, there is a need to determine which input elements affect them. In other words, we are interested in reversed dependencies: for each state element $s$ we desire to determine such input elements $\{a_i\}$ that $\forall i, s \in Cl_D^{-1}(a_i)$. Otherwise, it may be unclear, which input elements must be reprocessed during recovery. In Apache Flink, it is implemented through special streaming elements which play the role of notifications that a determined set of input elements have been processed. In~\FlameStream\ this mechanism is implemented using a modification of {\em Acker} agent from Apache Storm~\cite{apache:storm}. 
 
-Assuming that the mechanism for detection of which input elements influence states is implemented, the protocol of state snapshotting is the following:
+Assuming that the mechanism for detection of which input elements influence states is implemented, the protocol of state snapshotting for {\em Coordinator} and {\em Nodes} is the following:
 
 \begin{itemize}
     \item Coordinator decides that snapshot should be taken and enables a mechanism to detect which input elements have been processed since the previous snapshot.
-    \item On the notification, operations write their states to persistent external storage and send to coordinator the acceptance message.
+    \item On the notification, nodes asynchronously make operation states recoverable and send to coordinator the acceptance message.
     \item When the coordinator receives all acceptance messages, it saves the information about which input elements belong to this snapshot and other service information about the snapshot. In general, it is sufficient to save only $t(a)$ of the last input element that affects the snapshot.
 \end{itemize}
 
@@ -48,7 +50,7 @@ It is worth to note that the proposed protocol is similar to the transactional (
 
 \subsubsection{Last output element}
 
-In order to preserve the deterministic outcome, the barrier must release output items with monotonically increasing $t(x)$. Hence, the barrier can filter out any items with $t(x)$ less than or equal to the $t(x)$ of the last released item $t_{last}$ in order to preserve exactly once after recovery. To implement this mechanism, there is a need to atomically deliver output items and update $t_{last}$. To solve this problem, we require the following output protocol with data consumer: 
+In order to preserve the deterministic outcome, the barrier must release output items with monotonically increasing $t(x)$. Hence, the barrier can filter out any items with $t(x)$ less than or equal to the $t(x)$ of the last released item $t_{last}$ in order to preserve exactly once after recovery. To implement this mechanism, there is a need to atomically deliver output items and update $t_{last}$. To solve this problem, we require the following output protocol between a {\em barrier} and a {\em data consumer}: 
 
 \begin{itemize}
     \item On each output delivery, barrier sends a bundle to the data consumer. This bundle contains an output item and $t_{last}$. The consumer must acknowledge that it received the bundle.
