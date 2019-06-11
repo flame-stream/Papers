@@ -23,13 +23,6 @@ We do not enforce a strict architecture of the system, but assume that there are
     \item Node is an executor of user-defined operations. The computation can be balanced through the distribution of data elements among nodes. Each node has a {\em barrier} that deliver output elements to end-user.
 \end{itemize}
 
-\begin{figure*}[tbp]
-  \centering
-  \includegraphics[width=0.78\textwidth]{pics/arch}
-  \caption{The overview of an architecture for drifting state implementation}
-  \label {arch}
-\end{figure*}
-
 Implementation of this architecture in~\FlameStream\ processing engine is demonstrated in Figure~\ref{arch}. Apache ZooKeeper is used for cluster state management. As persistent storage, one can use a distributed file system or database (e.g., HDFS, S3, MongoDB, GFS, HBase, etc.). Data producers may vary as well: the role of $t(a)$ can be played by any monotonic sequence, e.g. offsets in Kafka.
 
 \subsection{Snapshotting}
@@ -46,7 +39,21 @@ Assuming that the mechanism for detection of which input elements influence stat
     \item When the coordinator receives all acceptance messages, it saves the information about which input elements belong to this snapshot and other service information about the snapshot. In general, it is sufficient to save only $t(a)$ of the last input element that affects the snapshot.
 \end{itemize}
 
-It is worth to note that the proposed protocol is similar to the transactional (variation of 2PC) state snapshotting protocol used in Flink~\cite{Carbone:2017:SMA:3137765.3137777}. The key difference is that in our method, output releasing agents (barriers) do not take part in a distributed transaction, because in a deterministic system there is no need to wait until the snapshot is taken in order to consistently release output elements. This difference determines the significant latency decrease that is demonstrated further in experiments.
+It is worth to note that the proposed protocol is similar to the transactional (variation of 2PC) state snapshotting protocol used in Flink~\cite{Carbone:2017:SMA:3137765.3137777}. The key difference is that in our method, output releasing agents (barriers) do not take part in a distributed transaction, because in a deterministic system there is no need to wait until the snapshot is taken in order to consistently release output elements. The scheme of the protocol used in Apache Flink is shown in Figure~\ref{protocol_flink}. As it is demonstrated, output elements delivery (stage 4) is allowed only after commit (stage 3). Modified state snapshotting protocol for a deterministic system is demonstrated in Figure~\ref{protocol_fs}. One can note that elements delivery is independent of the snapshotting protocol. This difference determines the significant latency decrease that is demonstrated further in experiments.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.48\textwidth]{pics/protocol-flink}
+  \caption{State snapshotting protocol in Apache Flink}
+  \label{protocol_flink}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.48\textwidth]{pics/protocol-fs}
+  \caption{State snapshotting protocol in a deterministic system}
+  \label{protocol_fs}
+\end{figure}
 
 \subsubsection{Last output element}
 

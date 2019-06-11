@@ -30,6 +30,13 @@ The necessary condition for exactly once from Theorem~\ref{necessary_conditions}
   \label{spark_flink}
 \end{figure}
  
+\begin{figure*}[tbp]
+  \centering
+  \includegraphics[width=0.78\textwidth]{pics/arch}
+  \caption{The overview of an architecture for drifting state implementation}
+  \label {arch}
+\end{figure*}
+ 
 Micro-batching technique ensures determinism as well. To the best of our knowledge, spark streaming is the only state-of-the-art stream processing system that provides for deterministic results. Another advantage of micro-batching is a high throughput~\cite{karimov2018benchmarking}. However, an architecture based on the processing of collections of buffered input elements makes it hard to achieve latency lower than several seconds~\cite{7530084, 7474816}. 
 
 \subsection{Flink}
