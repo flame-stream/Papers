@@ -6,7 +6,7 @@ In general, determinism allows us to relax the requirement introduced in the The
 
 To bridge the gap between the determinism and exactly once we need to design protocols for recovery function $F$ and saving data needed for correct restoring. In this section, we describe protocols for exactly once enforcement on top of a lightweight deterministic model for distributed stream processing called {\em drifting state}~\cite{we2018adbis}. This model is implemented in~\FlameStream\ processing system~\cite{we2018beyondmr}.
 
-Deterministic computations require defined total order on elements. The order can be defined using various methods~\cite{we2018seim}, and we assume that $\forall x_1,x_2\in \Gamma, \exists t(x): x_1 < x_2 \Longleftrightarrow t(x_1) < t(x_2)$. In order to achieve exactly once on top of a deterministic stream processing system we propose the following way:
+Deterministic computations require pre-defined total order on elements. The order can be defined using various methods~\cite{we2018seim}, and we assume that $\forall x_1,x_2\in \Gamma, \exists t(x): x_1 < x_2 \Longleftrightarrow t(x_1) < t(x_2)$. In order to achieve exactly once on top of a deterministic stream processing system we propose the following way:
 \begin{itemize}
     \item Periodically save (take a snapshot of) operation states
     \item Consistently restore these states and replay missed input elements in case of failure
