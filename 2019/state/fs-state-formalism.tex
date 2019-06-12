@@ -2,6 +2,27 @@
 
 In this section, we introduce a formal model of a distributed stream processing system. After that, we define the notions of delivery guarantees in a regular way. We demonstrate that in a general case, non-deterministic systems must save results of non-commutative operations before output delivery. It is illustrated how state-of-the-art stream processing systems fit the requirements that we formulate.
 
+\subsection{Preliminaries}
+In this section, we remind the main concepts of stream processing, that we use further in this paper. 
+
+A distributed stream processing system is a shared-nothing distributed runtime, that can handle a potentially unlimited sequence of input items. Each item can be transformed several times before the final result is released from the system. Elements can be processed one-by-one or grouped into small input sets, usually called {\em micro-batches}. 
+
+A user specifies required stream processing with a {\em logical graph}. Vertices of this graph represent operations and edges determine the data flow between tasks. A processing system maps the logical graph to a {\em physical} graph that is used to control actual distributed execution. Commonly, each logical operation is mapped to a number of physical tasks that are deployed to a cluster of computational units connected through a network. Each operation may be {\em stateless} or {\em stateful}. A system is usually responsible for state management in order to prevent inconsistencies.
+
+An input element has {\em entered} if the system is aware of this element since that moment and takes some kind of responsibility for its processing. 
+This concept can be implemented differently. 
+For example,
+ an  element has been entered when  it  has arrived at {\em Source} vertex in Flink, while   
+an element enters, when it is read or received by an input agent also called  {\em Source}   in Spark Streaming.
+
+An output element has {\em left} the system if the element has been released to a consumer. 
+Since that time system cannot observe it anymore. This concept can also be implemented differently in various systems. For instance, in Spark Streaming element leaves when it is pushed to output operation, e.g. written to HDFS or file. In Flink, an element is delivered to end-user when it leaves from {\em Sink} vertex.   
+
+It is important to note that input and output elements cannot be directly matched due to the possibility of complex transformations within the system. 
+For instance, a single input element can be transformed into multiple ones.  The resulting elements may be processed in completely different ways and even influence each other. 
+In general, it is hard to find out input elements on which an output element depends. 
+%  Hence, in general, it is hard to determine the input element by an output.
+
 \subsection{Distributed streaming model}
 
 \begin{table}[!b]
@@ -12,9 +33,9 @@ In this section, we introduce a formal model of a distributed stream processing 
         \hline
         $D\subseteq{2^{\Gamma}\times2^{\Gamma}}$ & Binary relation that captures user-defined operations  \\
         \hline
-        $Cl_d$ & Transitive closure of $D$  \\
+        $Cl_D$ & Transitive closure of $D$  \\
         \hline
-        $Cl^{-1}_d$ & Inversed transitive closure of $D$  \\
+        $Cl^{-1}_D$ & Inversed transitive closure of $D$  \\
         \hline
         $\tau \in \mathbb{N}$ & Exact global discrete time \\
         \hline
@@ -45,12 +66,14 @@ is a tuple of $(\Gamma,D,F)$, where $\Gamma$ is a set of all possible data flow 
 
 \begin{enumerate}
     \item \textbf{Input} $a_\tau\in{\Gamma}$:\\ $A_{\tau+1}=A_\tau \cup \{a_\tau\}, \\ B_{\tau+1}=B_{\tau}, \\ W_{\tau+1}=W_{\tau} \cup \{a_\tau\}.$
-    \item \textbf{Output} $b_\tau\in{2^\Gamma}$:\\ $A_{\tau + 1} = A_{\tau}$, \\ $B_{\tau+1}=B_\tau \cup \{b_\tau\}, \\ W_{\tau+1}=W_{\tau} \setminus \{b_\tau\}.$
-    \item \textbf{Transform}\\ $A_{\tau + 1} = A_{\tau}$,\\ $B_{\tau+1}=B_{\tau}$, \\ $W_{\tau+1}=(W_\tau \setminus X_\tau) \cup Y_\tau, (X_\tau,Y_\tau) \in D$, \\where\\$X_\tau \thicksim \mathcal{\Psi}(X\mid X \subseteq W_\tau \cup B_\tau , \exists Y : (X,Y) \in D)$, \\ distribution $\mathcal{\Psi}$ depends on a system architecture. \label{random_formula}
+    \item \textbf{Output} $b_\tau\in{W_\tau}$:\\ $A_{\tau + 1} = A_{\tau}$, \\ $B_{\tau+1}=B_\tau \cup \{b_\tau\}, \\ W_{\tau+1}=W_{\tau} \setminus \{b_\tau\}.$
+    \item \textbf{Transform}\\ $A_{\tau + 1} = A_{\tau}$,\\ $B_{\tau+1}=B_{\tau}$, \\ $W_{\tau+1}=(W_\tau \setminus \chi_\tau) \cup Y_\tau, (\chi_\tau,Y_\tau) \in D$, \\where\\$\chi_\tau \thicksim P(X\mid X \subseteq W_\tau \cup B_\tau , \exists Y : (X,Y) \in D)$, \\ probability distribution of $\chi_\tau$ depends on a system architecture. \label{random_formula}
     \item \textbf{Failure and recover} \\  $A_{\tau + 1} = A_{\tau}$,\\ $B_{\tau+1}=B_{\tau}$, \\ $W_{\tau+1} = F(A_\tau,B_\tau)$
 \end{enumerate}
 
 \end{definition}
+
+% Прожевать
 
 Within our model, one can define a streaming system using only data flow elements and operations. Index $\tau\in{\mathbb{N}}$ can be considered as an exact global discrete time. We assume that only one event can happen at any single point in time $\tau$. 
 
