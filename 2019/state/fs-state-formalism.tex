@@ -3,9 +3,9 @@
 In this section, we introduce a formal model of a distributed stream processing system. After that, we define the notions of delivery guarantees in a regular way. We demonstrate that in a general case, non-deterministic systems must save results of non-commutative operations before output delivery. It is illustrated how state-of-the-art stream processing systems fit the requirements that we formulate.
 
 \subsection{Preliminaries}
-In this section, we remind the main concepts of stream processing, that we use further in this paper. 
+% In this section, we remind the main concepts of stream processing, that we use further in this paper. 
 
-A distributed stream processing system is a shared-nothing distributed runtime, that can handle a potentially unlimited sequence of input items. Each item can be transformed several times before the final result is released from the system. Elements can be processed one-by-one or grouped into small input sets, usually called {\em micro-batches}. 
+A distributed stream processing system is a shared-nothing distributed runtime, that can handle a potentially unlimited sequence of input items. Each item can be transformed several times before the final result is released from the system. Output elements may depend on multiple input ones. Elements can be processed one-by-one or grouped into small input sets, usually called {\em micro-batches}. 
 
 A user specifies required stream processing with a {\em logical graph}. Vertices of this graph represent operations and edges determine the data flow between tasks. A processing system maps the logical graph to a {\em physical} graph that is used to control actual distributed execution. Commonly, each logical operation is mapped to a number of physical tasks that are deployed to a cluster of computational units connected through a network. Each operation may be {\em stateless} or {\em stateful}. A system is usually responsible for state management in order to prevent inconsistencies.
 
@@ -60,6 +60,10 @@ In general, it is hard to find out input elements on which an output element dep
     \label{notations}
 \end{table}
 
+A formalization of streaming consistency guarantees we begin with a regular definition of a stream processing system. In order to be sufficient for the formalization, such model should cover user-defined transformations, system state, data producers, and data consumers.
+
+Index $\tau\in{\mathbb{N}}$ can be considered as an exact global discrete time. We assume that only one event can happen at any single point in time $\tau$.
+
 \begin{definition}{Stream processing system}
 \label{reference_system}
 is a tuple of $(\Gamma,D,F)$, where $\Gamma$ is a set of all possible data flow elements, $D\subseteq{2^{\Gamma}\times2^{\Gamma}}$ is a binary relation on its power set. $F$ is a recovery function that restores working set in case of system failures. Computations within the system are defined by the recurrent rules on the set of input elements $A$, output elements $B$ and the transient working set $W$. On each iteration one of the following steps is chosen:
@@ -74,16 +78,20 @@ is a tuple of $(\Gamma,D,F)$, where $\Gamma$ is a set of all possible data flow 
 \end{definition}
 
 % Прожевать
+Data producers and consumers are modeled using sets $A$ and $B$, respectively. All elements which are being processed in the system at the time $\tau$ are also presented in the set $W_\tau$. We assume that operation states are ordinary elements which are presented in $W_\tau$ as well. Binary relation $D$ captures all possible transformations within a physical graph. {\em Input} step indicates that a new streaming element enters the system. This element is also presented in set $A$, because the system may request it for reprocessing. {\em Output step} describes a case, when an element leaves the system, e.g. during delivery of an output element to a data consumer. {\em Transform} step denotes internal transformation of an element according to user-defined operations. In this model, we do not explicitly introduce computational units and asynchronous network channels. Instead, we simulate possible races and distributed asynchronous processing through the probability of the next transformation inside a data flow. Such probability is modeled using a random variable $\chi_\tau$ which indicates the input of an operation that will be executed next. {\em Failure and recover} step indicates the recovery of the system state based on input and output elements.
 
-Within our model, one can define a streaming system using only data flow elements and operations. Index $\tau\in{\mathbb{N}}$ can be considered as an exact global discrete time. We assume that only one event can happen at any single point in time $\tau$. 
+% Within our model, one can define a streaming system using only data flow elements and operations. 
 
-We suppose that {\em snapshots} of operation states taken by real stream processing systems become ordinary output elements. Thus, we allow using output elements in system transformations. The rationale for this assumption is the following:
+We allow using output elements in system transformations because we suppose that {\em snapshots} of operation states taken by real stream processing systems are ordinary output elements. The rationale for this assumption is the following:
 
 \begin{itemize}
     \item Snapshots should be considered as an output as they are usually stored in external systems, (such as in HDFS, Kafka, relational databases)   and are read back during recovery. 
-    
     \item Stream processing systems aim at minimizing information which is needed to recover processing, but their optimizations do not directly affect consistency. The notion of $F(A_\tau,B_\tau)$ makes our concept general enough to describe any streaming engine while being independent of a specific implementation of $F$.
 \end{itemize}
+
+Let us illustrate the proposed model by an example. Assume that a physical execution graph consists of a single operation that concatenates strings from multiple asynchronous input channels. In this case, set $\Gamma$ contains all possible strings, and binary relation $D$ contains all possible options for their concatenation. Let strings $"a","b","c"$ enter the system, e.g. $"a"\in A_\tau, W_\tau$, $"b" \in A_{\tau+1},W_{\tau+1}$, and $"c" \in A_{\tau+2},W_{\tau+2}$. We are not aware which of these strings will be processed first due to asynchronous input channels, therefore, each of them can arrive before others with some probability. Assume that the first one is $"c"$. In this case, $W_{\tau+3}$ contains elements $"a","b","c"$. Element $"c"$ is still presented in the working set because it becomes the state of the concatenation. After that, element $c$ can also be delivered to end-user as a partial result of the concatenation, so $"c" \in B_{\tau+4}$. If the next arrived element is $"b"$, then $W_{\tau+5}$ consists of $"a"$ and $"cb"$, where $"cb"$ is the current state. If a system takes a snapshot of the concatenation operation at time $\tau+6$, then $"cb" \in B_{\tau+6}$, and it can be used for recovery in case of failure.
+
+\subsection{Model analysis}
 
 In a classical model proposed by Chandy and Lamport~\cite{Chandy:1985:DSD:214451.214456}, a distributed system is represented as a graph of processes, which can be connected to each other via channels. Each process can own a modifiable internal state, generate {\em events} and send them to other processes through the channels. {\em Global system state} in this model contains processes states and channel states, e.g., elements, which are in-flight at the moment. Distributed asynchronous processing is simulated using permutations of events.
 
@@ -94,6 +102,8 @@ The proposed model is a variation of a classical Chandy-Lamport distributed syst
     \item Input and output elements $a_\tau$ and $b_\tau$ are special events. This way, {\em storage} and {\em computations} are distinguished. We assume that output elements $B_\tau$ are all data that leaves a system including so-called {\em state snapshots} which are typically used for recovery~\cite{Carbone:2017:SMA:3137765.3137777}. Because of this, we state that $X \subseteq W_\tau \cup B_\tau$ in the transform transition of the working set. In most state-of-the-art stream processing systems, end-user is external to the system, i.e. a user is able to observe input and output elements, but not the working set.
     \item Distributed asynchronous computations are modeled through the random choice of an operation that is executed next. In the proposed model, instead of using permutations of data flow elements which fixate an execution route, we suppose that the next transition of the working set is a random variable. The distribution of this variable depends on system architecture. 
 \end{itemize}
+
+\subsection{Consistency}
 
 Parallel asynchronous nature of distributed stream processing allows us to handle only a {\em probability} of an output element because it can be different from run to run due to element reorderings.
 
@@ -117,8 +127,6 @@ Using the notion of a reference recovery function, one can simply define the cor
 with all previous input and output elements $A_\tau$ and $B_\tau$ if the probability to observe it is non-zero in a system with reference recovery: $P(b_{\tau+1} \mid A_\tau,B_\tau,F^{*})>0$.
 \end{definition}
 
-\subsection{Consistency guarantees}
-
 The reference recovery function allows us to express the notion of valid execution in terms of correspondence between input and output elements. In most real cases, input and output elements are the only data that can be observed by end-user. In real distributed stream processing systems, failures and recoveries can corrupt the output, despite the fact, that in terms of a naive definition of delivery guarantees, all elements are processed exactly once. Let us demonstrate it by an example. Assume that $\Gamma=\mathbb{N}$ and $D$ consists of a single non-commutative operation $v^{i+1}=a_\tau(1+v^{i}),v^{0}=0$ and $v$ becomes an output element on each iteration. Upper index denotes an order of transformations. Let $F$ set $v^{0}=0$ and reprocess input elements from the very beginning that seems like a correct naive approach for restoring. Assume that the system does not release output elements during reprocessing to avoid duplicates. However, if input elements arrive from asynchronous input channels, they can be reordered, and results of non-commutative operation may become inconsistent with results before the failure, e.g. the property of output monotonicity can be violated. This example is demonstrated in Figure~\ref{state-inconsistency}. 
 
 \begin{figure}[htbp]
@@ -127,6 +135,8 @@ The reference recovery function allows us to express the notion of valid executi
   \caption{Inconsistency of results after complete input reprocessing}
   \label {state-inconsistency}
 \end{figure}
+
+\subsection{Delivery guarantees}
 
 \begin{definition}{System provides for exactly once}
 if it is possible to obtain each output element $b_{\tau+1}$ in a system with a reference recovery fucntion, i.e.,\\ 
@@ -196,7 +206,7 @@ If $D$ contains non-commutative transformation and has the following dependencie
 \begin{sketch}
 $ $\newline
 
-The scheme of $D$ in the form of a graph is shown in Figure~\ref{theorem-pic}. Basically, the theorem conditions mean that each result of non-commutative operation must become recoverable before the delivery of output that depends on this result. Such behavior is similar to the issue shown in Figure~\ref{state-inconsistency} if we set $b_{\tau_1}=v$.
+The scheme of $D$ in the form of a graph is shown in Figure~\ref{theorem-pic}. Basically, the theorem conditions mean that each result of the non-commutative operation must become recoverable before the delivery of output that depends on this result. Such behavior is similar to the issue shown in Figure~\ref{state-inconsistency} if we set $b_{\tau_1}=v$.
 $ $\newline
 
 \noindent{\em Necessary condition}\newline
