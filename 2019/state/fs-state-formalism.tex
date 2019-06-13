@@ -77,7 +77,6 @@ is a tuple of $(\Gamma,D,F)$, where $\Gamma$ is a set of all possible data flow 
 
 \end{definition}
 
-% Прожевать
 Data producers and consumers are modeled using sets $A$ and $B$, respectively. All elements which are being processed in the system at the time $\tau$ are also presented in the set $W_\tau$. We assume that operation states are ordinary elements which are presented in $W_\tau$ as well. Binary relation $D$ captures all possible transformations within a physical graph. {\em Input} step indicates that a new streaming element enters the system. This element is also presented in set $A$, because the system may request it for reprocessing. {\em Output step} describes a case, when an element leaves the system, e.g. during delivery of an output element to a data consumer. {\em Transform} step denotes internal transformation of an element according to user-defined operations. In this model, we do not explicitly introduce computational units and asynchronous network channels. Instead, we simulate possible races and distributed asynchronous processing through the probability of the next transformation inside a data flow. Such probability is modeled using a random variable $\chi_\tau$ which indicates the input of an operation that will be executed next. {\em Failure and recover} step indicates the recovery of the system state based on input and output elements.
 
 % Within our model, one can define a streaming system using only data flow elements and operations. 
@@ -89,7 +88,27 @@ We allow using output elements in system transformations because we suppose that
     \item Stream processing systems aim at minimizing information which is needed to recover processing, but their optimizations do not directly affect consistency. The notion of $F(A_\tau,B_\tau)$ makes our concept general enough to describe any streaming engine while being independent of a specific implementation of $F$.
 \end{itemize}
 
-Let us illustrate the proposed model by an example. Assume that a physical execution graph consists of a single operation that concatenates strings from multiple asynchronous input channels. In this case, set $\Gamma$ contains all possible strings, and binary relation $D$ contains all possible options for their concatenation. Let strings $"a","b","c"$ enter the system, e.g. $"a"\in A_\tau, W_\tau$, $"b" \in A_{\tau+1},W_{\tau+1}$, and $"c" \in A_{\tau+2},W_{\tau+2}$. We are not aware which of these strings will be processed first due to asynchronous input channels, therefore, each of them can arrive before others with some probability. Assume that the first one is $"c"$. In this case, $W_{\tau+3}$ contains elements $"a","b","c"$. Element $"c"$ is still presented in the working set because it becomes the state of the concatenation. After that, element $c$ can also be delivered to end-user as a partial result of the concatenation, so $"c" \in B_{\tau+4}$. If the next arrived element is $"b"$, then $W_{\tau+5}$ consists of $"a"$ and $"cb"$, where $"cb"$ is the current state. If a system takes a snapshot of the concatenation operation at time $\tau+6$, then $"cb" \in B_{\tau+6}$, and it can be used for recovery in case of failure.
+Let us illustrate the proposed model by an example. Assume that a physical graph consists of a single operation that concatenates strings from multiple asynchronous input channels. In this case, set $\Gamma$ contains all possible characters, and binary relation $D$ contains all possible options for their concatenation. Table~\ref{concat_example} demonstrates a potential execution of the defined graph with strings $"a","b","c"$ as input elements. In this example, the first processed element is $"c"$, but it can be $"a"$ or $"b"$ as well due to the randomness provided by asynchronous channels. The final state of concatenation is $"cab"$, but this result also can vary from run to run. Wall time is indicated to highlight that races may occur in a data flow.
+
+% Let strings $"a","b","c"$ enter the system, e.g. $"a"\in A_\tau, W_\tau$, $"b" \in A_{\tau+1},W_{\tau+1}$, and $"c" \in A_{\tau+2},W_{\tau+2}$. We are not aware which of these strings will be processed first due to asynchronous input channels, therefore, each of them can arrive at the operation before others with some probability. Assume that the first one is $"c"$. In this case, $W_{\tau+3}$ contains elements $"a","b","c"$. Element $"c"$ is still presented in the working set because it becomes the state of the concatenation. After that, element $c$ can also be delivered to end-user as a partial result of the concatenation, so $"c" \in B_{\tau+4}$. If the next arrived element is $"b"$, then $W_{\tau+5}$ consists of $"a"$ and $"cb"$, where $"cb"$ is the current state.
+
+\begin{table}[htbp]
+\caption{String concatenation data flow}
+\begin{tabular}{cccccc}
+wall time & $\tau$ & $a\in A$ & $W (s=state)$ & $b \in B$ & step  \\
+\hline
+1 & 1 & $a$ & a & & input    \\
+1 & 2 & $b$ & $a,b$ &  & input      \\
+1 & 3 & $c$ & $a,b,c$ &  & input     \\
+2 & 4 &  & $a,b,c^{s},c$ &  & transform     \\
+2 & 5 &  & $a,b,c^{s}$ & c  & output     \\
+3 & 6 &  & $b,ca^{s},ca$ &   & transform     \\
+3 & 7 &  & $b,ca^{s}$ & ca  & output     \\
+4 & 8 &  & $cab^{s},cab$ &   & transform     \\
+4 & 9 &  & $cab^{s}$ & cab  & output     \\
+\end{tabular}
+\label{concat_example}
+\end{table}
 
 \subsection{Model analysis}
 
@@ -127,16 +146,62 @@ Using the notion of a reference recovery function, one can simply define the cor
 with all previous input and output elements $A_\tau$ and $B_\tau$ if the probability to observe it is non-zero in a system with reference recovery: $P(b_{\tau+1} \mid A_\tau,B_\tau,F^{*})>0$.
 \end{definition}
 
-The reference recovery function allows us to express the notion of valid execution in terms of correspondence between input and output elements. In most real cases, input and output elements are the only data that can be observed by end-user. In real distributed stream processing systems, failures and recoveries can corrupt the output, despite the fact, that in terms of a naive definition of delivery guarantees, all elements are processed exactly once. Let us demonstrate it by an example. Assume that $\Gamma=\mathbb{N}$ and $D$ consists of a single non-commutative operation $v^{i+1}=a_\tau(1+v^{i}),v^{0}=0$ and $v$ becomes an output element on each iteration. Upper index denotes an order of transformations. Let $F$ set $v^{0}=0$ and reprocess input elements from the very beginning that seems like a correct naive approach for restoring. Assume that the system does not release output elements during reprocessing to avoid duplicates. However, if input elements arrive from asynchronous input channels, they can be reordered, and results of non-commutative operation may become inconsistent with results before the failure, e.g. the property of output monotonicity can be violated. This example is demonstrated in Figure~\ref{state-inconsistency}. 
+The reference recovery function allows us to express the notion of valid execution in terms of correspondence between input and output elements. In most real cases, input and output elements are the only data that can be observed by end-user. In real distributed stream processing systems, failures and recoveries can corrupt the output, despite the fact, that in terms of a naive definition of delivery guarantees, all elements are processed exactly once. 
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.48\textwidth]{pics/failure}
-  \caption{Inconsistency of results after complete input reprocessing}
-  \label {state-inconsistency}
-\end{figure}
+Let us demonstrate it by the already mentioned example with a physical graph consisted of a single operation that concatenates input strings from multiple asynchronous input channels. Let $F$ set reprocess input elements from the very beginning that seems like a correct straightforward approach for restoring the state (concatenation obtained before failure). Assume that the system does not release output elements during reprocessing to avoid duplicates. 
+
+The problem here is that elements can be concatenated in a different order on recovery. This example is shown in Table~\ref{inconsistency_example}. Before failure, system reached concatenation state $"ca"$, but there is no guarantee that straightforward recovery approach leads to the same state due to asynchronous input. Instead of $"ca"$, state may become $"ac"$. However, output element $"ca"$ has been already released and it is expected that the next output starts with the prefix $"ca"$. It is important to note that even if the next output element is $"acb"$, that is inconsistent with previously released items, all input elements are applied to concatenation state {\em exactly once}. This simple example demonstrates that a simple definition of exactly-once does not guarantee the consistency of output elements.
+
+\begin{table}[htbp]
+\caption{Output inconsistency due to straightforward recovery}
+\begin{tabular}{cccccc}
+wall time & $\tau$ & $a\in A$ & $W (s=state)$ & $b \in B$ & step  \\
+\hline
+1 & 1 & $a$ & a & & input    \\
+1 & 2 & $c$ & $a,c$ &  & input     \\
+2 & 3 &  & $a,c^{s},c$ &  & transform     \\
+2 & 4 &  & $a,c^{s}$ & c  & output     \\
+3 & 5 &  & $ca^{s},ca$ &   & transform     \\
+3 & 6 &  & $ca^{s}$ & {\bf ca}  & output     \\
+\arrayrulecolor{red}\hline
+4 & 7 & $a$ & a & & recovery    \\
+4 & 7 & $c$ & $a,c$ &  &       \\
+5 & 7 &  & $c,a^{s}$ &  &     \\
+6 & 7 &  & $ac^{s}$ &   &     \\
+\arrayrulecolor{red}\hline
+7 & 8 & $b$ & $b,ac^{s}$ &  & input      \\
+8 & 5 &  & $acb^{s},acb$ &   & transform     \\
+8 & 6 &  & $acb^{s}$ & {\bf acb}  & output     \\
+\end{tabular}
+\label{inconsistency_example}
+\end{table}
+
+% Input elements: $"a","b","c","d","e"$
+
+% \begin{table}[htbp]
+% \caption{Race effects within multi-class model}
+% \begin{tabular}{cc}
+%   \\
+% \hline
+% 2   &   $0.9\pm0.2$    \\
+% 4   &   $1.7\pm0.4$    \\
+% 8   &   $1.9\pm0.5$    \\
+% \end{tabular}
+% \label{race_table}
+% \end{table}
+
+% Assume that $\Gamma=\mathbb{N}$ and $D$ consists of a single non-commutative operation $v^{i+1}=a_\tau(1+v^{i}),v^{0}=0$ and $v$ becomes an output element on each iteration. Upper index denotes an order of transformations. Let $F$ set $v^{0}=0$ and reprocess input elements from the very beginning that seems like a correct naive approach for restoring. Assume that the system does not release output elements during reprocessing to avoid duplicates. However, if input elements arrive from asynchronous input channels, they can be reordered, and results of non-commutative operation may become inconsistent with results before the failure, e.g. the property of output monotonicity can be violated. This example is demonstrated in Figure~\ref{state-inconsistency}. 
+
+% \begin{figure}[htbp]
+%   \centering
+%   \includegraphics[width=0.48\textwidth]{pics/failure}
+%   \caption{Inconsistency of results after complete input reprocessing}
+%   \label {state-inconsistency}
+% \end{figure}
 
 \subsection{Delivery guarantees}
+
+As we demonstrate further, state-of-the-art stream processing systems prevent inconsistencies illustrated in the example above. However, the informal definition of exactly once is insufficient to describe the level of data consistency that is actually provided. Here we introduce a regular definitions of delivery guarantees which take this issue into account. 
 
 \begin{definition}{System provides for exactly once}
 if it is possible to obtain each output element $b_{\tau+1}$ in a system with a reference recovery fucntion, i.e.,\\ 
@@ -178,7 +243,7 @@ An important property of a deterministic system is that it preserves the same or
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.48\textwidth]{pics/theorem-pic}
-  \caption{The scheme of $D$ from Theorem~\ref{necessary_conditions}}
+  \caption{The scheme of Theorem~\ref{necessary_conditions}}
   \label {theorem-pic}
 \end{figure}
 
@@ -206,7 +271,8 @@ If $D$ contains non-commutative transformation and has the following dependencie
 \begin{sketch}
 $ $\newline
 
-The scheme of $D$ in the form of a graph is shown in Figure~\ref{theorem-pic}. Basically, the theorem conditions mean that each result of the non-commutative operation must become recoverable before the delivery of output that depends on this result. Such behavior is similar to the issue shown in Figure~\ref{state-inconsistency} if we set $b_{\tau_1}=v$.
+The scheme of $D$ in the form of a graph is shown in Figure~\ref{theorem-pic}. Basically, the theorem conditions mean that each result of the non-commutative operation must become recoverable before the delivery of output that depends on this result. 
+% Such behavior is similar to the issue shown in Ta~\ref{state-inconsistency} if we set $b_{\tau_1}=v$.
 $ $\newline
 
 \noindent{\em Necessary condition}\newline
