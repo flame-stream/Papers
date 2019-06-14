@@ -1,10 +1,15 @@
 \label{fs-eo-impl}
 
-In the previous section, we introduced the formal model that allows describing delivery guarantees in a regular way and proposed necessary and sufficient conditions of~\eo. In this section, we demonstrate how implementations of~\eo\ in state-of-the-art distributed stream processing systems satisfy the necessary condition of~\eo. 
+
+%   The formal model developed ablve can be used for analysis of several systems. 
+%  In the previous section, we introduced the formal model that allows describing delivery guarantees in a regular way and proposed necessary and sufficient conditions of~\eo. In this section, we demonstrate how implementations of~\eo\ in state-of-the-art distributed stream processing systems satisfy the necessary condition of~\eo. 
 
 \subsection{MillWheel}
 
-In MillWheel, the $\Gamma$ is all possible streaming {\em records}. Dependency relation $D$ is defined using a graph of user-defined transformations. MillWheel employs a {\em strong productions}~\cite{Akidau:2013:MFS:2536222.2536229} fault tolerance mechanism: on each new input item, every operation in a graph atomically writes the input and produced records to external storage. Therefore, each streaming element is saved to external storage before it influences other elements or operation states. Recovery function $F$ resends all saved records in case of failure, and each operation deduplicates input records that have been already processed.
+ The $\Gamma$ is all possible streaming {\em records}. Dependency relation $D$ is defined using a graph of user-defined transformations. 
+ To ensure fault tolerance,   MillWheel employs a {\em strong productions}~\cite{Akidau:2013:MFS:2536222.2536229}   mechanism that storews persistently  input and output of any operation for each new  input item.
+ Thus  each streaming element is saved  before it  may influence other elements or operation states. 
+ Recovery function $F$ resends all saved records in case of failure, and each operation deduplicates input  that have been already processed.
 
 The necessary condition of~\eo\ from Theorem~\ref{necessary_conditions} claims that each element $s \in \Gamma$ obtained through a non-commutative operation must be persistently saved before any other element $b_{\tau} \in Cl_D(s)$ that depends on $s$ is released. Strong productions mechanism ensures that this condition is satisfied, i.e. if some element $b_\tau$ is released, it is guaranteed that its dependencies were released earlier (saved to persistent storage). The idea of this method is shown in Figure~\ref{millwheel}. It demonstrates that in MillWheel all elements become recoverable, so there is no need to reprocess them again from an input item in case of failure. 
 
