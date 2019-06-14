@@ -2,7 +2,7 @@
 
 \label {fs-consistency-section}
 
-In the previous section, we demonstrated how state-of-the-art stream processing system handle non-deterministic behavior in order to achieve exactly-once. All these systems make state recoverable before output elements which depend on this state are released. As we demonstrate further, such behavior can significantly increase the processing latency of individual elements.
+In the previous section, we demonstrated how state-of-the-art stream processing system handle non-deterministic behavior in order to achieve~\eo. All these systems make state recoverable before output elements which depend on this state are released. As we demonstrate further, such behavior can significantly increase the processing latency of individual elements.
 
 The necessary condition from the Theorem~\ref{necessary_conditions} can be relaxed for a deterministic system because determinism guarantees order enforcement before non-commutative operations. If a system is deterministic, it is possible to consistently recompute states of non-commutative operations. Hence, such system can release an output element before a snapshot is taken, because it is able to reproduce exactly the same state in case of failure. It means that even if elements are divided into the epochs like in Apache Flink, and a snapshot is taken once per epoch, ready-to-release output elements should not wait until epoch is committed in order to be delivered. As we show further in experiments, this relaxation is able to dramatically decrease processing latency, because there is no need to wait until the snapshot is taken in order to release output elements.
 
@@ -12,9 +12,9 @@ The necessary condition from the Theorem~\ref{necessary_conditions} can be relax
 
 % In general, determinism allows us to relax the requirement introduced in the Theorem~\ref{necessary_conditions}: output elements in a deterministic system can be delivered to end-user before results of non-commutative operations are written to persistent external storage. Hence, if data for recovery is periodically saved, the duration of this period will not affect latency. 
 
-To bridge the gap between the determinism and exactly once we need to design protocols for recovery function $F$ and saving data needed for correct restoring. In this section, we describe protocols for exactly once enforcement on top of a lightweight deterministic model for distributed stream processing called {\em drifting state}~\cite{we2018adbis}. This model is implemented in~\FlameStream\ processing system~\cite{we2018beyondmr}.
+To bridge the gap between the determinism and~\eo\ we need to design protocols for recovery function $F$ and saving data needed for correct restoring. In this section, we describe protocols for~\eo\ enforcement on top of a lightweight deterministic model for distributed stream processing called {\em drifting state}~\cite{we2018adbis}. This model is implemented in~\FlameStream\ processing system~\cite{we2018beyondmr}.
 
-In~\FlameStream\, computations are deterministic due to a (speculative) maintenance of a pre-defined total order on elements before each order-sensitive operation. The order can be defined using various methods~\cite{we2018seim}, and we assume that $\forall x_1,x_2\in \Gamma, \exists t(x): x_1 < x_2 \Longleftrightarrow t(x_1) < t(x_2)$. In order to achieve exactly once on top of a deterministic stream processing system we propose the following way:
+In~\FlameStream\, computations are deterministic due to a (speculative) maintenance of a pre-defined total order on elements before each order-sensitive operation. The order can be defined using various methods~\cite{we2018seim}, and we assume that $\forall x_1,x_2\in \Gamma, \exists t(x): x_1 < x_2 \Longleftrightarrow t(x_1) < t(x_2)$. In order to achieve~\eo\ on top of a deterministic stream processing system we propose the following way:
 \begin{itemize}
     \item Periodically save (take a snapshot of) operation states
     \item Consistently restore these states and replay missed input elements in case of failure
@@ -65,7 +65,7 @@ It is worth to note that the proposed protocol is similar to the transactional (
 
 \subsubsection{Last output element}
 
-In order to preserve the deterministic outcome, the barrier must release output items with monotonically increasing $t(x)$. Hence, the barrier can filter out any items with $t(x)$ less than or equal to the $t(x)$ of the last released item $t_{last}$ in order to preserve exactly once after recovery. To implement this mechanism, there is a need to atomically deliver output items and update $t_{last}$. To solve this problem, we require the following output protocol between a {\em barrier} and a {\em data consumer}: 
+In order to preserve the deterministic outcome, the barrier must release output items with monotonically increasing $t(x)$. Hence, the barrier can filter out any items with $t(x)$ less than or equal to the $t(x)$ of the last released item $t_{last}$ in order to preserve~\eo\ after recovery. To implement this mechanism, there is a need to atomically deliver output items and update $t_{last}$. To solve this problem, we require the following output protocol between a {\em barrier} and a {\em data consumer}: 
 
 \begin{itemize}
     \item On each output delivery, barrier sends a bundle to the data consumer. This bundle contains an output item and $t_{last}$. The consumer must acknowledge that it received the bundle.
@@ -97,7 +97,7 @@ Failure detection can be implemented in different ways~\cite{hayashibara2002fail
     \item When the coordinator receives all acknowledgments from groupings and barriers, it requests data producer to replay starting from the $t(a)$ of the last snapshot.
 \end{itemize}
 
-The proposed protocol guarantees the following properties that allow preserving exactly once:
+The proposed protocol guarantees the following properties that allow preserving~\eo:
 
 \begin{itemize}
     \item Processing does not restart until all operations obtain consistent states. The consistency of these states is guaranteed by the state snapshotting protocol. Therefore, the elements are not lost.

@@ -146,11 +146,11 @@ Using the notion of a reference recovery function, one can simply define the cor
 with all previous input and output elements $A_\tau$ and $B_\tau$ if the probability to observe it is non-zero in a system with reference recovery: $P(b_{\tau+1} \mid A_\tau,B_\tau,F^{*})>0$.
 \end{definition}
 
-The reference recovery function allows us to express the notion of valid execution in terms of correspondence between input and output elements. In most real cases, input and output elements are the only data that can be observed by end-user. In real distributed stream processing systems, failures and recoveries can corrupt the output, despite the fact, that in terms of a naive definition of delivery guarantees, all elements are processed exactly once. 
+The reference recovery function allows us to express the notion of valid execution in terms of correspondence between input and output elements. In most real cases, input and output elements are the only data that can be observed by end-user. In real distributed stream processing systems, failures and recoveries can corrupt the output, despite the fact, that in terms of a naive definition of delivery guarantees, all elements are processed~\eo. 
 
 Let us demonstrate it by the already mentioned example with a physical graph consisted of a single operation that concatenates input strings from multiple asynchronous input channels. Let $F$ set reprocess input elements from the very beginning that seems like a correct straightforward approach for restoring the state (concatenation obtained before failure). Assume that the system does not release output elements during reprocessing to avoid duplicates. 
 
-The problem here is that elements can be concatenated in a different order on recovery. This example is shown in Table~\ref{inconsistency_example}. Before the failure, the system reached concatenation state $"ca"$, but there is no guarantee that a straightforward recovery approach leads to the same state due to asynchronous input. Instead of $"ca"$, state may become $"ac"$. However, output element $"ca"$ has been already released and it is expected that the next output starts with the prefix $"ca"$. It is important to note that even if the next output element is $"acb"$, that is inconsistent with previously released items, all input elements are applied to concatenation state {\em exactly once}. This simple example demonstrates that a simple definition of exactly-once does not guarantee the consistency of output elements.
+The problem here is that elements can be concatenated in a different order on recovery. This example is shown in Table~\ref{inconsistency_example}. Before the failure, the system reached concatenation state $"ca"$, but there is no guarantee that a straightforward recovery approach leads to the same state due to asynchronous input. Instead of $"ca"$, state may become $"ac"$. However, output element $"ca"$ has been already released and it is expected that the next output starts with the prefix $"ca"$. It is important to note that even if the next output element is $"acb"$, that is inconsistent with previously released items, all input elements are applied to concatenation state {\em ~\eo}. This simple example demonstrates that a simple definition of~\eo\ does not guarantee the consistency of output elements.
 
 \begin{table}[htbp]
 \caption{Output inconsistency due to straightforward recovery}
@@ -201,34 +201,34 @@ wall time & $\tau$ & $a\in A$ & $W (s=state)$ & $b \in B$ & step  \\
 
 \subsection{Delivery guarantees}
 
-As we demonstrate further, state-of-the-art stream processing systems prevent inconsistencies illustrated in the example above. However, the informal definition of exactly once is insufficient to describe the level of data consistency that is actually provided. Here we introduce regular definitions of delivery guarantees which take this issue into account. 
+As we demonstrate further, state-of-the-art stream processing systems prevent inconsistencies illustrated in the example above. However, the informal definition of~\eo\ is insufficient to describe the level of data consistency that is actually provided. Here we introduce regular definitions of delivery guarantees which take this issue into account. 
 
-\begin{definition}{System provides for exactly once}
+\begin{definition}{System provides for~\eo}
 if it is possible to obtain each output element $b_{\tau+1}$ in a system with a reference recovery fucntion, i.e.,\\ 
 $\forall{\tau \in \mathbb{N}}, b_{\tau+1}\in 2^{\Gamma}: P(b_{\tau+1}|A_{\tau},B_\tau,F)>0 \Rightarrow \\ P(b_{\tau+1}|A_{\tau},B_\tau,F^{*})>0$.
 \end{definition}
 
-\begin{definition}{System provides for at most once}
+\begin{definition}{System provides for~\amo}
 if \\
 $\exists{A^{0}_{\tau}\subseteq{A_{\tau}}}$ such that \\
 $\forall{\tau \in \mathbb{N},{b_{\tau+1}\in 2^{\Gamma}}}: P(b_{\tau+1}|A_{\tau},B_\tau,F)>0 \Rightarrow \\ P(b_{\tau+1}|A^{0}_{\tau},B_\tau,F^{*})>0$.
 \end{definition}
 
-\begin{definition}{System provides for at least once}
+\begin{definition}{System provides for~\alo}
 if \\
 $\exists{A^{*}_{\tau}\subseteq{2^{A_{\tau}}}}$ such that \\
 $\forall{\tau \in \mathbb{N}, {b_{\tau+1} \in 2^{\Gamma}}}: P(b_{\tau+1}|A_{\tau},B_\tau,F)>0 \Rightarrow \\ P(b_{\tau+1}|A^{*}_{\tau},B_\tau,F^{*})>0$.
 \end{definition}
 
-Exactly once states that observed results cannot be distinguished from one of the possible results produced by a system with a reference recovery function. It means that even if data flow contains races and some elements do not commute, output consistency will be preserved. Looking back to the example illustrated in Table~\ref{inconsistency_example}, our formal definition of exactly-once ensures that after recovery system reaches state $"ca"$, because this state has already influenced output elements.
+\Eo\ states that observed results cannot be distinguished from one of the possible results produced by a system with a reference recovery function. It means that even if data flow contains races and some elements do not commute, output consistency will be preserved. Looking back to the example illustrated in Table~\ref{inconsistency_example}, our formal definition of~\eo\ ensures that after recovery system reaches state $"ca"$, because this state has already influenced output elements.
 
-At most once and at least once guarantees are the relaxations of exactly once. The results within these guarantees can be obtained without failures, but with the modification of the input. At least once can be reproduced if the input contains duplicated items. At most once can be achieved with a reference recovery if some input elements are missed. It is important to note, that regarding at most once guarantee we require an input element to be processed atomically with all its derivatives or not processed at all. To the best of our knowledge, none of the stream processing engines supports at most once guarantee, so we cannot verify the relevancy of this assumption. It is easy to provide at most once by producing no output at all but if the output is presented, at most once enforcement becomes much more difficult.  
+\Amo\ and~\alo\ guarantees are the relaxations of~\eo. The results within these guarantees can be obtained without failures, but with the modification of the input. \Alo\ can be reproduced if the input contains duplicated items. \Amo\ can be achieved with a reference recovery if some input elements are missed. It is important to note, that regarding~\amo\ guarantee we require an input element to be processed atomically with all its derivatives or not processed at all. To the best of our knowledge, none of the stream processing engines supports~\amo\ guarantee, so we cannot verify the relevancy of this assumption. It is easy to provide~\amo\ by producing no output at all but if the output is presented,\amo\ enforcement becomes much more difficult.  
 
-In our formal model, the relaxations of exactly once are defined without diving into recovery mechanisms. Instead, they are described through possible input channel flaws in a system with a reference recovery. This trick allows us to represent invisible system details in terms clear for an external user.
+In our formal model, the relaxations of~\eo\ are defined without diving into recovery mechanisms. Instead, they are described through possible input channel flaws in a system with a reference recovery. This trick allows us to represent invisible system details in terms clear for an external user.
 
-\subsection{Exactly-once and determinism}
+\subsection{\Eo\ and determinism}
 
-Operations that are presented in $D$ can directly affect the complexity of consistency enforcement mechanisms. For example, if all operations are idempotent, exactly once can be obviously achieved~\cite{Akidau:2013:MFS:2536222.2536229}. Among common types of operations, non-commutative ones provide significant difficulties in achieving exactly-once.
+Operations that are presented in $D$ can directly affect the complexity of consistency enforcement mechanisms. For example, if all operations are idempotent, \eo\ can be obviously achieved~\cite{Akidau:2013:MFS:2536222.2536229}. Among common types of operations, non-commutative ones provide significant difficulties in achieving~\eo.
 
 \begin{definition}{D contains non-commutative operation}
 if\\ 
@@ -242,9 +242,9 @@ if\\
 $\forall{\tau\in{\mathbb{N}}, b_{\tau+1}\in{2^{\Gamma}}}:P(b_{\tau+1}|A_{\tau},B_\tau,F^{*})=1$.
 \end{definition}
 
-An important property of a deterministic system is that it preserves the same order of elements before non-commutative operations on each run. We further demonstrate how this property can be used to achieve exactly-once with low performance overhead.
+An important property of a deterministic system is that it preserves the same order of elements before non-commutative operations on each run. We further demonstrate how this property can be used to achieve~\eo\ with low performance overhead.
 
-On the other hand, the absence of determinism imposes restrictions on exactly-once implementations. The following theorem denotes the necessary and sufficient conditions for exactly once in non-deterministic systems with a non-commutative operation in $D$. It demonstrates that if a system is non-deterministic, but supports non-commutative operations, it must save (take a snapshot of) results of non-commutative operations before delivery of output elements that depend on these results.
+On the other hand, the absence of determinism imposes restrictions on~\eo\ implementations. The following theorem denotes the necessary and sufficient conditions for~\eo\ in non-deterministic systems with a non-commutative operation in $D$. It demonstrates that if a system is non-deterministic, but supports non-commutative operations, it must save (take a snapshot of) results of non-commutative operations before delivery of output elements that depend on these results.
 
 \begin{figure}[htbp]
   \centering
@@ -263,7 +263,7 @@ If $D$ contains non-commutative transformation and has the following dependencie
   \item[(iii)] $b_{\tau_1}, b_{\tau_2} \in Cl_D(s), \tau_1 < \tau_2$
 \end{enumerate}
 
-\noindent then non-deterministic system supports exactly once if and only if:
+\noindent then non-deterministic system supports~\eo\ if and only if:
 
 \begin{equation}
 \label{theorem_conditions}
@@ -289,7 +289,7 @@ $ $\newline
 \noindent{\em Sufficient condition}
 \newline
 
-Let us assume that a  system fails at time $\tau_f$. If $\tau_f < \tau_1$ or $\tau_f > \tau_2$, exactly once is obviously satisfied. Assume that $\tau_1<\tau_f<\tau_2$. In this case, $b_{\tau_1}\in B_{\tau_f}\subset B_{\tau_2}$. Hence, $b_{\tau_2}$ can be restored directly from $b_{\tau_1}$ without reprocessing of s, i.e. $F(a_\tau,b_{\tau_1})=b_{\tau_2}$ and $b_{\tau_1}, b_{\tau_2} \in Cl_D(s)$ after recovery, thus $P(b_{\tau_2}\in Cl_D(s)|\{a_\tau\},\{b_{\tau_1} \in Cl_D(s) \})>0$.
+Let us assume that a  system fails at time $\tau_f$. If $\tau_f < \tau_1$ or $\tau_f > \tau_2$, \eo\ is obviously satisfied. Assume that $\tau_1<\tau_f<\tau_2$. In this case, $b_{\tau_1}\in B_{\tau_f}\subset B_{\tau_2}$. Hence, $b_{\tau_2}$ can be restored directly from $b_{\tau_1}$ without reprocessing of s, i.e. $F(a_\tau,b_{\tau_1})=b_{\tau_2}$ and $b_{\tau_1}, b_{\tau_2} \in Cl_D(s)$ after recovery, thus $P(b_{\tau_2}\in Cl_D(s)|\{a_\tau\},\{b_{\tau_1} \in Cl_D(s) \})>0$.
 \end{sketch}
 
 
@@ -297,8 +297,8 @@ We assume   in this  theorem    that input element $a_\tau$ is split into elemen
 
 This theorem has direct practical implications for non-deterministic systems:
 \begin{itemize}
-    \item {\bf Output elements must wait until the snapshot is taken}. If a system aims at providing exactly once, it must output elements only if there exists a snapshot that contains results of non-commutative operations. The problem here is that a system is usually not aware of user-defined operations and cannot distinguish commutative and non-commutative operations, so it must wait even if all elements actually commutate.
+    \item {\bf Output elements must wait until the snapshot is taken}. If a system aims at providing~\eo, it must output elements only if there exists a snapshot that contains results of non-commutative operations. The problem here is that a system is usually not aware of user-defined operations and cannot distinguish commutative and non-commutative operations, so it must wait even if all elements actually commutate.
     \item {\bf Latency is affected by the period of snapshotting}. The consideration above implies that the lower bound of latency in the worst case in non-deterministic systems is the snapshotting period together with the duration of taking a snapshot. There is a trade-off between latency and the frequency of taking snapshots because too frequent snapshotting can cause high extra load, while rare snapshots lead to high latency.
 \end{itemize}
 
-It is important to note that the proposed model is suitable not only for the formal analysis of the properties of exactly once but for a deeper understanding of the other aspects of stream processing. While these topics are promising as well, they are out of the scope of this paper.
+It is important to note that the proposed model is suitable not only for the formal analysis of the properties of~\eo\ but for a deeper understanding of the other aspects of stream processing. While these topics are promising as well, they are out of the scope of this paper.
