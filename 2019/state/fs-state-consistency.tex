@@ -2,11 +2,19 @@
 
 \label {fs-consistency-section}
 
-In general, determinism allows us to relax the requirement introduced in the Theorem~\ref{necessary_conditions}: output elements in a deterministic system can be delivered to end-user before results of non-commutative operations are written to persistent external storage. Hence, if data for recovery is periodically saved, the duration of this period will not affect latency. It means that even if elements are divided into the epochs like in Apache Flink, and a snapshot is taken once per epoch, ready-to-release output elements should not wait until epoch is committed in order to be delivered. 
+In the previous section, we demonstrated how state-of-the-art stream processing system handle non-deterministic behavior in order to achieve exactly-once. All these systems make state recoverable before output elements which depend on this state are released. As we demonstrate further, such behavior can significantly increase the processing latency of individual elements.
+
+The necessary condition from the Theorem~\ref{necessary_conditions} can be relaxed for a deterministic system because determinism guarantees order enforcement before non-commutative operations. If a system is deterministic, it is possible to consistently recompute states of non-commutative operations. Hence, such system can release an output element before a snapshot is taken, because it is able to reproduce exactly the same state in case of failure. It means that even if elements are divided into the epochs like in Apache Flink, and a snapshot is taken once per epoch, ready-to-release output elements should not wait until epoch is committed in order to be delivered. As we show further in experiments, this relaxation is able to dramatically decrease processing latency, because there is no need to wait until the snapshot is taken in order to release output elements.
+
+% To the best of our knowledge, only micro-batching systems support the property of determinism in streaming. However, micro-batching solutions provide higher latency than pure streaming engines due to overhead on input buffering~\cite{karimov2018benchmarking}. 
+
+% We proposed a pure streaming model called {\em drifting state}~\cite{we2018adbis} that allows achieving both determinism and low latency. Therefore, a question arises: is it more efficient in practice to handle non-determinism by atomic snapshotting and releasing than to maintain a fair determinism in order to get exactly once? 
+
+% In general, determinism allows us to relax the requirement introduced in the Theorem~\ref{necessary_conditions}: output elements in a deterministic system can be delivered to end-user before results of non-commutative operations are written to persistent external storage. Hence, if data for recovery is periodically saved, the duration of this period will not affect latency. 
 
 To bridge the gap between the determinism and exactly once we need to design protocols for recovery function $F$ and saving data needed for correct restoring. In this section, we describe protocols for exactly once enforcement on top of a lightweight deterministic model for distributed stream processing called {\em drifting state}~\cite{we2018adbis}. This model is implemented in~\FlameStream\ processing system~\cite{we2018beyondmr}.
 
-Deterministic computations require pre-defined total order on elements. The order can be defined using various methods~\cite{we2018seim}, and we assume that $\forall x_1,x_2\in \Gamma, \exists t(x): x_1 < x_2 \Longleftrightarrow t(x_1) < t(x_2)$. In order to achieve exactly once on top of a deterministic stream processing system we propose the following way:
+In~\FlameStream\, computations are deterministic due to a (speculative) maintenance of a pre-defined total order on elements before each order-sensitive operation. The order can be defined using various methods~\cite{we2018seim}, and we assume that $\forall x_1,x_2\in \Gamma, \exists t(x): x_1 < x_2 \Longleftrightarrow t(x_1) < t(x_2)$. In order to achieve exactly once on top of a deterministic stream processing system we propose the following way:
 \begin{itemize}
     \item Periodically save (take a snapshot of) operation states
     \item Consistently restore these states and replay missed input elements in case of failure

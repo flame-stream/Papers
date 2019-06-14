@@ -220,25 +220,31 @@ $\exists{A^{*}_{\tau}\subseteq{2^{A_{\tau}}}}$ such that \\
 $\forall{\tau \in \mathbb{N}, {b_{\tau+1} \in 2^{\Gamma}}}: P(b_{\tau+1}|A_{\tau},B_\tau,F)>0 \Rightarrow \\ P(b_{\tau+1}|A^{*}_{\tau},B_\tau,F^{*})>0$.
 \end{definition}
 
-Exactly once states that observed results cannot be distinguished from one of the possible results produced by a system with a reference recovery function. At most once and at least once guarantees are the relaxations of exactly once. The results within these guarantees can be obtained without failures, but with the modification of the input. At least once can be reproduced if the input contains duplicated items. At most once can be achieved with a reference recovery if some input elements are missed. It is important to note, that regarding at most once guarantee we require an input element to be processed atomically with all its derivatives or not processed at all. To the best of our knowledge, none of the stream processing engines supports at most once guarantee, so we cannot verify the relevancy of this assumption. It is easy to provide at most once by producing no output at all but if the output is presented, at most once enforcement becomes much more difficult.  
+Exactly once states that observed results cannot be distinguished from one of the possible results produced by a system with a reference recovery function. It means that even if data flow contains races and some elements do not commute, output consistency will be preserved. Looking back to the example illustrated in Table~\ref{inconsistency_example}, our formal definition of exactly-once ensures that after recovery system reaches state $"ca"$, because this state has already influenced output elements.
 
-In our formal model, the relaxations of exactly once are defined without diving into recovery mechanisms. Instead, they are described through possible input channel flaws in a system with a reference recovery. This trick allows us to represent invisible system details in terms clear for a user.
+At most once and at least once guarantees are the relaxations of exactly once. The results within these guarantees can be obtained without failures, but with the modification of the input. At least once can be reproduced if the input contains duplicated items. At most once can be achieved with a reference recovery if some input elements are missed. It is important to note, that regarding at most once guarantee we require an input element to be processed atomically with all its derivatives or not processed at all. To the best of our knowledge, none of the stream processing engines supports at most once guarantee, so we cannot verify the relevancy of this assumption. It is easy to provide at most once by producing no output at all but if the output is presented, at most once enforcement becomes much more difficult.  
 
-Operations that are presented in $D$ can directly affect the complexity of consistency enforcement mechanisms. For example, if all operations are idempotent, exactly once can be obviously achieved~\cite{Akidau:2013:MFS:2536222.2536229}. On the other hand, if $D$ consists of non-idempotent and non-commutative, exactly once becomes challenging.
+In our formal model, the relaxations of exactly once are defined without diving into recovery mechanisms. Instead, they are described through possible input channel flaws in a system with a reference recovery. This trick allows us to represent invisible system details in terms clear for an external user.
+
+\subsection{Exactly-once and determinism}
+
+Operations that are presented in $D$ can directly affect the complexity of consistency enforcement mechanisms. For example, if all operations are idempotent, exactly once can be obviously achieved~\cite{Akidau:2013:MFS:2536222.2536229}. Among common types of operations, non-commutative ones provide significant difficulties in achieving exactly-once.
 
 \begin{definition}{D contains non-commutative operation}
 if\\ 
 $\exists (x,y), s_1, s_2 \in \Gamma, s_1 \neq s_2: \\ ((x,y),s_1)\in D, \\ ((y,x),s_1)\notin D, \\ ((y,x),s_2)\in D$.
 \end{definition}
 
-The are many non-commutative operations that are commonly used in practice: concatenation, matrix multiplication, cross product,  etc. Hence, general-purpose stream processing systems should support them.
+The are many non-commutative operations that are commonly used in practice: concatenation, matrix multiplication, cross product, etc. Hence, general-purpose stream processing systems should support them. The problem with such operations we demonstrated in Table~\ref{inconsistency_example}: simple reprocessing of missing elements in case of failure may lead to results inconsistencies.
 
 \begin{definition}{System is deterministic}
 if\\ 
-$\forall{\tau\in{\mathbb{N}}, b_{\tau+1}\in{2^{\Gamma}}}:P(b_{\tau+1}|A_{\tau},B_\tau)=1$.
+$\forall{\tau\in{\mathbb{N}}, b_{\tau+1}\in{2^{\Gamma}}}:P(b_{\tau+1}|A_{\tau},B_\tau,F^{*})=1$.
 \end{definition}
 
-An important property of a deterministic system is that it preserves the same order of elements before non-commutative operations on each run. The following theorem denotes the necessary and sufficient conditions for exactly once in non-deterministic systems with a non-commutative operation in $D$. It demonstrates that if a system is non-deterministic, but supports non-commutative operations, it must save (take a snapshot of) results of non-commutative operations before delivery of output elements that depend on these results.
+An important property of a deterministic system is that it preserves the same order of elements before non-commutative operations on each run. We further demonstrate how this property can be used to achieve exactly-once with low performance overhead.
+
+On the other hand, the absence of determinism imposes restrictions on exactly-once implementations. The following theorem denotes the necessary and sufficient conditions for exactly once in non-deterministic systems with a non-commutative operation in $D$. It demonstrates that if a system is non-deterministic, but supports non-commutative operations, it must save (take a snapshot of) results of non-commutative operations before delivery of output elements that depend on these results.
 
 \begin{figure}[htbp]
   \centering
@@ -271,7 +277,7 @@ If $D$ contains non-commutative transformation and has the following dependencie
 \begin{sketch}
 $ $\newline
 
-The scheme of $D$ in the form of a graph is shown in Figure~\ref{theorem-pic}. Basically, the theorem conditions mean that each result of the non-commutative operation must become recoverable before the delivery of output that depends on this result. 
+The scheme of the theorem is shown in Figure~\ref{theorem-pic}. Basically, the theorem conditions mean that each result of the non-commutative operation must become recoverable before the delivery of output that depends on this result. 
 % Such behavior is similar to the issue shown in Ta~\ref{state-inconsistency} if we set $b_{\tau_1}=v$.
 $ $\newline
 
@@ -289,11 +295,10 @@ Let us assume that a  system fails at time $\tau_f$. If $\tau_f < \tau_1$ or $\t
 
 We assume   in this  theorem    that input element $a_\tau$ is split into elements $x,y$. The same behavior can be reproduced if two input elements $a_\tau$ and $a_{\tau+1}$ enter a system through asynchronous channels. In general, this behavior is natural for stream processing systems, because elements are processed one-by-one without synchronization and order enforcement. 
 
-This theorem has a direct practical implication. If a system aims at providing exactly once, it must output elements only if there exists a snapshot that contains results of non-commutative operations. The problem here is that a system is usually not aware of user-defined operations and cannot distinguish commutative and non-commutative operations. It means that the lower bound of latency in the worst case in such systems is the snapshotting period together with the duration of taking a snapshot. There is a trade-off between latency and the frequency of taking snapshots because too frequent snapshotting can cause high extra load, while rare snapshots lead to high latency.
-
-The necessary condition from the Theorem~\ref{necessary_conditions} can be relaxed for a deterministic system 
-because determinism guarantees order enforcement before non-commutative operations. Hence, if a system is deterministic, it is possible to inexpensively achieve a consistent snapshotting mechanism without synchronization between taking snapshots and output elements delivery. A deterministic system can release an element before a snapshot is taken. As we show further in experiments, this relaxation is able to dramatically decrease processing latency, because there is no need to wait until the snapshot is taken in order to release output elements.
-
-To the best of our knowledge, only micro-batching systems support the property of determinism in streaming. However, micro-batching solutions provide higher latency than pure streaming engines due to overhead on input buffering~\cite{karimov2018benchmarking}. We proposed a pure streaming model called {\em drifting state}~\cite{we2018adbis} that allows achieving both determinism and low latency. Therefore, a question arises: is it more efficient in practice to handle non-determinism by atomic snapshotting and releasing than to maintain a fair determinism in order to get exactly once? 
+This theorem has direct practical implications for non-deterministic systems:
+\begin{itemize}
+    \item {\bf Output elements must wait until the snapshot is taken}. If a system aims at providing exactly once, it must output elements only if there exists a snapshot that contains results of non-commutative operations. The problem here is that a system is usually not aware of user-defined operations and cannot distinguish commutative and non-commutative operations, so it must wait even if all elements actually commutate.
+    \item {\bf Latency is affected by the period of snapshotting}. The consideration above implies that the lower bound of latency in the worst case in non-deterministic systems is the snapshotting period together with the duration of taking a snapshot. There is a trade-off between latency and the frequency of taking snapshots because too frequent snapshotting can cause high extra load, while rare snapshots lead to high latency.
+\end{itemize}
 
 It is important to note that the proposed model is suitable not only for the formal analysis of the properties of exactly once but for a deeper understanding of the other aspects of stream processing. While these topics are promising as well, they are out of the scope of this paper.
