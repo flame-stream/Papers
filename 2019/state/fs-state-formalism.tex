@@ -150,7 +150,7 @@ The reference recovery function allows us to express the notion of valid executi
 
 Let us demonstrate it by the already mentioned example with a physical graph consisted of a single operation that concatenates input strings from multiple asynchronous input channels. Let $F$ set reprocess input elements from the very beginning that seems like a correct straightforward approach for restoring the state (concatenation obtained before failure). Assume that the system does not release output elements during reprocessing to avoid duplicates. 
 
-The problem here is that elements can be concatenated in a different order on recovery. This example is shown in Table~\ref{inconsistency_example}. Before failure, system reached concatenation state $"ca"$, but there is no guarantee that straightforward recovery approach leads to the same state due to asynchronous input. Instead of $"ca"$, state may become $"ac"$. However, output element $"ca"$ has been already released and it is expected that the next output starts with the prefix $"ca"$. It is important to note that even if the next output element is $"acb"$, that is inconsistent with previously released items, all input elements are applied to concatenation state {\em exactly once}. This simple example demonstrates that a simple definition of exactly-once does not guarantee the consistency of output elements.
+The problem here is that elements can be concatenated in a different order on recovery. This example is shown in Table~\ref{inconsistency_example}. Before the failure, the system reached concatenation state $"ca"$, but there is no guarantee that a straightforward recovery approach leads to the same state due to asynchronous input. Instead of $"ca"$, state may become $"ac"$. However, output element $"ca"$ has been already released and it is expected that the next output starts with the prefix $"ca"$. It is important to note that even if the next output element is $"acb"$, that is inconsistent with previously released items, all input elements are applied to concatenation state {\em exactly once}. This simple example demonstrates that a simple definition of exactly-once does not guarantee the consistency of output elements.
 
 \begin{table}[htbp]
 \caption{Output inconsistency due to straightforward recovery}
@@ -201,7 +201,7 @@ wall time & $\tau$ & $a\in A$ & $W (s=state)$ & $b \in B$ & step  \\
 
 \subsection{Delivery guarantees}
 
-As we demonstrate further, state-of-the-art stream processing systems prevent inconsistencies illustrated in the example above. However, the informal definition of exactly once is insufficient to describe the level of data consistency that is actually provided. Here we introduce a regular definitions of delivery guarantees which take this issue into account. 
+As we demonstrate further, state-of-the-art stream processing systems prevent inconsistencies illustrated in the example above. However, the informal definition of exactly once is insufficient to describe the level of data consistency that is actually provided. Here we introduce regular definitions of delivery guarantees which take this issue into account. 
 
 \begin{definition}{System provides for exactly once}
 if it is possible to obtain each output element $b_{\tau+1}$ in a system with a reference recovery fucntion, i.e.,\\ 
