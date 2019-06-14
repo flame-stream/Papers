@@ -3,24 +3,24 @@
 The concept of {\em consistency} is traditionally expressed in terms of the transactional behavior, known as ACID properties of transactions in the databases. 
  These properties ensure that the (database) state is consistent to the degree required by the specified isolation level, providing consistency of processing. 
  However, database systems are not used standalone: they  	interact  with client applications.
-  From the client perspective,   the notion of consistency includes also  {\em delivery guarantees} as well. {\em At least once}  ensures that input data are not lost, {\em at most once} eliminates duplicate processing, and {\em exactly once} combines both ensuring the absence of input data losses and repeated delivery of results. An implementation of exactly once processing of transactions based on persistent queues is described in~\cite{DBLP:books/mk/WeikumV2002}.
+  From the client perspective,   the notion of consistency includes also  {\em delivery guarantees} as well. {\em \Alo} ensures that input data are not lost, {\em \amo} eliminates duplicate processing, and {\em ~\eo} combines both ensuring the absence of input data losses and repeated delivery of results. An implementation of~\eo\ processing of transactions based on persistent queues is described in~\cite{DBLP:books/mk/WeikumV2002}.
 
 % Distributed processing systems are typically shared-nothing and do not require concurrency control. Hence, isolation levels are meaningless for them. In this case, consistency properties are determined by system behavior in case of failure. 
 
 % Consistent state snapshotting protocols for distributed systems were proposed in~\cite{Chandy:1985:DSD:214451.214456}. However, as typical database systems, modern distributed processing systems interact with data producers and data consumers. Therefore, the notion of consistency in distributed processing systems should also cover delivery guarantees.
 
-Delivery guarantees are typically not considered in batch processing systems, because they always ensure atomicity between reading input data, processing, and delivery of results. In other words, it means that each record within a batch is processed exactly once. This is achieved by consecutive processing of batches, persistent storage for all intermediate results, and re-processing of all suspected failures. 
+Delivery guarantees are typically not considered in batch processing systems, because they always ensure atomicity between reading input data, processing, and delivery of results. In other words, it means that each record within a batch is processed~\eo. This is achieved by consecutive processing of batches, persistent storage for all intermediate results, and re-processing of all suspected failures. 
 A disadvantage of this approach is the impossibility to deliver any results whilt the processing is not complete.
 
 In contrast,   consistency guarantees   for  stream processing systems   are commonly declared in terms of delivery only. 
-A pitfall here is that terms like {\em exactly once} and {\em at least once} hide the fact that system state must also be consistent with input and output in order to achieve correct results. 
+A pitfall here is that terms like {\em \eo} and {\em \alo} hide the fact that system state must also be consistent with input and output in order to achieve correct results. 
 In absence of formal definitions such terms  can lead to an improper perception that state does not play an important role in consistency enforcement. 
 
 The problem shows up if some streaming elements do not commutate within an operation in a data flow. 
 Let us consider a data flow with an operation that concatenates input strings and delivers it after each item. 
 The system must restore its state  (a concatenation of strings in this example) after a failure. 
 A straightforward approach to restoring state is to replay missing input elements. 
-However, these elements can be reordered in an asynchronous distributed environment, potentially affecting    the   concatenation   of input items processed  exactly once but  inconsistent with output  released before the failure. 
+However, these elements can be reordered in an asynchronous distributed environment, potentially affecting    the   concatenation   of input items processed~\eo\ but  inconsistent with output  released before the failure. 
 For example, if input elements are strings $"a","b","c"$, and user have already received  $"a"$ and $"ab"$, it is expected that the current state is $"ab"$, and the next output element is $"abc"$. However, after recovery and state reprocessing, the current state can become $"ba"$ due to races. In this case, the next output element $"bac"$ will be inconsistent with the previously delivered elements $"a"$ and $"ab"$.  
 
 In real-life applications, concatenation can be faced in user behavior analysis, where the most recent actions are stored. 
@@ -28,7 +28,7 @@ This simple example illustrates that straightforward definitions of delivery gua
 While the state snapshotting protocol for distributed systems~\cite{Chandy:1985:DSD:214451.214456} was adopted for streaming systems~\cite{2015arXiv150608603C}, to the best of our knowledge, there are no formal definitions of delivery guarantees and consistent results. 
 In the next  section, we introduce  a formal framework that allows us to define delivery guarantees with aware of the system state, data producers, and data consumers. 
 %Using this framework we demonstrate in details how delivery guarantees are implemented in state-of-the-art stream processing systems. 
-We also reveal an approach to exactly once implementation with low performance overhead. 
+We also reveal an approach to~\eo\ implementation with low performance overhead. 
 
 
 \
