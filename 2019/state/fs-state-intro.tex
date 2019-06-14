@@ -16,9 +16,9 @@ State-of-the-art stream processing systems, such as Flink \cite{carbone2015apach
 One of the most challenging tasks for streaming systems is to provide guarantees on data processing. 
 Streaming systems must release output elements before processing has finished because input data is assumed to be unbounded. 
 
-In distributed stream processing, consistency is usually described in terms of delivery guarantees: {\em at most once}, {\em at least once}, and {\em exactly once}~\cite{carbone2015apache}. 
+In distributed stream processing, consistency is usually described in terms of delivery guarantees: {\em at-most-once}, {\em at-least-once}, and {\em \eo}~\cite{carbone2015apache}. 
 These guarantees describe a contract regarding {\em which data} will be  processed and released in case of failures. 
-Exactly once is the strongest and the most valuable guarantee from the user perspective as it ensures that input elements are processed atomically and are not lost. These notions are seemingly simple but shadow  the dependency   of  an output item on the {\em system state} as well as on the  input item. 
+\Eo\ is the strongest and the most valuable guarantee from the user perspective as it ensures that input elements are processed atomically and are not lost. These notions are seemingly simple but shadow  the dependency   of  an output item on the {\em system state} as well as on the  input item. 
 Streaming systems face a need to recover computations consistently with previous input data, the current system state, and with the already delivered elements.
 This requirement makes failure recovery mechanisms somewhat complex. 
 %  The above implies that a system can process each element exactly once, but in practice, it can release completely invalid results due to inconsistencies in the state or in-flight elements.
@@ -32,10 +32,10 @@ Micro-batching engines like Storm Trident~\cite{apache:storm:trident} and Spark 
 Each block is atomically processed on each stage of a data flow  providing properties similar to batch processing. 
 %   The main downside of this approach is high latency, about a few seconds~\cite{7530084, 7474816}. 
 %Therefore,  it is clear that state-of-the-art systems are aware of the issues regarding exactly once, but pay performance price for their resolution.
-The price for exactly once delivery is a high latency  observed in these implementations (e.g.~\cite{7530084, 7474816}).
+The price for~\eo\ delivery is a high latency  observed in these implementations (e.g.~\cite{7530084, 7474816}).
 
 
-The huge gap between the notion of exactly once and the properties of its implementations indicates the lack of formalization. 
+The huge gap between the notion of~\eo\ and the properties of its implementations indicates the lack of formalization. 
 Misunderstandings of streaming delivery guarantees frequently cause debates and discussions~\cite{JerryPengStreamIO, PaperTrail}. Without a formal model, it is hard to observe similarities and distinctions between existing solutions and to recognize their limitations. In this work, we introduce a formal model of stream processing that captures delivery guarantees existing in most of the state-of-the-art systems.
 
 Another property that can be easily obtained in batch processing systems but is hard to achieve in streaming engines is {\em a determinism}. 
@@ -43,24 +43,24 @@ The determinism means that repeated runs of the system on the same data produce 
 
 % We demonstrate that determinism is tightly connected with the implementation of delivery guarantees. In a deterministic system, a state of a non-commutative operation can be reprocessed consistently with the previous output elements. Hence, there is no need to save the results of non-commutative operations before output delivery. This property opens a wide range for performance optimizations.
 
-In this work, we demonstrate that the property of determinism can mitigate an overhead on exactly once. 
-In order to prove the feasibility of efficient exactly once over determinism, we introduce  fault tolerance protocols on top of {\em drifting state} model~\cite{we2018adbis}. 
+In this work, we demonstrate that the property of determinism can mitigate an overhead on~\eo\. 
+In order to prove the feasibility of efficient~\eo\ over determinism, we introduce  fault tolerance protocols on top of {\em drifting state} model~\cite{we2018adbis}. 
 %  This optimistic technique provides determinism with low overhead. 
-We show that lightweight determinism together with the results of the formal inference provides for  exactly once for a negligible  cost.
+We show that lightweight determinism together with the results of the formal inference provides for~\eo\ for a negligible  cost.
 %   It is verified by the experiments on a realistic  problem.
 
 The contributions of this paper are the following: 
 \begin{itemize}
     \item Formal model of a distributed stream processing  and   a   definition of  delivery guarantees 
-    \item Demonstration that in non-deterministic systems providing exactly once, the lower bound of latency is the duration of state snapshotting
-    \item Techniques for lightweight implementation of exactly once guarantee on top of a deterministic engine
+    \item Demonstration that in non-deterministic systems providing~\eo\, the lower bound of latency is the duration of state snapshotting
+    \item Techniques for lightweight implementation of~\eo\ guarantee on top of a deterministic engine
     \item Study of the practical feasibility of the proposed approaches
 \end{itemize}
 
 The rest of the paper is structured as follows: 
 in section~\ref{fs-preliminaries} the notion of consistency applied to a stream processing is discussed, 
 we introduce our formal framework in section~\ref{fs-formalism}, 
-existing implementations of exactly once in terms of the proposed formal framework are described in section~\ref{fs-eo-impl}, 
-implementation details of exactly once over determinism are mentioned in section~\ref{fs-consistency-section}, 
+existing implementations of~\eo\ in terms of the proposed formal framework are described in section~\ref{fs-eo-impl}, 
+implementation details of~\eo\ over determinism are mentioned in section~\ref{fs-consistency-section}, 
 experiments that demonstrate the feasibility of the proposed concept are detailed in section~\ref{fs-experiments-seciton}, 
 and we discuss prior works on the topic in section~\ref{fs-related-seciton}. 
