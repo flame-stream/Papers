@@ -19,11 +19,11 @@ Streaming systems must release output elements before processing has finished be
 In distributed stream processing, consistency is usually described in terms of delivery guarantees: {\em at most once}, {\em at least once}, and {\em exactly once}~\cite{carbone2015apache}. 
 These guarantees describe a contract regarding {\em which data} will be  processed and released in case of failures. 
 Exactly once is the strongest and the most valuable guarantee from the user perspective as it ensures that input elements are processed atomically and are not lost. These notions are seemingly simple but shadow  the dependency   of  an output item on the {\em system state} as well as on the  input item. 
-This requirement makes failure recovery mechanisms more complex. 
 Streaming systems face a need to recover computations consistently with previous input data, the current system state, and with the already delivered elements.
+This requirement makes failure recovery mechanisms somewhat complex. 
 %  The above implies that a system can process each element exactly once, but in practice, it can release completely invalid results due to inconsistencies in the state or in-flight elements.
 
-This complicationm   is resolved  by most of the existing stream processing engines. 
+This complication is resolved  by most of the existing stream processing engines. 
 Flink ensures atomicity of  state updates and   delivery using a protocol based on distributed transactions. 
 %   This protocol prevents inconsistencies but leads to a significant latency increase. 
 Google MillWheel~\cite{Akidau:2013:MFS:2536222.2536229} enforces consistency between state and output elements by writing results of each operation to persistent external storage. 
@@ -51,13 +51,16 @@ We show that lightweight determinism together with the results of the formal inf
 
 The contributions of this paper are the following: 
 \begin{itemize}
-    \item Formalization of a distributed stream processing  and   a formal   definition of  delivery guarantees 
+    \item Formal model of a distributed stream processing  and   a   definition of  delivery guarantees 
     \item Demonstration that in non-deterministic systems providing exactly once, the lower bound of latency is the duration of state snapshotting
     \item Techniques for lightweight implementation of exactly once guarantee on top of a deterministic engine
     \item Study of the practical feasibility of the proposed approaches
 \end{itemize}
 
 The rest of the paper is structured as follows: 
-section~\ref{fs-preliminaries} recalls basic concepts of stream processing, we introduce our formal framework 
-in section~\ref{fs-formalism}, existing implementations of exactly once in terms of the proposed formal framework are described 
-in section~\ref{fs-eo-impl}, implementation details of exactly once over determinism are mentioned in section~\ref{fs-consistency-section}, experiments that demonstrate feasibility of the proposed concept are detailed in section~\ref{fs-experiments-seciton}, and we discuss prior works on the topic in section~\ref{fs-related-seciton}. 
+in section~\ref{fs-preliminaries} the notion of consistency applied to a stream processing is discussed, 
+we introduce our formal framework in section~\ref{fs-formalism}, 
+existing implementations of exactly once in terms of the proposed formal framework are described in section~\ref{fs-eo-impl}, 
+implementation details of exactly once over determinism are mentioned in section~\ref{fs-consistency-section}, 
+experiments that demonstrate the feasibility of the proposed concept are detailed in section~\ref{fs-experiments-seciton}, 
+and we discuss prior works on the topic in section~\ref{fs-related-seciton}. 
