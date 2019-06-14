@@ -2,12 +2,21 @@
 
 \label {fs-intro-seciton}
 
-Distributed batch processing systems, such as Google's MapReduce~\cite{Dean:2008:MSD:1327452.1327492}, Apache Hadoop~\cite{hadoop2009hadoop}, and Apache Spark~\cite{Zaharia:2016:ASU:3013530.2934664}, address a need to process vast amounts of data (e.g., Internet-scale). The fundamental idea behind them is to independently process large data blocks (batches) that are collected from static datasets. These engines are able to run in a massively parallel fashion on clusters consisting of thousands of commodity computational units. The main advantages of these systems are fault tolerance and scalability~\cite{borthakur2011apache}.
+Distributed batch processing systems, such as Google's MapReduce~\cite{Dean:2008:MSD:1327452.1327492}, Apache Hadoop~\cite{hadoop2009hadoop}, and Apache Spark~\cite{Zaharia:2016:ASU:3013530.2934664}, address a need to process vast amounts of data (e.g., Internet-scale). 
+The basic   idea behind them is to independently process large data blocks (batches) that are collected from static datasets. 
+%  These engines are able to run in a massively parallel fashion on clusters consisting of thousands of commodity computational units. 
+The main advantages of these systems are fault tolerance and scalability~\cite{borthakur2011apache} of massively parallel computations on commodity hardware.
 
-However, there are plenty of scenarios where processing results are most valuable at the time of data arrival, for example, IoT, news processing, financial analysis, anti-fraud, network monitoring, etc. Such problems cannot be directly addressed by classical MapReduce~\cite{Doulkeridis:2014:SLA:2628707.2628782}. State-of-the-art stream processing systems, such as Flink \cite{carbone2015apache}, Samza \cite{Noghabi:2017:SSS:3137765.3137770}, Storm \cite{apache:storm}, Spark Streaming~\cite{Zaharia:2012:DSE:2342763.2342773}, aim at filling this gap by introducing another computational models. 
-These systems receive a record or a set of records, updates internal state if any, and sends out new records. % можно выпилить
+However, there are plenty of scenarios where processing results are most valuable at the time of data arrival, for example, IoT, news processing, financial analysis, anti-fraud, network monitoring, etc. 
+Such problems cannot be directly addressed by classical MapReduce~\cite{Doulkeridis:2014:SLA:2628707.2628782}. 
+State-of-the-art stream processing systems, such as Flink \cite{carbone2015apache}, Samza \cite{Noghabi:2017:SSS:3137765.3137770}, Storm \cite{apache:storm}, Spark Streaming~\cite{Zaharia:2012:DSE:2342763.2342773},   provide a computational model addressing these needs.
+%   aim at filling this gap by introducing another computational models. 
+%  These systems receive a record or a set of records, updates internal state if any, and sends out new records. % можно выпилить
 
-One of the most challenging tasks for streaming systems is to provide guarantees on data processing. Streaming systems must release output elements before processing has finished because input data is assumed to be unbounded. This requirement makes failure recovery mechanisms more complex. Streaming systems face a need to recover computations consistently with previous input data, the current system state, and with the elements which have been already delivered to a consumer. 
+One of the most challenging tasks for streaming systems is to provide guarantees on data processing. 
+Streaming systems must release output elements before processing has finished because input data is assumed to be unbounded. 
+This requirement makes failure recovery mechanisms more complex. 
+Streaming systems face a need to recover computations consistently with previous input data, the current system state, and with the elements which have been already delivered to a consumer. 
 
 In distributed stream processing, consistency is usually described in terms of delivery guarantees: {\em at most once}, {\em at least once}, and {\em exactly once}~\cite{carbone2015apache}. These guarantees describe a contract regarding {\em which data} will be eventually processed and released in case of failures. Exactly once is the strongest and the most valuable guarantee from the user perspective because it ensures that input elements are processed atomically and are not lost. These notions are seemingly simple but have the fact that an output item may depend on the {\em system state} as well as on the corresponding input item. The above implies that a system can process each element exactly once, but in practice, it can release completely invalid results due to inconsistencies in the state or in-flight elements.
 
