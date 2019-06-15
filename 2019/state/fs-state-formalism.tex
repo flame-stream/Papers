@@ -88,24 +88,51 @@ We allow using output elements in system transformations because we suppose that
     \item Stream processing systems aim at minimizing information which is needed to recover processing, but their optimizations do not directly affect consistency. The notion of $F(A_\tau,B_\tau)$ makes our concept general enough to describe any streaming engine while being independent of a specific implementation of $F$.
 \end{itemize}
 
-Let us illustrate the proposed model by an example. Assume that a physical graph consists of a single operation that concatenates strings from multiple asynchronous input channels. In this case, set $\Gamma$ contains all possible characters, and binary relation $D$ contains all possible options for their concatenation. Table~\ref{concat_example} demonstrates a potential execution of the defined graph with strings $"a","b","c"$ as input elements. In this example, the first processed element is $"c"$, but it can be $"a"$ or $"b"$ as well due to the randomness provided by asynchronous channels. The final state of concatenation is $"cab"$, but this result also can vary from run to run. Wall time is indicated to highlight that races may occur in a data flow.
+Let us illustrate the proposed model by an example. Assume that a physical graph consists of a single windowed operation (window = 2) that concatenates strings from multiple asynchronous input channels. This graph is illustrated in Figure~\ref{concat}: $x \in W$ indicates input channels, $y\in W$ denotes output channel, and $s \in W$ is the state of the operation. Set $\Gamma$ contains all possible characters, and binary relation $D$ contains all possible options for their concatenation. Recovery function $F$ reprocess all input elements since the last snapshot. Table~\ref{concat_example} demonstrates a potential execution of the defined graph with strings $"a","c","b","d","e"$ as input elements. Concatenation operation receives a random element from its input due to asynchronous channels. Wall time is indicated to highlight that races may occur in a data flow. Note that step {\em snapshot} can be considred as an ordinary output step. Red lines emphasize recovery process after failure. 
+
+As one can see, system reaches exactly the same state after recovery. Eventually, end-user receives the output element {\em be} that is expected within such execution. Further we demonstrate that simple reprocessing of missed input elements can cause significant inconsistencies of results.
+
+% In this example, the first processed element is $"c"$, but it can be $"a"$ or $"b"$ as well due to the randomness provided by asynchronous channels. The final state of concatenation is $"cab"$, but this result also can vary from run to run. Wall time is indicated to highlight that races may occur in a data flow.
 
 % Let strings $"a","b","c"$ enter the system, e.g. $"a"\in A_\tau, W_\tau$, $"b" \in A_{\tau+1},W_{\tau+1}$, and $"c" \in A_{\tau+2},W_{\tau+2}$. We are not aware which of these strings will be processed first due to asynchronous input channels, therefore, each of them can arrive at the operation before others with some probability. Assume that the first one is $"c"$. In this case, $W_{\tau+3}$ contains elements $"a","b","c"$. Element $"c"$ is still presented in the working set because it becomes the state of the concatenation. After that, element $c$ can also be delivered to end-user as a partial result of the concatenation, so $"c" \in B_{\tau+4}$. If the next arrived element is $"b"$, then $W_{\tau+5}$ consists of $"a"$ and $"cb"$, where $"cb"$ is the current state.
 
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.48\textwidth]{pics/concat}
+  \caption{Strings concatenation physical graph}
+  \label{concat}
+\end{figure}
+
 \begin{table}[htbp]
 \caption{String concatenation data flow}
-\begin{tabular}{cccccc}
-wall time & $\tau$ & $a\in A$ & $W (s=state)$ & $b \in B$ & step  \\
+\begin{tabular}{c|c|c|c|c|c|c|c}
+wall\\ time & $\tau$& $a\in A$  &$x\in W$& $s\in W$ & $y\in W$ & $b \in B$ & step  \\
 \hline
-1 & 1 & $a$ & a & & input    \\
-1 & 2 & $b$ & $a,b$ &  & input      \\
-1 & 3 & $c$ & $a,b,c$ &  & input     \\
-2 & 4 &  & $a,b,c^{s},c$ &  & transform     \\
-2 & 5 &  & $a,b,c^{s}$ & c  & output     \\
-3 & 6 &  & $b,ca^{s},ca$ &   & transform     \\
-3 & 7 &  & $b,ca^{s}$ & ca  & output     \\
-4 & 8 &  & $cab^{s},cab$ &   & transform     \\
-4 & 9 &  & $cab^{s}$ & cab  & output     \\
+1   &   1   &   a   &   a           &           &       &           &   input \\
+1   &   2   &   c   &   a,c         &           &       &           &   input \\
+1   &   3   &       &    c          &   [a]     &    a  &           &   transform \\
+1   &   4   &       &   c           &   [a]     &       &   a       &   output \\
+1   &   5   &       &               &   [a,c]   &   ac  &           &   transform \\
+1   &   6   &       &               &   [a,c]   &       &   ac       &   output \\
+1   &   7   &       &               &   [a,c]   &       &   [a,c]   &   snapshot \\
+2   &   8   &   b    &   b          &   [a,c]   &       &           &   input \\
+2   &   9   &   d    &   b,d        &   [a,c]   &       &           &   input \\
+2   &   10   &       &   b          &   [c,d]   &  cd   &           &   transform \\
+2   &   11   &       &   b          &   [c,d]   &       &      cd     &   output \\
+2   &   12   &       &              &   [d,b]    &  db   &           &   transform \\
+2   &   13   &       &              &   {\bf [d,b]}    &       &      {\bf db}     &   output \\
+\arrayrulecolor{red}\hline
+3   &   14   &       &               &   [a,c]         &       &           &   recovery \\
+3   &   14   &   b   &   b           &   [a,c]         &       &           &   \\
+3   &   14   &   d   &   b,d         &   [a,c]         &       &           &   \\
+3   &   14   &       &   b           &   [c,d]         &       &           &   \\
+3   &   14   &       &   b           &   [c,d]         &       &           &   \\
+3   &   14   &       &               &   [d,b]         &       &           &    \\
+3   &   14   &       &               &   {\bf [d,b]}   &       &           &    \\
+\arrayrulecolor{red}\hline
+4   &   15   &  e    &   e           &   [d,b]   &      &           &   input \\
+4   &   16   &       &              &   [b,e]   &   be    &          &   transform \\
+4   &   17   &       &              &   [b,e]   &       &   {\bf be}       &   output \\
 \end{tabular}
 \label{concat_example}
 \end{table}
@@ -148,33 +175,58 @@ with all previous input and output elements $A_\tau$ and $B_\tau$ if the probabi
 
 The reference recovery function allows us to express the notion of valid execution in terms of correspondence between input and output elements. In most real cases, input and output elements are the only data that can be observed by end-user. In real distributed stream processing systems, failures and recoveries can corrupt the output, despite the fact, that in terms of a naive definition of delivery guarantees, all elements are processed~\eo. 
 
-Let us demonstrate it by the already mentioned example with a physical graph consisted of a single operation that concatenates input strings from multiple asynchronous input channels. Let $F$ set reprocess input elements from the very beginning that seems like a correct straightforward approach for restoring the state (concatenation obtained before failure). Assume that the system does not release output elements during reprocessing to avoid duplicates. 
+The problem here is that elements can be concatenated in a different order on recovery. Let us demonstrate it by the already mentioned example demonstrated in Figure~\ref{concat} and Table~\ref{concat_example}. During recovery system may reach concatenation state $s=[b,d]$ at $\tau=15$ rather than $s=[d,b]$ due to asynchronous input. In this case, output at $\tau=17$ becomes {\em de} instead of {\em be}. However, {\em de} is inconsistent with the previous output, because element with prefix {\em d} has already been released at $\tau=13$. It is important to note that all input elements within the example are applied to concatenation state {\em \eo}. This simple example demonstrates that informal definition of\eo\ does not guarantee the consistency of output elements.
 
-The problem here is that elements can be concatenated in a different order on recovery. This example is shown in Table~\ref{inconsistency_example}. Before the failure, the system reached concatenation state $"ca"$, but there is no guarantee that a straightforward recovery approach leads to the same state due to asynchronous input. Instead of $"ca"$, state may become $"ac"$. However, output element $"ca"$ has been already released and it is expected that the next output starts with the prefix $"ca"$. It is important to note that even if the next output element is $"acb"$, that is inconsistent with previously released items, all input elements are applied to concatenation state {\em ~\eo}. This simple example demonstrates that a simple definition of~\eo\ does not guarantee the consistency of output elements.
 
-\begin{table}[htbp]
-\caption{Output inconsistency due to straightforward recovery}
-\begin{tabular}{cccccc}
-wall time & $\tau$ & $a\in A$ & $W (s=state)$ & $b \in B$ & step  \\
-\hline
-1 & 1 & $a$ & a & & input    \\
-1 & 2 & $c$ & $a,c$ &  & input     \\
-2 & 3 &  & $a,c^{s},c$ &  & transform     \\
-2 & 4 &  & $a,c^{s}$ & c  & output     \\
-3 & 5 &  & $ca^{s},ca$ &   & transform     \\
-3 & 6 &  & $ca^{s}$ & {\bf ca}  & output     \\
-\arrayrulecolor{red}\hline
-4 & 7 & $a$ & a & & recovery    \\
-4 & 7 & $c$ & $a,c$ &  &       \\
-5 & 7 &  & $c,a^{s}$ &  &     \\
-6 & 7 &  & $ac^{s}$ &   &     \\
-\arrayrulecolor{red}\hline
-7 & 8 & $b$ & $b,ac^{s}$ &  & input      \\
-8 & 5 &  & $acb^{s},acb$ &   & transform     \\
-8 & 6 &  & $acb^{s}$ & {\bf acb}  & output     \\
-\end{tabular}
-\label{inconsistency_example}
-\end{table}
+% The problem here is that elements can be concatenated in a different order on recovery. This example is shown in Table~\ref{inconsistency_example}. Before the failure, the system reached concatenation state $"ca"$, but there is no guarantee that a straightforward recovery approach leads to the same state due to asynchronous input. Instead of $"ca"$, state may become $"ac"$. However, output element $"ca"$ has been already released and it is expected that the next output starts with the prefix $"ca"$. It is important to note that even if the next output element is $"acb"$, that is inconsistent with previously released items, all input elements are applied to concatenation state {\em ~\eo}. This simple example demonstrates that a simple definition of~\eo\ does not guarantee the consistency of output elements.
+
+% \begin{table}[htbp]
+% \caption{Output inconsistency due to straightforward recovery}
+% \begin{tabular}{cccccc}
+% wall time & $\tau$ & $a\in A$ & $W (s=state)$ & $b \in B$ & step  \\
+% \hline
+% 1 & 1 & $a$ & a & & input    \\
+% 1 & 2 & $c$ & $a,c$ &  & input     \\
+% 2 & 3 &  & $a,c^{s},c$ &  & transform     \\
+% 2 & 4 &  & $a,c^{s}$ & c  & output     \\
+% 3 & 5 &  & $ca^{s},ca$ &   & transform     \\
+% 3 & 6 &  & $ca^{s}$ & {\bf ca}  & output     \\
+% \arrayrulecolor{red}\hline
+% 4 & 7 & $a$ & a & & recovery    \\
+% 4 & 7 & $c$ & $a,c$ &  &       \\
+% 5 & 7 &  & $c,a^{s}$ &  &     \\
+% 6 & 7 &  & $ac^{s}$ &   &     \\
+% \arrayrulecolor{red}\hline
+% 7 & 8 & $b$ & $b,ac^{s}$ &  & input      \\
+% 8 & 5 &  & $acb^{s},acb$ &   & transform     \\
+% 8 & 6 &  & $acb^{s}$ & {\bf acb}  & output     \\
+% \end{tabular}
+% \label{inconsistency_example}
+% \end{table}
+
+% \begin{table}[htbp]
+% \caption{Output inconsistency due to straightforward recovery}
+% \begin{tabular}{cccccc}
+% wall\\ time & $\tau$ & $a\in A$ & $W$ & $b \in B$ & step  \\
+% \hline
+% 1 & 1 & $a_{in}$ & $a_{in}$ & & input    \\
+% 1 & 2 & $c_{in}$ & $a_{in},c_{in}$ &  & input     \\
+% 2 & 3 &  & $a_{in},(c)_{state},(c)_{out}$ &  & transform     \\
+% 2 & 4 &  & $a_{in},(c)_{state}$ & $(c)_{out}$  & output     \\
+% 3 & 5 &  & $(ca)_{state},(ca)_{out}$ &   & transform     \\
+% 3 & 6 &  & $(ca)_{state}$ & $\mathbf{(ca)_{out}}$  & output     \\
+% \arrayrulecolor{red}\hline
+% 4 & 7 & $a_{in}$ & $a_{in}$ & & recovery    \\
+% 4 & 7 & $c_{in}$ & $a_{in},c_{in}$ &  &      \\
+% 5 & 7 &  & $c_{in},(a)_{state}$ &  &     \\
+% 6 & 7 &  & $(ac)_{state}$ &   &     \\
+% \arrayrulecolor{red}\hline
+% 7 & 8 & $b_{in}$ & $b_{in},(ac)_{state}$ &  & input      \\
+% 9 & 9 &  & $(acb)_{state},(acb)_{out}$ &   & transform     \\
+% 9 & 10 &  & $(acb)_{state}$ & $\mathbf{(acb)_{out}}$  & output     \\
+% \end{tabular}
+% \label{inconsistency_example}
+% \end{table}
 
 % Input elements: $"a","b","c","d","e"$
 
@@ -220,7 +272,7 @@ $\exists{A^{*}_{\tau}\subseteq{2^{A_{\tau}}}}$ such that \\
 $\forall{\tau \in \mathbb{N}, {b_{\tau+1} \in 2^{\Gamma}}}: P(b_{\tau+1}|A_{\tau},B_\tau,F)>0 \Rightarrow \\ P(b_{\tau+1}|A^{*}_{\tau},B_\tau,F^{*})>0$.
 \end{definition}
 
-\Eo\ states that observed results cannot be distinguished from one of the possible results produced by a system with a reference recovery function. It means that even if data flow contains races and some elements do not commute, output consistency will be preserved. Looking back to the example illustrated in Table~\ref{inconsistency_example}, our formal definition of~\eo\ ensures that after recovery system reaches state $"ca"$, because this state has already influenced output elements.
+\Eo\ states that observed results cannot be distinguished from one of the possible results produced by a system with a reference recovery function. It means that even if data flow contains races and some elements do not commute, output consistency will be preserved. Looking back to the example illustrated in Table~\ref{concat_example}, our formal definition of~\eo\ ensures that after recovery system reaches state $[d,b]$, not $[b,d]$, because this state has already influenced output elements.
 
 \Amo\ and~\alo\ guarantees are the relaxations of~\eo. The results within these guarantees can be obtained without failures, but with the modification of the input. \Alo\ can be reproduced if the input contains duplicated items. \Amo\ can be achieved with a reference recovery if some input elements are missed. It is important to note, that regarding~\amo\ guarantee we require an input element to be processed atomically with all its derivatives or not processed at all. To the best of our knowledge, none of the stream processing engines supports~\amo\ guarantee, so we cannot verify the relevancy of this assumption. It is easy to provide~\amo\ by producing no output at all but if the output is presented,\amo\ enforcement becomes much more difficult.  
 
@@ -235,7 +287,7 @@ if\\
 $\exists (x,y), s_1, s_2 \in \Gamma, s_1 \neq s_2: \\ ((x,y),s_1)\in D, \\ ((y,x),s_1)\notin D, \\ ((y,x),s_2)\in D$.
 \end{definition}
 
-The are many non-commutative operations that are commonly used in practice: concatenation, matrix multiplication, cross product, etc. Hence, general-purpose stream processing systems should support them. The problem with such operations we demonstrated in Table~\ref{inconsistency_example}: simple reprocessing of missing elements in case of failure may lead to results inconsistencies.
+The are many non-commutative operations that are commonly used in practice: concatenation, matrix multiplication, cross product, etc. Hence, general-purpose stream processing systems should support them. The problem with such operations we demonstrated above: simple reprocessing of missing elements in case of failure may lead to results inconsistencies.
 
 \begin{definition}{System is deterministic}
 if\\ 
