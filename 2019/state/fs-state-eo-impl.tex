@@ -62,5 +62,5 @@ Hence, as it is shown in Figure~\ref{spark_flink},
  it is guaranteed that $\tau_1=\tau_2$. 
 This ensures that the necessary condition of~\eo\ from Theorem~\ref{necessary_conditions} is satisfied. 
 Such a method is quite similar to the micro-batching technique used in Spark. 
-The differences are: elements are buffered after their processing is done. and  multiple epochs can be processed simultaneously. 
+The differences are: elements are buffered after their processing is done and  multiple epochs can be processed simultaneously. 
 %  These facts allow Flink to achieve lower latency in comparison with micro-batching, because at the end of an epoch, most of the elements which belong to this epoch, has already been processed.
