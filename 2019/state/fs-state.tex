@@ -112,7 +112,14 @@ borisnov@acm.org}
 \maketitle
 
 \begin{abstract}
-Guarantees on data provided by state-of-the-art stream processing systems are defined in terms of so-called delivery guarantees. Exactly-once is the strongest one and the most desirable for end-user. However, there are several issues regarding this concept. Mechanisms that are commonly used to enforce~\eo\ produce significant performance overhead. Besides, the notion of~\eo\ is informal and does not capture all properties that provide stream processing systems supporting this guarantee. In this paper, we introduce a formal framework that allows us to define streaming guarantees in a more regular way. We demonstrate that the properties of delivery, consistency, and determinism are tightly connected within distributed stream processing. We also show that having lightweight determinism it is possible to provide~\eo\ with almost no performance overhead. Experiments show that the proposed approach can significantly outperform an alternative industrial solution.
+Consistency requirements for state-of-the-art stream processing systems are defined in terms of delivery guarantees. 
+Exactly-once is the strongest one and the most desirable for end-user. 
+However, there are several issues regarding this concept. 
+ Commonly used techniques that enforce \eo\ produce significant performance overhead. 
+Besides, the notion of \eo\ is not formally defined and does not capture all properties that provide stream processing systems supporting this guarantee. 
+In this paper, we introduce a formal framework that allows us to define streaming guarantees more regularly. 
+We demonstrate that the properties of delivery, consistency, and determinism are tightly connected within distributed stream processing. 
+We also show that having lightweight determinism, it is possible to provide \eo\ with almost no performance overhead. Experiments show that the proposed approach can significantly outperform alternative industrial solutions.
 \end{abstract}
 
 \section {Introduction}
