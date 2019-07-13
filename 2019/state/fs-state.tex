@@ -53,12 +53,12 @@
 \newcommand{\PicScale}{0.5}
 \newcommand {\FlameStream} {FlameStream}
 \newcommand {\Acker} {trAcker}
-\newcommand {\eo} {exactly-once}
-\newcommand {\Eo} {Exactly-once}
-\newcommand {\alo} {at-least-once}
-\newcommand {\Alo} {At-least-once}
-\newcommand {\amo} {at-most-once}
-\newcommand {\Amo} {At-most-once}
+% \newcommand {\eo} {exactly-once}
+% \newcommand {\Eo} {Exactly-once}
+% \newcommand {\alo} {at-least-once}
+% \newcommand {\Alo} {At-least-once}
+% \newcommand {\amo} {at-most-once}
+% \newcommand {\Amo} {At-most-once}
 
 \begin{document}
 
@@ -115,11 +115,11 @@ borisnov@acm.org}
 Consistency requirements for state-of-the-art stream processing systems are defined in terms of delivery guarantees. 
 Exactly-once is the strongest one and the most desirable for end-user. 
 However, there are several issues regarding this concept. 
- Commonly used techniques that enforce \eo\ produce significant performance overhead. 
-Besides, the notion of \eo\ is not formally defined and does not capture all properties that provide stream processing systems supporting this guarantee. 
+ Commonly used techniques that enforce exactly-once produce significant performance overhead. 
+Besides, the notion of exactly-once is not formally defined and does not capture all properties that provide stream processing systems supporting this guarantee. 
 In this paper, we introduce a formal framework that allows us to define streaming guarantees more regularly. 
 We demonstrate that the properties of delivery, consistency, and determinism are tightly connected within distributed stream processing. 
-We also show that having lightweight determinism, it is possible to provide \eo\ with almost no performance overhead. Experiments show that the proposed approach can significantly outperform alternative industrial solutions.
+We also show that having lightweight determinism, it is possible to provide exactly-once with almost no performance overhead. Experiments show that the proposed approach can significantly outperform alternative industrial solutions.
 \end{abstract}
 
 \section {Introduction}

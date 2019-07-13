@@ -2,9 +2,9 @@
 
 \label {fs-related-seciton}
 
-Techniques for providing~\eo~\cite{Carbone:2017:SMA:3137765.3137777, Akidau:2013:MFS:2536222.2536229, Zaharia:2012:DSE:2342763.2342773} are discussed   in details in sections~\ref{fs-intro-seciton} and~\ref{fs-eo-impl}. Many prior works in the field of stream processing do not consider~\eo\ maintenance. 
+Techniques for providing exactly-once~\cite{Carbone:2017:SMA:3137765.3137777, Akidau:2013:MFS:2536222.2536229, Zaharia:2012:DSE:2342763.2342773} are discussed   in details in sections~\ref{fs-intro-seciton} and~\ref{fs-eo-impl}. Many prior works in the field of stream processing do not consider exactly-once maintenance. 
 For instance, Aurora~\cite{Abadi:2003:ANM:950481.950485} and Borealis~\cite{abadi2005design} do not provide any guarantees on data at all. Some other systems provide only partial consistency. Apache Storm~\cite{apache:storm} supports message tracking mechanism that prevents the loss of data. 
-However,\eo\ semantics is not provided, because duplicates are still possible. Twitter Heron, that was presented as the next generation of Apache Storm~\cite{Kulkarni:2015:THS:2723372.2742788}, does not provide for~\eo\ as well. 
+However, exactly-once semantics is not provided, because duplicates are still possible. Twitter Heron, that was presented as the next generation of Apache Storm~\cite{Kulkarni:2015:THS:2723372.2742788}, does not provide for exactly-once as well. 
 Samza~\cite{Noghabi:2017:SSS:3137765.3137770} also implements fairly similar to Storm model and has the same consistency guarantees.
 
 Prior works on stream processing formalization concentrate on operations specification rather than delivery guarantees. Logical foundation for specifying streaming computations is discussed in~\cite{alur2018interfaces}. Declarative algebraic notations for the streaming queries are introduced in~\cite{halle2014formalization}. Another direction in streaming formalization is designing frameworks to define operations semantics~\cite{beck2018lars}.

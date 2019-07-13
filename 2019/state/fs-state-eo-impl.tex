@@ -2,7 +2,7 @@
 
 
 %   The formal model developed above can be used for the analysis of several systems. 
-%  In the previous section, we introduced the formal model that allows regularly describing delivery guarantees and proposed necessary and sufficient conditions of~\eo. In this section, we demonstrate how implementations of~\eo\ in state-of-the-art distributed stream processing systems satisfy the necessary condition of~\eo. 
+%  In the previous section, we introduced the formal model that allows regularly describing delivery guarantees and proposed necessary and sufficient conditions of~ exactly-once. In this section, we demonstrate how implementations of exactly-once in state-of-the-art distributed stream processing systems satisfy the necessary condition of~ exactly-once. 
 
 \subsection{MillWheel}
 
@@ -11,7 +11,7 @@
  Thus each streaming element is saved before it may influence other elements or operation states. 
  Recovery function $F$ resends all saved records in case of failure, and each operation deduplicates input that has been already processed.
 
-The necessary condition of~\eo\ from Theorem~\ref{necessary_conditions} claims that each element $s \in \Gamma$ obtained through a non-commutative operation must be persistently saved before any other element $b_{\tau} \in Cl_D(s)$ that depends on $s$ is released. Strong productions mechanism ensures that this condition is satisfied, i.e., if some element $b_\tau$ is released, it is guaranteed that its dependencies were released earlier (saved to persistent storage). The idea of this method is shown in Figure~\ref{millwheel}. It demonstrates that in MillWheel, all elements become recoverable, so there is no need to reprocess them again from an input item in case of failure. 
+The necessary condition of exactly-once from Theorem~\ref{necessary_conditions} claims that each element $s \in \Gamma$ obtained through a non-commutative operation must be persistently saved before any other element $b_{\tau} \in Cl_D(s)$ that depends on $s$ is released. Strong productions mechanism ensures that this condition is satisfied, i.e., if some element $b_\tau$ is released, it is guaranteed that its dependencies were released earlier (saved to persistent storage). The idea of this method is shown in Figure~\ref{millwheel}. It demonstrates that in MillWheel, all elements become recoverable, so there is no need to reprocess them again from an input item in case of failure. 
 
 \begin{figure}[htbp]
   \centering
@@ -20,7 +20,7 @@ The necessary condition of~\eo\ from Theorem~\ref{necessary_conditions} claims t
   \label{millwheel}
 \end{figure}
 
-Such behavior is also called {\em effective determinism}~\cite{akidau2018streaming} because computations become deterministic until the persistent storage is cleared. Strong productions method guarantees that even if many possible results of a non-commutative operation may be obtained due to races, only one of them is computed and saved. The price for such~\eo\ enforcement is an overhead on external writes on each transformation in a physical graph.
+Such behavior is also called {\em effective determinism}~\cite{akidau2018streaming} because computations become deterministic until the persistent storage is cleared. Strong productions method guarantees that even if many possible results of a non-commutative operation may be obtained due to races, only one of them is computed and saved. The price for such exactly-once enforcement is an overhead on external writes on each transformation in a physical graph.
 
 \subsection{Spark streaming}
 
@@ -28,7 +28,7 @@ In Spark, the  $\Gamma$   is a set of all possible small collections of input it
 Dependency relation on the power set of $\Gamma$ is also defined using a directed acyclic graph of user operations. 
 Spark inherits main properties of batch processing systems:  each new stage of computations is started only after the previous one is completed and recovery function $F$ starts reprocessing of a micro-batch from the beginning in case of failure.
 
-The condition for~\eo\ from Theorem~\ref{necessary_conditions} is satisfied because all elements within the micro-batch are released atomically. Elements from various micro-batches can interact only through persistently stored state. 
+The condition for exactly-once from Theorem~\ref{necessary_conditions} is satisfied because all elements within the micro-batch are released atomically. Elements from various micro-batches can interact only through persistently stored state. 
 Output elements that are ready to be delivered to the end-user must wait until the whole micro-batch is completely processed. 
 Therefore, if two output elements $b_{\tau_1},b_{\tau_2} \in Cl_D(s)$ depend on a single item $s$, it is guaranteed that $\tau_1=\tau_2$. The illustration of this behavior is shown in Figure~\ref{spark_flink}. 
  
@@ -60,7 +60,7 @@ This mechanism ensures that all elements within an epoch are processed atomicall
 Hence, as it is shown in Figure~\ref{spark_flink},
  if two output elements $b_{\tau_1},b_{\tau_2} \in Cl_D(s)$ depend on a single item $s$, 
  it is guaranteed that $\tau_1=\tau_2$. 
-This ensures that the necessary condition of~\eo\ from Theorem~\ref{necessary_conditions} is satisfied. 
+This ensures that the necessary condition of exactly-once from Theorem~\ref{necessary_conditions} is satisfied. 
 Such a method is quite similar to the micro-batching technique used in Spark. 
 The differences are: elements are buffered after their processing is done and  multiple epochs can be processed simultaneously. 
 %  These facts allow Flink to achieve lower latency in comparison with micro-batching, because at the end of an epoch, most of the elements which belong to this epoch, has already been processed.

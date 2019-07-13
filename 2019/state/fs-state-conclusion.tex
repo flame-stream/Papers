@@ -2,24 +2,24 @@
 
 \label {fs-conclusion-seciton}
 
-We introduced a formal, conceptual framework for modeling consistency properties for any stream processing system. We demonstrated how the behavior of state-of-the-art research and industrial systems could be described in terms of the proposed framework. It was shown that the property of determinism is tightly connected with the concept of of~\eo. We proved that non-deterministic systems must persistently save a state of non-commutative operations before output delivery in order to achieve~\eo. Most of the state-of-the-art stream processing systems use one of the following approaches to overcome this problem: 
+We introduced a formal, conceptual framework for modeling consistency properties for any stream processing system. We demonstrated how the behavior of state-of-the-art research and industrial systems could be described in terms of the proposed framework. It was shown that the property of determinism is tightly connected with the concept of of exactly-once. We proved that non-deterministic systems must persistently save a state of non-commutative operations before output delivery in order to achieve exactly-once. Most of the state-of-the-art stream processing systems use one of the following approaches to overcome this problem: 
 
 \begin{itemize}
-    \item Inherit~\eo\ from batch processing using small-sized batches (micro-batching)
+    \item Inherit exactly-once from batch processing using small-sized batches (micro-batching)
     \item Apply distributed transaction control protocols which guarantee that states are saved before delivery of elements affected by these states
     \item Write results of an operation to external storage on each input element
 \end{itemize}
 
 All these methods experience difficulties with working under low-latency requirements (less than a second). In the first case, latency cannot be lower than the batching period, in the second case, the distributed two-phase commit may result in a significant increase of latency, while in the third case latency is bounded below by the duration of external writes.
 
-Using our formal inference, we designed mechanisms for achieving~\eo\ on top of {\em drifting state} technique introduced in our previous work~\cite{we2018adbis}. Drifting state provides inexpensive determinism due to optimistic nature and low overhead on a single buffer per any stateful data flow. Because of the determinism, the protocols provide the following features:
+Using our formal inference, we designed mechanisms for achieving exactly-once on top of {\em drifting state} technique introduced in our previous work~\cite{we2018adbis}. Drifting state provides inexpensive determinism due to optimistic nature and low overhead on a single buffer per any stateful data flow. Because of the determinism, the protocols provide the following features:
 
 \begin{itemize}
     \item Elements are processed in a pure streaming manner without input buffering
     \item The processes of business-logic computations, state snapshotting and delivery of output items work asynchronously and independently
-    \item \Eo\ is preserved
+    \item Exactly-once is preserved
 \end{itemize}
 
-We implemented the prototype of the proposed technique to examine its performance. Our experiments demonstrated that the introduced protocols for fault tolerance are scalable and provide remarkably low overhead within different computational layouts. Furthermore, the comparison with the industrial stream processing solution indicated that our prototype could provide significantly lower latency under~\eo\ requirement.
+We implemented the prototype of the proposed technique to examine its performance. Our experiments demonstrated that the introduced protocols for fault tolerance are scalable and provide remarkably low overhead within different computational layouts. Furthermore, the comparison with the industrial stream processing solution indicated that our prototype could provide significantly lower latency under exactly-once requirement.
 
 % Regarding future work, we plan to design a distributed version of ~\Acker\ and to adopt the drifting state for iterative stream processing. This task seems natural for our model because it already handles cycles in a data flow. 
