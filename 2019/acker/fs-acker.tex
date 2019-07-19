@@ -13,6 +13,8 @@
 
 \newcommand{\PicScale}{0.5}
 \newcommand {\FlameStream} {FlameStream}
+\newcommand {\tracker} {trAcker}
+\newcommand {\acker} {Acker}
 \begin{document}
 
 \copyrightyear{2019} 
@@ -24,23 +26,46 @@
 % \acmDOI{10.1145/3206333.3209273}
 % \acmISBN{978-1-4503-5703-6/18/06}
 
-\title {Dependency Tracking in Cyclic Streaming Dataflows}
+\title {Dependency Tracking in Streaming Dataflows}
 
-% \author{  Igor E. Kuralenok,$^1$     Artem Trofimov,$^ {1,2}$    Nikita Marshalkin,$^ {1,2}$   and  Boris Novikov$^ {1,2}$ }
-% \affiliation{%
-% \institution{$^1$JetBrains Research}
-%   \city{St. Petersburg} 
-%   \country{Russia}
-% }
-% \affiliation{%
-% \institution{$^2$Saint Petersburg State University}
-%   \city{St. Petersburg} 
-%   \country{Russia}
-% }
-% \email{\string{ikuralenok, trofimov9artem, marnikitta\string}@gmail.com, borisnov@acm.org}
+\author{Nikita Sokolov}
+\affiliation{%
+  \institution{ITMO University}
+  \city{Saint Petersburg}
+  \country{Russia}}
+\email{faucct@gmail.com}
+
+\author{Artem Trofimov}
+\affiliation{%
+  \institution{Yandex}
+  \city{Saint Petersburg}
+  \country{Russia}}
+\email{tomato@yandex-team.ru}
+
+\author{Igor Kuralenok}
+\affiliation{%
+  \institution{Yandex}
+  \city{Saint Petersburg}
+  \country{Russia}}
+\email{solar@yandex-team.ru}
+
+\author{Nikita Marshalkin}
+\affiliation{%
+  \institution{VK}
+  \city{Saint Petersburg}
+  \country{Russia}}
+\email{n.marshalkin@corp.vk.com}
+
+\author{Boris Novikov}
+\affiliation{%
+  \institution{National Research University Higher School of Economics}
+  \city{Saint Petersburg}
+  \country{Russia}}
+\email{borisnov@acm.org}
 
 \begin{abstract}
-\end {abstract}
+The majority of state-of-the-art stream processing systems faces a problem of obtaining notifications when the specific set of input elements have been already applied to all operators in a dataflow. Such notifications are commonly used to take consistent state snapshots or to release all descendants of an input element atomically and preserve exactly-once delivery guarantee. To generate these notifications, there is a need to track dependencies between input and their descendants and to inform when all descendants have been completely processed. In this work, we propose a method for tracking such dependencies between streaming elements that can be applied for both cyclic (iterative) and acyclic dataflows. We demonstrate that our technique produces low latency and throughput overhead within various setups and can significantly outperform methods employed by state-of-the-art stream processing systems.
+\end{abstract}
 
 % \keywords{Data streams, exactly-once, drifting state, optimistic OOP}
 

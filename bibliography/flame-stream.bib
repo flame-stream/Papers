@@ -1664,4 +1664,22 @@ month={June},}
   bibsource = {dblp computer science bibliography, http://dblp.org}
 }
 
+@inproceedings{Begoli:2019:OSR:3299869.3314040,
+ author = {Begoli, Edmon and Akidau, Tyler and Hueske, Fabian and Hyde, Julian and Knight, Kathryn and Knowles, Kenneth},
+ title = {One SQL to Rule Them All - an Efficient and Syntactically Idiomatic Approach to Management of Streams and Tables},
+ booktitle = {Proceedings of the 2019 International Conference on Management of Data},
+ series = {SIGMOD '19},
+ year = {2019},
+ isbn = {978-1-4503-5643-5},
+ location = {Amsterdam, Netherlands},
+ pages = {1757--1772},
+ numpages = {16},
+ url = {http://doi.acm.org/10.1145/3299869.3314040},
+ doi = {10.1145/3299869.3314040},
+ acmid = {3314040},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {data management, query processing, stream processing},
+} 
+Real-time data analysis and management are increasingly critical for today's businesses. SQL is the de facto lingua franca for these endeavors, yet support for robust streaming analysis and management with SQL remains limited. Many approaches restrict semantics to a reduced subset of features and/or require a suite of non-standard constructs. Additionally, use of event timestamps to provide native support for analyzing events according to when they actually occurred is not pervasive, and often comes with important limitations. We present a three-part proposal for integrating robust streaming into SQL, namely: (1) time-varying relations as a foundation for classical tables as well as streaming data, (2) event time semantics, (3) a limited set of optional keyword extensions to control the materialization of time-varying query results. We show how with these minimal additions it is possible to utilize the complete suite of standard SQL semantics to perform robust stream processing. We motivate and illustrate these concepts using examples and describe lessons learned from implementations in Apache Calcite, Apache Flink, and Apache Beam. We conclude with syntax and semantics of a concrete proposal for extensions of the SQL standard and note further areas of exploration.
 
