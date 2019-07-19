@@ -28,43 +28,43 @@
 
 \title {Dependency Tracking in Streaming Dataflows}
 
-\author{Nikita Sokolov}
-\affiliation{%
-  \institution{ITMO University}
-  \city{Saint Petersburg}
-  \country{Russia}}
-\email{faucct@gmail.com}
+% \author{Nikita Sokolov}
+% \affiliation{%
+%   \institution{ITMO University}
+%   \city{Saint Petersburg}
+%   \country{Russia}}
+% \email{faucct@gmail.com}
 
-\author{Artem Trofimov}
-\affiliation{%
-  \institution{Yandex}
-  \city{Saint Petersburg}
-  \country{Russia}}
-\email{tomato@yandex-team.ru}
+% \author{Artem Trofimov}
+% \affiliation{%
+%   \institution{Yandex}
+%   \city{Saint Petersburg}
+%   \country{Russia}}
+% \email{tomato@yandex-team.ru}
 
-\author{Igor Kuralenok}
-\affiliation{%
-  \institution{Yandex}
-  \city{Saint Petersburg}
-  \country{Russia}}
-\email{solar@yandex-team.ru}
+% \author{Igor Kuralenok}
+% \affiliation{%
+%   \institution{Yandex}
+%   \city{Saint Petersburg}
+%   \country{Russia}}
+% \email{solar@yandex-team.ru}
 
-\author{Nikita Marshalkin}
-\affiliation{%
-  \institution{VK}
-  \city{Saint Petersburg}
-  \country{Russia}}
-\email{n.marshalkin@corp.vk.com}
+% \author{Nikita Marshalkin}
+% \affiliation{%
+%   \institution{VK}
+%   \city{Saint Petersburg}
+%   \country{Russia}}
+% \email{n.marshalkin@corp.vk.com}
 
-\author{Boris Novikov}
-\affiliation{%
-  \institution{National Research University Higher School of Economics}
-  \city{Saint Petersburg}
-  \country{Russia}}
-\email{borisnov@acm.org}
+% \author{Boris Novikov}
+% \affiliation{%
+%   \institution{National Research University Higher School of Economics}
+%   \city{Saint Petersburg}
+%   \country{Russia}}
+% \email{borisnov@acm.org}
 
 \begin{abstract}
-The majority of state-of-the-art stream processing systems faces a problem of obtaining notifications when the specific set of input elements have been already applied to all operators in a dataflow. Such notifications are commonly used to take consistent state snapshots or to release all descendants of an input element atomically and preserve exactly-once delivery guarantee. To generate these notifications, there is a need to track dependencies between input and their descendants and to inform when all descendants have been completely processed. In this work, we propose a method for tracking such dependencies between streaming elements that can be applied for both cyclic (iterative) and acyclic dataflows. We demonstrate that our technique produces low latency and throughput overhead within various setups and can significantly outperform methods employed by state-of-the-art stream processing systems.
+The majority of state-of-the-art stream processing systems faces a problem of obtaining notifications when the specific set of input elements have already been applied to all operators in a dataflow. Such notifications are commonly used to take consistent state snapshots or to release all descendants of an input element atomically while preserving exactly-once delivery guarantee. To generate these notifications, there is a need to track dependencies between input and their descendants and to inform when all descendants have been completely processed. In this work, we propose a method for tracking dependencies between streaming elements that can be applied for both cyclic (iterative) and acyclic dataflows. We demonstrate that our technique has low latency and throughput overhead within various setups and can significantly outperform methods employed by state-of-the-art stream processing systems.
 \end{abstract}
 
 % \keywords{Data streams, exactly-once, drifting state, optimistic OOP}
