@@ -13,7 +13,7 @@
 
 \theoremstyle{remark}
 
-\settopmatter{printacmref=false, printccs=true, printfolios=true}
+\settopmatter{printacmref=true, printccs=true, printfolios=true}
 \pagestyle{empty} % removes running headers
 
 \newcommand{\PicScale}{0.5}
@@ -22,36 +22,96 @@
 
 \copyrightyear{2019} 
 \acmYear{2019} 
-\setcopyright{acmcopyright}
-% \acmConference[BeyondMR'18]{Algorithms and Systems for MapReduce and Beyond }{June 15, 2018}{Houston, TX, USA}
-% \acmBooktitle{BeyondMR'18: Algorithms and Systems for MapReduce and Beyond , June 15, 2018, Houston, TX, USA}
-% \acmPrice{15.00}
-% \acmDOI{10.1145/3206333.3209273}
-% \acmISBN{978-1-4503-5703-6/18/06}
+\acmConference[BIRTE 2019]{Real-Time Business Intelligence and Analytics}{August 26, 2019}{Los Angeles, CA, USA}
+\acmBooktitle{Real-Time Business Intelligence and Analytics (BIRTE 2019), August 26, 2019, Los Angeles, CA, USA}
+\acmPrice{15.00}
+\acmDOI{10.1145/3350489.3350491}
+\acmISBN{978-1-4503-7660-0/19/08}
 
 \title {Distributed Classification of Text Streams: Limitations, Challenges, and Solutions}
 
-\author{Artem Trofimov,$^ {1}$   Nikita Sokolov,$^{2}$    Mikhail Shavkunov,$^3$   Igor E. Kuralenok,$^1$    and  Boris Novikov$^ {3}$ }
+% \author{Artem Trofimov,$^ {1}$   Nikita Sokolov,$^{2}$    Mikhail Shavkunov,$^3$   Igor E. Kuralenok,$^1$    and  Boris Novikov$^ {3}$ }
+% \affiliation{%
+% \institution{$^1$JetBrains Research}
+% }
+% \affiliation{%
+% \institution{$^2$ ITMO University}
+% }
+% \affiliation{%
+% \institution{$^3$National Research University Higher School of Economics}
+% \city{St. Petersburg} 
+% \country{Russia}
+% }
+% \email{\string{trofimov9artem, faucct, mv.shavkunov, ikuralenok\string}@gmail.com, borisnov@acm.org}
+
+\author{Artem Trofimov}
 \affiliation{%
-\institution{$^1$JetBrains Research}
-}
+  \institution{Saint Petersburg State University / Yandex}
+  \city{Saint Petersburg}
+  \country{Russia}}
+\email{tomato@yandex-team.ru}
+
+\author{Nikita Sokolov}
 \affiliation{%
-\institution{$^2$ ITMO University}
-}
+  \institution{ITMO university}
+  \city{Saint Petersburg}
+  \country{Russia}}
+\email{faucct@gmail.com}
+
+\author{Mikhail Shavkunov}
 \affiliation{%
-\institution{$^3$National Research University Higher School of Economics}
-\city{St. Petersburg} 
-\country{Russia}
-}
-\email{\string{trofimov9artem, faucct, mv.shavkunov, ikuralenok\string}@gmail.com, borisnov@acm.org}
+  \institution{National Research University Higher School of Economics}
+  \city{Saint Petersburg}
+  \country{Russia}}
+\email{mv.shavkunov@gmail.com}
+
+\author{Igor Kuralenok}
+\affiliation{%
+  \institution{Yandex}
+  \city{Saint Petersburg}
+  \country{Russia}}
+\email{solar@yandex-team.ru}
+
+\author{Boris Novikov}
+\affiliation{%
+  \institution{National Research University Higher School of Economics}
+  \city{Saint Petersburg}
+  \country{Russia}}
+\email{borisnov@acm.org}
 
 \begin{abstract}
 
-Large-scale classification of text streams is an essential problem that is hard to solve. Batch processing systems are scalable and proved their effectiveness for this problem but do not provide low latency. On the other hand, state-of-the-art distributed stream processing systems are able to achieve low latency but do not support the same level of fault tolerance and determinism. In this work, we discuss how the distributed streaming computational model and fault tolerance mechanisms can affect the results of a typical text classification data flow. We demonstrate emerged trade-offs between fault tolerance and reproducibility on the one side, and performance on the other side. Potential ways to mitigate the revealed issues and to handle streaming features are proposed.
+Large-scale classification of text streams is an essential problem that is hard to solve. Batch processing systems are scalable and proved their effectiveness for this problem but do not provide low latency. On the other hand, state-of-the-art distributed stream processing systems are able to achieve low latency but do not support the same level of fault tolerance and determinism. In this work, we discuss how the distributed streaming computational model and fault tolerance mechanisms can affect the results of a typical text classification data flow. We demonstrate emerged trade-offs between fault tolerance and reproducibility on the one side, and performance on the other side. Potential ways to solve the revealed issues and to handle streaming features are proposed.
 
 \end{abstract}
 
-% \keywords{Data streams, exactly-once, drifting state, optimistic OOP}
+\begin{CCSXML}
+\begin{CCSXML}
+\begin{CCSXML}
+<ccs2012>
+<concept>
+<concept_id>10002951.10002952.10002953.10010820.10003208</concept_id>
+<concept_desc>Information systems~Data streams</concept_desc>
+<concept_significance>500</concept_significance>
+</concept>
+<concept>
+<concept_id>10002951.10003317.10003347.10003356</concept_id>
+<concept_desc>Information systems~Clustering and classification</concept_desc>
+<concept_significance>500</concept_significance>
+</concept>
+<concept>
+<concept_id>10002951.10003227.10003351.10003446</concept_id>
+<concept_desc>Information systems~Data stream mining</concept_desc>
+<concept_significance>300</concept_significance>
+</concept>
+</ccs2012>
+\end{CCSXML}
+
+\ccsdesc[500]{Information systems~Data streams}
+\ccsdesc[500]{Information systems~Clustering and classification}
+\ccsdesc[300]{Information systems~Data stream mining}
+
+\keywords{Data streams, text classification, reproducibility, exactly-once}
 
 \maketitle
 
