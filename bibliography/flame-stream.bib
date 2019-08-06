@@ -1683,3 +1683,21 @@ month={June},}
 } 
 Real-time data analysis and management are increasingly critical for today's businesses. SQL is the de facto lingua franca for these endeavors, yet support for robust streaming analysis and management with SQL remains limited. Many approaches restrict semantics to a reduced subset of features and/or require a suite of non-standard constructs. Additionally, use of event timestamps to provide native support for analyzing events according to when they actually occurred is not pervasive, and often comes with important limitations. We present a three-part proposal for integrating robust streaming into SQL, namely: (1) time-varying relations as a foundation for classical tables as well as streaming data, (2) event time semantics, (3) a limited set of optional keyword extensions to control the materialization of time-varying query results. We show how with these minimal additions it is possible to utilize the complete suite of standard SQL semantics to perform robust stream processing. We motivate and illustrate these concepts using examples and describe lessons learned from implementations in Apache Calcite, Apache Flink, and Apache Beam. We conclude with syntax and semantics of a concrete proposal for extensions of the SQL standard and note further areas of exploration.
 
+@inproceedings{we2019debs,
+ author = {Trofimov, Artem and Shavkunov, Mikhail and Reznick, Sergey and Sokolov, Nikita and Yutman, Mikhail and Kuralenok, Igor E. and Novikov, Boris},
+ title = {Reproducible and Reliable Distributed Classification of Text Streams},
+ booktitle = {Proceedings of the 13th ACM International Conference on Distributed and Event-based Systems},
+ series = {DEBS '19},
+ year = {2019},
+ isbn = {978-1-4503-6794-3},
+ location = {Darmstadt, Germany},
+ pages = {264--265},
+ numpages = {2},
+ url = {http://doi.acm.org/10.1145/3328905.3332514},
+ doi = {10.1145/3328905.3332514},
+ acmid = {3332514},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {Data streams, exactly once, reproducibility, text classification},
+} 
+
