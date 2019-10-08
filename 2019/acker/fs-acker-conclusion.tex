@@ -1,13 +1,13 @@
 \label {fs-acker-conclusion}
 
-We formulated a problem of dependency tracking between input and output elements in streaming dataflows. We demonstrated that this problem is commonly faced by distributed stream processing systems, e.g. to detect which input elements have already affected state or to notify that some set of input elements have been completely processed. Such notifications can be used for triggering state snapshotting mechanism as it is implemented in state-of-the-art stream processing systems~\cite{Carbone:2017:SMA:3137765.3137777, apache:storm}, for materialization of time-varying relations as it is described in~\cite{Begoli:2019:OSR:3299869.3314040}, or for atomically releasing of all descendants of an input item~\cite{we2018adbis}.
+In this work, we formulated and formalized a problem of dependency tracking between input and output elements in streaming dataflows. We demonstrated that state-of-the-art distributed stream processing systems face this problem in state snapshotting mechanisms~\cite{Carbone:2017:SMA:3137765.3137777, apache:storm}, the materialization of time-varying relations~\cite{Begoli:2019:OSR:3299869.3314040}, and atomic delivery of all descendants of an input item~\cite{we2018adbis}.  
 
-To solve this problem, we proposed a mechanism that adopts ideas from Apache Storm tuples completion tracking mechanism called \acker. Our solution, called \tracker, provides the following features:
+To solve this problem, we proposed a mechanism that adopts ideas from the Apache Storm completion tracking mechanism called \acker. We extend each data item with a logical timestamp that denotes corresponding input items and track if data flow contains elements with specific timestamps. Our solution, called \tracker, provides the following features:
 \begin{itemize}
-    \item {\bf Fine-grained tracking:} \tracker\ efficiently watches and provides notifications even for individual input elements.
-    \item {\bf Cyclic graphs support:} proposed mechanism works for both cyclic and acyclic execution graphs and that makes it suitable for iterative dataflows as well. 
+    \item {\bf Fine-grained tracking:} \tracker\ efficiently watches and provides notifications that system completely processed some set of input items even for individual input elements.
+    \item {\bf Cyclic graphs support:} proposed mechanism works for both cyclic and acyclic execution graphs, and that makes it suitable for iterative dataflows as well. 
     \item {\bf Scalability:} we introduced a decentralized version of \tracker\ that allows a system to distribute extra network traffic between all computational units. 
     \item {\bf Low overhead:} \tracker\ does not produce any significant performance penalty and does not affect the throughput of a distributed streaming dataflow.
 \end{itemize}
 
-We conducted a series of experiments and compared the proposed method with a baseline approach based on checkpointing mechanism used in Apache Flink. We demonstrated that both centralized and decentralized implementations of \tracker\ provide lower notification latency that does not considerably degrade with an increase of a logical graph size or a cluster size. It was also shown that \tracker\ has lower throughput overhead in case of fine-grained tracking.
+We conducted a series of experiments and compared the proposed method with a baseline approach based on the checkpointing mechanism used in Apache Flink. We demonstrated that both centralized and decentralized implementations of \tracker\ provide lower notification latency that does not considerably degrade with an increase of a logical graph size or a cluster size. It was also shown that \tracker\ has lower throughput overhead in case of fine-grained tracking.
