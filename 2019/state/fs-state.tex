@@ -1,5 +1,4 @@
-\documentclass[conference]{IEEEtran}		
- \IEEEoverridecommandlockouts		
+\documentclass[sigconf]{acmart}		
 
   \usepackage{graphicx}		
  \usepackage{balance}		
@@ -50,6 +49,9 @@
 
   %\theoremstyle{remark}		
 
+\settopmatter{printacmref=false, printccs=true, printfolios=true}
+\pagestyle{empty} % removes running headers
+
   \newcommand{\PicScale}{0.5}		
  \newcommand {\FlameStream} {FlameStream}		
  \newcommand {\Acker} {trAcker}		
@@ -62,28 +64,37 @@
 
   \begin{document}		
 
+\copyrightyear{2019} 
+\acmYear{2019} 
+\setcopyright{acmcopyright}
+% \acmConference[BeyondMR'18]{Algorithms and Systems for MapReduce and Beyond }{June 15, 2018}{Houston, TX, USA}
+% \acmBooktitle{BeyondMR'18: Algorithms and Systems for MapReduce and Beyond , June 15, 2018, Houston, TX, USA}
+% \acmPrice{15.00}
+% \acmDOI{10.1145/3206333.3209273}
+% \acmISBN{978-1-4503-5703-6/18/06}
+
   \title {Delivery, consistency, and determinism: rethinking guarantees in distributed stream processing}		
 
-  \author{\IEEEauthorblockN{1\textsuperscript{st} Artem Trofimov}		
- \IEEEauthorblockA{\textit{JetBrains Research} \\		
- Saint Petersburg, Russia \\		
- trofimov9artem@gmail.com}		
- \and		
- \IEEEauthorblockN{2\textsuperscript{nd} Igor E. Kuralenok}		
- \IEEEauthorblockA{\textit{Yandex} \\		
- Saint Petersburg, Russia \\		
- solar@yandex-team.ru}		
- \and		
- \IEEEauthorblockN{3\textsuperscript{rd}  Nikita Marshalkin}		
- \IEEEauthorblockA{\textit{VK} \\		
- Saint Petersburg, Russia \\		
- n.marshalkin@corp.vk.com}		
- \and    		
- \IEEEauthorblockN{4\textsuperscript{th} Boris Novikov}		
- \IEEEauthorblockA{\textit{National Research University}\\ \textit{Higher School of Economics} \\		
- Saint Petersburg, Russia \\		
- borisnov@acm.org}		
- }		
+%   \author{\IEEEauthorblockN{1\textsuperscript{st} Artem Trofimov}		
+%  \IEEEauthorblockA{\textit{JetBrains Research} \\		
+%  Saint Petersburg, Russia \\		
+%  trofimov9artem@gmail.com}		
+%  \and		
+%  \IEEEauthorblockN{2\textsuperscript{nd} Igor E. Kuralenok}		
+%  \IEEEauthorblockA{\textit{Yandex} \\		
+%  Saint Petersburg, Russia \\		
+%  solar@yandex-team.ru}		
+%  \and		
+%  \IEEEauthorblockN{3\textsuperscript{rd}  Nikita Marshalkin}		
+%  \IEEEauthorblockA{\textit{VK} \\		
+%  Saint Petersburg, Russia \\		
+%  n.marshalkin@corp.vk.com}		
+%  \and    		
+%  \IEEEauthorblockN{4\textsuperscript{th} Boris Novikov}		
+%  \IEEEauthorblockA{\textit{National Research University}\\ \textit{Higher School of Economics} \\		
+%  Saint Petersburg, Russia \\		
+%  borisnov@acm.org}		
+%  }		
 
   % \author{		
  % \alignauthor		
@@ -153,7 +164,7 @@
 
   \balance		
 
-  \bibliographystyle{IEEEtran}		
+  \bibliographystyle{ACM-Reference-Format}	
  \bibliography{../../bibliography/flame-stream}		
 
   \newpage		
