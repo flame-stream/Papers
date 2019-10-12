@@ -5,9 +5,9 @@ In this work, we formulated and formalized a problem of dependency tracking betw
 To solve this problem, we proposed a mechanism that adopts ideas from the Apache Storm completion tracking mechanism called \acker. We extend each data item with a logical timestamp that denotes corresponding input items and track if data flow contains elements with specific timestamps. Our solution, called \tracker, provides the following features:
 \begin{itemize}
     \item {\bf Fine-grained tracking:} \tracker\ efficiently watches and provides notifications that system completely processed some set of input items even for individual input elements.
-    \item {\bf Cyclic graphs support:} proposed mechanism works for both cyclic and acyclic execution graphs, and that makes it suitable for iterative dataflows as well. 
+    \item {\bf Cyclic graphs support:} proposed mechanism works for cyclic execution graphs, and that makes it suitable for iterative dataflows as well. 
     \item {\bf Scalability:} we introduced a decentralized version of \tracker\ that allows a system to distribute extra network traffic between all computational units. 
     \item {\bf Low overhead:} \tracker\ does not produce any significant performance penalty and does not affect the throughput of a distributed streaming dataflow.
 \end{itemize}
 
-We conducted a series of experiments and compared the proposed method with a baseline approach based on the checkpointing mechanism used in Apache Flink. We demonstrated that both centralized and decentralized implementations of \tracker\ provide lower notification latency that does not considerably degrade with an increase of a logical graph size or a cluster size. It was also shown that \tracker\ has lower throughput overhead in case of fine-grained tracking.
+We conducted a series of experiments and compared the proposed method with a baseline approach based on the checkpointing mechanism used in Apache Flink. We demonstrated that both centralized and decentralized implementations of \tracker\ provide lower notification latency that does not considerably degrade with an increase of a logical graph size or a cluster size. Experiments also showed that \tracker\ has lower throughput overhead in case of fine-grained tracking.
