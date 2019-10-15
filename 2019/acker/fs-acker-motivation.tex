@@ -1,14 +1,21 @@
 \label {fs-acker-motivation}
 
-Describe typical use-cases for dependency tracking.
+Distributed stream processing systems are shared-nothing runtimes which continuously ingest input elements, transform them according to pre-defined operators, and deliver output elements. We assume that an operator can process only one item at a time. Operators can be stateless and stateful. An output element of an operator may depend on the current state as well as on the corresponding input element. Operators are partitioned among workers and independently process their chunks of data items. Streaming operators are often defined just as a user-provided code and can be quite complicated: they can produce multiple output elements from a single input, filter out some items, or do transformations according to their current state. In general, it is hard to figure out which input element originated an output one. For instance, if an operator receives texts and splits them into the words, it is not possible, having only a word, to determine the document this word came from.
+
+{\em Dependency tracking} is a process of matching output streaming elements with its original input items and vice versa. One of the most common problems that require this mechanism is to notify the system when all descendants of some input elements are entirely processed. For instance, input elements can be stored in persistent queues to be reprocessed in case of system failures. However, items cannot be stored in these queues forever due to memory and disk limits. A dependency tracking mechanism can trigger garbage collection within these queues. As an example, notification, when the system has processed all words from particular documents, can cause removing these documents from the persistent storage. A good dependency tracking technique should provide low notification latency as well as do not induce an overhead on regular processing.
+
+Further, in this section, we present several practical problems that require a dependency tracking mechanism. We demonstrate that this mechanism plays a crucial role in obtaining the correct and consistent processing results. After that, we review tracking techniques adopted in state-of-the-art stream processing systems and identify their limitations. 
 
 \subsection{Transactional processing}
-Releasing elements atomically to preserve exactly-once.
+If input elements are split into multiple ones and system processes them independently, a user often assumes that the descendants will be processed atomically. In other words, if a system loses a single element, other items that depend on the same input will not affect a system state. As an illustration, let us consider a streaming pipeline that transfers money between accounts. Assume that input elements are bank transfer actions. An operator that updates an account balance is partitioned by the account identifier. In this case, one can split an input element into items that update source and destination accounts. Note that these items can be processed independently and possibly on different workers. If a system loses only one of these records, e.g., due to a network failure, the system state becomes inconsistent.
+
+To process input items transactionally, a system must check that all descendants of an input item are not lost and rollback changes caused by survived elements otherwise. One can solve this problem with dependency tracking. If there is no notification that all descendants of an input transfer are completely processed for quite a long time, a system can initiate state rollback and input elements reprocessing.
 
 \subsection{State snapshotting}
 Consistent state snapshotting: epochs and input replay.
 
-\subsection{Count iterations}
-Want to stop a pipeline after 100 iterations.
+\subsection{Existing solutions}
+
+
 
 
