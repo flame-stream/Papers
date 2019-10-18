@@ -1,5 +1,37 @@
 \label {fs-acker-impl}
 
+%Interface of acker: definitions of Heartbeats, Acks, Min Time Updates, tracking in windows of Global Time, maybe tell about acker responsibility in registering fronts.
+%Implementation of Global Time and its assignment at fronts: system time.
+%Centralized acker: cyclic buffer, heartbeats received from fronts, min time updates issuing. Local Acker: buffered messages, ordering. Distributed acker: problem of a bottleneck, solution with sharding, problem of replaying, solution with node times.
+
+\subsection{Global Time}
+
+Global Times get assigned to elements by fronts and are pairs of monotonic numbers and the front identifier. Notifications from \tracker\ are being provided for windows of numeric parts of Global Time, so these numbers should be synchronized between fronts to prevent elements emitted from a front with an ahead clock waiting for others emitted from one with a behind clock.
+
+\subsection{Interface\ of\ \tracker\ }
+
+Messages received by \tracker:
+\begin{itemize}
+	\item Ack message is a pair of a Global Time window and a XOR value, which is a product of multiple XOR values corresponding to items being sent or received.
+	\item Heartbeat message is a pair of a Global Time and a Front Id, which tells the \tracker\ that the front will not emit no more elements with a lesser Global Time.
+\end{itemize}
+Messages sent by \tracker:
+\begin{itemize}
+	\item Minimal Global Time Update message is a Global Time window meaning that all items within previous Global Time windows have been processed.
+\end{itemize}
+
+
 \subsection{Centralized \tracker\ }
 
+\tracker\ is implemented as an "actor" on a dedicated machine and is shared between all system workers. It encapsulates minimal times received from the system fronts and a cyclic buffer for storing tracked elements.
+
+Cyclic buffer stores XORs keyed by elements Global Time windows. It stores values in a fixed size range starting from current Minimal Global Time window. Received Ack message XOR gets applied to the corresponding value stored in the buffer.
+
+\tracker\ can tell that there will be no more elements in a specific Global Time window when two conditions are fulfilled: no fronts will emit any more elements within this Global Time window and the cyclic buffer stores zero for it. These conditions get checked every time \tracker\ receives Acks or Heartbeats. If there are any matching windows they get removed from the beginning of the buffer and an update with the last of the windows gets broadcasted.
+
+\subsection{Local \tracker\ }
+
+As \tracker\ communicates with the rest of the system via the network sending Ack messages on every sent or received item generates a lot of network traffic. A Local \tracker\ gets introduced to reduce this traffic. It is deployed at every worker machine and serves as a middleware between it and the \tracker. It buffers incoming Ack and Heartbeat messages and flushes them periodically. It manages to reduce Ack messages traffic as ones within the same Global Time window can be aggregated in a single Ack message. If we will emit these messages in order of decreasing Global Time this aggregation will not break the requirements for order of processing. This is true as in all the cases when this order is relevant an Ack that should be processed first has greater or equal Global Time than a one that should be processed last. 
+
 \subsection{Decentralized \tracker\ }
+
