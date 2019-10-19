@@ -1,16 +1,37 @@
 \label {fs-acker-experiments}
 
+We have tested the \tracker\ performance on a simple directed path graph of various length, which was shuffling processed elements between machines in each vertex. The \tracker of various configurations was compared with  tracking using watermarks and no tracking at all. Elements were tracked in windows of 1, 10 and 100.
+Virtual machines used in experiments had single CPUs and 4 GB of RAM per machine. One machine called a Bench Stand was used to input data into the dataflow at a fixed rate while measuring the speed of it being processed via receiving output and notifications for data being processed. \tracker was running on machines excluded from the dataflow: a single one for centralized configuration and two for distributed configuration.
+
 \subsection{Network traffic}
+
+Network traffic was measured in number of separate service messages sent over the network. Local Acker was sending messages in batches.
+
+% https://gist.github.com/faucct/032aaf6240db361d30a184b1d7bf3c8e
 
 \subsection{Notification latency}
 
+Notification latency was measured as a time between moments of Bench Stand receiving last elements in tracking windows and notifications for that window.
+
+% https://gist.github.com/faucct/032aaf6240db361d30a184b1d7bf3c8e
+
 \subsection{Scalability}
+
+In those experiments we are reproducing a case in which the centralized \tracker\ was not holding the load, while the distributed \tracker\ was working. While using 100 machines running our dataflow we have failed to reproduce it. Still, we have been able to simulate it by increasing the number of Ack messages sent in a single batch 9 times.
+
+% Надо подумать, какие графики тут нужны и какой кейс мы симулируем этим способом.
 
 \subsection{Overhead on throughput}
 
+In those experiments we show that tracking with \tracker\ in contrary to watermarks does not have a large overhead on throughput.
+
+% Я забыл доснять эти эксперименты.
+
 \subsection{State snapshotting}
 
+In those experiments we are comparing granular tracking using centralized \tracker and watermarks. Processed elements are divided into snapshot windows. Pipeline vertices only process elements from a current snapshot window and buffer ones from a next snapshot window until they receive a notification that all elements from a current snapshot have been processed. When this happens vertices imitate snapshotting with a fixed duration sleep and continue to process elements from next snapshot window. We have measured a number of buffered elements and total time they have spent in buffer.
+
+% https://gist.github.com/faucct/6097d9d08197cb979b71721b16f8b6a3/
+
 \subsection{Count iterations?}
-
-
 
