@@ -25,7 +25,7 @@ We do not enforce a strict architecture of the system, but assume that there are
     \item Node is an executor of user-defined operations. The computation can be balanced through the distribution of data elements among nodes. Each Node has a {\em barrier} that delivers output elements to the end-user.
 \end{itemize}
 
-The implementation of this architecture in~\FlameStream\ processing engine is demonstrated in Figure~\ref{arch}. Apache ZooKeeper is used for cluster state management. As persistent storage, one can use a distributed file system or database (e.g., HDFS, S3, MongoDB, GFS, HBase, etc.). Data producers may vary as well: the role of $t(a)$ can be played by any monotonic sequence, e.g., offsets in Kafka.
+Figure~\ref{arch} illustrates the proposed architecture. Apache ZooKeeper is used for cluster state management. As persistent storage, one can use a distributed file system or database (e.g., HDFS, S3, MongoDB, GFS, HBase, etc.). Data producers may vary as well: the role of $t(a)$ can be played by any monotonic sequence, e.g., offsets in Kafka.
 
 \subsection{Snapshotting}
 
