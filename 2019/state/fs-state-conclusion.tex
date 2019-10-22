@@ -12,7 +12,7 @@ We introduced a formal, conceptual framework for modeling consistency properties
 
 All these methods experience difficulties with working under low-latency requirements (less than a second). In the first case, latency cannot be lower than the batching period, in the second case, the distributed two-phase commit may result in a significant increase of latency, while in the third case latency is bounded below by the duration of external writes.
 
-Using our formal inference, we designed mechanisms for achieving exactly-once on top of {\em drifting state} technique introduced in our previous work~\cite{we2018adbis}. Drifting state provides inexpensive determinism due to optimistic nature and low overhead on a single buffer per any stateful data flow. Because of the determinism, the protocols provide the following features:
+Using our formal inference, we designed mechanisms for achieving exactly-once on top of {\em drifting state} technique~\cite{we2018adbis}. Drifting state provides inexpensive determinism due to optimistic nature and low overhead on a single buffer per any stateful data flow. Because of the determinism, the protocols provide the following features:
 
 \begin{itemize}
     \item Elements are processed in a pure streaming manner without input buffering
