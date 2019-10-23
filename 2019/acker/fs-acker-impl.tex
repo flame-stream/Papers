@@ -8,7 +8,7 @@ Our distributed system FlameStream is implemented on top of Akka actors framewor
 
 \subsection{Global Time}
 
-Global Times get assigned to elements by fronts and are pairs of monotonic numbers and the front identifier. Notifications from \tracker\ are being provided for windows of numeric parts of Global Time, so these numbers should be synchronized between fronts to prevent elements emitted from a front with an ahead clock waiting for others emitted from one with a behind clock. Global Times have a total lexicographical order on their numeric parts and front identifiers, which is used in Grouping operations and during buffering of messages to be described later in this section.
+Fronts assign Global Times to elements. They are pairs of monotonic numbers and the front identifier. Notifications from \tracker\ are being provided for windows of numeric parts of Global Time, so these numbers should be synchronized between fronts to prevent elements emitted from a front with an ahead clock waiting for others emitted from one with a behind clock. Global Times have a total lexicographical order on their numeric parts and front identifiers, which is used in Grouping operations and during buffering of messages to be described later in this section.
 
 \subsection{Interface\ of\ \tracker\ }
 
@@ -27,9 +27,9 @@ Messages sent by \tracker:
 
 \tracker\ is implemented as an "actor" on a dedicated machine and is shared between all system workers. It encapsulates minimal times received from the system fronts and a cyclic buffer for storing tracked elements.
 
-Cyclic buffer stores XORs keyed by elements Global Time windows. It stores values in a fixed size range starting from current Minimal Global Time window. Received Ack message XOR gets applied to the corresponding value stored in the buffer.
+Cyclic buffer stores XORs keyed by elements Global Time windows. It stores values in a fixed size range starting from current Minimal Global Time window. \tracker\ applies received Ack messages checksum changes to the corresponding value stored in the buffer.
 
-\tracker\ can tell that there will be no more elements in a specific Global Time window when two conditions are fulfilled: no fronts will emit any more elements within this Global Time window and the cyclic buffer stores zero for it. These conditions get checked every time \tracker\ receives Acks or Heartbeats. If there are any matching windows they get removed from the beginning of the buffer and an update with the last of the windows gets broadcasted.
+\tracker\ can tell that there will be no more elements in a specific Global Time window when two conditions are fulfilled: no fronts will emit any more elements within this Global Time window and the cyclic buffer stores zero for it. Every time \tracker\ receives Acks or Heartbeats, it checks these conditions. If there are any matching windows \tracker removes them from the beginning of the buffer and broadcasts an update with the last of the windows.
 
 To prevent premature Min Time Updates this implementation has two requirements on order of processing:
 
@@ -42,14 +42,14 @@ Ordering of messages per sender-receiver pair given to us by Akka framework fulf
 
 \subsection{Local \tracker\ }
 
-As \tracker\ communicates with the rest of the system via the network sending Ack messages on every sent or received item generates a lot of network traffic. A Local \tracker\ gets introduced to reduce this traffic. It is deployed at every worker machine and serves as a middleware between it and the \tracker. It buffers incoming Ack and Heartbeat messages and flushes them periodically. The flushing window can be configured and  is an upper bound notifications an overhead on latency from Local \tracker.
+As \tracker\ communicates with the rest of the system via the network sending Ack messages on every sent or received item generates a lot of network traffic. A Local \tracker\ is introduced to reduce this traffic. It is deployed at every worker machine and serves as a middleware between it and the \tracker. It buffers incoming Ack and Heartbeat messages and flushes them periodically. The flushing window can be configured and  is an upper bound notifications an overhead on latency from Local \tracker.
 
-Heartbeat messages get aggregated to the latest ones per front. Ack messages within the same Global Time windows  get aggregated to a single Ack message via XOR product. On flush Local \tracker\ sends these messages in an ordered batch: Ack messages come first in order of decreasing Global Time and Heartbeat messages come second.
+\tracker\ agggregates Heartbeat messages to the latest ones per front. \tracker\ aggregates Ack messages within the same Global Time windows to a single Ack message via XOR product. On flush Local \tracker\ sends these messages in an ordered batch: Ack messages come first in order of decreasing Global Time and Heartbeat messages come second.
 
 This aggregation does not break the requirements for order of processing:
 \begin{itemize}
-	\item Ack messagess get processed before Heartbeat messages.
-	\item Ack messages for produced elements get processed before Ack messages for incoming messages as their Global Time is larger.
+	\item \tracker\ processes Ack messages before Heartbeat messages.
+	\item \tracker\ processes Ack messages for produced elements before Ack messages for incoming messages as their Global Time is larger.
 \end{itemize}
 
 \subsection{Decentralized \tracker\ }
