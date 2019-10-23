@@ -1,67 +1,67 @@
-\documentclass[10pt,sigconf]{acmart}
+\documentclass{vldb}
 
 \usepackage{graphicx}
-\usepackage{algorithm} % for algorithms
-\usepackage{algpseudocode}
-\usepackage{booktabs} % For formal tables
-\usepackage{amsthm} % For claims
+\usepackage{url}
+\usepackage{hyperref}
+% \usepackage{algorithm} % for algorithms
+% \usepackage{algpseudocode}
+% \usepackage{booktabs} % For formal tables
+% `\usepackage{amsthm} % For claims
+\usepackage{balance}  % for  \balance command ON LAST PAGE  (only there!)
 
-\theoremstyle{remark}
+% \theoremstyle{remark}
 
-\settopmatter{printacmref=false, printccs=true, printfolios=true}
 \pagestyle{empty} % removes running headers
 
 \newcommand{\PicScale}{0.5}
 \newcommand {\FlameStream} {FlameStream}
 \newcommand {\tracker} {trAcker}
 \newcommand {\acker} {Acker}
-\begin{document}
 
-\copyrightyear{2019} 
-\acmYear{2019} 
-\setcopyright{acmcopyright}
-% \acmConference[BeyondMR'18]{Algorithms and Systems for MapReduce and Beyond }{June 15, 2018}{Houston, TX, USA}
-% \acmBooktitle{BeyondMR'18: Algorithms and Systems for MapReduce and Beyond , June 15, 2018, Houston, TX, USA}
-% \acmPrice{15.00}
-% \acmDOI{10.1145/3206333.3209273}
-% \acmISBN{978-1-4503-5703-6/18/06}
+% Include information below and uncomment for camera ready
+\vldbTitle{Tracking Dependencies in Distributed Streaming Dataflows}
+\vldbAuthors{Nikita Sokolov, Artem Trofimov, Igor Kuralenok, Nikita Marshalkin, and Boris Novikov}
+\vldbDOI{https://doi.org/10.14778/xxxxxxx.xxxxxxx}
+\vldbVolume{12}
+\vldbNumber{xxx}
+\vldbYear{2019}
+
+\begin{document}
 
 \title {Tracking Dependencies in Distributed Streaming Dataflows}
 
-% \author{Nikita Sokolov}
-% \affiliation{%
-%   \institution{ITMO University}
-%   \city{Saint Petersburg}
-%   \country{Russia}}
-% \email{faucct@gmail.com}
+\numberofauthors{5}
 
-% \author{Artem Trofimov}
-% \affiliation{%
-%   \institution{Yandex}
-%   \city{Saint Petersburg}
-%   \country{Russia}}
-% \email{tomato@yandex-team.ru}
+\author{
+\alignauthor
+Nikita Sokolov\\
+    \affaddr{ITMO University}\\
+    \affaddr{Saint Petersburg, Russia}\\
+    \email{faucct@gmail.com}
+\alignauthor
+Artem Trofimov\\
+    \affaddr{Yandex}\\
+    \affaddr{Saint Petersburg, Russia}\\
+    \email{tomato@yandex-team.ru}
+\alignauthor
+Igor Kuralenok\\
+    \affaddr{Yandex}\\
+    \affaddr{Saint Petersburg, Russia}\\
+    \email{solar@yandex-team.ru}
+\and 
+\alignauthor
+Nikita Marshalkin\\
+    \affaddr{VK}\\
+    \affaddr{Saint Petersburg, Russia}\\
+    \email{n.marshalkin@corp.vk.com}
+\alignauthor
+Boris Novikov\\
+    \affaddr{National Research University Higher School of Economics}\\
+    \affaddr{Saint Petersburg, Russia}\\
+    \email{borisnov@acm.org}
+}
 
-% \author{Igor Kuralenok}
-% \affiliation{%
-%   \institution{Yandex}
-%   \city{Saint Petersburg}
-%   \country{Russia}}
-% \email{solar@yandex-team.ru}
-
-% \author{Nikita Marshalkin}
-% \affiliation{%
-%   \institution{VK}
-%   \city{Saint Petersburg}
-%   \country{Russia}}
-% \email{n.marshalkin@corp.vk.com}
-
-% \author{Boris Novikov}
-% \affiliation{%
-%   \institution{National Research University Higher School of Economics}
-%   \city{Saint Petersburg}
-%   \country{Russia}}
-% \email{borisnov@acm.org}
+\maketitle
 
 \begin{abstract}
 %The majority of state-of-the-art stream processing systems faces a problem of obtaining notifications when the specific set of input elements have already been applied to all operators in a dataflow. Such notifications are commonly used to take consistent state snapshots or to release all descendants of an input element atomically while preserving exactly-once delivery guarantee. To generate these notifications, there is a need to track dependencies between input and their descendants and to inform when all descendants have been completely processed. In this work, we propose a method for tracking dependencies between streaming elements that can be applied for both cyclic (iterative) and acyclic dataflows. We demonstrate that our technique has low latency and throughput overhead within various setups and can significantly outperform methods employed by state-of-the-art stream processing systems.
@@ -73,8 +73,6 @@ In distributed stream processing, it is hard to determine a correspondence betwe
 \end{abstract}
 
 % \keywords{Data streams, exactly-once, drifting state, optimistic OOP}
-
-\maketitle
 
 \thispagestyle{empty}
 
@@ -100,7 +98,7 @@ In distributed stream processing, it is hard to determine a correspondence betwe
 \section {Conclusion}
 \input {fs-acker-conclusion.tex}
 
-\bibliographystyle{ACM-Reference-Format}
+\bibliographystyle{abbrvurl}
 \bibliography{../../bibliography/flame-stream}
 
 \end {document}
