@@ -8,30 +8,126 @@ Virtual machines used in experiments had single CPUs and 4 GB of RAM per machine
 Network traffic was measured in number of separate service messages sent over the network. Local Acker was sending messages in batches.
 
 % https://gist.github.com/faucct/032aaf6240db361d30a184b1d7bf3c8e
+%\begin{figure*}[t!]
+%    \begin{subfigure}[b]{0.31\textwidth}
+%            \includegraphics{traffic_by_graph_size.png}
+%            \caption{Traffic by graph size}
+%    \end{subfigure}
+%    \hspace{5mm}
+%    \begin{subfigure}[b]{0.31\textwidth}
+%            \includegraphics{traffic_by_number_of_machines.png}
+%            \caption{Traffic by number of machines}
+%    \end{subfigure}
+%    \hspace{5mm}
+%    \begin{subfigure}[b]{0.31\textwidth}
+%            \includegraphics{traffic_by_tracking_frequency.png}
+%            \caption{Traffic by tracking frequency}
+%	\end{subfigure}
+%%    \caption{Results of preliminary experiments}
+%\end{figure*}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.50\textwidth]{traffic_by_graph_size.png}
+  \caption{Traffic by graph size}
+\end{figure}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.50\textwidth]{traffic_by_number_of_machines.png}
+  \caption{Traffic by number of machines}
+\end{figure}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.50\textwidth]{traffic_by_tracking_frequency.png}
+  \caption{Traffic by tracking frequency}
+\end{figure}
 
 \subsection{Notification latency}
 
 Notification latency was measured as a time between moments of Bench Stand receiving last elements in tracking windows and notifications for that window.
 
 % https://gist.github.com/faucct/032aaf6240db361d30a184b1d7bf3c8e
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.50\textwidth]{notification_await_time_by_graph_size.png}
+  \caption{Notification await time by graph size}
+\end{figure}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.50\textwidth]{notification_await_time_by_number_of_machines.png}
+  \caption{Notification await time by number of machines}
+\end{figure}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.50\textwidth]{notification_await_time_by_tracking_frequency.png}
+  \caption{Notification await time by tracking frequency}
+\end{figure}
 
 \subsection{Scalability}
 
-In those experiments we are reproducing a case in which the centralized \tracker\ was not holding the load, while the distributed \tracker\ was working. While using 100 machines running our dataflow we have failed to reproduce it. Still, we have been able to simulate it by increasing the number of Ack messages sent in a single batch 9 times.
+In those experiments we are reproducing a case in which the centralized \tracker\ was not holding the load, while the distributed \tracker\ was working. While using 100 machines running our dataflow we have failed to reproduce it. Still, we have been able to simulate it by increasing the total number of Ack messages.
 
-% Надо подумать, какие графики тут нужны и подобрать, какую конфигурацию мы симулируем этим способом.
+% https://gist.github.com/faucct/546f5617b958349a125449926373b780
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.50\textwidth]{scalability_01x.png}
+  \caption{1x acks}
+\end{figure}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.50\textwidth]{scalability_05x.png}
+  \caption{5x acks}
+\end{figure}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.50\textwidth]{scalability_09x.png}
+  \caption{9x acks}
+\end{figure}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.50\textwidth]{scalability_17x.png}
+  \caption{17x acks}
+\end{figure}
 
 \subsection{Overhead on throughput}
 
 In those experiments we show that tracking with \tracker\ in contrary to watermarks does not have a large overhead on throughput.
 
-% Я забыл доснять эти эксперименты.
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.50\textwidth]{throughput_overhead.png}
+  \caption{Throughput overhead}
+\end{figure}
 
 \subsection{State snapshotting}
 
 In those experiments we are comparing granular tracking using centralized \tracker\ and watermarks. Processed elements are divided into snapshot windows. Pipeline vertices only process elements from a current snapshot window and buffer ones from a next snapshot window until they receive a notification that all elements from a current snapshot have been processed. When this happens vertices imitate snapshotting with a fixed duration sleep and continue to process elements from next snapshot window. We have measured a number of buffered elements and total time they have spent in buffer varying the snapshot duration.
 
 % https://gist.github.com/faucct/6097d9d08197cb979b71721b16f8b6a3/
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.50\textwidth]{buffering_average_duration.png}
+  \caption{Average buffering duration}
+\end{figure}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.50\textwidth]{buffering_count.png}
+  \caption{Buffered elements count}
+\end{figure}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.50\textwidth]{buffering_sum_duration.png}
+  \caption{Total buffering duration}
+\end{figure}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.50\textwidth]{buffering_latencies_evolution_acker.png}
+  \caption{Latencies with \tracker}
+\end{figure}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.50\textwidth]{buffering_latencies_evolution_watermarks.png}
+  \caption{Latencies with Watermarks}
+\end{figure}
 
 \subsection{Count iterations?}
 
