@@ -1733,6 +1733,24 @@ Stephanie Wang, John Liagouris, Robert Nishihara, Philipp Moritz, Ujval Misra, A
 As cluster computing frameworks such as Spark, Dryad, Flink, and Ray are being deployed in mission critical applications and on larger and larger clusters, their ability to tolerate failures is growing in importance. These frameworks employ two broad approaches for fault tolerance: checkpointing and lineage. Checkpointing exhibits low overhead during normal operation but high overhead during recovery, while lineage-based solutions make the opposite tradeoff.
 We propose the lineage stash, a decentralized causal logging technique that significantly reduces the runtime overhead of lineage-based approaches without impacting recovery efficiency. With the lineage stash, instead of recording the task's information before the task is executed, we record it asynchronously and forward the lineage along with the task. This makes it possible to support large-scale, low-latency (millisecond-level) data processing applications with low runtime and recovery overheads. Experimental results for applications in distributed training and stream processing show that the lineage stash provides task execution latencies similar to checkpointing alone, while incurring a recovery overhead as low as traditional lineage-based approaches.
 
+@inproceedings{webirte,
+ author = {Trofimov, Artem and Sokolov, Nikita and Shavkunov, Mikhail and Kuralenok, Igor and Novikov, Boris},
+ title = {Distributed Classification of Text Streams: Limitations, Challenges, and Solutions},
+ booktitle = {Proceedings of Real-Time Business Intelligence and Analytics},
+ series = {BIRTE 2019},
+ year = {2019},
+ isbn = {978-1-4503-7660-0},
+ location = {Los Angeles, CA, USA},
+ pages = {2:1--2:6},
+ articleno = {2},
+ numpages = {6},
+ url = {http://doi.acm.org/10.1145/3350489.3350491},
+ doi = {10.1145/3350489.3350491},
+ acmid = {3350491},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {Data streams, exactly-once, reproducibility, text classification},
+} 
 
 
 
