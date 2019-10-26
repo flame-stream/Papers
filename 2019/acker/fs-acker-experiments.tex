@@ -2,15 +2,15 @@
 
 We divided our evaluation of \tracker\ into three parts. Each of these parts encapsulates logically connected experiments that measure the performance of \tracker\ mechanism in various perspectives.
 
-In Section~\ref{overhead} we demonstrate the overhead induced by \tracker\ mechanism. First, we measure the amount of extra network traffic for different cluster sizes, the number of nodes in a logical graph, and the granularity of tracking. After that we show throughput overhead on a regular processing for a fixed streaming setup. Section~\ref{completeness} contains the evaluation of \tracker\ applied to completeness monitoring problem. We measure the notification latency within various setups as well as the ability of distributed \tracker\ to scale out. Finally, in section~\ref{snapshotting}, we figure out the performance of high locality tracking with the state snapshotting problem. 
+In Section~\ref{overhead}, we demonstrate the overhead induced by \tracker\ mechanism. First, we measure the amount of extra network traffic for different cluster sizes, the number of nodes in a logical graph, and the granularity of tracking. After that, we show throughput overhead on regular processing for a fixed streaming setup. Section~\ref{completeness} contains the evaluation of \tracker\ applied to completeness monitoring problem. We measure the notification latency within various setups as well as the ability of distributed \tracker\ to scale out. Finally, in section~\ref{snapshotting}, we figure out the performance of high locality tracking with the state snapshotting problem. 
 
-As a logical graph for experiments we use a simple directed path graph of various length. All vertices just pass an input element to the next operation. All elements are re-partitioned (round-robin) before each vertex. As a baseline approach we utilize the marker-based method employed in Flink~\cite{Carbone:2017:SMA:3137765.3137777}. To have an ability to compare two techniques within the same streaming engine, we implemented both \tracker\ and marker methods on top open-source distributed stream processing system called \FlameStream\ .
+As a logical graph for experiments, we use a simple directed path graph of various lengths. All vertices simply pass an input element to the next operation. All items are re-partitioned (round-robin) before each vertex. As a baseline approach, we utilize the marker-based method employed in Flink~\cite{Carbone:2017:SMA:3137765.3137777}. To have an ability to compare two techniques within the same streaming engine, we implemented both \tracker\ and marker methods on top open-source distributed stream processing system called \FlameStream\ .
 
-% The \tracker\ of various configurations was compared with tracking using markers and no tracking at all. Elements were tracked in windows of 1, 10 and 100.
+% The \tracker\ of various configurations was compared with tracking using markers and no tracking at all. Elements were tracked in windows of 1, 10, and 100.
 
-We run all experiments on a cluster of 20 virtual machines from one of the biggest cloud providers. All these virtual machines have a single CPU and 4 GB RAM. Each machine runs a single \FlameStream\ worker.
+We run all experiments on a cluster of 20 virtual machines from one of the biggest cloud providers. All these virtual machines have a single CPU and 4 GB RAM. Each node runs a single \FlameStream\ worker.
 % One machine called a Bench Stand is used to input data into the dataflow at a fixed rate while measuring the speed of it being processed via receiving output and notifications for data being processed. 
-\tracker\ is deployed on machines excluded from a regular processing: a single one for centralized configuration and two for distributed configuration.
+We deploy \tracker\ on machines excluded from regular processing: a single one for centralized configuration and two for distributed configuration.
 
 \subsection{Network usage and overhead} \label{overhead}
 
