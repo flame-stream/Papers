@@ -27,11 +27,37 @@ Messages sent by \tracker:
 
 \tracker\ is implemented as an "actor" on a dedicated machine and is shared between all system workers. It encapsulates minimal times received from the system fronts and a cyclic buffer for storing tracked elements.
 
-Cyclic buffer stores XORs keyed by elements Global Time windows. It stores values in a fixed size range starting from current Minimal Global Time window. \tracker\ applies received Ack messages checksum changes to the corresponding value stored in the buffer.
+Cyclic buffer stores checksums keyed by elements Global Time windows. It stores values in a fixed size range starting from current Minimal Global Time window. \tracker\ applies received Ack messages checksum changes to the corresponding value stored in the buffer.
 
 \tracker\ can tell that there will be no more elements in a specific Global Time window when two conditions are fulfilled: no fronts will emit any more elements within this Global Time window and the cyclic buffer stores zero for it. Every time \tracker\ receives Acks or Heartbeats, it checks these conditions. If there are any matching windows \tracker removes them from the beginning of the buffer and broadcasts an update with the last of the windows.
 
-To prevent premature Min Time Updates this implementation has two requirements on order of processing:
+\begin{algorithm}
+\caption{\tracker}
+\begin{algorithmic}[1]
+\Procedure{HandleAck}{$time, checksum$}
+\State $checksums[time] \gets checksums[time] \bigoplus checksum$
+\State $CheckMinTime$
+\EndProcedure
+\\
+\Procedure{HandleHeartbeat}{$time$}
+\State $heartbeat \gets time$
+\State $CheckMinTime$
+\EndProcedure
+\\
+\Procedure{CheckMinTime}{}
+\State $time \gets previousMinTime$
+\While{$time < heartbeat \And checksums[time] = 0$}
+\State $time \gets time + 1$
+\EndWhile
+\If{$previousMinTime < time$}
+\State $previousMinTime \gets time$
+\State $SendMinTimeUpdate(time)$
+\EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+To prevent false Min Time Updates this implementation has two requirements on order of processing:
 
 \begin{itemize}
 	\item Initial Ack message emitted from front with an input element must be processed before the following Heartbeat message.
