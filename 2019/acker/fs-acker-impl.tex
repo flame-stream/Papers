@@ -15,7 +15,7 @@ Fronts assign Global Times to elements. They are pairs of monotonic numbers and 
 Messages received by \tracker:
 \begin{itemize}
 	\item Ack message is a pair of a Global Time window and an integer checksum change, which is a XOR product of checksums for multiple items being sent or received.
-	\item Heartbeat message is a pair of a Global Time and a Front Id, which tells the \tracker\ that the front will not emit no more elements with a lesser Global Time.
+	\item Heartbeat message is a pair of a Global Time and a Front Id, which tells the \tracker\ that the front will not emit items with a preceding Global Time anymore.
 \end{itemize}
 Messages sent by \tracker:
 \begin{itemize}
@@ -42,7 +42,7 @@ Ordering of messages per sender-receiver pair given to us by Akka framework fulf
 
 \subsection{Local \tracker\ }
 
-As \tracker\ communicates with the rest of the system via the network sending Ack messages on every sent or received item generates a lot of network traffic. A Local \tracker\ is introduced to reduce this traffic. It is deployed at every worker machine and serves as a middleware between it and the \tracker. It buffers incoming Ack and Heartbeat messages and flushes them periodically. The flushing window can be configured and  is an upper bound notifications an overhead on latency from Local \tracker.
+As \tracker\ communicates with the rest of the system via the network sending Ack messages on every sent or received item generates a lot of network traffic. A Local \tracker\ is introduced to reduce this traffic. It is deployed at every worker machine and serves as a mediator between it and the \tracker. It buffers incoming Ack and Heartbeat messages and flushes them periodically. The flushing window can be configured and  is an upper bound notifications an overhead on latency from Local \tracker.
 
 \tracker\ agggregates Heartbeat messages to the latest ones per front. \tracker\ aggregates Ack messages within the same Global Time windows to a single Ack message via XOR product. On flush Local \tracker\ sends these messages in an ordered batch: Ack messages come first in order of decreasing Global Time and Heartbeat messages come second.
 
@@ -57,17 +57,17 @@ This aggregation does not break the requirements for order of processing:
 As \tracker\ is being shared between all system machines, it is possible for it to become a system bottleneck and prevent scaling. When this becomes a problem \tracker\ and messages sent to it can be sharded:
 \begin{itemize}
 	\item Ack messages are sharded by Global Time, as it is the same for received and sent items.
-	\item Heartbeat messages could be simply broadcasted as their number is lesser than the number of Ack messages and most likely much lesser, but still they are also sharded with respect to their meaning that  front will not emit no more elements with a lesser Global Time. Considering that Ack messages with next Global Times will be sent to specific \tracker\ shards, for some \tracker\ shards Heartbeat messages Global Times can be rounded up to reduce the number of messages being sent on this Global Time updates.
+	\item Heartbeat messages could be simply broadcasted as their number is less than the number of Ack messages and most likely much less, but still they are also sharded with respect to their meaning that front will not emit items with a preceding Global Time anymore. Considering that Ack messages with next Global Times will be sent to specific \tracker\ shards, for some \tracker\ shards Heartbeat messages Global Times can be rounded up to reduce the number of messages being sent on this Global Time updates.
 \end{itemize}
 
 Min Time Update messages received from shards should be aggregated to minimum of Global Times from them which would be a minimal Global Time for the whole system.
 
 Still this sharding mechanism can cause false notifications in case of replay in Grouping operators. Let our system current Minimal Global Time be $t$, two elements with Global Times $t$ and $(t+1)$ have entered the system with Global Times being sharded to first and second \tracker\ shards accordingly, element $(t+1)$ is completely processed ahead of $t$ and has a zero checksum in second \tracker\ shard, while element $t$ is still in flight and has a non-zero checksum in first \tracker\ shard. When element $t$ is being processed it emits Ack messages with checksum change for Global Times $t$ and $(t+1)$. First Ack should change \tracker\ checksum to zero, while the second one should change its checksum from zero. As they are being sent to different shards, an order of their processing is undefined. If the first Ack message will reach its shard and make it emit an incrementing Min Time Update before the second one emits a decrementing Min Time Update then a \tracker\ listener will prematurely count both $t$ and $(t+1)$ as processed.
 
-This problem is solved using the vector clock algorithm. To make sure that both Ack messages are processed they are being followed with a broadcast of incremented clock time of the worker machine, Node Time. \tracker collects a vector of Node Times from all worker machines, attaches it to Min Time Updates and only sends them when Node Times vector changes. Min Time Update listeners collect vectors of Node Times from all acker machines and do not accept a Min Time Update message if its Node Times vector is not lesser or equal to element-wise minimum of collected vectors.
+This problem is solved using the vector clock algorithm. To make sure that both Ack messages are processed they are being followed with a broadcast of incremented clock time of the worker machine, Node Time. \tracker collects a vector of Node Times from all worker machines, attaches it to Min Time Updates and only sends them when Node Times vector changes. Min Time Update listeners collect vectors of Node Times from all acker machines and do not accept a Min Time Update message if its Node Times vector is not less than or equal to element-wise minimum of collected vectors.
 
 This solves the described problem, as the Min Time Update from second shard will not be accepted without accepting the Min Time Update from first shard and the resulting Min Time will be $(t+1)$.
 
-\subsection{Granular tracking}
+\subsection{Operation-level tracking}
 
 Our tracking mechanism can be made granular, tracking different parts of pipeline in case of directed acyclic graphs. For this we enrich Global Times with a pipeline identifier and change \tracker\ to track each pipeline part checksums in a separate buffer and limit minimal time of a pipeline part with minimal times of pipeline parts incoming into it. These changes make it possible for \tracker\ to emit Minimal Time Update messages for pipeline parts.
