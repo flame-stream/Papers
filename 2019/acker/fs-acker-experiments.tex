@@ -118,16 +118,24 @@ In those experiments we are comparing granular tracking using \tracker\ and mark
   \includegraphics[width=0.50\textwidth]{pics/buffering_sum_duration.png}
   \caption{Total buffering duration}
 \end{figure}
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.50\textwidth]{pics/buffering_latencies_evolution_acker.png}
-  \caption{Latencies with \tracker}
-\end{figure}
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.50\textwidth]{pics/buffering_latencies_evolution_watermarks.png}
-  \caption{Latencies with markers}
-\end{figure}
+
+\begin{figure*}[t!]
+    \begin{subfigure}[b]{0.32\textwidth}
+            \includegraphics[width=0.99\textwidth]{pics/buffering_latencies_barh_100.png}
+            \caption{100 ms snapshot}
+    \end{subfigure}
+    \hspace{5mm}
+    \begin{subfigure}[b]{0.32\textwidth}
+            \includegraphics[width=0.99\textwidth]{pics/buffering_latencies_barh_500.png}
+            \caption{500 ms snapshot}
+    \end{subfigure}
+    \hspace{5mm}
+    \begin{subfigure}[b]{0.32\textwidth}
+            \includegraphics[width=0.99\textwidth]{pics/buffering_latencies_barh_1000.png}
+            \caption{1000 ms snapshot}
+    \end{subfigure}
+    \caption{Post-snapshot latencies}
+\end{figure*}
 
 \subsection{Count iterations?}
 
