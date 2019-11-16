@@ -4,7 +4,7 @@ We divided our evaluation of \tracker\ into three parts. Each of these parts enc
 
 In Section~\ref{overhead}, we demonstrate the overhead induced by \tracker\ mechanism. First, we measure the amount of extra network traffic for different cluster sizes, the number of nodes in a logical graph, and the granularity of tracking. After that, we show throughput overhead on regular processing for a fixed streaming setup. Section~\ref{completeness} contains the evaluation of \tracker\ applied to completeness monitoring problem. We measure the notification latency within various setups as well as the ability of distributed \tracker\ to scale out. Finally, in section~\ref{snapshotting}, we figure out the performance of operator-level tracking with the state snapshotting problem. 
 
-As a baseline approach, we utilize the marker-based method employed in Flink~\cite{Carbone:2017:SMA:3137765.3137777}. To have an ability to compare two techniques within the same streaming engine, we implemented both \tracker\ and marker methods on the top open-source distributed streaming system called \FlameStream\ . \FlameStream\ has similar to state-of-the-art stream processing systems (Flink, Storm, etc.) functionality and use-cases. We did not exploit any system-specific features during the implementation of tracking methods.
+As a baseline approach, we utilize the marker-based method employed in Flink~\cite{Carbone:2017:SMA:3137765.3137777}. To have an ability to compare two techniques within the same streaming engine, we implemented both \tracker\ and marker methods on the top open-source distributed streaming system called \FlameStream . \FlameStream\ has similar to state-of-the-art stream processing systems (Flink, Storm, etc.) functionality and use-cases. We did not exploit any system-specific features during the implementation of tracking methods.
 
 As a logical graph for experiments, we use simple directed graphs of various lengths. All vertices pass an input element to the next operation. All items are re-partitioned (round-robin) before each vertex. This setup does not induce possible overhead by heavy computations while covering many real-life scenarios. Graphs with few vertices (under 30) may fit almost any acyclic streaming pipeline~\cite{akidau2018streaming}. On the other hand, more massive pipelines can be considered as flattened iterative dataflows such as PageRank or Connected Components~\cite{Murray:2013:NTD:2517349.2522738, xu2016efficient}. 
 
@@ -41,19 +41,26 @@ We can measure the extra load provided by tracking mechanisms in a number of ser
 
 As it is shown in Figure~\ref{traffic_graph}, service traffic for markers linearly depends on the dataflow size, because each new logical vertex adds network broadcasting of markers on a physical level. Dependency from the number of computational nodes is quadratic due to the need to broadcast markers to each node after all operators. The number of sent service messages for markers also directly depends on the tracking granularity. For example, the system should broadcast markers after each streaming element in every operator to implement tracking of individual items. 
 
-In the case of~\tracker\ , service traffic depends on the logical graph size and the number of machines as well. The growth has a linear trend but can be significantly reduced with the local~\tracker\ optimization. Distributed \tracker\ without optimizations provides ~10x less service than markers traffic for a graph with 10 vertices, and ~30x decrease for a graph with 100 vertices. Regarding the number of machines, the difference is ~10x for 10 nodes, and ~30x for 20 nodes. Besides, local \tracker\ optimization allows the system to reduce traffic in up to 5 times in comparison with plain distributed \tracker\ .
+In the case of~\tracker , service traffic depends on the logical graph size and the number of machines as well. The growth has a linear trend but can be significantly reduced with the local~\tracker\ optimization. Distributed \tracker\ without optimizations provides ~10x less service than markers traffic for a graph with 10 vertices, and ~30x decrease for a graph with 100 vertices. Regarding the number of machines, the difference is ~10x for 10 nodes, and ~30x for 20 nodes. Besides, local \tracker\ optimization allows the system to reduce traffic in up to 5 times in comparison with plain distributed \tracker .
 
 % Network traffic was measured in number of separate service messages sent over the network. 
 % Local \tracker\ was sending messages in batches.
 
 \subsubsection{Overhead on throughput} \label{overhead}
 
-In those experiments we compare maximum throughput of system without tracking to systems with various trackings. \tracker's overhead on maximum throughput is not substantial and does not depend on tracking window frequency. Overhead of tracking with markers is huge when tracking every element.
+In this experiment, we measure the median latency of regular processing, depending on the input rate (input elements per millisecond). The growth of median latency indicates the system overloading. Input rate that corresponds to the point where latency starts to growth indicates a {\em sustainable throughput}~\cite{karimov2018benchmarking}.
+
+Figure~\ref{throughput_overhead} indicates the results of the experiment. The system without tracking at all starts to be overloaded since ~8 items per millisecond rate as well as the system with fine-grained centralized~\tracker\ setup. Overloading with the marker-based approach starts earlier and depends on the granularity of tracking: fine-grained setup does not sustain even 1 item per millisecond. Markers achieve similar to centralized~\tracker\ results only when they are injected once per 50 input elements.
+
+This experiment shows that markers significantly bound throughput of regular processing. It is explained by the heavy extra network traffic that we demonstrated in the previous experiment. Note that this additional traffic goes through the same network channels as ordinary data items. On the other hand, \tracker\ almost does not provide additional system load due to lower extra network load and the exploiting of other network channels.
+
+% In those experiments we compare maximum throughput of system without tracking to systems with various trackings. \tracker's overhead on maximum throughput is not substantial and does not depend on tracking window frequency. Overhead of tracking with markers is huge when tracking every element.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.50\textwidth]{pics/throughput_overhead_50.png}
   \caption{Throughput overhead}
+  \label{throughput_overhead}
 \end{figure}
 
 \subsection{Completeness monitoring} \label{completeness}
