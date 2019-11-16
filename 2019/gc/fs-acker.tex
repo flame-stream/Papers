@@ -1,0 +1,91 @@
+\documentclass{vldb}
+
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{algorithm} % for algorithms
+\usepackage{algpseudocode}
+% \usepackage{booktabs} % For formal tables
+% `\usepackage{amsthm} % For claims
+\usepackage{balance}  % for  \balance command ON LAST PAGE  (only there!)
+\usepackage{caption}
+\usepackage{subcaption}
+
+% \theoremstyle{remark}
+
+\pagestyle{empty} % removes running headers
+
+\newcommand{\PicScale}{0.5}
+\newcommand {\FlameStream} {FlameStream}
+\newcommand {\tracker} {trAcker}
+\newcommand {\acker} {Acker}
+
+% Include information below and uncomment for camera ready
+\vldbTitle{Tracking Dependencies in Distributed Streaming Dataflows}
+\vldbAuthors{Nikita Sokolov, Artem Trofimov, Igor Kuralenok, Nikita Marshalkin, and Boris Novikov}
+\vldbDOI{https://doi.org/10.14778/xxxxxxx.xxxxxxx}
+\vldbVolume{12}
+\vldbNumber{xxx}
+\vldbYear{2019}
+
+\begin{document}
+
+\title {Garbage Collection in Distributed Streaming Dataflows}
+
+\numberofauthors{5}
+
+\author{
+\alignauthor
+Nikita Sokolov\\
+    \affaddr{ITMO University}\\
+    \affaddr{Saint Petersburg, Russia}\\
+    \email{faucct@gmail.com}
+\alignauthor
+Artem Trofimov\\
+    \affaddr{Yandex}\\
+    \affaddr{Saint Petersburg, Russia}\\
+    \email{tomato@yandex-team.ru}
+\alignauthor
+Igor Kuralenok\\
+    \affaddr{Yandex}\\
+    \affaddr{Saint Petersburg, Russia}\\
+    \email{solar@yandex-team.ru}
+\and 
+\alignauthor
+Nikita Marshalkin\\
+    \affaddr{VK}\\
+    \affaddr{Saint Petersburg, Russia}\\
+    \email{n.marshalkin@corp.vk.com}
+\alignauthor
+Boris Novikov\\
+    \affaddr{National Research University Higher School of Economics}\\
+    \affaddr{Saint Petersburg, Russia}\\
+    \email{borisnov@acm.org}
+}
+
+\maketitle
+
+\begin{abstract}
+%The majority of state-of-the-art stream processing systems faces a problem of obtaining notifications when the specific set of input elements have already been applied to all operators in a dataflow. Such notifications are commonly used to take consistent state snapshots or to release all descendants of an input element atomically while preserving exactly-once delivery guarantee. To generate these notifications, there is a need to track dependencies between input and their descendants and to inform when all descendants have been completely processed. In this work, we propose a method for tracking dependencies between streaming elements that can be applied for both cyclic (iterative) and acyclic dataflows. We demonstrate that our technique has low latency and throughput overhead within various setups and can significantly outperform methods employed by state-of-the-art stream processing systems.
+
+%In distributed stream processing, it is hard to determine a correspondence between input and output elements due to complex transformations, filterings, producing multiple items from a single, and so on. On the other hand, mechanisms for taking consistent state snapshots and for transactional stream processing require notifications when a system has already processed a specific set of input elements together with all their descendants. To produce these notifications, one needs to track dependencies between items in a dataflow. In this work, we propose a method for monitoring dependencies between streaming elements applicable to cyclic dataflows as well. We enrich each data item with a logical timestamp that identifies corresponding input items. We build a scalable method to watch for the computational progress and to notify when dataflow contains no elements with specific timestamps. These notifications indicate when a system completely processed all descendants of concrete input elements. We demonstrate that our technique provides low notification latency while having almost no throughput overhead on regular processing, and can outperform methods employed by state-of-the-art stream processing systems.
+
+% In distributed stream processing, a system often needs to determine a correspondence between input and output elements, e.g. to take state snapshot affected by  or to release all descendants of an input element atomically while preserving exactly-once delivery guarantee. This task is hard due to complex transformations, filterings, producing multiple elements from a single, etc. 
+
+In distributed stream processing, it is often required to manage in-memory state for independent keys with undefined lifetime, for example user sessions. These keys can be either internal or external. Such state includes buffers for joining streams. When this state is no longer required, it could be dumped to disk or even deleted. In this work, we propose a method for monitoring a presence of in-flight elements per key applicable to cyclic dataflows as well. We demonstrate that our method provides low notification latency and compare its memory footprint with methods employed by state-of-the-art stream processing systems.
+
+\end{abstract}
+
+% \keywords{Data streams, exactly-once, drifting state, optimistic OOP}
+
+\thispagestyle{empty}
+
+\section {Conclusion}
+\input {fs-acker-conclusion.tex}
+
+\bibliographystyle{abbrvurl}
+\bibliography{../../bibliography/flame-stream}
+
+\end {document}
+
+\endinput

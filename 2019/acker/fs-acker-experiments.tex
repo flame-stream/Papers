@@ -61,7 +61,6 @@ In those experiments we compare maximum throughput of system without tracking to
 Notification latency was measured as a time between moments of Bench Stand receiving last elements in tracking windows and notifications for that window.
 
 % https://gist.github.com/faucct/032aaf6240db361d30a184b1d7bf3c8e
-\begin{figure*}[t!]
     \begin{subfigure}[b]{0.32\textwidth}
             \includegraphics[width=0.99\textwidth]{pics/notification_await_time_by_graph_size_bars.png}
             \caption{Notification latency by graph size}
@@ -78,6 +77,22 @@ Notification latency was measured as a time between moments of Bench Stand recei
 	\end{subfigure}
     \caption{Notification latency of various trackings}
 \end{figure*}
+
+\subsubsection{Overhead on throughput} \label{overhead}
+
+In those experiments we compare maximum throughput of system without tracking to systems with various trackings. \tracker's overhead on maximum throughput is not substantial and does not depend on tracking window frequency. Overhead of tracking with markers is huge when tracking every element.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.50\textwidth]{pics/throughput_overhead_50.png}
+  \caption{Throughput overhead}
+\end{figure}
+
+\subsection{Completeness monitoring} \label{completeness}
+
+\subsubsection{Notification latency}
+
+Notification latency was measured as a time between moments of Bench Stand receiving last elements in tracking windows and notifications for that window.
 
 \subsubsection{Scalability}
 
