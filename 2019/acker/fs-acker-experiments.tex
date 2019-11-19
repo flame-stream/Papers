@@ -46,20 +46,20 @@ In the case of~\tracker , service traffic depends on the logical graph size and 
 % Network traffic was measured in number of separate service messages sent over the network. 
 % Local \tracker\ was sending messages in batches.
 
-\subsubsection{Overhead on throughput} \label{overhead}
+\subsubsection{Overhead on throughput}
 
-In this experiment, we measure the median latency of regular processing, depending on the input rate (input elements per millisecond). The growth of median latency indicates the system overloading. Input rate that corresponds to the point where latency starts to growth indicates a {\em sustainable throughput}~\cite{karimov2018benchmarking}.
+In this experiment, we measure the median latency of regular processing, depending on the input rate (input elements per millisecond). The growth of median latency indicates system overloading. Input rate that corresponds to the point where latency starts to growth indicates a {\em sustainable throughput}~\cite{karimov2018benchmarking}.
 
-Figure~\ref{throughput_overhead} indicates the results of the experiment. The system without tracking at all starts to be overloaded since ~8 items per millisecond rate as well as the system with fine-grained centralized~\tracker\ setup. Overloading with the marker-based approach starts earlier and depends on the granularity of tracking: fine-grained setup does not sustain even 1 item per millisecond. Markers achieve similar to centralized~\tracker\ results only when they are injected once per 50 input elements.
+Figure~\ref{throughput_overhead} demonstrates the results of the experiment. The system without tracking at all starts to be overloaded since $\sim 9$ items per millisecond rate. The system with the finest-grained centralized~\tracker\ setup provides $\sim 7$ items per millisecond sustainable throughput. Overloading with the marker-based approach depends on the granularity of tracking: the finest-grained setup does not sustain even 1 item per millisecond, while the setup with the granularity of 10 has $\sim 2$ records per millisecond throughput. Markers achieve similar to centralized~\tracker\ throughput ($\sim 5$ items per millisecond) only when they are injected once per 50 input elements.
 
-This experiment shows that markers significantly bound throughput of regular processing. It is explained by the heavy extra network traffic that we demonstrated in the previous experiment. Note that this additional traffic goes through the same network channels as ordinary data items. On the other hand, \tracker\ almost does not provide additional system load due to lower extra network load and the exploiting of other network channels.
+This experiment shows that markers significantly bound throughput of regular processing within the fine-grained setups. It is explained by the heavy extra network traffic that we demonstrated in the previous experiment. Note that this additional traffic goes through the same network channels as ordinary data items to ensure that markers do not overtake ordinary records. On the other hand, \tracker\ provides less additional system load due to lower extra network usage and the exploiting of additional network channels.
 
 % In those experiments we compare maximum throughput of system without tracking to systems with various trackings. \tracker's overhead on maximum throughput is not substantial and does not depend on tracking window frequency. Overhead of tracking with markers is huge when tracking every element.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.50\textwidth]{pics/throughput_overhead_50.png}
-  \caption{Throughput overhead}
+  \caption{Tracking overhead on a processing throughput}
   \label{throughput_overhead}
 \end{figure}
 
