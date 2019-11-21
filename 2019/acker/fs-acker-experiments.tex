@@ -1,17 +1,3 @@
-\label {fs-acker-experiments}
-
-We divided our evaluation of \tracker\ into three parts. Each of these parts encapsulates logically connected experiments that measure the performance of \tracker\ mechanism in various perspectives.
-
-In Section~\ref{overhead}, we demonstrate the overhead induced by \tracker\ mechanism. First, we measure the amount of extra network traffic for different cluster sizes, the number of nodes in a logical graph, and the granularity of tracking. After that, we show throughput overhead on regular processing for a fixed streaming setup. Section~\ref{completeness} contains the evaluation of \tracker\ applied to completeness monitoring problem. We measure the notification latency within various setups as well as the ability of distributed \tracker\ to scale out. Finally, in section~\ref{snapshotting}, we figure out the performance of operator-level tracking with the state snapshotting problem. 
-
-As a baseline approach, we utilize the marker-based method employed in Flink~\cite{Carbone:2017:SMA:3137765.3137777}. To have an ability to compare two techniques within the same streaming engine, we implemented both \tracker\ and marker methods on the top open-source distributed streaming system called \FlameStream . \FlameStream\ has similar to state-of-the-art stream processing systems (Flink, Storm, etc.) functionality and use-cases. We did not exploit any system-specific features during the implementation of tracking methods.
-
-As a logical graph for experiments, we use simple directed graphs of various lengths. All vertices pass an input element to the next operation. All items are re-partitioned (round-robin) before each vertex. This setup does not induce possible overhead by heavy computations while covering many real-life scenarios. Graphs with few vertices (under 30) may fit almost any acyclic streaming pipeline~\cite{akidau2018streaming}. On the other hand, more massive pipelines can be considered as flattened iterative dataflows such as PageRank or Connected Components~\cite{Murray:2013:NTD:2517349.2522738, xu2016efficient}. 
-
-We run all experiments on a cluster of 20 virtual machines with a single CPU and 4 GB RAM from one of the biggest cloud providers. Each node runs a \FlameStream\ worker. We deploy \tracker\ on nodes excluded from regular processing: a single one for centralized configuration and two for distributed configuration. If it is not specified, the number of machines used in an experiment is 15, the graph size is 30, and the granularity (how accurately an input element can be determined by an output) is 10.
-
-\subsection{Network usage and overhead} \label{overhead}
-
 % https://gist.github.com/faucct/032aaf6240db361d30a184b1d7bf3c8e
 \begin{figure*}[t!]
     \begin{subfigure}[b]{0.32\textwidth}
@@ -34,6 +20,20 @@ We run all experiments on a cluster of 20 virtual machines with a single CPU and
     \caption{Service network traffic of marker-based approach and various \tracker\ setups}
     \label{traffic_plots}
 \end{figure*}
+
+\label {fs-acker-experiments}
+
+We divided our evaluation of \tracker\ into three parts. Each of these parts encapsulates logically connected experiments that measure the performance of \tracker\ mechanism in various perspectives.
+
+In Section~\ref{overhead}, we demonstrate the overhead induced by \tracker\ mechanism. First, we measure the amount of extra network traffic for different cluster sizes, the number of nodes in a logical graph, and the granularity of tracking. After that, we show throughput overhead on regular processing for a fixed streaming setup. Section~\ref{completeness} contains the evaluation of \tracker\ applied to completeness monitoring problem. We measure the notification latency within various setups as well as the ability of distributed \tracker\ to scale out. Finally, in section~\ref{snapshotting}, we figure out the performance of operator-level tracking with the state snapshotting problem. 
+
+As a baseline approach, we utilize the marker-based method employed in Flink~\cite{Carbone:2017:SMA:3137765.3137777}. To have an ability to compare two techniques within the same streaming engine, we implemented both \tracker\ and marker methods on the top open-source distributed streaming system called \FlameStream . \FlameStream\ has similar to state-of-the-art stream processing systems (Flink, Storm, etc.) functionality and use-cases. We did not exploit any system-specific features during the implementation of tracking methods.
+
+As a logical graph for experiments, we use simple directed graphs of various lengths. All vertices pass an input element to the next operation. All items are re-partitioned (round-robin) before each vertex. This setup does not induce possible overhead by heavy computations while covering many real-life scenarios. Graphs with few vertices (under 30) may fit almost any acyclic streaming pipeline~\cite{akidau2018streaming}. On the other hand, more massive pipelines can be considered as flattened iterative dataflows such as PageRank or Connected Components~\cite{Murray:2013:NTD:2517349.2522738, xu2016efficient}. 
+
+We run all experiments on a cluster of 20 virtual machines with a single CPU and 4 GB RAM from one of the biggest cloud providers. Each node runs a \FlameStream\ worker. We deploy \tracker\ on nodes excluded from regular processing: a single one for centralized configuration and two for distributed configuration. If it is not specified, the number of machines used in an experiment is 15, the graph size is 30, and the granularity (how accurately an input element can be determined by an output) is 10.
+
+\subsection{Network usage and overhead} \label{overhead}
 
 \subsubsection{Network traffic}
 
@@ -129,45 +129,53 @@ Without the extra load, distributed \tracker\ provides similar results as a cent
 
 The experiments demonstrate that even centralized \tracker\ can sustain a high input rate within 20 computational nodes. Besides, the distributed version of \tracker\ can make the completeness monitoring mechanism scalable in larger setups.
 
-% Figure~\ref{notification_scalability} 
-% In those experiments we are reproducing a case in which the centralized \tracker\ was not holding the load, while the distributed \tracker\ was working. We have failed to reproduce it while using 100 machines running our dataflow. Still, we have been able to simulate it by increasing the total number of Ack messages.
+\begin{figure*}[t!]
+    \begin{subfigure}[b]{0.32\textwidth}
+            \includegraphics[width=0.99\textwidth]{pics/buffering_latencies_barh_100.png}
+            \caption{100 ms snapshot duration}
+            \label{100ms_snapshot}
+    \end{subfigure}
+    \hspace{5mm}
+    \begin{subfigure}[b]{0.32\textwidth}
+            \includegraphics[width=0.99\textwidth]{pics/buffering_latencies_barh_500.png}
+            \caption{500 ms snapshot duration}
+            \label{500ms_snapshot}
+    \end{subfigure}
+    \hspace{5mm}
+    \begin{subfigure}[b]{0.32\textwidth}
+            \includegraphics[width=0.99\textwidth]{pics/buffering_latencies_barh_1000.png}
+            \caption{1000 ms snapshot duration}
+            \label{1000ms_snapshot}
+    \end{subfigure}
+    \caption{Latency spikes during state snapshotting}
+    \label{snapshot_spikes}
+\end{figure*}
 
 \subsection{State snapshotting} \label{snapshotting}
 
-In those experiments we are comparing granular tracking using \tracker\ and markers. Processed elements are divided into snapshot windows. Pipeline vertices only process elements from a current snapshot window and buffer ones from a next snapshot window until they receive a notification that all elements from a current snapshot have been processed. When this happens vertices imitate snapshotting with a fixed duration sleep and continue to process elements from next snapshot window. We have measured a number of buffered elements and total time they have spent in buffer varying the snapshot duration.
+As we mentioned above, another important application of dependency tracking mechanisms is state snapshotting. Typically, state snapshotting is implemented as follows: a streaming system divides input records into the continuous parts called epochs. When an operator entirely processes all items from a particular epoch, it blocks all inputs and persistently saves its local state. Each operator can receive the notification and start to save its state independently from other operators. Hence, there is a need for operator-level dataflow locality of tracking. Flink~\cite{Carbone:2017:SMA:3137765.3137777}, Storm~\cite{apache:storm:state}, IBM Streams~\cite{jacques2016consistent}, and Heron~\cite{Kulkarni:2015:THS:2723372.2742788} implement this state snapshotting scheme. All these systems use marker-based techniques to provide notifications for operators.
+
+A dependency tracking mechanism can imply latency overhead on this protocol. In the case of markers, the overhead is caused by blocking an operator after the first marker is received and until the operator receives markers from all inputs. This behavior is known as {\em marker alignment} issue~\cite{Carbone:2017:SMA:3137765.3137777}. In the case of \tracker\ , an operator must buffer element from the next epoch until {\em MinTimeUpdate} for the previous epoch is received.
+
+Figure~\ref{snapshot_spikes} demonstrates latency spikes during state snapshotting for markers and \tracker\ , depending on the persistent save duration. In general, \tracker\ provides 50-120 milliseconds fewer latency spikes. This difference is significant regarding the setup (WHICH SETUP????). The low notification latency explains this difference, as we demonstrated in Section~\ref{completeness}. Low notification latency leads to a smaller number of elements that need to wait (be buffered), as it is shown if Figure~\ref{snapshot_buffered}. The smaller number of buffered records causes lower buffering duration that implies lower spikes in general.
+
+This experiment indicates that \tracker\ can provide better results for a common problem that is traditionally solved using markers. This result also shows that operator-level locality of tracking can be implemented efficiently with \tracker .
 
 % https://gist.github.com/faucct/6097d9d08197cb979b71721b16f8b6a3/
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.50\textwidth]{pics/buffering_average_duration_bars.png}
-  \caption{Average buffering duration}
-\end{figure}
+% \begin{figure}[htbp]
+%   \centering
+%   \includegraphics[width=0.50\textwidth]{pics/buffering_average_duration_bars.png}
+%   \caption{Average buffering duration}
+% \end{figure}
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.50\textwidth]{pics/buffering_count_bars.png}
   \caption{Buffered elements count}
+  \label{snapshot_buffered}
 \end{figure}
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.50\textwidth]{pics/buffering_sum_duration_bars.png}
   \caption{Total buffering duration}
 \end{figure}
-
-\begin{figure*}[t!]
-    \begin{subfigure}[b]{0.32\textwidth}
-            \includegraphics[width=0.99\textwidth]{pics/buffering_latencies_barh_100.png}
-            \caption{100 ms snapshot}
-    \end{subfigure}
-    \hspace{5mm}
-    \begin{subfigure}[b]{0.32\textwidth}
-            \includegraphics[width=0.99\textwidth]{pics/buffering_latencies_barh_500.png}
-            \caption{500 ms snapshot}
-    \end{subfigure}
-    \hspace{5mm}
-    \begin{subfigure}[b]{0.32\textwidth}
-            \includegraphics[width=0.99\textwidth]{pics/buffering_latencies_barh_1000.png}
-            \caption{1000 ms snapshot}
-    \end{subfigure}
-    \caption{Post-snapshot latencies}
-\end{figure*}
 
