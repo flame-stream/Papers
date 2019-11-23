@@ -72,7 +72,11 @@ Boris Novikov\\
 
 % In distributed stream processing, a system often needs to determine a correspondence between input and output elements, e.g. to take state snapshot affected by  or to release all descendants of an input element atomically while preserving exactly-once delivery guarantee. This task is hard due to complex transformations, filterings, producing multiple elements from a single, etc. 
 
-In distributed stream processing, it is often required to manage in-memory state for independent keys with undefined lifetime, for example user sessions. These keys can be either internal or external. Such state includes buffers for joining streams. When this state is no longer required, it could be dumped to disk or even deleted. In this work, we propose a method for monitoring a presence of in-flight elements per key applicable to cyclic dataflows as well. We demonstrate that our method provides low notification latency and compare its memory footprint with methods employed by state-of-the-art stream processing systems.
+In distributed stream processing, it is often required to manage in-memory state, e.g. buffers for joining streams. This state is often partitioned by independent keys, for example by user session identifier. When these keys reach their end of life, the state related to them can no longer be reached and could be dumped to disk or even deleted. Unless freed, this state can grow limitless.
+
+Another problem in distributed stream processing is uneven distribution of workload between machines as a result of most popular or hot keys being partitioned together.
+
+In this work, we propose a method for monitoring an amount of in-flight elements per key, which can be used to solve the mentioned problems and is applicable to cyclic dataflows as well. We demonstrate that our method provides low notification latency and its memory footprint is less than ones of methods employed by state-of-the-art stream processing systems.
 
 \end{abstract}
 
