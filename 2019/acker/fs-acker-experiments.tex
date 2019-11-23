@@ -27,11 +27,11 @@ We divided our evaluation of \tracker\ into three parts. Each of these parts enc
 
 In Section~\ref{overhead}, we demonstrate the overhead induced by \tracker\ mechanism. First, we measure the amount of extra network traffic for different cluster sizes, the number of nodes in a logical graph, and the granularity of tracking. After that, we show throughput overhead on regular processing for a fixed streaming setup. Section~\ref{completeness} contains the evaluation of \tracker\ applied to completeness monitoring problem. We measure the notification latency within various setups as well as the ability of distributed \tracker\ to scale out. Finally, in section~\ref{snapshotting}, we figure out the performance of operator-level tracking with the state snapshotting problem. 
 
-As a baseline approach, we utilize the marker-based method employed in Flink~\cite{Carbone:2017:SMA:3137765.3137777}. To have an ability to compare two techniques within the same streaming engine, we implemented both \tracker\ and marker methods on the top open-source distributed streaming system called \FlameStream . \FlameStream\ has similar to state-of-the-art stream processing systems (Flink, Storm, etc.) functionality and use-cases. We did not exploit any system-specific features during the implementation of tracking methods.
+As a baseline approach, we utilize the marker-based method employed in many state-of-the-art stream processing systems such as Flink~\cite{Carbone:2017:SMA:3137765.3137777}, Storm~\cite{apache:storm:state}, Heron~\cite{Kulkarni:2015:THS:2723372.2742788}, IBM Streams~\cite{jacques2016consistent}, etc. This technique, as well as alternatives, is detailed in Section~\ref{existing_solutions}. Unlike other mentioned techniques, markers support fine granularity and operator-level locality of tracking. To have an ability to compare two techniques within the same streaming engine, we implemented both \tracker\ and marker methods on the top open-source distributed streaming system called \FlameStream . \FlameStream\ has similar to state-of-the-art stream processing systems (Flink, Storm, etc.) functionality and use-cases. We did not exploit any system-specific features during the implementation of tracking methods.
 
 As a logical graph for experiments, we use simple directed graphs of various lengths. All vertices pass an input element to the next operation. All items are re-partitioned (round-robin) before each vertex. This setup does not induce possible overhead by heavy computations while covering many real-life scenarios. Graphs with few vertices (under 30) may fit almost any acyclic streaming pipeline~\cite{akidau2018streaming}. On the other hand, more massive pipelines can be considered as flattened iterative dataflows such as PageRank or Connected Components~\cite{Murray:2013:NTD:2517349.2522738, xu2016efficient}. 
 
-We run all experiments on a cluster of 20 virtual machines with a single CPU and 4 GB RAM from one of the biggest cloud providers. Each node runs a \FlameStream\ worker. We deploy \tracker\ on nodes excluded from regular processing: a single one for centralized configuration and two for distributed configuration. If it is not specified, the number of machines used in an experiment is 15, the graph size is 30, and the granularity (how accurately an input element can be determined by an output) is 10.
+We run all experiments on a cluster of 20 virtual machines with a single CPU and 4 GB RAM from one of the biggest cloud providers. Each node runs a \FlameStream\ worker. We deploy \tracker\ on nodes excluded from regular processing: a single one for centralized configuration and two for distributed configuration. If it is not specified, the number of machines used in an experiment is 20, the graph size is 30, and the granularity is 10. 
 
 \subsection{Network usage and overhead} \label{overhead}
 
@@ -105,7 +105,7 @@ This experiment shows that markers significantly bound throughput of regular pro
             \caption{9x acks}
             \label{9x_acks}
 	\end{subfigure}
-    \caption{\tracker scalability}
+    \caption{\tracker\ scalability}
     \label{notification_scalability}
 \end{figure*}
 
