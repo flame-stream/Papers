@@ -1,13 +1,16 @@
 \label {fs-acker-conclusion}
 
-In this work, we formulated and formalized problems of freeing in-memory state per internal and external independent keys.
+In this work, we formulated and formalized a problem of freeing independent in-memory state per surrogate and natural keys and a problem of detecting hot keys.
 
-To solve this problem, we proposed a mechanism that adopts ideas from the Apache Storm completion tracking mechanism called \acker. We track if dataflow contains elements with specific independent keys and can free state in this case. Our solution, called \tracker, provides the following features:
+To solve the problems, we proposed a mechanism that adopts ideas from the Apache Storm completion tracking mechanism called \acker. We track number of dataflow elements with specific independent keys and notify when there are no more left or when the system load is unevenly distributed. Our solution, called \tracker, provides the following features:
 \begin{itemize}
-    \item {\bf Fine-grained tracking:} \tracker\ efficiently watches and provides notifications that system completely processed input items with a specific key.
+    \item {\bf Fine-grained tracking:} \tracker\ efficiently watches and provides notifications that the system has completely processed input items with a specific key.
     \item {\bf Cyclic graphs support:} proposed mechanism works for cyclic execution graphs, and that makes it suitable for iterative dataflows as well. 
     \item {\bf Low overhead:} \tracker\ does not produce any significant performance penalty and does not affect the throughput of a distributed streaming dataflow.
-    \item {\bf Confidence:} \tracker\ lets you completely delete state for internal keys as it ensures that all elements that may require it have been completely processed.
 \end{itemize}
 
-We have tested the proposed method in three stream processing tasks: TF-IDF, an abstract Log Service and Descendant Query. We compared the proposed method with two baseline approaches: Last Recently Used (LRU) cache and one based on the checkpointing mechanism used in Apache Flink. We demonstrated that our implementation of \tracker\ provide lower memory footprint. Experiments also showed that \tracker\ has lower throughput overhead in case of fine-grained tracking.
+We have tested the proposed method in three stream processing tasks: text classification, User Session Log Service and Descendant Query.
+
+We compared the proposed method of state freeing with two baseline approaches: Last Recently Used and Last Frequently Used caches, TTL and punctuations based on markers used in Apache Flink. We demonstrated that our method provide lower memory footprint.
+
+We also tested the proposed method of hot keys tracking. We demonstrated that it is able to detect uneven load distribution and propose an even repartition.
