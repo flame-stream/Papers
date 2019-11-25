@@ -36,6 +36,92 @@ To have an ability to compare two techniques within the same streaming engine, w
 We did not exploit any system-specific features during the implementation of tracking methods.
 
 As a logical graph for experiments, we use simple directed graphs of various lengths. All vertices pass an input element to the next operation. All items are re-partitioned (round-robin) before each vertex. This setup does not induce possible overhead by heavy computations while covering many real-life scenarios. Graphs with few vertices (under 30) may fit almost any acyclic streaming pipeline~\cite{akidau2018streaming}. 
+
+\begin{tikzpicture}[%
+   ->, 
+   >=stealth,
+   shorten >=1pt,
+   node distance=1.2cm,
+   thick,
+   every state/.style={%
+   fill=white,
+   draw=black,
+   text=black
+  }   
+  ]
+    \node[draw, circle] (I_1) [draw=none] {};
+    \node[draw, circle] (I_2) [below of=I_1,draw=none] {};
+    \node[draw, circle] (I_dots) [below of=I_2,draw=none] {};
+    \node[draw, circle] (I_3) [below of=I_dots,draw=none] {};
+
+    \node[draw, circle] (A_1) [right of=I_1] {};
+    \node[draw, circle] (A_2) [below of=A_1] {};
+    \node[draw, circle] (A_dots) [below of=A_2,draw=none] {$\ldots$};
+    \node[draw, circle] (A_3) [below of=A_dots] {};
+
+    \node[draw, circle] (B_1) [right of=A_1] {};
+    \node[draw, circle] (B_2) [below of=B_1] {};
+    \node[draw, circle] (B_dots) [below of=B_2,draw=none] {$\ldots$};
+    \node[draw, circle] (B_3) [below of=B_dots] {};
+
+    \node[draw, circle] (Dots_1) [right of=B_1,draw=none] {$\ldots$};
+    \node[draw, circle] (Dots_2) [below of=Dots_1,draw=none] {$\ldots$};
+    \node[draw, circle] (Dots_dots) [below of=Dots_2,draw=none] {$\ldots$};
+    \node[draw, circle] (Dots_3) [below of=Dots_dots,draw=none] {$\ldots$};
+
+    \node[draw, circle] (Z_1) [right of=Dots_1] {};
+    \node[draw, circle] (Z_2) [below of=Z_1] {};
+    \node[draw, circle] (Z_dots) [below of=Z_2,draw=none] {$\ldots$};
+    \node[draw, circle] (Z_3) [below of=Z_dots] {};
+
+    \node[draw, circle] (O_1) [right of=Z_1,draw=none] {};
+    \node[draw, circle] (O_2) [below of=O_1,draw=none] {};
+    \node[draw, circle] (O_dots) [below of=O_2,draw=none] {};
+    \node[draw, circle] (O_3) [below of=O_dots,draw=none] {};
+
+    \path
+          (I_1) edge (A_1)
+          (I_2) edge (A_2)
+          (I_dots) edge (A_dots)
+          (I_3) edge (A_3)
+          (A_1) edge (B_1)
+          (A_1) edge (B_2)
+          (A_1) edge (B_3)
+          (A_2) edge (B_1)
+          (A_2) edge (B_2)
+          (A_2) edge (B_3)
+          (A_3) edge (B_1)
+          (A_3) edge (B_2)
+          (A_3) edge (B_3)
+          (B_1) edge (Dots_1)
+          (B_1) edge (Dots_2)
+          (B_1) edge (Dots_3)
+          (B_2) edge (Dots_1)
+          (B_2) edge (Dots_2)
+          (B_2) edge (Dots_3)
+          (B_3) edge (Dots_1)
+          (B_3) edge (Dots_2)
+          (B_3) edge (Dots_3)
+          (Dots_1) edge (Z_1)
+          (Dots_1) edge (Z_2)
+          (Dots_1) edge (Z_3)
+          (Dots_2) edge (Z_1)
+          (Dots_2) edge (Z_2)
+          (Dots_2) edge (Z_3)
+          (Dots_3) edge (Z_1)
+          (Dots_3) edge (Z_2)
+          (Dots_3) edge (Z_3)
+          (Z_1) edge (O_1)
+          (Z_2) edge (O_2)
+          (Z_dots) edge (O_dots)
+          (Z_3) edge (O_3)
+          ;
+      \draw[-,thick,decorate,decoration={brace,amplitude=5pt,mirror}]
+            ([xshift=-5pt]I_1.center) -- ([xshift=-5pt]I_3.center) node[midway, left=4pt] {Workers};
+      \draw[-,thick,decorate,decoration={brace,amplitude=5pt}]
+            ([xshift=-5pt, yshift=5pt]A_1.center) -- ([xshift=5pt, yshift=5pt]Z_1.center) node[midway, above=5pt] {Layers};
+\end{tikzpicture}
+
 On the other hand, more massive pipelines can be considered as flattened iterative dataflows such as PageRank or Connected Components~\cite{Murray:2013:NTD:2517349.2522738, xu2016efficient}. 
 
 We run all experiments on a cluster of 20 virtual machines with a single CPU and 4 GB RAM from one of the biggest cloud providers. Each node runs a \FlameStream\ worker. We deploy \tracker\ on nodes excluded from regular processing: a single one for centralized configuration and two for distributed configuration. If it is not specified, the number of machines used in an experiment is 20, the graph size is 30, and the granularity is 10. 
