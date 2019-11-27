@@ -1,12 +1,14 @@
 \documentclass{vldb}
 
+\usepackage[utf8]{inputenc}
+
 \usepackage{graphicx}
 \usepackage{url}
 \usepackage{hyperref}
 \usepackage{algorithm} % for algorithms
 \usepackage{algpseudocode}
 % \usepackage{booktabs} % For formal tables
-% `\usepackage{amsthm} % For claims
+
 \usepackage{balance}  % for  \balance command ON LAST PAGE  (only there!)
 \usepackage{caption}
 \usepackage{subcaption}
@@ -20,6 +22,8 @@
 \newcommand {\FlameStream} {FlameStream}
 \newcommand {\tracker} {trAcker}
 \newcommand {\acker} {Acker}
+
+\newtheorem{lemma}{Lemma}
 
 % Include information below and uncomment for camera ready
 \vldbTitle{Tracking Dependencies in Distributed Streaming Dataflows}
