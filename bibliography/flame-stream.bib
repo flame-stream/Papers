@@ -1777,6 +1777,23 @@ Applications like social networking, urban monitoring and market feed processing
 This paper presents Wukong+S, a distributed stream querying engine that provides sub-millisecond stateful query at millions of queries per-second over fast-evolving linked data. Wukong+S uses an integrated design that combines the stream processor and the persistent store with efficient state sharing, which avoids the cross-system cost and sub-optimal query plan in conventional composite designs (e.g., Storm/Heron+Wukong). Wukong+S uses a hybrid store to differentially manage timeless data and timing data accordingly and provides an efficient stream index with locality-aware partitioning to facilitate fast access to streaming data. Wukong+S further provides decentralized vector timestamps with bounded snapshot scalarization to scale with nodes and massive queries at efficient memory usage.
 We have designed Wukong+S conforming to the RDF data model and Continuous SPARQL (C-SPARQL) query interface and have implemented Wukong+S by extending a state-of-the-art static RDF store (namely Wukong). Evaluation on an 8-node RDMA-capable cluster using LSBench and CityBench shows that Wukong+S significantly outperforms existing system designs (e.g., CSPARQL-engine, Storm/Heron+Wukong, and Spark Streaming/Structured Streaming) for both latency and throughput, usually at the scale of orders of magnitude.
 
-
+@inproceedings{Toshniwal:2014:STO:2588555.2595641,
+ author = {Toshniwal, Ankit and Taneja, Siddarth and Shukla, Amit and Ramasamy, Karthik and Patel, Jignesh M. and Kulkarni, Sanjeev and Jackson, Jason and Gade, Krishna and Fu, Maosong and Donham, Jake and Bhagat, Nikunj and Mittal, Sailesh and Ryaboy, Dmitriy},
+ title = {Storm@Twitter},
+ booktitle = {Proceedings of the 2014 ACM SIGMOD International Conference on Management of Data},
+ series = {SIGMOD '14},
+ year = {2014},
+ isbn = {978-1-4503-2376-5},
+ location = {Snowbird, Utah, USA},
+ pages = {147--156},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/2588555.2595641},
+ doi = {10.1145/2588555.2595641},
+ acmid = {2595641},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {real-time query processing, stream data management},
+} 
+This paper describes the use of Storm at Twitter. Storm is a real-time fault-tolerant and distributed stream data processing system. Storm is currently being used to run various critical computations in Twitter at scale, and in real-time. This paper describes the architecture of Storm and its methods for distributed scale-out and fault-tolerance. This paper also describes how queries (aka. topologies) are executed in Storm, and presents some operational stories based on running Storm at Twitter. We also present results from an empirical evaluation demonstrating the resilience of Storm in dealing with machine failures. Storm is under active development at Twitter and we also present some potential directions for future work.
 
 
