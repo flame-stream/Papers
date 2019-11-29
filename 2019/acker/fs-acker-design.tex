@@ -1,6 +1,10 @@
 \label{fs-acker-design}
 
-In this section we focus on the core concepts of our system. We start from the definition of \textit{global time}. This framework allows us to cut an input stream into independent pieces that are then processed one after another. After introduction of the global time we define assumptions on user-defined operations that are needed to define a element tracking mechanism. Then the tracking mechanism itself is introduced.
+In this section, we focus on the core concepts of our dependency tracking method. We start from the definition of \textit{global time}: a special marker that is assigned to all input data items and inherited (with possible modifications) by their descendants. This framework allows us to cut an input stream into small ordered pieces and to monitor the descendants of these pieces independently.
+
+After the introduction of the global time concept, we describe how it can be modified during dataflow execution. Then we introduce the tracking mechanism itself and formulate basic requirements that a stream processing system must satisfy in order to apply \tracker . Finally, we illustrate our tracking mechanism within two practical problems: completeness monitoring and state snapshotting.
+
+% assumptions on user-defined operations that are needed to define a element tracking mechanism. 
 
 \subsection{Global time concept}
 \label{fs-acker-gt}
