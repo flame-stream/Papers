@@ -17,11 +17,12 @@ In section~\ref{tracker_mechanism}, we propose the tracking mechanism itself and
 
 \subsection{Data items labeling} \label{labeling}
 
-\subsubsection{Global time concept}
-\label{fs-acker-gt}
-The core concept of our design is \textit{global time}, that is based on the assumption that we are able to order input elements up to some difference in wall time. In case where all elements are coming to the system through the same node this assumption is natural since we can compare elements by system time of their check-in.
+\subsubsection{Global time concept} \label{fs-acker-gt}
+The core concept of our design is \textit{global time}. Global time is used to make the order of notifications produced by the tracking mechanism correspondent with the order of input elements arrival. As we mentioned above, such correspondence is required by state snapshotting mechanisms: if the notification that input element arrived at (wall) time $t$ has been entirely processed is generated after the same notification for input element arrived at time $t+1$, state snapshots may become inconsistent~\cite{2015arXiv150608603C}.
 
-On the other hand if elements are coming from different nodes we can compare generation times up to some guarantied maximum system time difference $\delta$. This way we can split the whole input stream into pieces of time length $\delta$ that are comparable by this mechanism. We call the time associated with each piece \textit{global time} $t$.
+To provide one more illustration why the order of notifications can be important let us suppose that a mobile device communicate with our system. The logs from the device are processed in the system and personalized feedback is finally sent back to the device. This scenario suppose low latency between logs analysis and feedback because we want to take into account the most recent behavior of the user. On the other hand, events are able to come to different system input nodes but must generate output one after another for consistent results. One of these events could be click to some object and the other ``like'' or some other sort of feedback to the clicked object. Suppose that we have a guarantee that ``click'' arrived at a system before the ``like''. In this case, system should deliver output of ``click'' item after the output of ``like'' item. If the order of notifications corresponds to the order of input elements arrival, system can simply output an element when the completeness notification for the corresponding input element is generated.
+
+Global time is based on the assumption that we are able to order input elements up to some difference in wall time. In case where all elements are coming to the system through the same node this assumption is natural since we can compare elements by system time of their check-in. On the other hand, if elements are coming from different nodes we can compare generation times up to some guarantied maximum system time difference $\delta$. This way we can split the whole input stream into pieces of time length $\delta$ that are comparable by this mechanism. We call the time associated with each piece \textit{global time} $t$.
 
 Using this notation we guarantee that all elements before true (wall) time $\tau$ are processed if all elements of \textit{global time} $\tau - \delta \le t \le \tau + \delta$ are processed. We reference this rule as \textit{processing order preservation} because this way we guarantee that induced output elements never will have a reverse order of their ancestors.
 
@@ -39,13 +40,10 @@ Element of wall time $\tau$ can be assigned to three different global times due 
 as one can see all these cases give the global times less or equal than $t + 1$ which is supposed to be processed.
 \end{proof}
 
-Lemma~\ref{gt-lemma} allows us to connect wall time with the \textit{global time} that forms a basis for semantic guarantees. This connection is crucial when single client connects to different input nodes of the system (e.g. round-robin balancing).
+Lemma~\ref{gt-lemma} allows us to connect wall time with the \textit{global time} that forms a basis for semantic guarantees. This connection is crucial when single client connects to different input nodes of the system (e.g. round-robin balancing). The same semantic is used in markers~\cite{Carbone:2017:SMA:3137765.3137777} concept: instead of global times conditions they simultaneously send a special item from all input nodes and after these elements reach the end of the pipeline generate the outputs of the current piece of input.
 
-To illustrate why the global time concept is important lets suppose that a mobile device communicate with our system, the logs from the device are then processed in the system and personalized feedback is finally sent back to the device. This scenario suppose low latency between logs analysis and feedback because we want to take into account the most recent behavior of the user. On the other hand events are able to come to different system input nodes but must generate output one after another for consistent results. One of these events could be click to some object and the other ``like'' or some other sort of feedback to the clicked object. In this case our concept of the global time allows us to guarantee that ``like'' element will generate output after ``click'' is processed. The physical processing of elements could be done in reverse order but the user code is guaranteed to observe both elements before any output will be generated. See more details in the next section.
+\subsubsection{Glabal time transformation}
 
-The same semantic is used in markers~\cite{Carbone:2017:SMA:3137765.3137777} concept: instead of global times conditions they simultaneously send a special item from all input nodes and after these elements reach the end of the pipeline generate the outputs of the current piece of input.
-
-\subsubsection{Tracking formalisms}
 In previous section we used a notion of processed elements. By elements processing we mean the chain of operations induced by some input elements. This chain is defined by logical execution graph of operations. Each node in this graph is a user-defined operation that process input elements one by one and outputs elements, that are then routed according to output node edges to some other operations. We suppose that output elements $O$ of each operation $f$ has the global time of its elements not lower than the global time of the input element $i$.
 
 \begin{equation}
@@ -56,7 +54,7 @@ The dependencies rule could be even more strict, if we don't allow cycles in exe
 
 Using this assumption on the global time dependencies, we can easily proof that if system contains no elements of global time $t < t_0$, then no elements of time $t$ will be generated in future.
 
-\subsection{\tracker\'s mechanism} \label{tracker_mechanism}
+\subsection{\tracker\ 's mechanism} \label{tracker_mechanism}
 In previous sections we have defined the main assumptions needed for \tracker\ to function. Using this assumptions we are now ready to define the tracking mechanism itself. We follow the idea of Acker introduced in Storm~\cite{Toshniwal:2014:STO:2588555.2595641}. The original idea is to send random long markers on each item before network transfer and after it. This way we are able to ensure that no elements are ``hang'' in the network using a single XOR operation on the set of such markers. We use this idea a bit differently: we track the way of the element down to output sending random markers in the following situations:
 \begin{itemize}
     \item element enters the system;
