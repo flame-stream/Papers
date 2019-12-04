@@ -1,12 +1,23 @@
 \label{fs-acker-design}
 
-In this section, we focus on the core concepts of our dependency tracking method. We start from the definition of \textit{global time}: a special label that is assigned to all input data items and inherited (with possible modifications) by their descendants. This framework allows us to cut an input stream into small ordered pieces and to monitor the descendants of these pieces independently.
+In this section, we focus on the core concepts of our dependency tracking method. In general, this mechanism bases on the following ideas:
+\begin{itemize}
+    \item Each ingested input item is assigned by a special label at a system entry
+    \item Descendant elements inherit label from the original input record~\footnote{Further we demonstrate cases when a label can be modified}
+    \item All labels are ordered by the time of corresponding input element arrival 
+    \item Each operator shares information about labels of all arriving and outgoing element with a special (potentially distributed) agent called {\em \tracker}
+    \item \tracker\ aggregates information about labels from all partitions of all operators
+    \item \tracker\ provides notifications when it ensures that elements with certain labels have been entirely processed
+    \item The order of produced notifications corresponds to the order of labels
+\end{itemize}
 
-After the introduction of the global time concept, we describe how it can be modified during dataflow execution. Then we introduce the tracking mechanism itself and formulate basic requirements that a stream processing system must satisfy in order to apply \tracker . Finally, we illustrate our tracking mechanism within two practical problems: completeness monitoring and state snapshotting.
+In section~\ref{labeling}, we introduce a concept of {\em global time}: the ordered labels that are assigned to input data items. This framework allows us to logically group an input stream into small ordered pieces and to monitor the descendants of these pieces independently. We describe the method of global time generation and the guarantees that it provides. After that, we detail the relation between the global time, a system (node) time, and wall time. The global time transformation rules are also discussed.
 
-% assumptions on user-defined operations that are needed to define a element tracking mechanism. 
+In section~\ref{tracker_mechanism}, we propose the tracking mechanism itself and formulate basic requirements that a stream processing system must satisfy in order to employ \tracker . We demonstrate the way how \tracker\ aggregates service information from operators, and how it guarantees the order of notifications. Finally, in Section~\ref{tracker_examples}, we illustrate our tracking mechanism within two practical problems: completeness monitoring and state snapshotting.
 
-\subsection{Global time concept}
+\subsection{Data items labeling} \label{labeling}
+
+\subsubsection{Global time concept}
 \label{fs-acker-gt}
 The core concept of our design is \textit{global time}, that is based on the assumption that we are able to order input elements up to some difference in wall time. In case where all elements are coming to the system through the same node this assumption is natural since we can compare elements by system time of their check-in.
 
@@ -34,7 +45,7 @@ To illustrate why the global time concept is important lets suppose that a mobil
 
 The same semantic is used in markers~\cite{Carbone:2017:SMA:3137765.3137777} concept: instead of global times conditions they simultaneously send a special item from all input nodes and after these elements reach the end of the pipeline generate the outputs of the current piece of input.
 
-\subsection{Tracking formalisms}
+\subsubsection{Tracking formalisms}
 In previous section we used a notion of processed elements. By elements processing we mean the chain of operations induced by some input elements. This chain is defined by logical execution graph of operations. Each node in this graph is a user-defined operation that process input elements one by one and outputs elements, that are then routed according to output node edges to some other operations. We suppose that output elements $O$ of each operation $f$ has the global time of its elements not lower than the global time of the input element $i$.
 
 \begin{equation}
@@ -45,7 +56,7 @@ The dependencies rule could be even more strict, if we don't allow cycles in exe
 
 Using this assumption on the global time dependencies, we can easily proof that if system contains no elements of global time $t < t_0$, then no elements of time $t$ will be generated in future.
 
-\subsection{\tracker\'s mechanism}
+\subsection{\tracker\'s mechanism} \label{tracker_mechanism}
 In previous sections we have defined the main assumptions needed for \tracker\ to function. Using this assumptions we are now ready to define the tracking mechanism itself. We follow the idea of Acker introduced in Storm~\cite{Toshniwal:2014:STO:2588555.2595641}. The original idea is to send random long markers on each item before network transfer and after it. This way we are able to ensure that no elements are ``hang'' in the network using a single XOR operation on the set of such markers. We use this idea a bit differently: we track the way of the element down to output sending random markers in the following situations:
 \begin{itemize}
     \item element enters the system;
@@ -59,7 +70,7 @@ Using introduced mechanism we are now able to define the rule for defined in Sec
 
 Notably, if execution graph has no cycles and global time equals the global time of the input element, the condition on all accumulators $t \le t_0 + 1$ could be relaxed to $t = \{t_0, t_0 + 1\}$ which allows to make implementation of the \tracker\ even more straightforward.
 
-\subsection{Examples}
+\subsection{Examples} \label{tracker_examples}
 In this section we show the application of the introduced mechanism to two popular tasks emerging in stream processing: completeness monitoring and state snapshotting. These tasks are usually addressed by different algorithms by \tracker\ allows to solve them both with introduction of a single agent.
 \subsubsection{Completeness monitoring}
 
