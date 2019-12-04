@@ -8,7 +8,7 @@ In this section, we focus on the core concepts of our dependency tracking method
     \item Each operator shares information about labels of all arriving and outgoing element with a special (potentially distributed) agent called {\em \tracker}
     \item \tracker\ aggregates information about labels from all partitions of all operators
     \item \tracker\ provides notifications when it ensures that elements with certain labels have been entirely processed
-    \item The order of produced notifications corresponds to the order of labels
+    \item The order of produced notifications corresponds to the order of labels (order of input elements arrival)
 \end{itemize}
 
 In section~\ref{labeling}, we introduce a concept of {\em global time}: the ordered labels that are assigned to input data items. This framework allows us to logically group an input stream into small ordered pieces and to monitor the descendants of these pieces independently. We describe the method of global time generation and the guarantees that it provides. After that, we detail the relation between the global time, a system (node) time, and wall time. The global time transformation rules are also discussed.
