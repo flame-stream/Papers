@@ -4,7 +4,7 @@ In this section, we focus on the core concepts of our dependency tracking method
 \begin{itemize}
     \item Each ingested input item is assigned by a special label at a system entry
     \item Descendant elements inherit label from the original input record~\footnote{Further we demonstrate cases when a label can be modified}
-    \item All labels are ordered by the time of corresponding input element arrival 
+    \item All labels are ordered by the time of corresponding input elements arrival 
     \item Each operator shares information about labels of all arriving and outgoing element with a special (potentially distributed) agent called {\em \tracker}
     \item \tracker\ aggregates information about labels from all partitions of all operators
     \item \tracker\ provides notifications when it ensures that elements with certain labels have been entirely processed
