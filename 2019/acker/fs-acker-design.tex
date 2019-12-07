@@ -2,9 +2,10 @@
 
 In this section, we focus on the core concepts of our dependency tracking method. Within the design of this mechanism, we aim at providing the following properties:
 \begin{itemize}
-    \item Low granularity of tracking: it should be possible, having an output, to determine an exact original input element or a small set of input records that contains it
-    \item Operator-level or block-level locality of tracking: the mechanism should provide independent notifications for various parts of a dataflow
-    \item Notifications order preservation: notification that input item ingested at wall time $t$ has been entirely processed should be provided before the notification for input item ingested at $t+1$
+    \item Low granularity of tracking: it should be possible to determine when an exact input element (or a small set of input records) has been entirely processed.
+    \item Operator-level or block-level locality of tracking: the mechanism should provide independent notifications for various parts of a dataflow.
+    \item Notifications order preservation: notification that input item ingested at wall time $t$ has been entirely processed should be provided before the notification for input item ingested at $t+1$.
+    \item Cyclic dataflows support: our tracking technique should be suitable for cyclic dataflow graphs. This feature substantially extends the applicability of a dependency tracking method.
 \end{itemize}
 
 Our dependency tracking mechanism bases on the following scheme: firstly, each data item is assigned with a special label. Each operator shares information about labels of all arriving and outgoing elements with a (potentially distributed) agent called {\em \tracker}. Finally, \tracker\ provides notifications when it ensures that elements with specific labels have been entirely processed.
