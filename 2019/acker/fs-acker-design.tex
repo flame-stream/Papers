@@ -1,19 +1,28 @@
 \label{fs-acker-design}
 
-In this section, we focus on the core concepts of our dependency tracking method. In general, this mechanism bases on the following ideas:
+In this section, we focus on the core concepts of our dependency tracking method. Within the design of this mechanism, we aim at providing the following properties:
 \begin{itemize}
-    \item Each ingested input item is assigned by a special label at a system entry
-    \item Descendant elements inherit label from the original input record~\footnote{Further we demonstrate cases when a label can be modified}
-    \item All labels are ordered by the time of corresponding input elements arrival 
-    \item Each operator shares information about labels of all arriving and outgoing element with a special (potentially distributed) agent called {\em \tracker}
-    \item \tracker\ aggregates information about labels from all partitions of all operators
-    \item \tracker\ provides notifications when it ensures that elements with certain labels have been entirely processed
-    \item The order of produced notifications corresponds to the order of labels (order of input elements arrival)
+    \item Low granularity of tracking: it should be possible, having an output, to determine an exact original input element or a small set of input records that contains it
+    \item Operator-level or block-level locality of tracking: the mechanism should provide independent notifications for various parts of a dataflow
+    \item Notifications order preservation: notification that input item ingested at wall time $t$ has been entirely processed should be provided before the notification for input item ingested at $t+1$
 \end{itemize}
 
-In section~\ref{labeling}, we introduce a concept of {\em global time}: the ordered labels that are assigned to input data items. This framework allows us to logically group an input stream into small ordered pieces and to monitor the descendants of these pieces independently. We describe the method of global time generation and the guarantees that it provides. After that, we detail the relation between the global time, a system (node) time, and wall time. The global time transformation rules are also discussed.
+Our dependency tracking mechanism bases on the following scheme: firstly, each data item is assigned with a special label. Each operator shares information about labels of all arriving and outgoing elements with a (potentially distributed) agent called {\em \tracker}. Finally, \tracker\ provides notifications when it ensures that elements with specific labels have been entirely processed.
 
-In section~\ref{tracker_mechanism}, we propose the tracking mechanism itself and formulate basic requirements that a stream processing system must satisfy in order to employ \tracker . We demonstrate the way how \tracker\ aggregates service information from operators, and how it guarantees the order of notifications. Finally, in Section~\ref{tracker_examples}, we illustrate our tracking mechanism within two practical problems: completeness monitoring and state snapshotting.
+In section~\ref{labeling}, we introduce a concept of {\em global time}: the ordered labels that are assigned to data items. This framework allows us to logically group an input stream into small ordered pieces and to monitor the descendants of these pieces independently. We describe the method of global time generation and the ordering guarantees that it provides. The global time transformation rules are also discussed.
+
+In section~\ref{tracker_mechanism}, we propose the tracking mechanism itself and formulate basic requirements that a stream processing system must satisfy in order to employ \tracker . We demonstrate the way how \tracker\ aggregates service information from operators, and how it uses the concept of global time to guarantee the order of notifications and fine granularity of tracking. We also discuss and a technique that allows \tracker\ to provide for the block-level locality. Finally, in Section~\ref{tracker_examples}, we illustrate our tracking mechanism within two practical problems: completeness monitoring and state snapshotting.
+
+% In this section, we focus on the core concepts of our dependency tracking method. In general, this mechanism bases on the following ideas:
+% \begin{itemize}
+%     \item Each ingested input item is assigned by a special label at a system entry
+%     \item Descendant elements inherit label from the original input record~\footnote{Further we demonstrate cases when a label can be modified}
+%     \item All labels are ordered by the time of corresponding input elements arrival 
+%     \item Each operator shares information about labels of all arriving and outgoing element with a special (potentially distributed) agent called {\em \tracker}
+%     \item \tracker\ aggregates information about labels from all partitions of all operators
+%     \item \tracker\ provides notifications when it ensures that elements with certain labels have been entirely processed
+%     \item The order of produced notifications corresponds to the order of labels (order of input elements arrival)
+% \end{itemize}
 
 \subsection{Data items labeling} \label{labeling}
 
