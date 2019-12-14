@@ -1,0 +1,268 @@
+\label {fs-experiments}
+
+\begin{figure}
+\centering
+\begin{tikzpicture}[%
+   ->, 
+   >=stealth,
+   shorten >=1pt,
+   node distance=1.2cm,
+   thick,
+   every state/.style={%
+   fill=white,
+   draw=black,
+   text=black
+  }   
+  ]
+    \node[draw, circle] (I_1) [draw=none] {};
+    \node[draw, circle] (I_2) [below of=I_1,draw=none] {};
+    \node[draw, circle] (I_dots) [below of=I_2,draw=none] {};
+    \node[draw, circle] (I_3) [below of=I_dots,draw=none] {};
+
+    \node[draw, circle] (A_1) [right of=I_1] {};
+    \node[draw, circle] (A_2) [below of=A_1] {};
+    \node[draw, circle] (A_dots) [below of=A_2,draw=none] {$\ldots$};
+    \node[draw, circle] (A_3) [below of=A_dots] {};
+
+    \node[draw, circle] (B_1) [right of=A_1] {};
+    \node[draw, circle] (B_2) [below of=B_1] {};
+    \node[draw, circle] (B_dots) [below of=B_2,draw=none] {$\ldots$};
+    \node[draw, circle] (B_3) [below of=B_dots] {};
+
+    \node[draw, circle] (Dots_1) [right of=B_1,draw=none] {$\ldots$};
+    \node[draw, circle] (Dots_2) [below of=Dots_1,draw=none] {$\ldots$};
+    \node[draw, circle] (Dots_dots) [below of=Dots_2,draw=none] {$\ldots$};
+    \node[draw, circle] (Dots_3) [below of=Dots_dots,draw=none] {$\ldots$};
+
+    \node[draw, circle] (Z_1) [right of=Dots_1] {};
+    \node[draw, circle] (Z_2) [below of=Z_1] {};
+    \node[draw, circle] (Z_dots) [below of=Z_2,draw=none] {$\ldots$};
+    \node[draw, circle] (Z_3) [below of=Z_dots] {};
+
+    \node[draw, circle] (O_1) [right of=Z_1,draw=none] {};
+    \node[draw, circle] (O_2) [below of=O_1,draw=none] {};
+    \node[draw, circle] (O_dots) [below of=O_2,draw=none] {};
+    \node[draw, circle] (O_3) [below of=O_dots,draw=none] {};
+
+    \path
+          (I_1) edge (A_1)
+          (I_2) edge (A_2)
+          (I_dots) edge (A_dots)
+          (I_3) edge (A_3)
+          (A_1) edge (B_1)
+          (A_1) edge (B_2)
+          (A_1) edge (B_3)
+          (A_2) edge (B_1)
+          (A_2) edge (B_2)
+          (A_2) edge (B_3)
+          (A_3) edge (B_1)
+          (A_3) edge (B_2)
+          (A_3) edge (B_3)
+          (B_1) edge (Dots_1)
+          (B_1) edge (Dots_2)
+          (B_1) edge (Dots_3)
+          (B_2) edge (Dots_1)
+          (B_2) edge (Dots_2)
+          (B_2) edge (Dots_3)
+          (B_3) edge (Dots_1)
+          (B_3) edge (Dots_2)
+          (B_3) edge (Dots_3)
+          (Dots_1) edge (Z_1)
+          (Dots_1) edge (Z_2)
+          (Dots_1) edge (Z_3)
+          (Dots_2) edge (Z_1)
+          (Dots_2) edge (Z_2)
+          (Dots_2) edge (Z_3)
+          (Dots_3) edge (Z_1)
+          (Dots_3) edge (Z_2)
+          (Dots_3) edge (Z_3)
+          (Z_1) edge (O_1)
+          (Z_2) edge (O_2)
+          (Z_dots) edge (O_dots)
+          (Z_3) edge (O_3)
+          ;
+      \draw[-,thick,decorate,decoration={brace,amplitude=5pt,mirror}]
+            ([xshift=-5pt]I_1.center) -- ([xshift=-5pt]I_3.center) node[midway, left=4pt] {Workers};
+      \draw[-,thick,decorate,decoration={brace,amplitude=5pt}]
+            ([xshift=-5pt, yshift=5pt]A_1.center) -- ([xshift=5pt, yshift=5pt]Z_1.center) node[midway, above=5pt] {Operators};
+\end{tikzpicture}
+\caption{Physical execution graph for experiments} 
+\label{physical_graph}
+\end{figure}
+
+% https://gist.github.com/faucct/032aaf6240db361d30a184b1d7bf3c8e
+\begin{figure*}[t!]
+    \begin{subfigure}[b]{0.32\textwidth}
+            \includegraphics[width=0.99\textwidth]{pics/traffic_by_graph_size_bars.png}
+            \caption{Traffic by graph size}
+            \label{traffic_graph}
+    \end{subfigure}
+    \hspace{5mm}
+    \begin{subfigure}[b]{0.32\textwidth}
+            \includegraphics[width=0.99\textwidth]{pics/traffic_by_number_of_machines_bars.png}
+            \caption{Traffic by number of virtual machines}
+            \label{traffic_machines}
+    \end{subfigure}
+    \hspace{5mm}
+    \begin{subfigure}[b]{0.32\textwidth}
+            \includegraphics[width=0.99\textwidth]{pics/traffic_by_tracking_frequency_bars.png}
+            \caption{Traffic by tracking frequency}
+            \label{traffic_granularity}
+	\end{subfigure}
+    \caption{Service network traffic of marker-based approach and various \tracker\ setups}
+    \label{traffic_plots}
+\end{figure*}
+
+\label {fs-acker-experiments}
+
+We divided our evaluation of \tracker\ into three parts. Each of these parts encapsulates logically connected experiments that measure the performance of \tracker\ mechanism in various perspectives.
+
+In Section~\ref{overhead}, we demonstrate the overhead induced by \tracker\ mechanism. First, we measure the amount of extra network traffic for different cluster sizes, the number of nodes in a logical graph, and the granularity of tracking. After that, we show throughput overhead on regular processing for a fixed streaming setup. Section~\ref{completeness} contains the evaluation of \tracker\ applied to completeness monitoring problem. We measure the notification latency within various setups as well as the ability of distributed \tracker\ to scale out. Finally, in section~\ref{snapshotting}, we analyze the performance of operator-level tracking with the state snapshotting problem. 
+
+As a baseline approach, we utilize the marker-based method employed in many state-of-the-art stream processing systems such as Flink~\cite{Carbone:2017:SMA:3137765.3137777}, Storm~\cite{apache:storm:state}, Heron~\cite{Kulkarni:2015:THS:2723372.2742788}, IBM Streams~\cite{jacques2016consistent}, etc. This technique, as well as alternatives, is detailed in Section~\ref{existing_solutions}. Unlike other mentioned techniques, markers support fine granularity and operator-level locality of tracking. To have an ability to compare two techniques within the same streaming engine, we implemented both \tracker\ and marker methods on the top open-source distributed streaming system called \FlameStream. The  \FlameStream\ has similar to state-of-the-art stream processing systems (Flink, Storm, etc.) functionality and use-cases. We did not exploit any system-specific features during the implementation of tracking methods.
+
+As a logical graph for experiments, we use simple directed graphs of various lengths. All vertices pass an input element to the next operation. All items are re-partitioned (round-robin) before each vertex, as it is shown in Figure~\ref{physical_graph}. This setup does not induce possible overhead by heavy computations while covering many real-life scenarios. Graphs with few vertices (under 30) may fit almost any acyclic streaming pipeline~\cite{akidau2018streaming}. On the other hand, more massive pipelines can be considered as flattened iterative dataflows such as PageRank or Connected Components~\cite{Murray:2013:NTD:2517349.2522738, xu2016efficient}.
+
+We run all experiments on a cluster of 20 virtual machines with a single CPU and 4 GB RAM from one of the biggest cloud providers. Each node runs a \FlameStream\ worker. We deploy \tracker\ on nodes excluded from regular processing: a single one for centralized configuration and two for distributed configuration. If it is not specified, the number of machines used in an experiment is 20, the graph size is 30, and the granularity is 10. 
+
+\subsection{Network usage and overhead} \label{overhead}
+
+\subsubsection{Network traffic}
+
+We can measure the extra load provided by tracking mechanisms in a number of service messages sent over the network. In \tracker\ there are several types of these messages: {\em Acks}, {\em Hearbeats}, {\em Min Time Updates}, and {\em Node Times} in distributed setup. In the baseline approach, all service messages are markers. Figure~\ref{traffic_plots} demonstrates the dependency between service network messages and the size of the logical graph, the number of computational nodes, and the granularity of tracking. The extra service traffic is generated by $50K$ input elements sent with 100 items per second arrival rate. 
+
+As it is shown in Figure~\ref{traffic_graph}, service traffic for markers linearly depends on the dataflow size, because each new logical vertex adds network broadcasting of markers on a physical level. Dependency from the number of computational nodes is quadratic \footnote{At first glance, the dependency may seem linear, but please note that the X-axis covers range from 10 to 20, and the Y-axis is log-scaled} due to the need to broadcast markers to each node after all operators, as it is demonstrated in Figure~\ref{traffic_machines}. Figure~\ref{traffic_granularity} indicates that the number of sent service messages for markers also directly depends on the tracking granularity. For example, the system should broadcast markers after each streaming element in every operator to implement tracking of individual items. 
+
+In the case of \tracker , service traffic depends on the logical graph size and the number of machines as well. The growth has a linear trend but can be significantly reduced with the local \tracker\ optimization. Distributed \tracker\ without optimizations provides ~10x less service than markers traffic for a graph with 10 vertices, and ~30x decrease for a graph with 100 vertices. Regarding the number of machines, the difference is ~10x for 10 nodes, and ~30x for 20 nodes. Besides, local \tracker\ optimization allows the system to reduce traffic in up to 5 times in comparison with plain distributed \tracker .
+
+\subsubsection{Overhead on throughput}
+
+In this experiment, we measure the median latency of regular processing, depending on the input rate (input elements per millisecond). The growth of median latency indicates system overloading. Input rate that corresponds to the point where latency starts to growth indicates a {\em sustainable throughput}~\cite{karimov2018benchmarking}.
+
+Figure~\ref{throughput_overhead} demonstrates the results of the experiment. The system without tracking at all starts to be overloaded since $\sim 9K$ requests (items) per second input rate. The system with the finest-grained centralized \tracker\ setup provides $\sim 7K$ RPS sustainable throughput. Overloading with the marker-based approach depends on the granularity of tracking: the finest-grained setup does not sustain even $1K$ RPS, while the setup with the granularity of 10 has $\sim 2K$ RPS throughput. Markers achieve similar to centralized \tracker\ throughput ($\sim 5K$ RPS) only when they are injected once per 50 input elements.
+
+This experiment shows that markers significantly bound throughput of regular processing within the fine-grained setups. It is explained by the heavy extra network traffic that we demonstrated in the previous experiment. Note that this additional traffic goes through the same network channels as ordinary data items to ensure that markers do not overtake ordinary records. On the other hand, \tracker\ provides less additional system load due to lower extra network usage and the exploiting of additional network channels.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.50\textwidth]{pics/throughput_overhead_50.png}
+  \caption{Tracking overhead on a processing throughput}
+  \label{throughput_overhead}
+\end{figure}
+
+% https://gist.github.com/faucct/032aaf6240db361d30a184b1d7bf3c8e
+\begin{figure*}[t!]
+    \begin{subfigure}[b]{0.32\textwidth}
+            \includegraphics[width=0.99\textwidth]{pics/notification_await_time_by_graph_size_bars.png}
+            \caption{Notification latency by graph size}
+            \label{notification_graph}
+    \end{subfigure}
+    \hspace{5mm}
+    \begin{subfigure}[b]{0.32\textwidth}
+            \includegraphics[width=0.99\textwidth]{pics/notification_await_time_by_number_of_machines_bars.png}
+            \caption{Notification latency by VMs number}
+            \label{notification_machines}
+    \end{subfigure}
+    \hspace{5mm}
+    \begin{subfigure}[b]{0.32\textwidth}
+            \includegraphics[width=0.99\textwidth]{pics/notification_await_time_by_tracking_frequency_bars.png}
+            \caption{Notification latency by granularity}
+            \label{notification_granularity}
+	\end{subfigure}
+    \caption{Notification latency}
+    \label{notification_latency}
+\end{figure*}
+
+% https://gist.github.com/faucct/546f5617b958349a125449926373b780
+\begin{figure*}[t!]
+    \begin{subfigure}[b]{0.32\textwidth}
+            \includegraphics[width=0.99\textwidth]{pics/scalability_01x.png}
+            \caption{1x acks}
+            \label{1x_acks}
+    \end{subfigure}
+    \hspace{5mm}
+    \begin{subfigure}[b]{0.32\textwidth}
+            \includegraphics[width=0.99\textwidth]{pics/scalability_05x.png}
+            \caption{5x acks}
+            \label{5x_acks}
+    \end{subfigure}
+    \hspace{5mm}
+    \begin{subfigure}[b]{0.32\textwidth}
+            \includegraphics[width=0.99\textwidth]{pics/scalability_09x.png}
+            \caption{9x acks}
+            \label{9x_acks}
+	\end{subfigure}
+    \caption{\tracker\ scalability}
+    \label{notification_scalability}
+\end{figure*}
+
+\subsection{Completeness monitoring} \label{completeness}
+
+\subsubsection{Notification latency}
+
+One of the key performance metrics in completeness monitoring solution is the latency of notifications. In some applications~\cite{Carbone:2017:SMA:3137765.3137777, we2018adbis} notification latency directly influences the latency of regular processing. For example, Flink finishes its state snapshotting protocol for the epoch (set of input elements) and delivers corresponding output elements to data consumers only after receiving a notification that the whole epoch is completed. 
+
+In this experiment, we measure the notification latency as an interval duration between a time moment when a set of input elements has been entirely processed and the reception of the notification for this event. We investigate the dependency between the notification latency and cluster sizes, the number of nodes in a logical graph, and the granularity of tracking. Figure~\ref{notification_latency} shows the results of the experiment. 
+
+The notification latency of marker-based technique depends on the graph and cluster sizes and the granularity of tracking as figures~\ref{notification_graph},\ref{notification_machines}, and~\ref{notification_granularity} indicate. These results are in-line with the overhead induced by markers shown in Section~\ref{overhead}. Notification latency of \tracker\ slightly fluctuates but does not directly depend on the investigated parameters. One can also note that local \tracker\ optimization, as well as distributed version, do not induce heavy overhead on the latency.
+
+Such a significant difference in latency between the markers and \tracker\ is explained by the fact that each operator in a dataflow must wait for markers from all partitions of the previous operator to send it further. This behavior ensures that markers do not overtake ordinary records that guarantee the correctness of this approach.
+
+\subsubsection{Scalability}
+
+In this experiment, we demonstrate that the distributed version of \tracker\ allows the completeness monitoring mechanism to scale. We measure the median notification latency, depending on the rate of input records. The growth of median latency indicates \tracker\ overloading. Input rate that corresponds to the point where latency starts to growth indicates a {\em sustainable throughput} of the \tracker . To simulate an additional load on the \tracker , staying on a budget of 20 machines, we artificially increased the number of sent service messages in 5 and 9 times. We approximate the sustainable throughput by multiplying extra service messages ratio by the obtained throughput due to the direct dependency between the input and service messages rates. This trick allows us to estimate \tracker\ throughput in a number of input data items per second rate without overloading of the stream processing system itself. Figure~\ref{notification_scalability} demonstrates the results of this experiment.
+
+Without the extra load, distributed \tracker\ provides similar results as a centralized setup, as Figure~\ref{1x_acks} indicates. Note, overloading of the streaming system limits the throughput of \tracker\ as well because it starts to delay service messages sending, buffer MinTimeUpdates, etc. Figure~\ref{5x_acks} demonstrates that with 5x simulated extra load, distributed \tracker\ can sustain $\sim 27K$ requests (items) per second input rate, while centralized provides only $\sim 20K$ RPS throughput. Figure~\ref{9x_acks} shows that with the increase of the extra load to 9x, distributed \tracker\ provides almost 2x throughput increase: $\sim 40K$ RPS against $\sim 22K$ RPS. 
+
+The experiments demonstrate that even centralized \tracker\ can sustain a high input rate within 20 computational nodes. Besides, the distributed version of \tracker\ can make the completeness monitoring mechanism scalable in larger setups.
+
+\begin{figure*}[t!]
+    \begin{subfigure}[b]{0.32\textwidth}
+            \includegraphics[width=0.99\textwidth]{pics/buffering_latencies_barh_100.png}
+            \caption{100 ms snapshot duration}
+            \label{100ms_snapshot}
+    \end{subfigure}
+    \hspace{5mm}
+    \begin{subfigure}[b]{0.32\textwidth}
+            \includegraphics[width=0.99\textwidth]{pics/buffering_latencies_barh_500.png}
+            \caption{500 ms snapshot duration}
+            \label{500ms_snapshot}
+    \end{subfigure}
+    \hspace{5mm}
+    \begin{subfigure}[b]{0.32\textwidth}
+            \includegraphics[width=0.99\textwidth]{pics/buffering_latencies_barh_1000.png}
+            \caption{1000 ms snapshot duration}
+            \label{1000ms_snapshot}
+    \end{subfigure}
+    \caption{Latency spikes during state snapshotting}
+    \label{snapshot_spikes}
+\end{figure*}
+
+\subsection{State snapshotting} \label{snapshotting}
+
+As we mentioned above, another important application of dependency tracking mechanisms is state snapshotting. Typically, state snapshotting is implemented as follows: a streaming system divides input records into the contiguous parts called epochs. When an operator entirely processes all items from a particular epoch, it blocks all inputs and persistently saves its local state. Each operator can receive the notification and start to save its state independently from other operators. Hence, there is a need for operator-level dataflow locality of tracking. Flink~\cite{Carbone:2017:SMA:3137765.3137777}, Storm~\cite{apache:storm:state}, IBM Streams~\cite{jacques2016consistent}, and Heron~\cite{Kulkarni:2015:THS:2723372.2742788} implement this state snapshotting scheme. All these systems use marker-based techniques to provide notifications for operators.
+
+A dependency tracking mechanism can imply latency overhead on this protocol. In the case of markers, the overhead is caused by blocking an operator after the first marker is received and until the operator receives markers from all inputs. This behavior is known as {\em marker alignment} issue~\cite{Carbone:2017:SMA:3137765.3137777}. In the case of \tracker , an operator must buffer element from the next epoch until {\em MinTimeUpdate} for the previous epoch is received.
+
+Figure~\ref{snapshot_spikes} demonstrates latency spikes during state snapshotting for markers and \tracker , depending on the persistent save duration. In general, \tracker\ provides 50-120 milliseconds fewer latency spikes. This difference can be significant for latency-conscious applications~\cite{zhang2017sub}. The low notification latency explains this difference, as we demonstrated in Section~\ref{completeness}. Low notification latency leads to a smaller number of elements that need to wait (be buffered), as it is shown if Figure~\ref{snapshot_buffered}. The smaller number of buffered records causes lower buffering duration that implies lower spikes in general. Note, the vast difference in the number of buffered elements does not necessarily imply the vast difference in total buffering duration because most of the buffered elements wait for a tiny amount of time.
+
+This experiment indicates that \tracker\ can provide better results for a common problem that is traditionally solved using markers. This result also shows that operator-level locality of tracking can be implemented efficiently with \tracker .
+
+% https://gist.github.com/faucct/6097d9d08197cb979b71721b16f8b6a3/
+% \begin{figure}[htbp]
+%   \centering
+%   \includegraphics[width=0.50\textwidth]{pics/buffering_average_duration_bars.png}
+%   \caption{Average buffering duration}
+% \end{figure}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.50\textwidth]{pics/buffering_count_bars.png}
+  \caption{Buffered elements count}
+  \label{snapshot_buffered}
+\end{figure}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.50\textwidth]{pics/buffering_sum_duration_bars.png}
+  \caption{Total buffering duration}
+\end{figure}
+
