@@ -2,39 +2,37 @@
 
 In this section, we focus on the core concepts of our dependency tracking method. Within the design of this mechanism, we aim at providing the following properties:
 \begin{itemize}
-    \item Low granularity of tracking: it should be possible to determine when an exact input element (or a small set of input records) has been entirely processed.
-    \item Operator-level or block-level locality of tracking: the mechanism should provide independent notifications for various parts of a dataflow.
-    \item Notifications order preservation: notification that input item ingested at wall time $t$ has been entirely processed should be provided before the notification for input item ingested at $t+1$.
+    \item Low granularity of tracking: for each input element (or for each small group of input records), it should be possible to determine when the element has been entirely processed independently from other items.
+    \item Operator-level or block-level locality of tracking: the mechanism should provide independent notifications for various blocks of a dataflow.
+    \item Notifications order preservation: the order of notifications should not contradict the order of input elements arrival with respect to wall time.
     \item Cyclic dataflows support: our tracking technique should be suitable for cyclic dataflow graphs. This feature substantially extends the applicability of a dependency tracking method.
 \end{itemize}
 
-Our dependency tracking mechanism bases on the following scheme: firstly, each data item is assigned with a special label. Each operator shares information about labels of all arriving and outgoing elements with a (potentially distributed) agent called {\em \tracker}. Finally, \tracker\ provides notifications when it ensures that elements with specific labels have been entirely processed.
+Our dependency tracking mechanism bases on the following scheme. Firstly, each data item is assigned with a special label. Then, each operator shares information about labels of all arriving and outgoing elements with a (potentially distributed) agent called {\em \tracker}. Thus, \tracker\ monitors all in-flight data items within a system. Finally, \tracker\ provides notifications when it ensures that elements with specific labels have been entirely processed.
 
-In section~\ref{labeling}, we introduce a concept of {\em global time}: the ordered labels that are assigned to data items. This framework allows us to logically group an input stream into small ordered pieces and to monitor the descendants of these pieces independently. We describe the method of global time generation and the ordering guarantees that it provides. The global time transformation rules are also discussed.
+In section~\ref{labeling}, we introduce a concept of {\em global time}: the ordered labels that are assigned to data items. This framework allows us to logically group an input stream into small ordered pieces and to monitor the descendants of these pieces independently. We describe the method of global time generation and the ordering properties that it provides.
 
-In section~\ref{tracker_mechanism}, we propose the tracking mechanism itself and formulate basic requirements that a stream processing system must satisfy in order to employ \tracker . We demonstrate the way how \tracker\ aggregates service information from operators, and how it uses the concept of global time to guarantee the order of notifications and fine granularity of tracking. We also discuss and a technique that allows \tracker\ to provide for the block-level locality. Finally, in Section~\ref{tracker_examples}, we illustrate our tracking mechanism within two practical problems: completeness monitoring and state snapshotting.
+In section~\ref{tracker_mechanism}, we propose the tracking mechanism itself and formulate basic requirements that a stream processing system must satisfy in order to employ \tracker . We demonstrate the way \tracker\ aggregates service information from operators, and how it uses the concept of global time to guarantee the order of notifications and fine granularity of tracking. We discuss a technique that allows \tracker\ to provide for the block-level locality. 
 
-% In this section, we focus on the core concepts of our dependency tracking method. In general, this mechanism bases on the following ideas:
-% \begin{itemize}
-%     \item Each ingested input item is assigned by a special label at a system entry
-%     \item Descendant elements inherit label from the original input record~\footnote{Further we demonstrate cases when a label can be modified}
-%     \item All labels are ordered by the time of corresponding input elements arrival 
-%     \item Each operator shares information about labels of all arriving and outgoing element with a special (potentially distributed) agent called {\em \tracker}
-%     \item \tracker\ aggregates information about labels from all partitions of all operators
-%     \item \tracker\ provides notifications when it ensures that elements with certain labels have been entirely processed
-%     \item The order of produced notifications corresponds to the order of labels (order of input elements arrival)
-% \end{itemize}
+Finally, in Section~\ref{tracker_examples}, we illustrate our tracking mechanism within two practical problems: completeness monitoring and state snapshotting.
 
 \subsection{Data items labeling} \label{labeling}
 
 \subsubsection{Global time concept} \label{fs-acker-gt}
-The core concept of our design is \textit{global time}. Global time is used to make the order of notifications produced by the tracking mechanism correspondent with the order of input elements arrival. As we mentioned above, such correspondence is required by state snapshotting mechanisms: if the notification that input element arrived at (wall) time $t$ has been entirely processed is generated after the same notification for input element arrived at time $t+1$, state snapshots may become inconsistent~\cite{2015arXiv150608603C}.
 
-To provide one more illustration why the order of notifications can be important let us suppose that a mobile device communicate with our system. The logs from the device are processed in the system and personalized feedback is finally sent back to the device. This scenario suppose low latency between logs analysis and feedback because we want to take into account the most recent behavior of the user. On the other hand, events are able to come to different system input nodes but must generate output one after another for consistent results. One of these events could be click to some object and the other ``like'' or some other sort of feedback to the clicked object. Suppose that we have a guarantee that ``click'' arrived at a system before the ``like''. In this case, system should deliver output of ``click'' item after the output of ``like'' item. If the order of notifications corresponds to the order of input elements arrival, system can simply output an element when the completeness notification for the corresponding input element is generated.
+In Storm \acker\ completeness monitoring mechanism, which is a source of inspiration for our method, all input elements are assigned with a random number. \acker\ notifies the system when an element with some specific number has been entirely processed. If \acker\ is not producing notifications for some elements for quite a long time, it may indicate the loss of the elements. In such setting, the order of notifications does not matter because they may only cause reprocessing of certain elements that is enough for {\em at-least-once} delivery guarantee~\cite{Toshniwal:2014:STO:2588555.2595641}.
 
-Global time is based on the assumption that we are able to order input elements up to some difference in wall time. In case where all elements are coming to the system through the same node this assumption is natural since we can compare elements by system time of their check-in. On the other hand, if elements are coming from different nodes we can compare generation times up to some guarantied maximum system time difference $\delta$. This way we can split the whole input stream into pieces of time length $\delta$ that are comparable by this mechanism. We call the time associated with each piece \textit{global time} $t$.
+On the other hand, a consistent state snapshotting problem requires more strict ordering properties. To provide for {\em exactly-once} guarantee, the system should periodically save the state of all operators only after a notification that some set of input elements have been already proceseed~\cite{thepaper}. These notifications should be conformed with the order of input items arrival. If the notification that the input element arrived at (wall) time $\tau$ has been entirely processed is generated after the same notification for input element arrived at time $\tau + 1$, state snapshots may become inconsistent~\cite{2015arXiv150608603C}.
 
-Using this notation we guarantee that all elements before true (wall) time $\tau$ are processed if all elements of \textit{global time} $\tau - \delta \le t \le \tau + \delta$ are processed. We reference this rule as \textit{processing order preservation} because this way we guarantee that induced output elements never will have a reverse order of their ancestors.
+In the marker-based approach that is commonly used for state snapshotting problem~\cite{Carbone:2017:SMA:3137765.3137777}, ordering properties are naturally provided by the implementation itself. As we mentioned in Section~\ref{existing_solutions}, markers are injected as ordinary elements and cannot be reordered with them. Hence, notifications are always provided in the order that is consistent with the ingestion of input items.
+
+The core concept that allows our method to preserve the order of notifications is \textit{global time}. Global time is a special label that a stream processing system assigns to each input element. As we mentioned above, our dependency tracking mechanism monitors global times of in-flight records within a system. Hence, our mechanism can provide notifications with respect to the order of global times. If global time ordering is conformed with the order of input elements arrival, it will ensure the notifications order preservation.
+
+The global time order is based on the assumption that we are able to order input elements up to some difference in wall time. In a case where all elements are coming to the system through the same node, this assumption is natural since the role of global time can be played by a system time of element ingestion. On the other hand, if elements are coming from different nodes, we can compare generation times up to some guaranteed maximum system time difference $\delta$. 
+
+This way, we can split the whole input stream into pieces of time with length $\delta$ that are comparable by this mechanism. We call the time associated with each piece \textit{global time} $t$. Hence, if input elements are arriving through the single node, all elements will be assigned with different global times. Otherwise, some elements can have the same global time. The number of elements that bear the same global times determines the granularity of tracking and depends on the input items rate and the maximum system time difference between nodes $\delta$. In practice, it is possible to synchronize system times between nodes up to 10 milliseconds difference~\ref{forgot} that can ensure fine granularity of tracking.
+
+Lemma~\ref{gt-lemma} allows us to connect wall time with the \textit{global time} in a regular way. It states that all elements before true (wall) time $\tau$ are processed if all elements of \textit{global time} $\tau - \delta \le t \le \tau + \delta$ are processed. Therefore, if a tracking mechanism provides notifications in the order of global times, it will be suitable for the state snapshotting problem.
 
 \begin{lemma}
 \label{gt-lemma}
@@ -50,7 +48,7 @@ Element of wall time $\tau$ can be assigned to three different global times due 
 as one can see all these cases give the global times less or equal than $t + 1$ which is supposed to be processed.
 \end{proof}
 
-Lemma~\ref{gt-lemma} allows us to connect wall time with the \textit{global time} that forms a basis for semantic guarantees. This connection is crucial when single client connects to different input nodes of the system (e.g. round-robin balancing). The same semantic is used in markers~\cite{Carbone:2017:SMA:3137765.3137777} concept: instead of global times conditions they simultaneously send a special item from all input nodes and after these elements reach the end of the pipeline generate the outputs of the current piece of input.
+% This connection is crucial when single client connects to different input nodes of the system (e.g. round-robin balancing). The same semantic is used in markers~\cite{Carbone:2017:SMA:3137765.3137777} concept: instead of global times conditions they simultaneously send a special item from all input nodes and after these elements reach the end of the pipeline generate the outputs of the current piece of input.
 
 \subsubsection{Glabal time transformation}
 
