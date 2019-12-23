@@ -2,7 +2,7 @@
 
 In this section, we focus on the core concepts of our dependency tracking method. Within the design of this mechanism, we aim at providing the following properties:
 \begin{itemize}
-    \item Low granularity of tracking: for each input element (or for each small group of input records), it should be possible to determine when the element has been entirely processed independently from other items.
+    \item Fine granularity of tracking: for each input element (or for each small group of input records), it should be possible to determine when the element has been entirely processed independently from other items.
     \item Operator-level or block-level locality of tracking: the mechanism should provide independent notifications for various blocks of a dataflow.
     \item Notifications order preservation: the order of notifications should not contradict the order of input elements arrival with respect to wall time.
     \item Cyclic dataflows support: our tracking technique should be suitable for cyclic dataflow graphs. This feature substantially extends the applicability of a dependency tracking method.
@@ -27,6 +27,16 @@ On the other hand, a consistent state snapshotting problem requires more strict 
 In the marker-based approach that is commonly used for state snapshotting problem~\cite{Carbone:2017:SMA:3137765.3137777}, ordering properties are naturally provided by the implementation itself. As we mentioned in Section~\ref{existing_solutions}, markers are injected as ordinary elements and cannot be reordered with them. Hence, notifications are always provided in the order that is consistent with the ingestion of input items.
 
 The core concept that allows our method to preserve the order of notifications is \textit{global time}. Global time is a special label that a stream processing system assigns to each input element. As we mentioned above, our dependency tracking mechanism monitors global times of in-flight records within a system. Hence, our mechanism can provide notifications with respect to the order of global times. If global time ordering is conformed with the order of input elements arrival, it will ensure the notifications order preservation.
+
+%требования к меткам
+%timing - wall time, упорядоченность, system time
+%global time = approximation wall time
+%если 1 - все ок wall time, если распределенно, то приближенно
+%global time, не обязательно уникальный даже на одной машине
+%лемма доказывает, что с аппроксимацией все ок
+%пояснить, что если global time не уникальный, то за них нотификация приходит одна
+%group commit
+%VLDB 2017, time oracle, но нам не так важно и тогда еще более fine-grained
 
 The global time order is based on the assumption that we are able to order input elements up to some difference in wall time. In a case where all elements are coming to the system through the same node, this assumption is natural since the role of global time can be played by a system time of element ingestion. On the other hand, if elements are coming from different nodes, we can compare generation times up to some guaranteed maximum system time difference $\delta$. 
 
