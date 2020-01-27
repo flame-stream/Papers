@@ -8,7 +8,7 @@ In this section, we focus on the core concepts of our dependency tracking method
     \item Cyclic dataflows support: our tracking technique should be suitable for cyclic dataflow graphs. This feature substantially extends the applicability of a dependency tracking method.
 \end{itemize}
 
-Our dependency tracking mechanism is inspired by Apache Storm \acker\ mechanism that we mentioned in the previous section. Firstly, each input data item is assigned with a unique label and a 64-bit random number. When an operator transforms elements, it preserves the label but assigns a new random number to the transformed record. All operators send tuples $(label, number)$ on each input and output element to a special agent called \acker . \acker\ XORs all random numbers grouped by the labels. 
+Our dependency tracking mechanism is inspired by Apache Storm \acker\ technique that we mentioned in the previous section. Firstly, each input data item is assigned with a unique label and a 64-bit random number. When an operator transforms elements, it preserves the label but assigns a new random number to the transformed record. All operators send tuples $(label, number)$ on each input and output element to a special agent called \acker . \acker\ XORs all random numbers grouped by the labels. 
 
 Note that each random number is sent to \acker\ precisely two times: when an operator sends a new transformed element downstream and when the next operator receives it. Therefore, if the XOR checksum for some label becomes zero, it means that all elements with that label are successfully processed. \acker\ broadcasts notifications on these events.
 
