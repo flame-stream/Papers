@@ -1,5 +1,14 @@
 \label{fs-acker-design}
 
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.5\textwidth]{pics/graph-segments.pdf}
+  \caption{Graph segmentation}
+  \label{graph-segments}
+\end{figure}
+
+\ref{graph-segments}
+
 In this section, we focus on the core concepts of our dependency tracking method. Within the design of this mechanism, we aim at providing the following properties:
 \begin{itemize}
     \item Fine granularity of tracking: for each input element (or for each small group of input records), it should be possible to determine when the element has been entirely processed independently from other items.
@@ -16,21 +25,49 @@ To avoid checksum becoming zero until all elements with a specified label are en
 
 We can illustrate \acker\ as a table with two columns: label and checksum. Table~\ref{ack_table} illustrates such table. According to this example, elements with label $b$ have been entirely processed, while records with labels $a$ and $c$ are still in processing.
 
-\begin{table}
-\caption{An example of \acker\ table}
-    \begin{center}
-        \begin{tabular}{ |c|c| } 
-         \hline
-         Label & Checksum \\ 
-         \hline
-         a & 11837652090509130941 \\ 
-         b & 0 \\
-         c & 9302885073111445477 \\
-         \hline
-        \end{tabular}
-    \end{center}
-\label{ack_table}
-\end{table}
+\begin{table*}
+  \begin{minipage}[b]{.40\textwidth}
+    \centering
+    \caption{Acker table}
+    \begin{tabular}{|c|>{\bfseries}c|c|c|} 
+      \hline
+      Released & Label & XOR & Global Time  \\ \hline \hline
+      \checkmark & a & 000 & 1 \\ \hline
+      & b & 101 & 4 \\ \hline
+      \checkmark & c & 000 & 3 \\ \hline
+      & d & 110 & 2 \\ \hline
+    \end{tabular}
+  \end{minipage}\qquad
+  \begin{minipage}[b]{.40\textwidth}
+    \centering
+    \caption{Acker + ordering}
+    \begin{tabular}{|c|>{\bfseries}c|c|c|} 
+      \hline
+      Released & Global Time & XOR  \\ \hline \hline
+      \checkmark & 1 & 000 \\ \hline
+      & 2 & 110 \\ \hline
+      blocked by 2 & 3 & 000 \\ \hline
+      & 4 & 101 \\ \hline
+    \end{tabular}
+  \end{minipage}
+  \begin{minipage}[b]{.40\textwidth}
+    \centering
+    \caption{trAcker}
+    \begin{tabular}{|c|>{\bfseries}c|c|c|c|} 
+      \hline
+      Released & Global Time & Segment & Local XOR & XOR  \\ \hline \hline
+      \multirow{2}{*}{\checkmark} & \multirow{2}{*}{1} & A & 000 & \multirow{2}{*}{000} \\ \cline{3-4}
+      & & B & 000 & \\ \hline
+      \multirow{2}{*}{} & \multirow{2}{*}{2} & A & 000 & \multirow{2}{*}{110} \\ \cline{3-4}
+      & & B & 110 & \\ \hline
+      \multirow{2}{*}{} & \multirow{2}{*}{3} & A & 000 & \multirow{2}{*}{000} \\ \cline{3-4}
+      & & B & 000 & \\ \hline
+      \multirow{2}{*}{} & \multirow{2}{*}{4} & A & 100 & \multirow{2}{*}{101} \\ \cline{3-4}
+      & & B & 001 & \\ \hline
+    \end{tabular}
+  \end{minipage}
+  \label{ack_table}
+\end{table*}
 
 \acker\ mechanism provides for the fine granularity of tracking and cyclic dataflows support out-of-the-box. However, only the uniqueness property of labels does not allow \acker\ to support block-level locality and notifications order preservation. Further, in this section, we design a more sophisticated structure of labels. Using these extended labels, we propose a \tracker\ mechanism that complements \acker\ and provides for all desired dependency tracking properties. 
 
@@ -125,6 +162,3 @@ We can illustrate \acker\ as a table with two columns: label and checksum. Table
 % \subsubsection{Completeness monitoring}
 
 % \subsubsection{State snapshotting}
-
-
-
