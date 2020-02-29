@@ -25,10 +25,8 @@ To avoid checksum becoming zero until all elements with a specified label are en
 
 We can illustrate \acker\ as a table with two columns: label and checksum. Table~\ref{ack_table} illustrates such table. According to this example, elements with label $b$ have been entirely processed, while records with labels $a$ and $c$ are still in processing.
 
-\begin{table*}
-  \begin{minipage}[b]{.40\textwidth}
+\begin{table}
     \centering
-    \caption{Acker table}
     \begin{tabular}{|c|>{\bfseries}c|c|c|} 
       \hline
       Released & Label & XOR & Global Time  \\ \hline \hline
@@ -37,43 +35,67 @@ We can illustrate \acker\ as a table with two columns: label and checksum. Table
       \checkmark & c & 000 & 3 \\ \hline
       & d & 110 & 2 \\ \hline
     \end{tabular}
-  \end{minipage}\qquad
-  \begin{minipage}[b]{.40\textwidth}
-    \centering
-    \caption{Acker + ordering}
-    \begin{tabular}{|c|>{\bfseries}c|c|c|} 
-      \hline
-      Released & Global Time & XOR  \\ \hline \hline
-      \checkmark & 1 & 000 \\ \hline
-      & 2 & 110 \\ \hline
-      blocked by 2 & 3 & 000 \\ \hline
-      & 4 & 101 \\ \hline
-    \end{tabular}
-  \end{minipage}
-  \begin{minipage}[b]{.40\textwidth}
-    \centering
-    \caption{trAcker}
-    \begin{tabular}{|c|>{\bfseries}c|c|c|c|} 
-      \hline
-      Released & Global Time & Segment & Local XOR & XOR  \\ \hline \hline
-      \multirow{2}{*}{\checkmark} & \multirow{2}{*}{1} & A & 000 & \multirow{2}{*}{000} \\ \cline{3-4}
-      & & B & 000 & \\ \hline
-      \multirow{2}{*}{} & \multirow{2}{*}{2} & A & 000 & \multirow{2}{*}{110} \\ \cline{3-4}
-      & & B & 110 & \\ \hline
-      \multirow{2}{*}{} & \multirow{2}{*}{3} & A & 000 & \multirow{2}{*}{000} \\ \cline{3-4}
-      & & B & 000 & \\ \hline
-      \multirow{2}{*}{} & \multirow{2}{*}{4} & A & 100 & \multirow{2}{*}{101} \\ \cline{3-4}
-      & & B & 001 & \\ \hline
-    \end{tabular}
-  \end{minipage}
-  \label{ack_table}
-\end{table*}
+    \caption{Acker table}
+\end{table}
+
+
+\begin{table}
+  \centering
+  \begin{tabular}{|c|>{\bfseries}c|c|c|c|} 
+    \hline
+    Released & Global Time & Segment & Local XOR & XOR  \\ \hline \hline
+    \multirow{2}{*}{\checkmark} & \multirow{2}{*}{1} & A & 000 & \multirow{2}{*}{000} \\ \cline{3-4}
+    & & B & 000 & \\ \hline
+    \multirow{2}{*}{} & \multirow{2}{*}{2} & A & 000 & \multirow{2}{*}{110} \\ \cline{3-4}
+    & & B & 110 & \\ \hline
+    \multirow{2}{*}{} & \multirow{2}{*}{3} & A & 000 & \multirow{2}{*}{000} \\ \cline{3-4}
+    & & B & 000 & \\ \hline
+    \multirow{2}{*}{} & \multirow{2}{*}{4} & A & 100 & \multirow{2}{*}{101} \\ \cline{3-4}
+    & & B & 001 & \\ \hline
+  \end{tabular}
+  \caption{trAcker}
+\end{table}
 
 \acker\ mechanism provides for the fine granularity of tracking and cyclic dataflows support out-of-the-box. However, only the uniqueness property of labels does not allow \acker\ to support block-level locality and notifications order preservation. Further, in this section, we design a more sophisticated structure of labels. Using these extended labels, we propose a \tracker\ mechanism that complements \acker\ and provides for all desired dependency tracking properties. 
 
-\subsection{\tracker\ mechanism}
+\subsection{Notification order preservation}
 
-\subsection{Ordered labelling}
+\begin{table}
+  \centering
+  \begin{tabular}{|c|>{\bfseries}c|c|c|} 
+    \hline
+    Released & Global Time & XOR  \\ \hline \hline
+    \checkmark & 1 & 000 \\ \hline
+    & 2 & 110 \\ \hline
+    blocked by 2 & 3 & 000 \\ \hline
+    & 4 & 101 \\ \hline
+  \end{tabular}
+  \caption{Acker + ordering}
+  \label{acker-ordering}
+\end{table}
+
+Each imput element has unique identificatior that defines the global order between elements. We discuss the exact structure of such identificator in section \ref{fs-acker-impl}, for now let's assume that it is element ingestion timestamp. We call such idenficator Global Time.
+
+Order preservation property requires that completeness notifications for processed elements are ordered according elements Global Times.
+
+To enforce such order we: 
+
+\begin{enumerate}
+  \item Use element Global Time as label in acker table
+  \item Sort entries in acker table according to the Global Time
+  \item Send notifications for zeroed entries only when notifications for all previous lines are send
+\end{enumerate}
+
+This modification is shown in table \ref{acker-ordering}. Notification for Global Time $1$ still can be sent as there are no elements with less Global Time and it is zeroed that means that all elements with such Global Time are completely processed. In contrast to traditional acker, notification for time $3$can't be sent even if there is zero in XOR column because there are unprocessed elements in dataflow with Global Time $2$.
+
+\subsection{Snapshot locality}
+
+Notification ordering enables us consistent snapshoting and recovery, but there are cases when snapshot mechanism could be triggered much earlier than notification for complete element processing.
+
+If graph is partitioned in segments without cycles between them, we can embed this information in trAcker. 
+
+
+\subsection{Generic cycles}
 
 %todo: посчитать вероятности того, что акер обнулится
 
