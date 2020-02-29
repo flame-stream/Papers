@@ -93,19 +93,19 @@
 % https://gist.github.com/faucct/032aaf6240db361d30a184b1d7bf3c8e
 \begin{figure*}[t!]
     \begin{subfigure}[b]{0.32\textwidth}
-            \includegraphics[width=0.99\textwidth]{pics/traffic_by_graph_size_bars.png}
+            \includegraphics[width=0.99\textwidth]{pics/traffic_by_graph_size_bars.pdf}
             \caption{Traffic by graph size}
             \label{traffic_graph}
     \end{subfigure}
     \hspace{5mm}
     \begin{subfigure}[b]{0.32\textwidth}
-            \includegraphics[width=0.99\textwidth]{pics/traffic_by_number_of_machines_bars.png}
+            \includegraphics[width=0.99\textwidth]{pics/traffic_by_number_of_machines_bars.pdf}
             \caption{Traffic by number of virtual machines}
             \label{traffic_machines}
     \end{subfigure}
     \hspace{5mm}
     \begin{subfigure}[b]{0.32\textwidth}
-            \includegraphics[width=0.99\textwidth]{pics/traffic_by_tracking_frequency_bars.png}
+            \includegraphics[width=0.99\textwidth]{pics/traffic_by_tracking_frequency_bars.pdf}
             \caption{Traffic by tracking frequency}
             \label{traffic_granularity}
 	\end{subfigure}
@@ -145,7 +145,7 @@ This experiment shows that markers significantly bound throughput of regular pro
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.50\textwidth]{pics/throughput_overhead_50.png}
+  \includegraphics[width=0.50\textwidth]{pics/throughput_overhead_50.pdf}
   \caption{Tracking overhead on a processing throughput}
   \label{throughput_overhead}
 \end{figure}
@@ -153,19 +153,19 @@ This experiment shows that markers significantly bound throughput of regular pro
 % https://gist.github.com/faucct/032aaf6240db361d30a184b1d7bf3c8e
 \begin{figure*}[t!]
     \begin{subfigure}[b]{0.32\textwidth}
-            \includegraphics[width=0.99\textwidth]{pics/notification_await_time_by_graph_size_bars.png}
+            \includegraphics[width=0.99\textwidth]{pics/notification_await_time_by_graph_size_bars.pdf}
             \caption{Notification latency by graph size}
             \label{notification_graph}
     \end{subfigure}
     \hspace{5mm}
     \begin{subfigure}[b]{0.32\textwidth}
-            \includegraphics[width=0.99\textwidth]{pics/notification_await_time_by_number_of_machines_bars.png}
+            \includegraphics[width=0.99\textwidth]{pics/notification_await_time_by_number_of_machines_bars.pdf}
             \caption{Notification latency by VMs number}
             \label{notification_machines}
     \end{subfigure}
     \hspace{5mm}
     \begin{subfigure}[b]{0.32\textwidth}
-            \includegraphics[width=0.99\textwidth]{pics/notification_await_time_by_tracking_frequency_bars.png}
+            \includegraphics[width=0.99\textwidth]{pics/notification_await_time_by_tracking_frequency_bars.pdf}
             \caption{Notification latency by granularity}
             \label{notification_granularity}
 	\end{subfigure}
@@ -176,19 +176,19 @@ This experiment shows that markers significantly bound throughput of regular pro
 % https://gist.github.com/faucct/546f5617b958349a125449926373b780
 \begin{figure*}[t!]
     \begin{subfigure}[b]{0.32\textwidth}
-            \includegraphics[width=0.99\textwidth]{pics/scalability_01x.png}
+            \includegraphics[width=0.99\textwidth]{pics/scalability_01x.pdf}
             \caption{1x acks}
             \label{1x_acks}
     \end{subfigure}
     \hspace{5mm}
     \begin{subfigure}[b]{0.32\textwidth}
-            \includegraphics[width=0.99\textwidth]{pics/scalability_05x.png}
+            \includegraphics[width=0.99\textwidth]{pics/scalability_05x.pdf}
             \caption{5x acks}
             \label{5x_acks}
     \end{subfigure}
     \hspace{5mm}
     \begin{subfigure}[b]{0.32\textwidth}
-            \includegraphics[width=0.99\textwidth]{pics/scalability_09x.png}
+            \includegraphics[width=0.99\textwidth]{pics/scalability_09x.pdf}
             \caption{9x acks}
             \label{9x_acks}
 	\end{subfigure}
@@ -218,19 +218,19 @@ The experiments demonstrate that even centralized \tracker\ can sustain a high i
 
 \begin{figure*}[t!]
     \begin{subfigure}[b]{0.32\textwidth}
-            \includegraphics[width=0.99\textwidth]{pics/buffering_latencies_barh_100.png}
+            \includegraphics[width=0.99\textwidth]{pics/buffering_latencies_barh_100.pdf}
             \caption{100 ms snapshot duration}
             \label{100ms_snapshot}
     \end{subfigure}
     \hspace{5mm}
     \begin{subfigure}[b]{0.32\textwidth}
-            \includegraphics[width=0.99\textwidth]{pics/buffering_latencies_barh_500.png}
+            \includegraphics[width=0.99\textwidth]{pics/buffering_latencies_barh_500.pdf}
             \caption{500 ms snapshot duration}
             \label{500ms_snapshot}
     \end{subfigure}
     \hspace{5mm}
     \begin{subfigure}[b]{0.32\textwidth}
-            \includegraphics[width=0.99\textwidth]{pics/buffering_latencies_barh_1000.png}
+            \includegraphics[width=0.99\textwidth]{pics/buffering_latencies_barh_1000.pdf}
             \caption{1000 ms snapshot duration}
             \label{1000ms_snapshot}
     \end{subfigure}
@@ -249,20 +249,15 @@ Figure~\ref{snapshot_spikes} demonstrates latency spikes during state snapshotti
 This experiment indicates that \tracker\ can provide better results for a common problem that is traditionally solved using markers. This result also shows that operator-level locality of tracking can be implemented efficiently with \tracker .
 
 % https://gist.github.com/faucct/6097d9d08197cb979b71721b16f8b6a3/
-% \begin{figure}[htbp]
-%   \centering
-%   \includegraphics[width=0.50\textwidth]{pics/buffering_average_duration_bars.png}
-%   \caption{Average buffering duration}
-% \end{figure}
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.50\textwidth]{pics/buffering_count_bars.png}
+  \includegraphics[width=0.50\textwidth]{pics/buffering_count_bars.pdf}
   \caption{Buffered elements count}
   \label{snapshot_buffered}
 \end{figure}
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.50\textwidth]{pics/buffering_sum_duration_bars.png}
+  \includegraphics[width=0.50\textwidth]{pics/buffering_sum_duration_bars.pdf}
   \caption{Total buffering duration}
 \end{figure}
 

@@ -25,6 +25,36 @@ To avoid checksum becoming zero until all elements with a specified label are en
 
 We can illustrate \acker\ as a table with two columns: label and checksum. Table~\ref{ack_table} illustrates such table. According to this example, elements with label $b$ have been entirely processed, while records with labels $a$ and $c$ are still in processing.
 
+% \begin{algorithm}
+%  \KwData{Execution graph $G$, input stream $I$, random number generator $r$, input element $d$}
+%  \KwResult{Processing complete notifications}
+ 
+% $tid = r.next()$ \;
+% $S = \{(node: G.Source, data: d, tuple: tid, ack: r.next()\}$ \; \\
+% \While{$S \ne \emptyset$}{
+%  $t = S.Any()$\;
+%  $S = S \setminus \{t\}$\;
+%  \eIf{$t.node = G.Source()$}{
+%   $O = \{t.data\}$ \;
+%  }{
+%   $O = t.node.process(t.data) $\;
+%  }
+%  \For{$\forall o \in O, \forall n \in G.Output(t.node)\setminus G.Sink$}{
+%     $ack = r.next()$\;
+%     $S = S \cup \{(node: n, data: o, tuple: t.tuple, ack: ack)\}$ \;
+%     $Ack(t.tuple, ack)$ \;
+%  }
+%  $Ack(t.tuple, t.ack)$\;
+% }
+
+% \eIf{$Ack(tid) = 0$}{
+%  $Complete(d)$\;
+% }{
+%  $Replay(d)$\;
+% }
+% \caption{Storm acker algorithm}
+% \end{algorithm}
+
 \begin{table}
     \centering
     \begin{tabular}{|c|>{\bfseries}c|c|c|} 
@@ -77,7 +107,6 @@ We can illustrate \acker\ as a table with two columns: label and checksum. Table
 Each imput element has unique identificatior that defines the global order between elements. We discuss the exact structure of such identificator in section \ref{fs-acker-impl}, for now let's assume that it is element ingestion timestamp. We call such idenficator Global Time.
 
 Order preservation property requires that completeness notifications for processed elements are ordered according elements Global Times.
-
 To enforce such order we: 
 
 \begin{enumerate}
@@ -94,8 +123,9 @@ Notification ordering enables us consistent snapshoting and recovery, but there 
 
 If graph is partitioned in segments without cycles between them, we can embed this information in trAcker. 
 
-
 \subsection{Generic cycles}
+
+\subsection{Ordered labelling}
 
 %todo: посчитать вероятности того, что акер обнулится
 

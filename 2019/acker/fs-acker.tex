@@ -7,7 +7,8 @@
 \usepackage{multirow}
 \usepackage{array}
 \usepackage{hyperref}
-\usepackage{algorithm} % for algorithms
+% \usepackage{algorithm} % for algorithms
+\usepackage{algorithm2e} % for algorithms
 \usepackage{algpseudocode}
 % \usepackage{booktabs} % For formal tables
 
@@ -75,7 +76,7 @@ Boris Novikov\\
 \begin{abstract}
 %The majority of state-of-the-art stream processing systems faces a problem of obtaining notifications when the specific set of input elements have already been applied to all operators in a dataflow. Such notifications are commonly used to take consistent state snapshots or to release all descendants of an input element atomically while preserving exactly-once delivery guarantee. To generate these notifications, there is a need to track dependencies between input and their descendants and to inform when all descendants have been completely processed. In this work, we propose a method for tracking dependencies between streaming elements that can be applied for both cyclic (iterative) and acyclic dataflows. We demonstrate that our technique has low latency and throughput overhead within various setups and can significantly outperform methods employed by state-of-the-art stream processing systems.
 
-In distributed stream processing, it is hard to determine a correspondence between input and output elements due to complex transformations, filterings, and so on. On the other hand, mechanisms for taking consistent state snapshots and for transactional stream processing require understanding when a system has already processed a specific set of input elements and the elements generated from them. To achieve this understanding, one needs to track dependencies between items in a dataflow. In this work, we propose a method for monitoring dependencies between streaming elements. This method is applicable to cyclic dataflows, as well. We enrich each data item with a label that captures its generation context. We build a scalable method to watch for the computational progress and to broadcast system notifications when dataflow contains no elements with specific labels. These notifications indicate when a system completely processed all descendants of concrete input elements. We demonstrate that our technique provides low notification latency while having low throughput overhead on regular processing, and can outperform methods employed by state-of-the-art stream processing systems.
+In distributed stream processing, it is hard to determine a correspondence between input and output elements due to complex transformations, filterings, and so on. On the other hand, mechanisms for taking consistent state snapshots and for transactional stream processing require understanding when a system has already processed a specific set of input elements and the elements induced by them. To achieve this understanding, one needs to track dependencies between items in a dataflow. In this work, we propose a method for monitoring dependencies between streaming elements that is applicable to cyclic dataflows, as well. Our technique is based on an agent that watches for the computational progress and broadcasts system notifications when certain elements processing is finished. These notifications indicate when a system completely processed all descendants of concrete input elements. We demonstrate that our technique provides low notification latency while having low throughput overhead on regular processing, and can outperform methods employed by state-of-the-art stream processing systems.
 
 % In distributed stream processing, a system often needs to determine a correspondence between input and output elements, e.g. to take state snapshot affected by  or to release all descendants of an input element atomically while preserving exactly-once delivery guarantee. This task is hard due to complex transformations, filterings, producing multiple elements from a single, etc. 
 
@@ -107,7 +108,7 @@ In distributed stream processing, it is hard to determine a correspondence betwe
 \input {fs-acker-conclusion.tex}
 
 \bibliographystyle{abbrvurl}
-\bibliography{../../bibliography/flame-stream}
+\bibliography{bibliography/flame-stream}
 
 \end {document}
 
