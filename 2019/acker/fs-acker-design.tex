@@ -36,6 +36,63 @@ We can illustrate \acker\ as a table with two columns: label and checksum. Table
 
 \subsection{\tracker\ mechanism}
 
+
+\begin{algorithm}
+\caption{\tracker}
+\begin{algorithmic}[1]
+\Procedure{HandleAck}{$time, checksum$}
+\State $checksums[time] \gets checksums[time] \bigoplus checksum$
+\State $CheckMinTime$
+\EndProcedure
+\\
+\Procedure{HandleHeartbeat}{$time$}
+\State $heartbeat \gets time$
+\State $CheckMinTime$
+\EndProcedure
+\\
+\Procedure{CheckMinTime}{}
+\State $time \gets previousMinTime$
+\While{$time < heartbeat \And checksums[time] = 0$}
+\State $time \gets time + 1$
+\EndWhile
+\If{$previousMinTime < time$}
+\State $previousMinTime \gets time$
+\State $SendMinTimeUpdate(time)$
+\EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+% \begin{algorithm}
+%  \KwData{Execution graph $G$, input stream $I$, random number generator $r$, input element $d$}
+%  \KwResult{Processing complete notifications}
+ 
+% $tid = r.next()$ \;
+% $S = \{(node: G.Source, data: d, tuple: tid, ack: r.next()\}$ \; \\
+% \While{$S \ne \emptyset$}{
+%  $t = S.Any()$\;
+%  $S = S \setminus \{t\}$\;
+%  \eIf{$t.node = G.Source()$}{
+%   $O = \{t.data\}$ \;
+%  }{
+%   $O = t.node.process(t.data) $\;
+%  }
+%  \For{$\forall o \in O, \forall n \in G.Output(t.node)\setminus G.Sink$}{
+%     $ack = r.next()$\;
+%     $S = S \cup \{(node: n, data: o, tuple: t.tuple, ack: ack)\}$ \;
+%     $Ack(t.tuple, ack)$ \;
+%  }
+%  $Ack(t.tuple, t.ack)$\;
+% }
+
+% \eIf{$Ack(tid) = 0$}{
+%  $Complete(d)$\;
+% }{
+%  $Replay(d)$\;
+% }
+% \caption{Storm acker algorithm}
+% \end{algorithm}
+
 \subsection{Ordered labelling}
 
 %todo: посчитать вероятности того, что акер обнулится
