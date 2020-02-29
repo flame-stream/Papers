@@ -25,6 +25,26 @@ To avoid checksum becoming zero until all elements with a specified label are en
 
 We can illustrate \acker\ as a table with two columns: label and checksum. Table~\ref{ack_table} illustrates such table. According to this example, elements with label $b$ have been entirely processed, while records with labels $a$ and $c$ are still in processing.
 
+\begin{table}
+\caption{An example of \acker\ table}
+    \begin{center}
+        \begin{tabular}{ |c|c| } 
+         \hline
+         Label & Checksum \\ 
+         \hline
+         a & 11837652090509130941 \\ 
+         b & 0 \\
+         c & 9302885073111445477 \\
+         \hline
+        \end{tabular}
+    \end{center}
+\label{ack_table}
+\end{table}
+
+\acker\ mechanism provides for the fine granularity of tracking and cyclic dataflows support out-of-the-box. However, only the uniqueness property of labels does not allow \acker\ to support block-level locality and notifications order preservation. Further, in this section, we design a more sophisticated structure of labels. Using these extended labels, we propose a \tracker\ mechanism that complements \acker\ and provides for all desired dependency tracking properties. 
+
+\subsection{\tracker\ mechanism}
+
 % \begin{algorithm}
 %  \KwData{Execution graph $G$, input stream $I$, random number generator $r$, input element $d$}
 %  \KwResult{Processing complete notifications}
