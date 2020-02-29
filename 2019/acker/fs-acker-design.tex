@@ -68,24 +68,6 @@ We can illustrate \acker\ as a table with two columns: label and checksum. Table
     \caption{Acker table}
 \end{table}
 
-
-\begin{table}
-  \centering
-  \begin{tabular}{|c|>{\bfseries}c|c|c|c|} 
-    \hline
-    Released & Global Time & Segment & Local XOR & XOR  \\ \hline \hline
-    \multirow{2}{*}{\checkmark} & \multirow{2}{*}{1} & A & 000 & \multirow{2}{*}{000} \\ \cline{3-4}
-    & & B & 000 & \\ \hline
-    \multirow{2}{*}{} & \multirow{2}{*}{2} & A & 000 & \multirow{2}{*}{110} \\ \cline{3-4}
-    & & B & 110 & \\ \hline
-    \multirow{2}{*}{} & \multirow{2}{*}{3} & A & 000 & \multirow{2}{*}{000} \\ \cline{3-4}
-    & & B & 000 & \\ \hline
-    \multirow{2}{*}{} & \multirow{2}{*}{4} & A & 100 & \multirow{2}{*}{101} \\ \cline{3-4}
-    & & B & 001 & \\ \hline
-  \end{tabular}
-  \caption{trAcker}
-\end{table}
-
 \acker\ mechanism provides for the fine granularity of tracking and cyclic dataflows support out-of-the-box. However, only the uniqueness property of labels does not allow \acker\ to support block-level locality and notifications order preservation. Further, in this section, we design a more sophisticated structure of labels. Using these extended labels, we propose a \tracker\ mechanism that complements \acker\ and provides for all desired dependency tracking properties. 
 
 \subsection{Notification order preservation}
@@ -118,6 +100,23 @@ To enforce such order we:
 This modification is shown in table \ref{acker-ordering}. Notification for Global Time $1$ still can be sent as there are no elements with less Global Time and it is zeroed that means that all elements with such Global Time are completely processed. In contrast to traditional acker, notification for time $3$can't be sent even if there is zero in XOR column because there are unprocessed elements in dataflow with Global Time $2$.
 
 \subsection{Snapshot locality}
+
+\begin{table}
+  \centering
+  \begin{tabular}{|c|>{\bfseries}c|c|c|c|} 
+    \hline
+    Released & Global Time & Segment & Local XOR & XOR  \\ \hline \hline
+    \multirow{2}{*}{\checkmark} & \multirow{2}{*}{1} & A & 000 & \multirow{2}{*}{000} \\ \cline{3-4}
+    & & B & 000 & \\ \hline
+    \multirow{2}{*}{} & \multirow{2}{*}{2} & A & 000 & \multirow{2}{*}{110} \\ \cline{3-4}
+    & & B & 110 & \\ \hline
+    \multirow{2}{*}{} & \multirow{2}{*}{3} & A & 000 & \multirow{2}{*}{000} \\ \cline{3-4}
+    & & B & 000 & \\ \hline
+    \multirow{2}{*}{} & \multirow{2}{*}{4} & A & 100 & \multirow{2}{*}{101} \\ \cline{3-4}
+    & & B & 001 & \\ \hline
+  \end{tabular}
+  \caption{trAcker}
+\end{table}
 
 Notification ordering enables us consistent snapshoting and recovery, but there are cases when snapshot mechanism could be triggered much earlier than notification for complete element processing.
 
