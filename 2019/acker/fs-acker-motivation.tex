@@ -38,7 +38,7 @@ Further, in this section, we overview several practical problems that require a 
 
 \subsection{Completeness monitoring}
 
-A particular use-case of completeness monitoring is transactional processing. If input elements are split into multiple ones (e.g. within a flatmap), and system processes them independently, a user often assumes that the descendants will be handled atomically. In other words, if a system loses a single element, other items that depend on the same input should not affect a system state. 
+A particular use-case of completeness monitoring is transactional processing. If input elements are split into multiple ones (e.g., within a flat map), and system processes them independently, a user often assumes that the descendants will be handled atomically. In other words, if a system loses a single element, other items that depend on the same input should not affect a system state. 
 
 To process input items transactionally, a system must check that all descendants of an input item are successfully processed or rollback changes caused by survived elements otherwise. One can solve this problem with dependency tracking. If there is no notification that all descendants of an input item are completely processed before a timeout, a system can initiate a recovery mechanism.
 
@@ -47,7 +47,7 @@ Another application of completeness monitoring is a cleanup of data producers. T
 \subsection{State snapshotting}
 Many streaming systems, including Flink~\cite{Carbone:2017:SMA:3137765.3137777} and Heron~\cite{Kulkarni:2015:THS:2723372.2742788}, apply state snapshotting mechanisms to ensure fault tolerance. The main idea behind this method is to periodically save the overall system state (states of all operators) to persistent storage. In case of a failure, the system rolls back a state from storage and reprocesses missed input elements. 
 
-The main problem here is to determine which input elements should be reprocessed after a failure. If an input element has already {\em affected} the state, reprocessing of this element can make state inconsistent. The tricky point is that the input element can affect the state {\em partially}: some descendants can modify the state, while others can be missed. If a system takes snapshot at such moment, it will not be able to consistently recover it after a failure and will not provide {\em exactly once} or {\em at least once} delivery guarantee~\cite{2015arXiv150608603C, Carbone:2017:SMA:3137765.3137777}.
+The main problem here is to determine which input elements should be reprocessed after a failure. If an input element has already {\em affected} the state, reprocessing of this element can make state inconsistent. The tricky point is that the input element can affect the state {\em partially}: some descendants can modify the state, while others can be missed. If a system takes a snapshot at such moment, it will not be able to consistently recover it after a failure and will not provide {\em exactly once} or {\em at least once} delivery guarantee~\cite{2015arXiv150608603C, Carbone:2017:SMA:3137765.3137777}.
 
 To prevent such inconsistency, a system can take state snapshot when some specific set of input records have been entirely processed, including all descendant records~\cite{2015arXiv150608603C, thepaper}. Streaming systems use dependency tracking techniques to determine these moments. For instance, the tracking mechanism can notify each operator when it is safe to save its local state. The system commits global snapshot when all operators successfully saved their states affected by certain input elements only. Therefore, in case of a failure, a streaming engine can safely reprocess missed input records that did not affect the snapshot.
 
@@ -55,7 +55,7 @@ The problem of state snapshotting is quite similar to completeness monitoring in
 
 \subsection{Existing solutions} \label{existing_solutions}
 
-In this section, we describe the properties of existing dependency tracking mechanisms and make an overview of their main advantages and restrictions. We also analyze their network traffic overhead in terms of the following parameters: computational units number (\textbf{C}), dataflow size (\textbf{N}), and granularity (\textbf{G}). Properties overview and performance analysis are summarized in Table~\ref{solutions-overview-table}.
+In this section, we describe the properties of existing dependency tracking mechanisms and make an overview of their main advantages and restrictions. We also analyze their network traffic overhead in terms of the following parameters: the number of computational units (\textbf{C}), dataflow size (\textbf{N}), and granularity (\textbf{G}). Properties overview and performance analysis are summarized in Table~\ref{solutions-overview-table}.
 
 \subsubsection{Micro-batching}
 
@@ -91,7 +91,7 @@ This method was originally designed for fine-grained tracking with a segment-lev
 
 \subsubsection{Acker}
 
-\acker\ is a mechanism for completeness tracking employed in Apache Storm~\cite{apache:storm}. The main idea is to enrich each data item along the dataflow with a random number that helps tracking processing progress. When an element is transformed, its descendants obtain new random numbers. Each time an item is sent or received, a system forwards its number to a special agent called {\em \acker}. Acker XORs all received numbers into the checksum. If all elements have been successfully processed, the checksum will be zero~\footnote{XOR operation is commutative, and as we send each number twice, the entire combination gives zero in the result.}.
+\acker\ is a mechanism for completeness tracking employed in Apache Storm~\cite{apache:storm}. The main idea is to enrich each data item along with the dataflow with a random number that helps to track processing progress. When an element is transformed, its descendants obtain new random numbers. Each time an item is sent or received, a system forwards its number to a special agent called {\em \acker}. Acker XORs all received numbers into the checksum. If all elements have been successfully processed, the checksum will be zero~\footnote{XOR operation is commutative, and as we send each number twice, the entire combination gives zero in the result.}.
 
 Acker is suitable for cyclic dataflows and can be efficiently used for fine-grained tracking because its amount of extra service traffic is $O(N+C)$ that is less than other methods induce. However, it does not support operator or segment-level locality of tracking. Another limitation is the lack of notifications order preservation that makes \acker\ not suitable for state snapshotting problem.
 

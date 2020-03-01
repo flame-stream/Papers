@@ -164,11 +164,11 @@ In \acker\ algorithm each input element is identified by so-called \textit{tuple
 
 Table~\ref{acker_table} illustrates original \acker\ table. As we can note, labels are random and do not correspond to input timestamps. Hence, e.g. notification for element with label $d$ is sent before notification for element with label $p$, despite the fact that $p$ entered a system before $d$.
 
-To preserve the notifications order, we change the \textit{tuple identifier} generation procedure. Instead of random tuple identifiers, we capture information about input elements order. We call such tuple identifiers \textit{global times}. In practice, we use timestamp of the element arrival time for this purpose.
+To preserve the notifications order, we change the \textit{tuple identifier} generation procedure. Instead of random tuple identifiers, we capture information about input elements order. We call such tuple identifiers \textit{global times}. In practice, we use the timestamp of the element arrival time for this purpose.
 
 % To demonstrate the differences between \tracker\ and \acker\ schemes we compared them in Figure~\ref{fig:tracker-acker-comparison}. 
 
-With the introduction of order on tuple identifier, the ack table can be sorted. For each label, we delay the processing complete notification up to the moment when all previous accumulators become zero. This will give us order preservation guarantee.
+With the introduction of the order on the tuple identifiers, the ack table can be sorted. For each label, we delay the processing complete notification up to the moment when all previous accumulators become zero. This will give us an order preservation guarantee.
 
 Table~\ref{acker-ordering} shows modified \acker\ table ordered by \textit{global time}. Global times, which are used instead of random labels, do not contradict the order of input elements arrival. Notification for element with \textit{global time} 3 is not sent although its XOR is zero because an element with less \textit{global time} (2) is not completed.
 
@@ -176,7 +176,7 @@ Table~\ref{acker-ordering} shows modified \acker\ table ordered by \textit{globa
 
 We can use \textit{global time} of different precision. In case of precise physical time, this will give us the same properties as \textit{tuple identifier}, as there will be no collisions between \textit{global times} of input elements. However, with the reduction of the time precision \textit{global time}, it will group elements by their arrival times in small batches of a size that is defined by input items rate and the time precision.
 
-The vital practical question is how to synchronize clock between source nodes to be able to compare \textit{global time} of elements coming from different sources. This problem is resolved in Section~\ref{fs-acker-impl}, here we skip this discussion and assume that all elements are coming from the single source node, so all global times can always be compared.
+The vital practical question is how to synchronize clocks between source nodes to be able to compare \textit{global time} of elements coming from different sources. This problem is resolved in Section~\ref{fs-acker-impl}, here we skip this discussion and assume that all elements are coming from the single source node, so all global times can always be compared.
 
 In the original algorithm, the output elements of operation always have the same \textit{tuple identifier} as an input element. This strict rule will not allow us to make consistent join operations since sometimes, we need to wait for a matching element to continue processing the current one. For example, if we want to join user click logs with access logs of some web service, we need to wait for the access event for further processing of a click. To overcome this difficulty sending acks is controlled by the user in Storm. Instead of this we allow user to spawn events with \textit{global time} equal or \textit{greater} then one of input element.
 
@@ -208,7 +208,7 @@ To provide segment-wise notifications, we use different \textit{tuple identifier
 Concluding all our modifications of the \textit{tuple identifier}, it now has two parts: \textit{global time} and \textit{segment identifier}. To send processing complete notification we require:
 \begin{enumerate}
     \item XOR accumulator for this identifier to be zero
-    \item All segments up the stream does not contain elements with such identifier (local XOR accumulator is zero)
+    \item All segments up the stream do not contain elements with such identifier (local XOR accumulator is zero)
     \item All accumulators for this segment with a  \textit{global time} less than current are nullified
 \end{enumerate}
 
