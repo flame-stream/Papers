@@ -191,23 +191,6 @@ In the original algorithm, the output elements of operation always have the same
 
 % This modification is shown in table \ref{acker-ordering}. Notification for Global Time $1$ still can be sent as there are no elements with less Global Time and it is zeroed that means that all elements with such Global Time are completely processed. In contrast to traditional acker, notification for time $3$can't be sent even if there is zero in XOR column because there are unprocessed elements in dataflow with Global Time $2$.
 \subsection{Dataflow locality}
-\begin{table}
-  \centering
-  \begin{tabular}{|c|>{\bfseries}c|c|c|c|} 
-    \hline
-    Released & GT & Segment & Local XOR & XOR  \\ \hline \hline
-    \multirow{2}{*}{\checkmark} & \multirow{2}{*}{1} & A & 000 & \multirow{2}{*}{000} \\ \cline{3-4}
-    & & B & 000 & \\ \hline
-    \multirow{2}{*}{} & \multirow{2}{*}{2} & A & 000 & \multirow{2}{*}{110} \\ \cline{3-4}
-    & & B & 110 & \\ \hline
-    \multirow{2}{*}{blocked by 2} & \multirow{2}{*}{3} & A & 000 & \multirow{2}{*}{000} \\ \cline{3-4}
-    & & B & 000 & \\ \hline
-    \multirow{2}{*}{} & \multirow{2}{*}{4} & A & 100 & \multirow{2}{*}{101} \\ \cline{3-4}
-    & & B & 001 & \\ \hline
-  \end{tabular}
-  \caption{trAcker}
-  \label{tracker-table}
-\end{table}
 
 \begin{figure}[htbp]
   \centering
@@ -230,6 +213,24 @@ Concluding all our modifications of the \textit{tuple identifier}, it now has tw
 To illustrate the dataflow locality feature, assume that we have a dataflow graph illustrated in Figure~\ref{fig:tracker-acker-comparison}. This graph has two segments: $A$ and $B$. Table~\ref{tracker-table} illustrates \tracker\ table for this case. Notification for \textit{global time} 3 cannot be sent to all subscribers, because elements with \textit{global time} 2 are still being processed. However, notification for the segment $A$ with \textit{global time} 2 is valid because all XORS with the prior \textit{global times} for this segment have been nullified.
 
 Further, in the paper, we reference the complete processing notifications of a certain segment as \textit{min time segment update}. The logic behind this notation is simple after the notification there are no elements with \textit{global time} less or equal to the time of notification left in the stream upper this segment sink.  
+
+\begin{table}
+  \centering
+  \begin{tabular}{|c|>{\bfseries}c|c|c|c|} 
+    \hline
+    Released & GT & Segment & Local XOR & XOR  \\ \hline \hline
+    \multirow{2}{*}{\checkmark} & \multirow{2}{*}{1} & A & 000 & \multirow{2}{*}{000} \\ \cline{3-4}
+    & & B & 000 & \\ \hline
+    \multirow{2}{*}{} & \multirow{2}{*}{2} & A & 000 & \multirow{2}{*}{110} \\ \cline{3-4}
+    & & B & 110 & \\ \hline
+    \multirow{2}{*}{blocked by 2} & \multirow{2}{*}{3} & A & 000 & \multirow{2}{*}{000} \\ \cline{3-4}
+    & & B & 000 & \\ \hline
+    \multirow{2}{*}{} & \multirow{2}{*}{4} & A & 100 & \multirow{2}{*}{101} \\ \cline{3-4}
+    & & B & 001 & \\ \hline
+  \end{tabular}
+  \caption{trAcker}
+  \label{tracker-table}
+\end{table}
 
 \subsection{\tracker\ overview}
 

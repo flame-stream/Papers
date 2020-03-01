@@ -19,24 +19,6 @@ This fact allows us to define \textit{global time} slots $t(d)$ such that $t(d) 
 
 However, \tracker\  interface has several distinctions. Firstly, \textit{ack} messages are extended with a \textit{segment} that is needed to provide dataflow-local notifications. Secondly, data sources (fronts) should send special messages called \textit{Heartbeats} that contain \textit{global time} if there were no elements with such \textit{global time}. These messages allows \tracker\ to send notifications even if some fronts did not produce records with a specific \textit{global time}. 
 
-Therefore, \tracker\ receives the following messages:
-\begin{itemize}
-    \item Ack message is a tuple of a \textit{global time}, \textit{segment}, and \textit{ack value} (random number)
-    \item Heartbeat message is a pair of a \textit{global time} and a front-end id.
-    \item (Un)Subscribe message
-\end{itemize}
-
-% On ack message the accumulator, associated with provided \textit{global time} is updated by the received \textit{ack value}. Due to commutation of xor operation the checksum change may contain either single ack or multiple acks xored to a single change. The heartbeat message from front-end guarantees that no more input items with such a \textit{global time} will be emitted by this front-end. Subscribe messages manage the list of notification receivers. 
-
-\tracker\ sends the following messages to subscribers:
-\begin{itemize}
-    \item \textit{Min segment time update} for time $t$ when no items with the \textit{global time} less or equal $t$ exists in the segment
-    \item \textit{Min global time update} for time $t$ when no items with the \textit{global time} less or equal $t$ exists in the system
-\end{itemize}
-
-
-When an accumulator, associated with \textit{global time}, becomes zero, this time is the minimum time in the acker table for this segment and all previous segments the \textit{min time update for segment} is emitted and send to all subscribers. If for all segments of a certain \textit{global time} the XOR result is zero, \tracker\ sends \textit{min global time update}. An implementation sketch of \tracker\ interface is shown in Algorithm~\ref{tracker_algo}.
-
 \begin{algorithm}
 \caption{\tracker\ implementation sketch}
 \label{tracker_algo}
@@ -85,6 +67,24 @@ When an accumulator, associated with \textit{global time}, becomes zero, this ti
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
+
+Therefore, \tracker\ receives the following messages:
+\begin{itemize}
+    \item Ack message is a tuple of a \textit{global time}, \textit{segment}, and \textit{ack value} (random number)
+    \item Heartbeat message is a pair of a \textit{global time} and a front-end id.
+    \item (Un)Subscribe message
+\end{itemize}
+
+% On ack message the accumulator, associated with provided \textit{global time} is updated by the received \textit{ack value}. Due to commutation of xor operation the checksum change may contain either single ack or multiple acks xored to a single change. The heartbeat message from front-end guarantees that no more input items with such a \textit{global time} will be emitted by this front-end. Subscribe messages manage the list of notification receivers. 
+
+\tracker\ sends the following messages to subscribers:
+\begin{itemize}
+    \item \textit{Min segment time update} for time $t$ when no items with the \textit{global time} less or equal $t$ exists in the segment
+    \item \textit{Min global time update} for time $t$ when no items with the \textit{global time} less or equal $t$ exists in the system
+\end{itemize}
+
+
+When an accumulator, associated with \textit{global time}, becomes zero, this time is the minimum time in the acker table for this segment and all previous segments the \textit{min time update for segment} is emitted and send to all subscribers. If for all segments of a certain \textit{global time} the XOR result is zero, \tracker\ sends \textit{min global time update}. An implementation sketch of \tracker\ interface is shown in Algorithm~\ref{tracker_algo}.
 
 % \subsection{Centralized \tracker\ }
 

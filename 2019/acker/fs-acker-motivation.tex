@@ -18,6 +18,23 @@ Streaming operators are often a black box and may contain complex user-provided 
 
 Further, in this section, we overview several practical problems that require a dependency tracking mechanism. We demonstrate that this mechanism plays a crucial role in obtaining the correct and consistent processing results. After that, we discuss tracking techniques adopted in state-of-the-art stream processing systems and identify their properties and limitations. 
 
+\begin{table*}
+    \caption{Overview of existing dependency tracking solutions}
+    \label{solutions-overview-table}
+    \begin{threeparttable}
+        \centering
+        \begin{tabular}{|>{\bfseries}c|c|c|c|c|c|} 
+          \hline
+          Method & Granularity & Locality & Notifications order & Cyclic dataflows & Network traffic  \\ \hline \hline
+          Micro-batching & Fine$^*$ & Operator/Block-level & + & + & $O(\frac{NC^2}{G})$ \\ \hline
+          Markers & Fine$^*$ & Operator/Block-level & + & +/- & $O(\frac{NC^2}{G})$ \\ \hline
+          Naiad tracking & Fine$^*$ & Operator/Block-level & - & + & $O(NC^2)$ \\ \hline
+          Acker & Fine & Dataflow-level & - & + & $O(N+C)$ \\ \hline
+        \end{tabular}
+        * can be inefficient due to a large amount of extra traffic
+    \end{threeparttable}
+\end{table*}
+
 \subsection{Completeness monitoring}
 
 A particular use-case of completeness monitoring is transactional processing. If input elements are split, and system processes the split results independently, a user often assumes that the descendants will be handled atomically. In other words, if a system loses a single element, other items that depend on the same input should not affect a system state. 
