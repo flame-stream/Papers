@@ -17,7 +17,7 @@ This fact allows us to define \textit{global time} slots $t(d)$ such that $t(d) 
 \subsection{Interface\ of\ \tracker\ }
 \tracker\ agent has interface similar to Storm \acker, so that it receives \textit{ack} messages (\textit{label}/\textit{global time} together with random \textit{ack value}) and subscribe/unsuscribe messages that is used to manage list of notifications subscribers. 
 
-However, \tracker\  interface has several distinctions. Firstly, \textit{ack} messages are extended with a \textit{segment} that is needed to provide dataflow-local notifications. Secondly, data sources (fronts) should send special messages called \textit{Heartbeats} that contain \textit{global time} if there were no elements with such \textit{global time}. These messages allows \tracker\ to send notifications even if some fronts did not produce records with a specific \textit{global time}. 
+However, \tracker\  interface has several distinctions. Firstly, \textit{ack} messages are extended with a \textit{segment} label that is needed to provide dataflow-local notifications. Secondly, data sources (fronts) should send special messages called \textit{heartbeats} that contain \textit{global time} if there were no elements with such \textit{global time}. These messages allows \tracker\ to send notifications even if some fronts did not produce records with a specific \textit{global time} due to low traffic. 
 
 \begin{algorithm}
 \caption{\tracker\ implementation sketch}
@@ -79,12 +79,17 @@ Therefore, \tracker\ receives the following messages:
 
 \tracker\ sends the following messages to subscribers:
 \begin{itemize}
-    \item \textit{Min segment time update} for time $t$ when no items with the \textit{global time} less or equal $t$ exists in the segment
+    \item \textit{Min segment time update} for time $t$ when no items with the \textit{global time} less or equal $t$ exists in the segment and all preceding segments are complete
     \item \textit{Min global time update} for time $t$ when no items with the \textit{global time} less or equal $t$ exists in the system
 \end{itemize}
 
-
-When an accumulator, associated with \textit{global time}, becomes zero, this time is the minimum time in the acker table for this segment and all previous segments the \textit{min time update for segment} is emitted and send to all subscribers. If for all segments of a certain \textit{global time} the XOR result is zero, \tracker\ sends \textit{min global time update}. An implementation sketch of \tracker\ interface is shown in Algorithm~\ref{tracker_algo}.
+\textit{Min time update for segment} is emitted and send to all subscribers when:
+\begin{enumerate}
+    \item the \textit{heartbeat} for this time is received from all front-end nodes;
+    \item accumulators for all \textit{global times} not greater than this time plus one\footnote{The condition from the previous section requires the completeness of the next global time segment to preserve the order of the input elements in the notifications stream} are nullified;
+    \item upstream segments for this \textit{global time} have already sent \textit{min time updates}.
+\end{enumerate}
+If accumulators for all segments of a certain \textit{global time} become zero, \tracker\ sends \textit{min global time update}. An implementation sketch of \tracker\ interface is shown in Algorithm~\ref{tracker_algo}.
 
 % \subsection{Centralized \tracker\ }
 
@@ -129,33 +134,20 @@ When an accumulator, associated with \textit{global time}, becomes zero, this ti
 
 % Ordering of messages per sender-receiver pair given to us by Akka framework fulfils these requirements.
 
-\subsection{Traffic optimizations: local \tracker\ }
+\subsection{Single node \tracker\ implementation}
+The naive version of the \tracker\ agent can be implemented as a single node agent. In this case the logic directly follows the Algorithm~\ref{tracker_algo}. Though, due to commutative nature of xor operation we are able to optimize incoming traffic aggregating ack messages before sending them to acker agent. For each worker node in the system we introduce a Local \tracker\ component. It serves as a mediator between the node and the \tracker, buffering the outgoing ack and \textit{heartbeat} messages and flushing them periodically. The flushing window is the parameter that allows to balance between the system latency and the service traffic. The optimal value of this parameter is defined by the execution graph topology and timing of particular operations.
 
-As \tracker\ communicates with the rest of the system via the network sending Ack messages on every sent or received item, generates a lot of network traffic. A Local \tracker\ is introduced to reduce this traffic. It is deployed at every worker machine and serves as a mediator between it and the \tracker. It buffers incoming Ack and Heartbeat messages and flushes them periodically. The flushing window can be configured and  is an upper bound notifications an overhead on latency from Local \tracker.
+\tracker\ use the latest \textit{heartbeat} message for each front and aggregates ack messages within the same \textit{global time} window to a single ack message via XOR product. On a flush, Local \tracker\ sends these messages in an ordered batch: ack messages come in order of associated \textit{global time} and \textit{heartbeat} messages come after them.
 
-\tracker\ agggregates Heartbeat messages to the latest ones per front. \tracker\ aggregates Ack messages within the same Global Time windows to a single Ack message via XOR product. On flush Local \tracker\ sends these messages in an ordered batch: Ack messages come first in order of decreasing Global Time and Heartbeat messages come second.
+\subsection{Distributed \tracker}
 
-This aggregation does not break the requirements for order of processing:
-\begin{itemize}
-	\item \tracker\ processes Ack messages before Heartbeat messages.
-	\item \tracker\ processes Ack messages for produced elements before Ack messages for incoming messages as their Global Time is larger.
-\end{itemize}
+As \tracker\ agent accumulates all the service traffic from entire system it may become a bottleneck. To deal with this problem we introduce a distributed version of the \tracker\ agent. The challenge here is to support the ability of the user defined code to emit elements of \textit{global time} greater than the current. Otherwise the problem becomes trivial as we can shard the \tracker\ agent by the \textit{global time} and all acker chains will use the same shard along their path and the completion of certain \textit{global time} is permanent. In this case we can send \textit{min time update} based on information from particular shard.
 
-\subsection{Distributed \tracker\ }
+If this is not the case and user is allowed to spawn items with the time grater than the time of the input element it is possible that already nullified \textit{global time} will become active again. In this case we need to take into account all \tracker\ shards to send the \textit{min time update} event.
 
-As \tracker\ is being shared between all system machines, it is possible for it to become a system bottleneck and prevent scaling. When this becomes a problem \tracker\ and messages sent to it can be sharded:
-\begin{itemize}
-	\item Ack messages are sharded by Global Time, as it is the same for received and sent items.
-	\item Heartbeat messages could be simply broadcasted as their number is less than the number of Ack messages and most likely much less, but still they are also sharded with respect to their meaning that front will not emit items with a preceding Global Time anymore. Considering that Ack messages with next Global Times will be sent to specific \tracker\ shards, for some \tracker\ shards Heartbeat messages Global Times can be rounded up to reduce the number of messages being sent on this Global Time updates.
-\end{itemize}
+We employ the vector clock algorithm to resolve this issue. Each worker machine either periodically or with flush of the \textit{local acker} sends its system time to all acker shards. The vector of an observed worker times accompanies all \tracker\ notification events. The acker table is built on \textit{min time update} event receivers side. Each row in this table is associated with vector of worker times. All conditions in the list for accepting \textit{min time update} now check that the associated time vector is not less than the vector of compared time. For example we need to check that all accumulators of the same segment become zero \textit{and} their vector is component-wise not greater than the current one.
 
-Min Time Update messages received from shards should be aggregated to minimum of Global Times from them which would be a minimal Global Time for the whole system.
-
-Still this sharding mechanism can cause false notifications in case of replay in Grouping operators. Let our system current Minimal Global Time be $t$, two elements with Global Times $t$ and $(t+1)$ have entered the system with Global Times being sharded to first and second \tracker\ shards accordingly, element $(t+1)$ is completely processed ahead of $t$ and has a zero checksum in second \tracker\ shard, while element $t$ is still in flight and has a non-zero checksum in first \tracker\ shard. When element $t$ is being processed it emits Ack messages with checksum change for Global Times $t$ and $(t+1)$. First Ack should change \tracker\ checksum to zero, while the second one should change its checksum from zero. As they are being sent to different shards, an order of their processing is undefined. If the first Ack message will reach its shard and make it emit an incrementing Min Time Update before the second one emits a decrementing Min Time Update then a \tracker\ listener will prematurely count both $t$ and $(t+1)$ as processed.
-
-This problem is solved using the vector clock algorithm. To make sure that both Ack messages are processed they are being followed with a broadcast of incremented clock time of the worker machine, Node Time. \tracker collects a vector of Node Times from all worker machines, attaches it to Min Time Updates and only sends them when Node Times vector changes. Min Time Update listeners collect vectors of Node Times from all acker machines and do not accept a Min Time Update message if its Node Times vector is not less than or equal to element-wise minimum of collected vectors.
-
-This solves the described problem, as the Min Time Update from second shard will not be accepted without accepting the Min Time Update from first shard and the resulting Min Time will be $(t+1)$.
+The vector clock introduction increase the service traffic, but allows to eliminate bottleneck from the system. The service traffic complexity remains the same, but the $O$ factor increases. In experimental section we will study how big is this increase.
 
 % \subsection{Operation-level tracking}
 
