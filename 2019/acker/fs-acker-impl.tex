@@ -1,23 +1,25 @@
 \label {fs-acker-impl}
 
-In the previous section, we introduced a general schema of the \tracker. In this section, we deepen into its implementation details. In the first section, we formally define the \textit{global time} labeling and explore its properties. The second section is dedicated to the \tracker\ agent messaging structure. The next section focuses on the single node implementation of the \tracker\ agent and local \tracker\ optimization. Distributed implementation of the \tracker\ concludes this part.
+In the previous section, we introduced a general schema of the \tracker. In this section, we deepen into its implementation details. In the first section, we formally define the \textit{global time} labeling and explore its properties. The second section is dedicated to the \tracker\ agent algorithm. The next section focuses on the single node implementation of the \tracker\ agent and local \tracker\ optimization. Distributed implementation of the \tracker\ concludes this part.
 
 \subsection{Global time}
-In Section~\ref{sec:acker-analysis}, we have introduced the notation of \textit{global time}, but the details of its practical implementation remain behind the scene. We can use time oracle~\cite{10.14778/3055330.3055335}, but in this case, the system will have a single point of failure, and we decided to make our system tolerant to the time difference between font-end. In this case, the comparison between timestamps coming from different front nodes is limited, and the \textit{global time} nice properties are under threat. To overcome this difficulty, we systematically synchronize the system time of the front-nodes and assume that this measure prevents the system time difference more than some fixed $\delta$, which we reference as synchronization slack.
+In Section~\ref{sec:acker-analysis}, we have introduced the notion of \textit{global time}, without details of its practical implementation. One can use time oracle agent~\cite{10.14778/3055330.3055335} to generate a monotonic sequence of unique timestamps. However, in this case, the system will have a single point of failure. 
 
-To work with the guarantees formally we need to define suitable notation. We use $\tau$ for precise physical time. If some data item $d$ comes to the system~\footnote{The moment when item is associated with its label by some front-end node} at time $\tau_0$ we write $\tau(d)=\tau_0$. The true order of events $\tau(d_1) > \tau(d_2)$ coming from different front-end nodes can be sometimes restored by their system timestamps $s(d_1)$ and $s(d_2)$. If these timestamps differ more than time synchronization slack then the order is clear: $s(d_1) > s(d_2) + \delta \Rightarrow \tau(d_1) > \tau(d_2)$.
+To make our system tolerant to the time difference between sources, we systematically synchronize the system clocks of them. We assume that clock differences are no more than some fixed $\delta$, which we reference as synchronization slack.
 
-This fact allows us to define \textit{global time} slots $t(d)$ such that $t(d) = [s(d) / \delta]$. This way we make global time less precise,  on one hand but this trick gives us ability to compare global time associated by different front-end nodes on the other. If global time of an item $d_1$ is greater by one than the global time of some other element $d_2$ then their order is defined despite the front-end nodes associated their labels:  $t(d_1) > t(d_2) + 1 \Rightarrow \tau(d_1) > \tau(d_2)$. This property forms a basis of our guarantees mechanism. Here is the summary of labeling mechanism:
+Let $\tau(d)$ be precise physical time of input data item $d$ arrival, and $s(d)$ be local system time of the source node where $d$ arrived. The true order of events $\tau(d_1) > \tau(d_2)$ coming from different sources can be sometimes restored by their system timestamps $s(d_1)$ and $s(d_2)$. If these timestamps differ more than time synchronization slack, then the order is clear: $s(d_1) > s(d_2) + \delta \Rightarrow \tau(d_1) > \tau(d_2)$.
+
+This fact allows us to define \textit{global time} slots $gt(d)$ such that $gt(d) = [s(d) / \delta]$. This way we make global time less precise,  on one hand but this trick gives us ability to compare global time associated by different source nodes on the other. If global time of an item $d_1$ is greater by one than the global time of some other element $d_2$ then their order is defined despite the source nodes associated their labels:  $gt(d_1) > gt(d_2) + 1 \Rightarrow \tau(d_1) > \tau(d_2)$. This property forms a basis of our guarantees mechanism. Here is the summary of labeling mechanism:
 \begin{enumerate}
-    \item On receiving of input item, front-end node gets the system timestamp
+    \item On receiving of input item, source node gets the system timestamp
     \item The system timestamp is shrunk up to synchronization slack (practically we use 10ms)
     \item The item is labeled by the result \textit{global time} and this label is sent to \tracker\ agent
 \end{enumerate}
 
 \subsection{Interface\ of\ \tracker\ }
-\tracker\ agent has interface similar to Storm \acker, so that it receives \textit{ack} messages (\textit{label}/\textit{global time} together with random \textit{ack value}) and subscribe/unsuscribe messages that is used to manage list of notifications subscribers. 
+\tracker\ agent has interface similar to Storm \acker, in a way that it receives \textit{ack} messages (\textit{global time} together with random \textit{ack value}) and subscribe/unsuscribe messages that is used to manage list of notifications subscribers. 
 
-However, \tracker\  interface has several distinctions. Firstly, \textit{ack} messages are extended with a \textit{segment} label that is needed to provide dataflow-local notifications. Secondly, data sources (fronts) should send special messages called \textit{heartbeats} that contain \textit{global time} if there were no elements with such \textit{global time}. These messages allows \tracker\ to send notifications even if some fronts did not produce records with a specific \textit{global time} due to low traffic. 
+However, the \tracker\  interface has several distinctions. Firstly, \textit{ack} messages are extended with a \textit{segment} label that is needed to provide dataflow-local notifications. Secondly, data sources should send special messages called \textit{heartbeats} that contain \textit{global time}. It promises that the source will not generate elements with lower or equal \textit{global time}. These messages allow \tracker\ to send notifications even if some sources did not produce records with a specific \textit{global time} due to low traffic. 
 
 \begin{algorithm}
 \caption{\tracker\ implementation sketch}
@@ -28,7 +30,7 @@ However, \tracker\  interface has several distinctions. Firstly, \textit{ack} me
 \State $segments \leftarrow List[Segment]$
 \State $segmentChecksums \leftarrow Map[Segment, List[Int64]]$
 \State $segmentMinTime \leftarrow Map[Segment, GlobalTime]$
-\State $frontHeartbeat \leftarrow Map[Front, GlobalTime]$
+\State $sourceHeartbeat \leftarrow Map[Source, GlobalTime]$
 \\
 \State \textbf{Upon} (segment, gt, ack\_val) $from \ in\in inputs$
 \Indent
@@ -37,14 +39,14 @@ However, \tracker\  interface has several distinctions. Firstly, \textit{ack} me
     \State $CheckMinTime$
 \EndIndent
 \\
-\State \textbf{Upon} (gt, front) $from \ in\in inputs$
+\State \textbf{Upon} (gt, source) $from \ in\in inputs$
 \Indent
- \State $frontHeartbeat[front] \leftarrow gt$
+ \State $sourceHeartbeat[source] \leftarrow gt$
  \State $CheckMinTime$
 \EndIndent
 \\
 \Procedure{CheckMinTime}{}
-\State $minHeartbeat \leftarrow frontHeartbeat.values.min()$
+\State $minHeartbeat \leftarrow sourceHeartbeat.values.min()$
 \For {$segment \in segments$}
 \State $checksums \gets segmentChecksums[segment]$
 \State $maxTime \gets min($
@@ -71,7 +73,7 @@ However, \tracker\  interface has several distinctions. Firstly, \textit{ack} me
 Therefore, \tracker\ receives the following messages:
 \begin{itemize}
     \item Ack message is a tuple of a \textit{global time}, \textit{segment}, and \textit{ack value} (random number)
-    \item Heartbeat message is a pair of a \textit{global time} and a front-end id.
+    \item Heartbeat message is a pair of a \textit{global time} and a source id.
     \item (Un)Subscribe message
 \end{itemize}
 
@@ -85,7 +87,7 @@ Therefore, \tracker\ receives the following messages:
 
 \textit{Min time update for segment} is emitted and send to all subscribers when:
 \begin{enumerate}
-    \item the \textit{heartbeat} for this time is received from all front-end nodes;
+    \item the \textit{heartbeat} for this time is received from all source nodes;
     \item accumulators for all \textit{global times} not greater than this time plus one\footnote{The condition from the previous section requires the completeness of the next global time segment to preserve the order of the input elements in the notifications stream} are nullified;
     \item upstream segments for this \textit{global time} have already sent \textit{min time updates}.
 \end{enumerate}
@@ -135,17 +137,17 @@ If accumulators for all segments of a certain \textit{global time} become zero, 
 % Ordering of messages per sender-receiver pair given to us by Akka framework fulfils these requirements.
 
 \subsection{Single node \tracker\ implementation}
-The naive version of the \tracker\ agent can be implemented as a single node agent. In this case, the logic directly follows the Algorithm~\ref{tracker_algo}. Though, due to the commutative nature of XOR operation, we are able to optimize incoming traffic aggregating ack messages before sending them to the \tracker\ agent. For each worker node in the system, we introduce a Local \tracker\ component. It serves as a mediator between the node and the \tracker, buffering the outgoing ack and \textit{heartbeat} messages and flushing them periodically. The flushing window is the parameter that allows us to balance between the system latency and the service traffic. The optimal value of this parameter is defined by the execution graph topology and timing of particular operations.
+The naive version of the \tracker\ agent can be implemented as a single node agent. In this case, the logic directly follows the Algorithm~\ref{tracker_algo}. Though, due to the commutative nature of XOR operation, we are able to optimize \tracker\ incoming traffic by aggregating ack messages locally on worker nodes before sending them to the \tracker\ agent. For each worker node in the system, we introduce a \textbf{Local \tracker} component. It serves as a mediator between the node and the \tracker, buffering the outgoing ack and \textit{heartbeat} messages and flushing them periodically. The flushing window is the parameter that allows us to balance between the system latency and the service traffic. The optimal value of this parameter is defined by the execution graph topology and timing of particular operations.
 
-\tracker\ use the latest \textit{heartbeat} message for each front and aggregates ack messages within the same \textit{global time} window to a single ack message via XOR product. On a flush, Local \tracker\ sends these messages in an ordered batch: ack messages come in order of associated \textit{global time} and \textit{heartbeat} messages come after them.
+\tracker\ use the latest \textit{heartbeat} message for each source and aggregates ack messages within the same \textit{global time} window to a single ack message via XOR product. On a flush, Local \tracker\ sends these messages in an ordered batch: ack messages come in order of associated \textit{global time} and \textit{heartbeat} messages come after them.
 
 \subsection{Distributed \tracker}
 
-As \tracker\ agent accumulates all the service traffic from the entire system, it may become a bottleneck. To deal with this problem, we introduce a distributed version of the \tracker\ agent. The challenge here is to support the ability of the user-defined code to emit elements of \textit{global time} greater than the current. Otherwise, the problem becomes trivial as we can shard the \tracker\ agent by the \textit{global time}, and all acker chains will use the same shard along their path and the completion of certain \textit{global time} is permanent. In this case, we can send \textit{min time update} based on information from a particular shard.
+As \tracker\ agent accumulates all the service traffic from the entire system, it may become a bottleneck. To deal with this problem, we introduce a distributed version of the \tracker\ agent. The challenge here is to support the ability of the user-defined code to emit elements of \textit{global time} greater than the current. Otherwise, the problem becomes trivial as we can shard the \tracker\ agent by the \textit{global time}, and all \tracker\ chains will use the same shard along their path and the completion of certain \textit{global time} is permanent. In this case, we can send \textit{min time update} based on information from a particular shard.
 
 If this is not the case and the user is allowed to spawn items with the time greater than the time of the input element, it is possible that already nullified \textit{global time} will become active again. In this case, we need to take into account all \tracker\ shards to send the \textit{min time update} event.
 
-We employ the vector clock algorithm to resolve this issue. Each worker machine either periodically or with a flush of the \textit{local acker} sends its system time to all acker shards. The vector of observed worker times accompanies all \tracker\ notification events. The acker table is built on the \textit{min time update} event receivers side. Each row in this table is associated with the vector of worker times. All conditions in the list for accepting \textit{min time update} now check that the associated time vector is not less than the vector of compared time. For example, we need to check that all accumulators of the same segment become zero \textit{and} their vector is component-wise not greater than the current one.
+We employ the vector clock algorithm to resolve this issue. Each worker machine either periodically sends its system time to all \tracker\ shards. The vector of observed worker times accompanies all \tracker\ notification events. The \tracker\ table is built on the \textit{min time update} event receivers side. Each row in this table is associated with the vector of worker times. All conditions in the list for accepting \textit{min time update} now check that the associated time vector is not less than the vector of compared time. For example, we need to check that all accumulators of the same segment become zero \textit{and} their vector is component-wise not greater than the current one.
 
 The vector clock introduction increases the service traffic but allows to eliminate bottleneck from the system. The service traffic complexity remains the same, but the $O$ factor increases. In the experimental section, we will study how big is this increase.
 
