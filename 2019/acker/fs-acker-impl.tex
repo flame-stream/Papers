@@ -35,7 +35,7 @@ Therefore, \tracker\ receives the following messages:
 \end{itemize}
 
 
-When an accumulator, associated with \textit{global time}, becomes zero, this time is the minimum time in the acker table for this segment and all previous segments the \textit{min time update for segment} is emitted and send to all subscribers. If for all segments of a certain \textit{global time} the XOR result is zero, \tracker\ sends \textit{min global time update}. An implementation sketch of \tracker\ interface is shown in Algorithm~\cite{tracker_algo}.
+When an accumulator, associated with \textit{global time}, becomes zero, this time is the minimum time in the acker table for this segment and all previous segments the \textit{min time update for segment} is emitted and send to all subscribers. If for all segments of a certain \textit{global time} the XOR result is zero, \tracker\ sends \textit{min global time update}. An implementation sketch of \tracker\ interface is shown in Algorithm~\ref{tracker_algo}.
 
 \begin{algorithm}
 \caption{\tracker\ implementation sketch}
@@ -43,28 +43,45 @@ When an accumulator, associated with \textit{global time}, becomes zero, this ti
 \begin{algorithmic}[1]
 \State $inputs \leftarrow configured\_inputs;$ 
 \State $subscribers \leftarrow configured\_subscribers;$
-\State $checksums \leftarrow Map[Int64 \rightarrow Int64]$
+\State $segments \leftarrow List[Segment]$
+\State $segmentChecksums \leftarrow Map[Segment, List[Int64]]$
+\State $segmentMinTime \leftarrow Map[Segment, GlobalTime]$
+\State $frontHeartbeat \leftarrow Map[Front, GlobalTime]$
 \\
-\State \textbf{Upon} (gt, segment, ack\_val) $from \ in\in inputs$
+\State \textbf{Upon} (segment, gt, ack\_val) $from \ in\in inputs$
 \Indent
-    \State $checksums[gt] \gets checksums[gt] \bigoplus checksum$
+    \State $segmentChecksums[segment][gt] \gets $
+    \par\Indent\Indent$segmentChecksums[segment][gt] \bigoplus checksum$\EndIndent\EndIndent
     \State $CheckMinTime$
 \EndIndent
 \\
-\State \textbf{Upon} (gt, front\_id) $from \ in\in inputs$
+\State \textbf{Upon} (gt, front) $from \ in\in inputs$
 \Indent
-    
+ \State $frontHeartbeat[front] \leftarrow gt$
+ \State $CheckMinTime$
 \EndIndent
 \\
 \Procedure{CheckMinTime}{}
-\State $time \gets previousMinTime$
-\While{$time < heartbeat \And checksums[time] = 0$}
+\State $minHeartbeat \leftarrow frontHeartbeat.values.min()$
+\For {$segment \in segments$}
+\State $checksums \gets segmentChecksums[segment]$
+\State $maxTime \gets min($
+\par\Indent\Indent$minHeartbeat,$\EndIndent\EndIndent
+\par\Indent\Indent$segmentMinTime[segment.inbound].min(),$\EndIndent\EndIndent
+\par\Indent$)$\EndIndent
+\State $time \gets segmentMinTime[segment]$
+\While{$time < maxTime$
+\par\Indent$\And checksums[time] = 0$\EndIndent
+\par}
 \State $time \gets time + 1$
 \EndWhile
-\If{$previousMinTime < time$}
-\State $previousMinTime \gets time$
-\State $SendMinTimeUpdate(time)$
+\If{$segmentMinTime[segment] < time$}
+\State $segmentMinTime[segment] \gets time$
+\For {$subscriber \in subscribers$}
+\State $subscriber.send(segment, time)$
+\EndFor
 \EndIf
+\EndFor
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
@@ -114,7 +131,7 @@ When an accumulator, associated with \textit{global time}, becomes zero, this ti
 
 \subsection{Traffic optimizations: local \tracker\ }
 
-As \tracker\ communicates with the rest of the system via the network sending Ack messages on every sent or received item generates a lot of network traffic. A Local \tracker\ is introduced to reduce this traffic. It is deployed at every worker machine and serves as a mediator between it and the \tracker. It buffers incoming Ack and Heartbeat messages and flushes them periodically. The flushing window can be configured and  is an upper bound notifications an overhead on latency from Local \tracker.
+As \tracker\ communicates with the rest of the system via the network sending Ack messages on every sent or received item, generates a lot of network traffic. A Local \tracker\ is introduced to reduce this traffic. It is deployed at every worker machine and serves as a mediator between it and the \tracker. It buffers incoming Ack and Heartbeat messages and flushes them periodically. The flushing window can be configured and  is an upper bound notifications an overhead on latency from Local \tracker.
 
 \tracker\ agggregates Heartbeat messages to the latest ones per front. \tracker\ aggregates Ack messages within the same Global Time windows to a single Ack message via XOR product. On flush Local \tracker\ sends these messages in an ordered batch: Ack messages come first in order of decreasing Global Time and Heartbeat messages come second.
 
