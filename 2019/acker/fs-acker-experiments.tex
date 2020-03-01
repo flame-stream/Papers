@@ -244,10 +244,6 @@ As we mentioned above, another important application of dependency tracking mech
 
 A dependency tracking mechanism can imply latency overhead on this protocol. In the case of markers, the overhead is caused by blocking an operator after the first marker is received and until the operator receives markers from all inputs. This behavior is known as {\em marker alignment} issue~\cite{Carbone:2017:SMA:3137765.3137777}. In the case of \tracker , an operator must buffer element from the next epoch until {\em MinTimeUpdate} for the previous epoch is received.
 
-Figure~\ref{snapshot_spikes} demonstrates latency spikes during state snapshotting for markers and \tracker , depending on the persistent save duration. In general, \tracker\ provides 50-120 milliseconds fewer latency spikes. This difference can be significant for latency-conscious applications~\cite{zhang2017sub}. The low notification latency explains this difference, as we demonstrated in Section~\ref{completeness}. Low notification latency leads to a smaller number of elements that need to wait (be buffered), as it is shown if Figure~\ref{snapshot_buffered}. The smaller number of buffered records causes lower buffering duration that implies lower spikes in general. Note, the vast difference in the number of buffered elements does not necessarily imply the vast difference in total buffering duration because most of the buffered elements wait for a tiny amount of time.
-
-This experiment indicates that \tracker\ can provide better results for a common problem that is traditionally solved using markers. This result also shows that operator-level locality of tracking can be implemented efficiently with \tracker .
-
 % https://gist.github.com/faucct/6097d9d08197cb979b71721b16f8b6a3/
 \begin{figure}[htbp]
   \centering
@@ -255,6 +251,11 @@ This experiment indicates that \tracker\ can provide better results for a common
   \caption{Buffered elements count}
   \label{snapshot_buffered}
 \end{figure}
+
+Figure~\ref{snapshot_spikes} demonstrates latency spikes during state snapshotting for markers and \tracker , depending on the persistent save duration. In general, \tracker\ provides 50-120 milliseconds fewer latency spikes. This difference can be significant for latency-conscious applications~\cite{zhang2017sub}. The low notification latency explains this difference, as we demonstrated in Section~\ref{completeness}. Low notification latency leads to a smaller number of elements that need to wait (be buffered), as it is shown if Figure~\ref{snapshot_buffered}. The smaller number of buffered records causes lower buffering duration that implies lower spikes in general. Note, the vast difference in the number of buffered elements does not necessarily imply the vast difference in total buffering duration because most of the buffered elements wait for a tiny amount of time.
+
+This experiment indicates that \tracker\ can provide better results for a common problem that is traditionally solved using markers. This result also shows that operator-level locality of tracking can be implemented efficiently with \tracker .
+
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.50\textwidth]{pics/buffering_sum_duration_bars.pdf}

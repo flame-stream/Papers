@@ -128,6 +128,8 @@ To track the processing of an input element and its descendants down the stream,
 % \end{algorithm}
 
 \begin{table}
+    \caption{Acker table}
+    \label{acker_table}
     \centering
     \begin{tabular}{|c|>{\bfseries}c|c|c|} 
       \hline
@@ -137,8 +139,6 @@ To track the processing of an input element and its descendants down the stream,
       \checkmark & d & 000 & 3 \\ \hline
       & p & 110 & 2 \\ \hline
     \end{tabular}
-    \caption{Acker table}
-    \label{acker_table}
 \end{table}
 
 % \acker\ mechanism provides for the fine granularity of tracking and cyclic dataflows support out-of-the-box. However, only the uniqueness property of labels does not allow \acker\ to support block-level locality and notifications order preservation. Further, in this section, we design a more sophisticated structure of labels. Using these extended labels, we propose a \tracker\ mechanism that complements \acker\ and provides for all desired dependency tracking properties. 
@@ -146,6 +146,8 @@ To track the processing of an input element and its descendants down the stream,
 \subsection{Notification order preservation}
 
 \begin{table}
+\caption{Acker + ordering}
+  \label{acker-ordering}
   \centering
   \begin{tabular}{|c|>{\bfseries}c|c|c|c|} 
     \hline
@@ -155,8 +157,6 @@ To track the processing of an input element and its descendants down the stream,
     blocked by 2 & 3 & 000 & 3 \\ \hline
     & 4 & 101 & 4 \\ \hline
   \end{tabular}
-  \caption{Acker + ordering}
-  \label{acker-ordering}
 \end{table}
 In \acker\ algorithm each input element is identified by so-called \textit{tuple identifier} ($tuple\_id$, $tid$). In the original algorithm, it is taken at random when an element enters a system and has no associated semantics. 
 
@@ -215,6 +215,8 @@ To illustrate the dataflow locality feature, assume that we have a dataflow grap
 Further, in the paper, we reference the complete processing notifications of a certain segment as \textit{min time segment update}. The logic behind this notation is simple after the notification there are no elements with \textit{global time} less or equal to the time of notification left in the stream upper this segment sink.  
 
 \begin{table}
+\caption{trAcker}
+  \label{tracker-table}
   \centering
   \begin{tabular}{|c|>{\bfseries}c|c|c|c|} 
     \hline
@@ -228,8 +230,6 @@ Further, in the paper, we reference the complete processing notifications of a c
     \multirow{2}{*}{} & \multirow{2}{*}{4} & A & 100 & \multirow{2}{*}{101} \\ \cline{3-4}
     & & B & 001 & \\ \hline
   \end{tabular}
-  \caption{trAcker}
-  \label{tracker-table}
 \end{table}
 
 \subsection{\tracker\ overview}
