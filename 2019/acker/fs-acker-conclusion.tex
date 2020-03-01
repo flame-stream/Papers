@@ -1,13 +1,15 @@
 \label {fs-acker-conclusion}
 
-In this work, we formulated and formalized a problem of dependency tracking between input and output elements in streaming dataflows. We demonstrated that state-of-the-art distributed stream processing systems face this problem in state snapshotting mechanisms~\cite{Carbone:2017:SMA:3137765.3137777, apache:storm}, the materialization of time-varying relations~\cite{Begoli:2019:OSR:3299869.3314040}, and atomic delivery of all descendants of an input item~\cite{we2018adbis}.  
+In this work, we formulated a problem of dependency tracking between input and output elements in streaming dataflows. We demonstrated that state-of-the-art distributed stream processing systems face this problem in state snapshotting mechanisms~\cite{Carbone:2017:SMA:3137765.3137777, apache:storm}, the materialization of time-varying relations~\cite{Begoli:2019:OSR:3299869.3314040}, and atomic delivery of all descendants of an input item~\cite{we2018adbis}.  
 
-To solve this problem, we proposed a mechanism that adopts ideas from the Apache Storm completion tracking mechanism called \acker. We extend each data item with a logical timestamp that denotes corresponding input items and track if dataflow contains elements with specific timestamps. Our solution, called \tracker, provides the following features:
+To solve this problem, we proposed a mechanism that adopts ideas from the Apache Storm completion tracking mechanism called \acker. We extend each data item with a logical timestamp that denotes corresponding input items and tracks if dataflow contains elements with specific timestamps. 
+
+Our solution, called \tracker\ inherits from \acker\ fine-grained tracking, and cyclic dataflows support and provides the following features:
 \begin{itemize}
-    \item {\bf Fine-grained tracking:} \tracker\ efficiently watches and provides notifications that system completely processed some set of input items even for individual input elements.
-    \item {\bf Cyclic graphs support:} proposed mechanism works for cyclic execution graphs, and that makes it suitable for iterative dataflows as well. 
-    \item {\bf Scalability:} we introduced a decentralized version of \tracker\ that allows a system to distribute extra network traffic between all computational units. 
+    \item {\bf Notifications order preservation:} the order of notifications that system completely processed some set of input items does not contradict the order of input elements. This feature allows using \tracker\ for state snapshotting.
+    \item {\bf Dataflow locality:} different parts of a dataflow can receive independent notifications that allow a stream processing system to apply efficient asynchronous state snapshotting algorithms, e.g., one that is used in Apache Flink~\cite{Carbone:2017:SMA:3137765.3137777}. 
+    \item {\bf Scalability:} we introduced a distributed version of \tracker\ that allows a system to distribute extra network traffic between all computational units. 
     \item {\bf Low overhead:} \tracker\ does not produce any significant performance penalty and does not affect the throughput of a distributed streaming dataflow.
 \end{itemize}
 
-We conducted a series of experiments and compared the proposed method with a baseline approach based on the checkpointing mechanism used in Apache Flink. We demonstrated that both centralized and decentralized implementations of \tracker\ provide lower notification latency that does not considerably degrade with an increase of a logical graph size or a cluster size. Experiments also showed that \tracker\ has lower throughput overhead in case of fine-grained tracking.
+We conducted a series of experiments and compared the proposed method with a baseline approach based on the markers mechanism used in Apache Flink. We demonstrated that both centralized and decentralized implementations of \tracker\ provide lower notification latency that does not considerably degrade with an increase of a logical graph size or a cluster size. Experiments also showed that \tracker\ has lower throughput overhead in case of fine-grained tracking.
