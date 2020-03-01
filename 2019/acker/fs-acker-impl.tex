@@ -1,26 +1,33 @@
 \label {fs-acker-impl}
 
-%Interface of acker: definitions of Heartbeats, Acks, Min Time Updates, tracking in windows of Global Time, maybe tell about acker responsibility in registering fronts.
-%Implementation of Global Time and its assignment at fronts: system time.
-%Centralized acker: cyclic buffer, heartbeats received from fronts, min time updates issuing. Local Acker: buffered messages, ordering. Distributed acker: problem of a bottleneck, solution with sharding, problem of replaying, solution with node times.
+In previous section we introduced general schema of the \tracker. In this section we deepen into its implementation details. In the first section we formally define the \textit{global time} labeling and explore its properties. The second section is dedicated to the \tracker\ agent messaging structure. Next section focuses on the single node implementation of the \tracker\ agent and local \tracker\ optimization and distributed implementation of the \tracker\ concludes this part.
 
-Our distributed system FlameStream is implemented on top of Akka actors framework and relies heavily on message ordering per sender-receiver pair. The rule more specifically is that for a given pair of actors, messages sent directly from the first to the second will not be received out-of-order. Remote communication between machines uses Aeron transport protocol.
+\subsection{Global time}
+In Section~\ref{sec:acker-analysis} we have introduced the notation of \textit{global time}, but the details of its practical implementation remain behind the scene. We can use time oracle~\cite{10.14778/3055330.3055335}, but in this case the system will have single point of failure and we decided to make our system tolerant to time difference between font-end. In this case the comparison between timestamps coming from different front nodes is limited, and the \textit{global time} nice properties are under threat. To overcome this difficulty we systematically synchronize the system time of the front-nodes and assume that this measure prevent the system time difference more than some fixed $\delta$ which we reference as synchronization slack.
 
-\subsection{Global Time}
+To work with the guarantees formally we need to define suitable notation. We use $\tau$ for precise physical time. If some data item $d$ comes to the system~\footnote{The moment when item is associated with its label by some front-end node} at time $\tau_0$ we write $\tau(d)=\tau_0$. The true order of events $\tau(d_1) > \tau(d_2)$ coming from different front-end nodes can be sometimes restored by their system timestamps $s(d_1)$ and $s(d_2)$. If these timestamps differ more than time synchronization slack then the order is clear: $s(d_1) > s(d_2) + \delta \Rightarrow \tau(d_1) > \tau(d_2)$.
 
-Fronts assign Global Times to elements. They are pairs of monotonic numbers and the front identifier. Notifications from \tracker\ are being provided for windows of numeric parts of Global Time, so these numbers should be synchronized between fronts to prevent elements emitted from a front with an ahead clock waiting for others emitted from one with a behind clock. Global Times have a total lexicographical order on their numeric parts and front identifiers, which is used in Grouping operations and during buffering of messages to be described later in this section.
+This fact allows us to define \textit{global time} slots $t(d)$ such that $t(d) = [s(d) / \delta]$. This way we make global time less precise,  on one hand but this trick gives us ability to compare global time associated by different front-end nodes on the other. If global time of an item $d_1$ is greater by one than the global time of some other element $d_2$ then their order is defined despite the front-end nodes associated their labels:  $t(d_1) > t(d_2) + 1 \Rightarrow \tau(d_1) > \tau(d_2)$. This property forms a basis of our guarantees mechanism. Here is the summary of labeling mechanism:
+\begin{enumerate}
+    \item On receiving of input item front-end node gets the system timestamp
+    \item The system timestamp is shrink up to synchronization slack (practically we use 10ms)
+    \item The item is labeled by the result \textit{global time} and this label is sent to \tracker\ agent
+\end{enumerate}
 
 \subsection{Interface\ of\ \tracker\ }
-
-Messages received by \tracker:
+\tracker\ agent has interface similar to Storm \acker\ , but to support notification order preservation and snapshot locality we the messaging protocol becomes following. \tracker\ receives the following messages:
 \begin{itemize}
-	\item Ack message is a pair of a Global Time window and an integer checksum change, which is a XOR product of checksums for multiple items being sent or received.
-	\item Heartbeat message is a pair of a Global Time and a Front Id, which tells the \tracker\ that the front will not emit items with a preceding Global Time anymore.
+	\item Ack message is a tuple of a \textit{global time} and a checksum change for this global time
+	\item Heartbeat message is a pair of a \textit{global time} and a front-end id.
+	\item (Un)Subscribe message
 \end{itemize}
+On ack message the accumulator, associated with provided \textit{global time} is updated by the received checksum change. Due to commutation of xor operation the checksum change may contain either single ack or multiple acks xored to a single change. The heartbeat message from front-end guarantees that no more input items with such a \textit{global time} will be emitted by this front-end. Subscribe messages manage the list of notification receivers. \tracker\ sends the following messages:
+\begin{itemize}
+    \item \textit{Min segment time update} for time $t$ when no items with the \textit{global time} less or equal $t$ exists in the segment
+	\item \textit{Min global time update} for time $t$ when no items with the \textit{global time} less or equal $t$ exists in the system
+\end{itemize}
+When an accumulator, associated with \textit{global time} becomes zero, this time is the minimum time in the acker table for this segment and all previous segments the \textit{min time update for segment} is emitted and send to all subscribers. If for all se
 Messages sent by \tracker:
-\begin{itemize}
-	\item Minimal Global Time Update message is a Global Time window meaning that all items within previous Global Time windows have been processed.
-\end{itemize}
 
 
 \subsection{Centralized \tracker\ }

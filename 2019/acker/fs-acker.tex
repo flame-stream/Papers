@@ -8,9 +8,13 @@
 \usepackage{array}
 \usepackage{hyperref}
 \usepackage{algorithm} % for algorithms
+% \usepackage{algorithmicx}
 % \usepackage{algorithm2e} % for algorithms
 \usepackage{algpseudocode}
 % \usepackage{booktabs} % For formal tables
+\algdef{SE}[SUBALG]{Indent}{EndIndent}{}{\algorithmicend\ }%
+\algtext*{Indent}
+\algtext*{EndIndent}
 
 \usepackage{balance}  % for  \balance command ON LAST PAGE  (only there!)
 \usepackage{caption}
@@ -109,7 +113,7 @@ In distributed stream processing, it is hard to determine a correspondence betwe
 
 \bibliographystyle{abbrvurl}
 % \bibliography{bibliography/flame-stream}
-\bibliography{../../bibliography/flame-stream}
+\bibliography{bibliography/flame-stream}
 
 \end {document}
 
