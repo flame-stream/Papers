@@ -1,7 +1,7 @@
 \label {fs-lightbulbs-conclusion}
 
 %In this work, we formulated and formalized a problem of dependency tracking between input and output elements in streaming dataflows. We demonstrated that state-of-the-art distributed stream processing systems face this problem in state snapshotting mechanisms~\cite{Carbone:2017:SMA:3137765.3137777, apache:storm}, the materialization of time-varying relations~\cite{Begoli:2019:OSR:3299869.3314040}, and atomic delivery of all descendants of an input item~\cite{we2018adbis}.  
-In this paper we formulated and formalized a problem of distributed change-point detection in streaming dataflows. We analysed the importance of dependencies in data distribution over nodes and intoduced our version of algorithm for distributed change-point detection.
+% In this paper we formulated and formalized a problem of distributed change-point detection in streaming dataflows. We analysed the importance of dependencies in data distribution over nodes and intoduced our version of algorithm for distributed change-point detection.
 
 %To solve this problem, we proposed a mechanism that adopts ideas from the Apache Storm completion tracking mechanism called \acker. We extend each data item with a logical timestamp that denotes corresponding input items and track if dataflow contains elements with specific timestamps. Our solution, called \tracker, provides the following features:
 %\begin{itemize}
@@ -13,4 +13,4 @@ In this paper we formulated and formalized a problem of distributed change-point
 
 %We conducted a series of experiments and compared the proposed method with a baseline approach based on the checkpointing mechanism used in Apache Flink. We demonstrated that both centralized and decentralized implementations of \tracker\ provide lower notification latency that does not considerably degrade with an increase of a logical graph size or a cluster size. Experiments also showed that \tracker\ has lower throughput overhead in case of fine-grained tracking.
 
-We conducted a series of experiments and compared the proposed method with a single-node methods and demonstrated that it keeps acceptable values of metrics and provides lower latency.
+% We conducted a series of experiments and compared the proposed method with a single-node methods and demonstrated that it keeps acceptable values of metrics and provides lower latency.

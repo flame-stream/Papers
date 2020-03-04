@@ -1,113 +1,97 @@
-\documentclass{vldb}
-
-\usepackage[utf8]{inputenc}
+\documentclass[sigconf]{acmart}
 
 \usepackage{graphicx}
-\usepackage{url}
-\usepackage{hyperref}
 \usepackage{algorithm} % for algorithms
 \usepackage{algpseudocode}
-% \usepackage{booktabs} % For formal tables
+\usepackage{booktabs} % For formal tables
+\usepackage{amsthm} % For claims
+\usepackage{bbm} % indicator function
 
-\usepackage{balance}  % for  \balance command ON LAST PAGE  (only there!)
-\usepackage{caption}
-\usepackage{subcaption}
-\usepackage{tikz}
-\usetikzlibrary{backgrounds, calc, positioning, fit, decorations.pathreplacing}
-% \theoremstyle{remark}
+% table
+\usepackage[flushleft]{threeparttable} % http://ctan.org/pkg/threeparttable
+\usepackage{booktabs,caption}
 
+\theoremstyle{remark}
+
+\settopmatter{printacmref=true, printccs=true, printfolios=true}
 \pagestyle{empty} % removes running headers
 
 \newcommand{\PicScale}{0.5}
 \newcommand {\FlameStream} {FlameStream}
-\newcommand {\tracker} {trAcker}
-\newcommand {\acker} {Acker}
-
-\newtheorem{lemma}{Lemma}
-
-% Include information below and uncomment for camera ready
-\vldbTitle{Tracking Dependencies in Distributed Streaming Dataflows}
-\vldbAuthors{Nikita Sokolov, Artem Trofimov, Igor Kuralenok, Nikita Marshalkin, and Boris Novikov}
-\vldbDOI{https://doi.org/10.14778/xxxxxxx.xxxxxxx}
-\vldbVolume{12}
-\vldbNumber{xxx}
-\vldbYear{2019}
-
 \begin{document}
 
-\title {Distributed Change-point Detection in Streaming Data}
+% \copyrightyear{2019} 
+% \acmYear{2019} 
+% \acmConference[BIRTE 2019]{Real-Time Business Intelligence and Analytics}{August 26, 2019}{Los Angeles, CA, USA}
+% \acmBooktitle{Real-Time Business Intelligence and Analytics (BIRTE 2019), August 26, 2019, Los Angeles, CA, USA}
+% \acmPrice{15.00}
+% \acmDOI{10.1145/3350489.3350491}
+% \acmISBN{978-1-4503-7660-0/19/08}
 
-\numberofauthors{5}
+\title {Distributed Change Detection in Data Sreams}
 
-\author{
-\alignauthor
-Nikita Sokolov\\
-    \affaddr{ITMO University}\\
-    \affaddr{Saint Petersburg, Russia}\\
-    \email{faucct@gmail.com}
-\alignauthor
-Artem Trofimov\\
-    \affaddr{Yandex}\\
-    \affaddr{Saint Petersburg, Russia}\\
-    \email{tomato@yandex-team.ru}
-\alignauthor
-Igor Kuralenok\\
-    \affaddr{Yandex}\\
-    \affaddr{Saint Petersburg, Russia}\\
-    \email{solar@yandex-team.ru}
-\and 
-\alignauthor
-Nikita Marshalkin\\
-    \affaddr{VK}\\
-    \affaddr{Saint Petersburg, Russia}\\
-    \email{n.marshalkin@corp.vk.com}
-\alignauthor
-Boris Novikov\\
-    \affaddr{National Research University Higher School of Economics}\\
-    \affaddr{Saint Petersburg, Russia}\\
-    \email{borisnov@acm.org}
-}
+\author{Mikhail Yutman}
+\affiliation{%
+  \institution{Yandex}
+  \city{Saint Petersburg}
+  \country{Russia}}
+\email{myutman@yandex-team.ru}
 
-\maketitle
+\author{Artem Trofimov}
+\affiliation{%
+  \institution{Yandex}
+  \city{Saint Petersburg}
+  \country{Russia}}
+\email{tomato@yandex-team.ru}
+
+\author{Igor Kuralenok}
+\affiliation{%
+  \institution{Yandex}
+  \city{Saint Petersburg}
+  \country{Russia}}
+\email{solar@yandex-team.ru}
+
+\author{Boris Novikov}
+\affiliation{%
+  \institution{National Research University Higher School of Economics}
+  \city{Saint Petersburg}
+  \country{Russia}}
+\email{borisnov@acm.org}
 
 \begin{abstract}
-%State-of-the-art distributed stream processing systems are powerful tools for building latency-conscious scalable computational pipelines. As the complexity of these pipelines grows, the validation of the result becomes a crucial task. In particular, testing that streaming data satisfies given statistical properties is an essential part of many real-life applications including spam detection, A/B testing, short-term personalization, etc. In this work, we analyze the potential of a decentralized approach to statistical validation over streaming data that is partitioned among multiple computational units. We discuss the main challenges, possible solutions, and preliminary results.
 
-High-frequent stream processing is a very important research area. Powerful streaming algorithms are widely used in banking and financial analytics as the data is too huge to store it and also arrives at high frequencies so it needed to be processed as soon as possible to make a timely decision.
+% High-frequent stream processing is a very important research area. Powerful streaming algorithms are widely used in banking and financial analytics as the data is too huge to store it and also arrives at high frequencies so it needed to be processed as soon as possible to make a timely decision. Change-point detection on a streaming data is used to track changes in credit card transactions, stock market ticks or computer network traffic. By the way, data can be produced too frequent, so it's desirable to distribute change-point detection over multiple nodes. Also values of statistics can be dependent and it's a challenge. In this paper we introduce a distributed stream processing algorithm for change-point detection and try to explore importance of dependencies between incoming statistics.
 
-Change-point detection on a streaming data is used to track changes in credit card transactions, stock market ticks or computer network traffic. By the way, data can be produced too frequent, so it's desirable to distribute change-point detection over multiple nodes. Also values of statistics can be dependent and it's a challenge.
+Change detection algorithms are widely used in dataflows that monitor suspicious activity in credit card transactions, stock market ticks, or computer network traffic. Another application is to track unexpected fluctuations in data used for training machine learning models. To make these dataflows scalable, it is natural to run them on distributed stream processing systems such as Flink, Storm, Spark Streaming, etc. However, most change detection algorithms aim to a case when all data stream items are handled by a single worker. In this work, we complement an existing efficient change detection algorithm to be suitable for the case when streaming data is partitioned among workers. Thus, it is possible to use our algorithm within a distributed stream processing engine for the price of a larger false detection rate. We conduct a series of experiments with several data partition methods and demonstrate an emerged trade-off between scalability and change detection accuracy.
 
-In this paper we introduce a distributed stream processing algorithm for change-point detection and try to explore importance of dependencies between incoming statistics.
+% To  By the way, data can be produced too frequent, so it's desirable to distribute change-point detection over multiple nodes. Also values of statistics can be dependent and it's a challenge. In this paper we introduce a distributed stream processing algorithm for change-point detection and try to explore importance of dependencies between incoming statistics.
 
 \end{abstract}
 
-% \keywords{Data streams, exactly-once, drifting state, optimistic OOP}
+\maketitle
 
 \thispagestyle{empty}
 
-%\section {Introduction}
-%\input {fs-lightbulbs-intro.tex}
+% \section {Introduction}
+% \input {fs-classification-intro.tex}
 
-%\section{Background and Motivation}
-%\input {fs-lightbulbs-motivation}
+% \section {Data flow}
+% \input {fs-classification-arch.tex}
 
-%\section{Dependency tracking design}
-%\input {fs-lightbulbs-design}
+% \section {Evaluation}
+% \input {fs-classification-discussion.tex}
 
-%\section{Implementation}
-%\input {fs-lightbulbs-impl}
+% \section {Screaming challenges}
+% \input {fs-classification-enhacement.tex}
 
-%\section {Experiments}
-%\input {fs-lightbulbs-experiments.tex}
-
-%\section{Related Work}
-%\input {fs-lightbulbs-related.tex}
+% \section{Related Work}
+% \input {fs-classification-related.tex}
 
 \section {Conclusion}
 \input {fs-lightbulbs-conclusion.tex}
 
-\bibliographystyle{abbrvurl}
-\bibliography{../../bibliography/flame-stream}
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{bibliography/flame-stream}
 
 \end {document}
 
