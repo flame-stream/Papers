@@ -14,3 +14,9 @@
 %We conducted a series of experiments and compared the proposed method with a baseline approach based on the checkpointing mechanism used in Apache Flink. We demonstrated that both centralized and decentralized implementations of \tracker\ provide lower notification latency that does not considerably degrade with an increase of a logical graph size or a cluster size. Experiments also showed that \tracker\ has lower throughput overhead in case of fine-grained tracking.
 
 % We conducted a series of experiments and compared the proposed method with a single-node methods and demonstrated that it keeps acceptable values of metrics and provides lower latency.
+
+In this work, we extended a popular algorithm for change detection in streaming data~\cite{kifer2004detecting} to make it suitable for distributed stream processing systems. We demonstrated that this extension makes change detection dataflows scalable. Thus, it potentially increases the applicability of change detection to large streaming deployments.
+
+However, our distributed change detection algorithm provides an increased false detection rate and detection latency in comparison with the centralized method. It is explained by the fact that data stream samples processed by each computational node can be skewed by a data partitioning method. Our preliminary experiments show that both false detection rate and latency linearly depends on the number of computational nodes. We also showed that round-robin partitioning provides slightly better results than a ``sticky'' partitioning that depends on the values of stream data elements.
+
+Regarding our future work, we plan to investigate more data partitioning methods and how they affect the accuracy of our change detection algorithms. We also plan to modify the algorithm to make it more stable in the case when streaming elements are partitioned depending on their values.
