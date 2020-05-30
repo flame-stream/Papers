@@ -1,6 +1,8 @@
 \label {fs-acker-intro}
 
-State-of-the-art distributed stream processing systems such as Flink~\cite{Carbone:2017:SMA:3137765.3137777}, Heron~\cite{Kulkarni:2015:THS:2723372.2742788}, or MillWheel~\cite{Akidau:2013:MFS:2536222.2536229} are able to execute complex dataflows consisted of multiple operators that can be partitioned among workers. Each operator may execute almost arbitrary user-defined code which transforms elements into other ones or filters them out. After multiple transformations, it may be not clear which ingested by a system input element spawned an output record. 
+%State-of-the-art distributed stream processing systems such as Flink~\cite{Carbone:2017:SMA:3137765.3137777}, Heron~\cite{Kulkarni:2015:THS:2723372.2742788}, or MillWheel~\cite{Akidau:2013:MFS:2536222.2536229} are able to execute complex dataflows consisted of multiple operators that can be partitioned among workers. Each operator may execute almost arbitrary user-defined code which transforms elements into other ones or filters them out. After multiple transformations, it may be not clear which ingested by a system input element spawned an output record. 
+
+
 
 To satisfy {\em consistency} and {\em fault tolerance} requirements, modern streaming engines support {\em dependency tracking} between input and output elements. Tracking mechanisms usually provide notifications that some set of ingested elements has already been transformed into outputs by the whole dataflow or its part. Such notifications are required for a plenty of problems: consistent {\bf state snapshotting}~\cite{Akidau:2013:MFS:2536222.2536229, 2015arXiv150608603C} to provide for correct failure-recovery, {\bf transactional processing} to ensure {\em delivery guarantees}~\cite{thepaper, Carbone:2017:SMA:3137765.3137777}, {\bf data producer cleanup}~\cite{Noghabi:2017:SSS:3137765.3137770} to support recovery while persistently storing only a part of input records, and so on. 
 
