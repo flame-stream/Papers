@@ -1,22 +1,9 @@
 \label {fs-lightbulbs-conclusion}
 
-%In this work, we formulated and formalized a problem of dependency tracking between input and output elements in streaming dataflows. We demonstrated that state-of-the-art distributed stream processing systems face this problem in state snapshotting mechanisms~\cite{Carbone:2017:SMA:3137765.3137777, apache:storm}, the materialization of time-varying relations~\cite{Begoli:2019:OSR:3299869.3314040}, and atomic delivery of all descendants of an input item~\cite{we2018adbis}.  
-% In this paper we formulated and formalized a problem of distributed change-point detection in streaming dataflows. We analysed the importance of dependencies in data distribution over nodes and intoduced our version of algorithm for distributed change-point detection.
+In this work, we extended a popular algorithm for change detection in streaming data~\cite{kifer2004detecting} to make it suitable for distributed stream processing systems. The quality of the resulting algorithm was experementally confirmed.
 
-%To solve this problem, we proposed a mechanism that adopts ideas from the Apache Storm completion tracking mechanism called \acker. We extend each data item with a logical timestamp that denotes corresponding input items and track if dataflow contains elements with specific timestamps. Our solution, called \tracker, provides the following features:
-%\begin{itemize}
-%    \item {\bf Fine-grained tracking:} \tracker\ efficiently watches and provides notifications that system completely processed some set of input items even for individual input elements.
-%    \item {\bf Cyclic graphs support:} proposed mechanism works for cyclic execution graphs, and that makes it suitable for iterative dataflows as well. 
-%    \item {\bf Scalability:} we introduced a decentralized version of \tracker\ that allows a system to distribute extra network traffic between all computational units. 
-%    \item {\bf Low overhead:} \tracker\ does not produce any significant performance penalty and does not affect the throughput of a distributed streaming dataflow.
-%\end{itemize}
+The experimentally obtained quality is comparable with the state-of-the-art and slightly decreases with the growing number of computational nodes while detection latency increases sublinearly. It is explained by the fact that the multinode algorithm needs to process more elements to ``warm-up'' before it starts to detect changes. Experiments within distributed stream processing system demonstrated linear increase of throughput, which means that the algorithm is pretty scalable.
 
-%We conducted a series of experiments and compared the proposed method with a baseline approach based on the checkpointing mechanism used in Apache Flink. We demonstrated that both centralized and decentralized implementations of \tracker\ provide lower notification latency that does not considerably degrade with an increase of a logical graph size or a cluster size. Experiments also showed that \tracker\ has lower throughput overhead in case of fine-grained tracking.
-
-% We conducted a series of experiments and compared the proposed method with a single-node methods and demonstrated that it keeps acceptable values of metrics and provides lower latency.
-
-In this work, we extended a popular algorithm for change detection in streaming data~\cite{kifer2004detecting} to make it suitable for distributed stream processing systems. We demonstrated that this extension makes change detection dataflows scalable. Thus, it potentially increases the applicability of change detection to large streaming deployments.
-
-However, our distributed change detection algorithm provides an increased false detection rate and detection latency in comparison with the centralized method. It is explained by the fact that data stream samples processed by each computational node can be skewed by a data partitioning method. Our preliminary experiments show that both false detection rate and latency linearly depends on the number of computational nodes. We also showed that round-robin partitioning provides slightly better results than a ``sticky'' partitioning that depends on the values of stream data elements.
+We demonstrated that our extension of single-node algorithm makes dataflows with change detection scalable with non-essential cost. Thus, it potentially increases the applicability of change detection to large streaming deployments.
 
 Regarding our future work, we plan to investigate more data partitioning methods and how they affect the accuracy of our change detection algorithms. We also plan to modify the algorithm to make it more stable in the case when streaming elements are partitioned depending on their values.

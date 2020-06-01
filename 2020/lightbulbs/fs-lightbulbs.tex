@@ -62,7 +62,7 @@
 
 % High-frequent stream processing is a very important research area. Powerful streaming algorithms are widely used in banking and financial analytics as the data is too huge to store it and also arrives at high frequencies so it needed to be processed as soon as possible to make a timely decision. Change-point detection on a streaming data is used to track changes in credit card transactions, stock market ticks or computer network traffic. By the way, data can be produced too frequent, so it's desirable to distribute change-point detection over multiple nodes. Also values of statistics can be dependent and it's a challenge. In this paper we introduce a distributed stream processing algorithm for change-point detection and try to explore importance of dependencies between incoming statistics.
 
-Change detection algorithms are widely used in streaming applications that monitor suspicious activity in credit card transactions, stock market ticks, or computer network traffic. Another class of applications is dataflows that track unexpected fluctuations in data used for training online machine learning models. To make these dataflows scalable, it is natural to run them on distributed stream processing systems such as Flink, Storm, Spark Streaming, etc. However, most change detection algorithms aim to a case when a single worker handles all data stream items. In this work, we complement an existing efficient change detection algorithm to be suitable for the scenario when streaming data is partitioned among workers. Thus, it is possible to use our algorithm within a distributed stream processing engine. However, scalability is not costless. We conduct a series of experiments with several data partition methods and demonstrate an emerged trade-off between scalability on the one side, and change detection accuracy together with detection latency on the other side.
+Change detection algorithms are widely used in data flows that monitor suspicious activity in credit card transactions, stock market ticks, or computer network traffic. Another application is to track unexpected fluctuations in data used for training online machine learning models. To make these data flows scalable, it is natural to run them on distributed stream processing systems such as Flink, Storm, Spark Streaming, etc. Usually, we don't have an information about probability distribution of data. However, change detection algorithms either aim to a case when all data stream items are handled by a single worker or require an information about probability distribution of data. In this work, I complement an existing efficient change detection algorithm that doesn't need information about probability distribution of data to be suitable for a distributed stream processing engine. However, scalability has its price. Experiments demonstrated an emerging trade-off between scalability together with false alarm probability on the one side, and change detection accuracy together with detection latency on the other side.
 
 % To  By the way, data can be produced too frequent, so it's desirable to distribute change-point detection over multiple nodes. Also values of statistics can be dependent and it's a challenge. In this paper we introduce a distributed stream processing algorithm for change-point detection and try to explore importance of dependencies between incoming statistics.
 
@@ -72,8 +72,11 @@ Change detection algorithms are widely used in streaming applications that monit
 
 \thispagestyle{empty}
 
-% \section {Introduction}
-% \input {fs-classification-intro.tex}
+\section {Introduction}
+\input {fs-lightbulbs-intro.tex}
+
+\section {Motivation}
+\input {fs-lightbulbs-motivation.tex}
 
 % \section {Data flow}
 % \input {fs-classification-arch.tex}
