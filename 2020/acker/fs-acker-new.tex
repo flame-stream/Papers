@@ -28,7 +28,7 @@
 
 \newcommand{\PicScale}{0.5}
 \newcommand {\FlameStream} {FlameStream}
-\newcommand {\tracker} {trAcker}
+\newcommand {\tracker} {Tracker}
 \newcommand {\acker} {Acker}
 
 \newtheorem{lemma}{Lemma}
@@ -91,9 +91,9 @@
 
 % In a plenty of real-world streaming applications, potentially infinite input stream is considered as a mixture of finite substreams with distinct properties. For example, stateful operators can maintain unbounded
 
-Stream Processing Engines (SPEs) handle a potentially infinite sequence of data elements. This sequence often can be viewed as a mixture of finite substreams with distinct properties: event times ranges, payload values, etc. Some operators ought to know since then there will be no longer elements with specified properties, i.e. when the substream ends. For instance, stateful streaming operators should clear outdated state to not run out of memory. Time window operators should release output after all elements within the specified time range arrived. Most state-of-the-art SPEs use {\em punctuations} to manage substreams. Punctuations approach is powerful, but has limitations: it does not support cyclic dataflows and is inefficient for small substreams due to high network traffic overhead.
+Stream Processing Engines (SPEs) handle a potentially infinite sequence of data elements. This sequence often can be viewed as a mixture of finite substreams with distinct properties: event times ranges, payload values, etc. Some operators ought to know since then there will be no longer elements with specified properties, i.e. when the substream ends. For instance, stateful streaming operators should clear outdated state to not run out of memory. Time window operators should release output after all elements within the specified time range arrived. Most state-of-the-art SPEs use {\em punctuations} to manage substreams. Punctuations approach is powerful, but has limitations: it does not support cyclic dataflows, poorly scalable due to frequent broadcasts, and is inefficient for small substreams because of high network traffic overhead.
 
-In this work, we present a new substream management design that supports cyclic dataflows and tiny substreams (even substreams containing a single element). Within our method, all streaming elements are marked with ordered {\em labels}. Operators transmit the properties of sent and received items with corresponding labels to a distributed agent called {\em tracker}. Tracker aggregates data from all operators and propagates notifications, which indicate the end of a substream since the specified label. We demonstrate that our implementation provides the same semantics of notifications as punctuations, but implies lower network traffic overhead. Experiments show that our technique efficiently handles real-world cyclic dataflows and outperforms punctuations for small substreams.
+In this work, we present a new substream management design that supports cyclic dataflows and tiny substreams (even substreams containing a single element). Within our method, all streaming elements are marked with ordered {\em labels}. Operators transmit the properties of sent and received items with corresponding labels to a distributed agent called \tracker. \tracker\ aggregates data from all operators and propagates notifications, which are also marked with labels. The notification indicates the end of a substream since receiving an element that bears the specified label. We demonstrate that our implementation can provide the same semantics of notifications as punctuations, but implies lower network traffic overhead. Experiments show that our technique is scalable, efficiently handles real-world cyclic dataflows, and outperforms punctuations for small substreams.
 
 % 
 
@@ -122,7 +122,7 @@ In this work, we present a new substream management design that supports cyclic 
 % \input {fs-acker-related.tex}
 
 \section {Conclusion}
-% \input {fs-acker-conclusion.tex}
+\input {fs-acker-conclusion.tex}
 
 \bibliographystyle{abbrvurl}
 % \bibliography{bibliography/flame-stream}
