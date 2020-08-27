@@ -93,7 +93,7 @@
 
 Stream Processing Engines (SPEs) handle a potentially infinite sequence of data elements. This sequence often can be viewed as a mixture of finite substreams with distinct properties: event times ranges, payload values, etc. Some operators ought to know since then there will be no longer elements with specified properties, i.e. when the substream ends. For instance, stateful streaming operators should clear outdated state to not run out of memory. Time window operators should release output after all elements within the specified time range arrived. Most state-of-the-art SPEs use {\em punctuations} to manage substreams. Punctuations approach is powerful, but has limitations: it does not support cyclic dataflows, poorly scalable due to frequent broadcasts, and is inefficient for small substreams because of high network traffic overhead.
 
-In this work, we present a new substream management design that supports cyclic dataflows and tiny substreams (even substreams containing a single element). Within our method, all streaming elements are marked with ordered {\em labels}. Operators transmit the properties of sent and received items with corresponding labels to a distributed agent called \tracker. \tracker\ aggregates data from all operators and propagates notifications, which are also marked with labels. The notification indicates the end of a substream since receiving an element that bears the specified label. We demonstrate that our implementation can provide the same semantics of notifications as punctuations, but implies lower network traffic overhead. Experiments show that our technique is scalable, efficiently handles real-world cyclic dataflows, and outperforms punctuations for small substreams.
+In this work, we present a new substream management framework called \tracker\ that supports cyclic dataflows and tiny substreams (even substreams containing a single element). Within our method, all streaming elements are marked with ordered {\em labels}. Operators transmit the properties of sent and received items with corresponding labels to a special distributed agent. This agent aggregates data from all operators and propagates notifications, which are also marked with labels. The notification indicates the end of a substream since receiving an element that bears the specified label. We demonstrate that our implementation can provide the same semantics of notifications as punctuations, but implies lower network traffic overhead. Experiments show that our technique is scalable, efficiently handles real-world cyclic dataflows, and outperforms punctuations for small substreams.
 
 % 
 
@@ -104,6 +104,57 @@ In this work, we present a new substream management design that supports cyclic 
 \thispagestyle{empty}
 
 \section {Introduction}
+
+General words about stream processing.
+
+\subsection{Motivation for substream management}
+
+It is useful to view an infinite stream as a mixture if finite substreams.
+
+\subsection{Examples}
+
+State garbage collection, state snapshotting, etc.
+
+\section{Formal framework}
+
+\subsection{Stream processing model}
+
+Formal framework for stream processing in general.
+
+\subsection{Punctuations model}
+
+Formal framework for punctuations.
+
+\section{Tracker overview}
+
+\subsection{Dividing into substreams via ordering}
+
+Show how to divide stream into substreams using order on streaming elements.
+
+\subsection{Agent for tracking substreams}
+
+\tracker basics in terms of formal framework.
+
+\subsection{\tracker\ properties}
+
+Show that our framework has almost the same properies as punctuations, but do not require frequent network broadcasting.
+
+\section{Tracker mplementation}
+
+\subsection{Global time and metadata}
+
+How we implement ordering.
+
+\subsection{Metadata aggregation}
+
+XORing random numbers. Here we use ideas from acker.
+
+\subsection{Tracking agent interface}
+
+\subsection{Single node tracking agent}
+
+\subsection{Distributed tracking agent}
+
 % \input {fs-acker-intro.tex}
 
 % \section{Background and Motivation}
@@ -118,7 +169,7 @@ In this work, we present a new substream management design that supports cyclic 
 \section {Experiments}
 \input {fs-acker-experiments.tex}
 
-% \section{Related Work}
+\section{Related Work}
 % \input {fs-acker-related.tex}
 
 \section {Conclusion}
