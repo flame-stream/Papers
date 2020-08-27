@@ -97,14 +97,25 @@ The experiments examine the benefits of the proposed substreams management frame
 We run all experiments on a cluster of 20 virtual machines with a single CPU and 4 GB RAM from one of the biggest cloud providers. Each node runs a \FlameStream\ worker. We deploy \tracker\ on nodes excluded from regular processing: a single one for centralized configuration and two for distributed configuration. 
 % If it is not specified, the number of machines used in an experiment is 20, the graph size is 30, and the granularity is 10. 
 
-We divided our evaluation of \tracker\ framework into two parts. Each of these parts encapsulates logically connected experiments that measure the performance of \tracker\ mechanism in various perspectives.
+We divided our evaluation of \tracker\ framework into two parts. Each of these parts encapsulates logically connected experiments that examine the performance of \tracker\ mechanism in various perspectives.
 
-{\noindent \bf Overall performance.} In Section~\ref{overhead}, we demonstrate an overhead induced by \tracker\ and its ability to scale. First, we measure the amount of extra network traffic for different cluster sizes, the number of nodes in a logical graph, and the substreams granularity. After that, we show throughput overhead on regular processing for a fixed streaming setup. Eventually, we demonstrate \tracker\ scalability due to its distributed implementation. As a baseline approach, we utilize the marker-based method employed in many state-of-the-art stream processing systems such as Flink~\cite{Carbone:2017:SMA:3137765.3137777}, Storm~\cite{apache:storm:state}, Heron~\cite{Kulkarni:2015:THS:2723372.2742788}, IBM Streams~\cite{jacques2016consistent}, etc. 
-% This technique, as well as alternatives, is detailed in Section~\ref{existing_solutions}. Unlike other mentioned techniques, markers support fine granularity and operator-level locality of tracking. 
+{\noindent \bf Overall performance.} In Section~\ref{overhead}, we demonstrate the performance of the \tracker\ framework itself. First, we measure the amount of extra network traffic for different cluster sizes, the number of nodes in a logical graph, and the sizes of substreams. We also show throughput overhead on regular processing for a fixed streaming setup. Second, we evaluate notifications latency, i.e., the time interval between substream ends and the corresponding notifications are received by subscribers.  Eventually, we demonstrate \tracker\ scalability due to its distributed implementation. 
 
-A logical graph for this block of experiments should be flexible in order to analyze performance with less bias on a specific task. We use synthetic directed graphs of various lengths. All vertices pass an input element to the next operation. All items are re-partitioned (round-robin) before each vertex, as it is shown in Figure~\ref{physical_graph}. This setup does not induce possible overhead by heavy computations while covering many real-life scenarios. Graphs with few vertices (under 30) may fit almost any acyclic streaming pipeline~\cite{akidau2018streaming}. On the other hand, more massive pipelines can be considered as flattened iterative dataflows such as PageRank or Connected Components~\cite{Murray:2013:NTD:2517349.2522738, xu2016efficient}.
+As a baseline approach, we utilize the punctuations-based method employed in many state-of-the-art stream processing systems such as Flink~\cite{Carbone:2017:SMA:3137765.3137777}, Storm~\cite{apache:storm:state}, Heron~\cite{Kulkarni:2015:THS:2723372.2742788}, IBM Streams~\cite{jacques2016consistent}, etc. To the best of our knowledge, the punctuation framework is the only existing general-purpose substreams management technique.
 
-{\noindent \bf Real-world scenarios.} Section~\ref{real-world-scenarios} contains the evaluation of \tracker\ applied to several real-world problems. 
+An execution graph for this block of experiments should be flexible in order to analyze performance with less bias on a specific task. We use synthetic directed graphs of various lengths. All vertices pass an input element to the next operation. All items are re-partitioned (round-robin) before each vertex, as it is shown in Figure~\ref{physical_graph}. This setup does not induce possible overhead by heavy computations while covering many realistic scenarios. Graphs with few vertices (under 30) may fit almost any acyclic streaming pipeline~\cite{akidau2018streaming}. On the other hand, more massive pipelines can be considered as flattened iterative dataflows such as PageRank or Connected Components~\cite{Murray:2013:NTD:2517349.2522738, xu2016efficient}.
+
+{\noindent \bf Real-world scenarios.} Section~\ref{real-world-scenarios} contains the evaluation of \tracker\ applied to several real-world problems. The first problem is state garbage collection. Often, the state maintained by streaming operators is divided by keys. When some keys become out-of-date (e.g., data source promises that it will never send elements with such keys further), the corresponding state should be removed. Otherwise, a streaming operator may run out-of-memory. A simple but efficient solution is to apply a fixed-sized LRU cache that spills outdated data on disk. We compare two strategies for freeing keys in the cache. The first strategy is to free keys using some pre-defined TTL. The second strategy is to free keys on notifications by \tracker\ and punctuations that there will be no more elements with such keys. As a performance metric, we use the cache misses ratio.
+
+The second problem is state snapshotting. Many state-of-the-art stream processing systems, including Flink~\cite{Carbone:2017:SMA:3137765.3137777}, Storm~\cite{Toshniwal:2014:STO:2588555.2595641}, and Samza~\cite{Noghabi:2017:SSS:3137765.3137770}, use state snapshotting protocol~\cite{2015arXiv150608603C} for fault tolerance that requires substreams management. Although this technique is popular, it leads to latency spikes that depend on the latency of notifications that a substream (epoch) ends. In our experiments, we compare latency spikes for punctuations and \tracker\ substreams management frameworks within this state snapshotting protocol.
+
+The third scenario is the hot keys detection. The distribution of keys of data elements that entering SPE can be skewed, and some (hot) keys can occur very often. In this case, load distribution between computational nodes may be imbalanced, and the throughput of an SPE may decrease~\cite{liao2019efficient}. If SPE is able to detect hot keys, it can forbid entering elements with such keys or rebalance load distribution by diving hot keys into multiple subkeys that are processed independently. In this scenario, we evaluate \tracker\ latency and accuracy of hot keys detection. As a baseline approach, we use a naive method that counts keys occurrences independently on each computational node.
+
+We apply two execution graphs with corresponding datasets for evaluation:
+\begin{enumerate}
+    \item Breadth-first-search computation on a big social graph. This execution graph can be used for social networks near real-time analysis~\cite{wang2011understanding}. Another application is heuristic search algorithms applied in motion planning for robotics~\cite{sud2007real}. As a dataset for this execution graph, we employ a large social graph provided by Twitter~\cite{kwak2010twitter}.
+    \item Execution graph for near real-time text classification. It has a wide range of applications, including detection of emerging news and current user interests, suspicious traffic analysis, spam filtering, etc~\cite{webirte}. As a dataset, we used an open corpus of news articles from Russian media resource lenta.ru~\cite{lentaru}.
+\end{enumerate}
 
 % We measure the notification latency within various setups as well as the ability of distributed \tracker\ to scale out. Finally, in section~\ref{snapshotting}, we analyze the performance of operator-level tracking with the state snapshotting problem. 
 
@@ -118,19 +129,21 @@ A logical graph for this block of experiments should be flexible in order to ana
 
 % We run all experiments on a cluster of 20 virtual machines with a single CPU and 4 GB RAM from one of the biggest cloud providers. Each node runs a \FlameStream\ worker. We deploy \tracker\ on nodes excluded from regular processing: a single one for centralized configuration and two for distributed configuration. If it is not specified, the number of machines used in an experiment is 20, the graph size is 30, and the granularity is 10. 
 
-\subsection{Overhead and scalability} \label{overhead}
+\subsection{\tracker\ performance} \label{overhead}
 
 \subsubsection{Network traffic}
 
-\subsubsection{Overhead on throughput}
+\subsubsection{Overhead on SPE throughput}
+
+\subsubsection{Notification latency}
 
 \subsubsection{Scalability}
 
 \subsection{Real-world scenarios} \label{real-world-scenarios}
 
-\subsubsection{State snapshotting}
+\subsubsection{State garbage collection}
 
-\subsubsection{Garbage collection}
+\subsubsection{State snapshotting}
 
 \subsubsection{Hot keys detection}
 
@@ -403,4 +416,3 @@ A logical graph for this block of experiments should be flexible in order to ana
 %   \includegraphics[width=0.50\textwidth]{pics/buffering_sum_duration_bars.pdf}
 %   \caption{Total buffering duration}
 % \end{figure}
-
