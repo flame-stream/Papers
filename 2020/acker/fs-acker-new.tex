@@ -109,39 +109,41 @@ General words about stream processing.
 
 \subsection{Motivation for substream management}
 
-It is useful to view an infinite stream as a mixture if finite substreams.
+It is useful to view an infinite stream as a mixture of finite substreams.
 
 \subsection{Examples}
 
 State garbage collection, state snapshotting, etc.
 
-\section{Formal framework}
+\section{Preliminaries}
 
-\subsection{Stream processing model}
+Formal framework for stream processing.
 
-Formal framework for stream processing in general.
+\section{Substreams management}
+
+\subsection{Problem specification}
+
+Formal framework for substreams management.
 
 \subsection{Punctuations model}
 
-Formal framework for punctuations.
+Punctuations in terms of the formal framework.
 
-\section{Tracker overview}
+\subsection{\tracker\ model}
 
-\subsection{Dividing into substreams via ordering}
+\tracker\ in terms of the formal framework.
 
-Show how to divide stream into substreams using order on streaming elements.
+\section{Discussion}
 
-\subsection{Agent for tracking substreams}
+Theoretical pros and cons of \tracker\ in comparison with punctuations.
 
-\tracker basics in terms of formal framework.
+\subsection{Technical features}
 
-\subsection{\tracker\ properties}
+\subsection{Performance}
 
-Show that our framework has almost the same properies as punctuations, but do not require frequent network broadcasting.
+\section{Tracker implementation}
 
-\section{Tracker mplementation}
-
-\subsection{Global time and metadata}
+\subsection{Elements ordering}
 
 How we implement ordering.
 
