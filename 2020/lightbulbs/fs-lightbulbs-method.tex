@@ -1,0 +1,19 @@
+\subsection{Single-node algorithm}
+
+Single-node algorithm should process elements from stream and return a statistic that characterises a state of the substream that was processed by this node.
+
+We use the window technique from the paper \cite{kifer2004detecting} which involves two windows. The first window, called reference, stands at the beginning of the stream and another one, called sliding, moves as soon as a new element arrives.
+
+After each processed element we calculate the distance between the samples that refer to reference and the sliding windows respectively, which we denote as $s_t$. We use the Kolmogorov-Smirnov statistic as a distance function between two samples. To be more precise we calculate the statistic from Kolmogorov-Smirnov test for empirical distributions of two samples which is $$KS(X, Y) = \max_x \left|F_X(x) - F_Y(x)\right|$$ for samples $X$ and $Y$ with emperical distributions $F_X$ and $F_Y$ respectively.
+
+We can use $s_t$ itself as a statistic for this node, but it's very local and doesn't anything about the data processed before. We can also use maximum among all the statistics as it was suggested in \cite{kifer2004detecting}, but maximum doesn't actually contain full information about processed substream and can be very sensible to outliers.
+
+We suggest an approach that involes smoothing of statistic by adding older statistic to current one with the lower weight. More precisely we propose to calculate the following values: $$n_t := 1 + \lambda n_{t - 1} $$ $$S_t := s_t + \lambda S_{t - 1}$$ $$\hat{s}_t := S_t / n_t$$ and use the value $\hat{s}_t$ as a statistic from the node. We assume that such a statistic can decrease the level of false detections with the same detection quality because it's more outlier resistant as far as it takes previous values into account.
+
+% More precisely we calculate the following statistic and return it as a result fo this node $$S_t = \max_{1 \le i \le t - (n + m) + 1} KS(reference, sliding_i)$$, where  is Kolmogorov-Smirnov statistic for emperical distributions $F_X$ and $F_Y$ of samples $X$ and $Y$.
+
+\subsection{Fusion rule}
+
+Fusion rule should recieve statistics from different nodes and decide wheter change has already happened or not.
+
+We apply a simple multivariable function such as maximum, median or mean. We compare the obtained value to the precomputed threshold and if it's greater than change is thought to be having occurred.
