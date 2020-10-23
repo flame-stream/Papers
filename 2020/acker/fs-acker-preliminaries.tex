@@ -4,7 +4,16 @@
 
 Typically, distributed stream processing engines are shared-nothing runtimes which continuously ingest input elements, transform them according to a dataflow graph, and deliver output elements. The dataflow graph consists of operators. We assume that each operator processes items one-by-one so that it can handle only one record at a time. Operators can be stateless or stateful. An output element may depend on the current state and the corresponding input element. Commonly, all operators are partitioned among workers. In most cases, a partition of the next operator for a record can be determined only in runtime because it may depend on the record payload. 
 
-Distributes SPEs can be modeled as process graph $G=\{\Pi,\mathcal{E}\}$, where $\Pi$ are operators (processes) and $\mathcal{E} \subseteq \Pi \times \Pi$ are network channels between them~\cite{carbone2018scalable}. 
+Distributes SPEs can be modeled~\cite{carbone2018scalable} as process graph $G=\{\Pi,\mathcal{E}\}$, where $\Pi$ are operators (processes) and $\mathcal{E} \subseteq \Pi \times \Pi$ are network channels between them, $c_{ij}=(p_i,p_j)\in \mathcal{E}; p_i,p_j \in \Pi$. Each process has input channels $I_p = \bigcup_{x \in \Pi} \{c_{xp} | (x,p) \in C\}$ and output channels $O_p = \bigcup_{x \in \Pi} \{c_{px} | (p,x) \in C\}$. Network channels state (all in-transit messages) is denoted as $M$. 
+
+Each process $p\in \Pi$ can handle the following events:
+\begin{enumerate}
+    \item Receiving element: $\langle recv,m\rangle_{qp}, q\in I_p, m\in M$
+    \item Sending element: $\langle send,m\rangle_{pq}, q\in O_p, m\in M$
+    \item Processing element: $\langle proc,m,M_i\rangle, q\in O_p, m\in M, M_i \subseteq M$
+\end{enumerate}
+
+All events within the same process $p$ are totally ordered by a local causal order relation $<_p$: $e^{0}_p,e^{1}_p,...,e^{i}_p,...$. The set of processing events is denoted as $E_{proc}$.
 
 \subsection{Substreams management}
 
