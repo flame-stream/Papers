@@ -1,0 +1,43 @@
+\label{fs-acker-preliminaries}
+
+\subsection{Stream processing}
+
+Typically, distributed stream processing engines are shared-nothing runtimes which continuously ingest input elements, transform them according to a dataflow graph, and deliver output elements. The dataflow graph consists of operators. We assume that each operator processes items one-by-one so that it can handle only one record at a time. Operators can be stateless or stateful. An output element may depend on the current state and the corresponding input element. Commonly, all operators are partitioned among workers. In most cases, a partition of the next operator for a record can be determined only in runtime because it may depend on the record payload. 
+
+Distributes SPEs can be modeled as process graph $G=\{\Pi,\mathcal{E}\}$, where $\Pi$ are operators (processes) and $\mathcal{E} \subseteq \Pi \times \Pi$ are network channels between them~\cite{carbone2018scalable}. 
+
+\subsection{Substreams management}
+
+\subsubsection{General guarantee}
+
+One defines a substream as a stream, which {\em may} contain elements $m \in M$ such that predicate $pred(m)$ is true~\cite{Tucker:2003:EPS:776752.776780}. Substreams management problem is to construct function $S(E_{proc})$ such that:
+
+\begin{align*}
+& S(E_{proc}) = 1 \Longleftrightarrow \\ 
+& \forall e^{'} = <proc,m,M_i>, e^{'} >_p \sup E_{proc} : \neg pred(m)
+\end{align*}
+
+This function considers all processing events and returns $1$ only if all further events do not satisfy the predicate. A computational node can run this function on each new processing event to be notified when the substream has ended.
+
+\subsubsection{Strict guarantee}
+
+The guarantee that any new event will not satisfy the predicate is sufficient for many real-life problems, i.e., SPE can initiate operator state pruning on such events. However, some problems require a more strict guarantee that the substream ends {\em exactly} after the last event. For example, epoch-based snapshotting protocol~\cite{2015arXiv150608603C, jacques2016consistent} requires notification that an operator processes all elements from a specified epoch and nothing more to take the snapshot. If elements from different epochs are mixed, the snapshot can be inconsistent.
+
+To support such scenarios, function $S(E_{proc})$ should satsify the following condition:
+
+\begin{align*}
+& S(E_{proc}) = 1  \Longleftrightarrow \\
+& \forall e^{'} = <proc,m,M_i>, e^{'} >_p \sup E_{proc} : \neg pred(m), \\
+& \sup E_{proc} = \inf_{e*} \forall e^{'} >_p e^{*} : \neg pred(m) 
+\end{align*}
+
+This condition allows computational node to determine the exact moment (processing event) that ``divides'' stream into substreams: all elements after the notification will not satisfy the predicate, but all previous elements satsify. To implement such function in practice, it is often required to buffer input events until some condition is fulfilled. Therefore, one need to define custom order of events processing $I(e)$ as well:
+
+\begin{align*}
+& I(e=<recv,m>): I(e=<recv, x>) > I(e=<recv, y>) \\
+& \Longleftrightarrow e=<proc,x,X_i> >_p e=<proc,y,Y_i>
+\end{align*}
+
+\subsection{Punctuations model}
+
+Punctuations framework is based on the idea that 
