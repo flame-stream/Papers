@@ -10,34 +10,55 @@ Distributes SPEs can be modeled as process graph $G=\{\Pi,\mathcal{E}\}$, where 
 
 \subsubsection{General guarantee}
 
-One defines a substream as a stream, which {\em may} contain elements $m \in M$ such that predicate $pred(m)$ is true~\cite{Tucker:2003:EPS:776752.776780}. Substreams management problem is to construct function $S(E_{proc})$ such that:
+One defines a substream as a stream, which contains elements $m \in M$ such that predicate $pred(m)$ is true~\cite{Tucker:2003:EPS:776752.776780}. Substreams management problem is to construct function $S(E_{proc})$ such that:
 
 \begin{align*}
 & S(E_{proc}) = 1 \Longleftrightarrow \\ 
-& \forall e^{'} = <proc,m,M_i>, e^{'} >_p \sup E_{proc} : \neg pred(m)
+& \forall e^{'} = \langle proc,m,M_i\rangle, e^{'} >_p \sup E_{proc} : \neg pred(m)
 \end{align*}
 
-This function considers all processing events and returns $1$ only if all further events do not satisfy the predicate. A computational node can run this function on each new processing event to be notified when the substream has ended.
+This function considers all processing events of a process $p$ and returns $1$ if and only if all further events do not satisfy the predicate. A computational node can run this function on each new processing event to be notified when the substream has ended.
 
 \subsubsection{Strict guarantee}
 
-The guarantee that any new event will not satisfy the predicate is sufficient for many real-life problems, i.e., SPE can initiate operator state pruning on such events. However, some problems require a more strict guarantee that the substream ends {\em exactly} after the last event. For example, epoch-based snapshotting protocol~\cite{2015arXiv150608603C, jacques2016consistent} requires notification that an operator processes all elements from a specified epoch and nothing more to take the snapshot. If elements from different epochs are mixed, the snapshot can be inconsistent.
+The guarantee that any new event will not satisfy the predicate is sufficient for many real-life problems, e.g., SPE can initiate operator state pruning on such events. However, some problems require a more strict guarantee that the substream ends {\em exactly} after the last event. For example, epoch-based snapshotting protocol~\cite{2015arXiv150608603C, jacques2016consistent} requires notification that an operator processes all elements from a specified epoch and nothing more to take the snapshot. If elements from different epochs are mixed, the snapshot can be inconsistent.
 
 To support such scenarios, function $S(E_{proc})$ should satsify the following condition:
 
 \begin{align*}
 & S(E_{proc}) = 1  \Longleftrightarrow \\
-& \forall e^{'} = <proc,m,M_i>, e^{'} >_p \sup E_{proc} : \neg pred(m), \\
+& \forall e^{'} = \langle proc,m,M_i\rangle, e^{'} >_p \sup E_{proc} : \neg pred(m), \\
 & \sup E_{proc} = \inf_{e*} \forall e^{'} >_p e^{*} : \neg pred(m) 
 \end{align*}
 
-This condition allows computational node to determine the exact moment (processing event) that ``divides'' stream into substreams: all elements after the notification will not satisfy the predicate, but all previous elements satsify. To implement such function in practice, it is often required to buffer input events until some condition is fulfilled. Therefore, one need to define custom order of events processing $I(e)$ as well:
+This condition allows computational node to determine the exact moment (processing event) that ``divides'' stream into substreams: all elements after the notification will not satisfy the predicate, but all previous elements satsify. To implement such function in practice, it is often required to buffer input events until some condition is fulfilled. Therefore, one may need to define custom order of events processing $R(e)$ as well:
 
 \begin{align*}
-& I(e=<recv,m>): I(e=<recv, x>) > I(e=<recv, y>) \\
-& \Longleftrightarrow e=<proc,x,X_i> >_p e=<proc,y,Y_i>
+& R(e=<recv,m>): R(e=\langle recv, x\rangle) > R(e=\langle recv, y\rangle) \\
+& \Longleftrightarrow e=\langle proc,x,X_i\rangle >_p e=\langle proc,y,Y_i\rangle
 \end{align*}
 
-\subsection{Punctuations model}
+\subsection{Punctuations framework}
 
-Punctuations framework is based on the idea that 
+\subsubsection{Framework overview}
+
+The main idea behind the punctuations framework is to divide the stream into substreams by injection of special elements that bear predicate $pred(m)$. Punctuations are injected directly into a system as ordinary data elements by SPE or by external data producers. The injector promises that all further produced records do not satisfy the predicate. Hence, the punctuation itself defines the ``border'' of a substream.
+
+Each opearator of an SPE propogates a punctuation to all outgoing channels when it receives corresponding punctuations from all input channels. If an operator receives punctuations from all inputs, it is guaranteed that it do not receive elements that satisfy the predicate further due to FIFO network channels. Therefore, function $S(E_{proc})$ for punctuations framework is the following:
+
+\begin{align*}
+& S_{punct}(E_{proc}) = \forall q \in I_p, \exists e \in E_{proc} : e = \langle recv,pred(m)\rangle_{qp}
+\end{align*}
+
+To make this function satisfy the strict notifications guarantee, one needs to block input channels which received punctuations until all other channels receive them. In~\cite{Carbone:2017:SMA:3137765.3137777} such behavior is called {\em watermark (punctuation) alignment}. The processing order function $R_{punct}(e)$ for this case should satisfy the following condition:
+
+\begin{align*}
+& \exists q \in I_p, e = \langle recv,m \rangle >_p e^{'} = \langle recv,pred(m)\rangle_{qp} \Longrightarrow \\ 
+& R(e) > R(e^{*}= \langle recv,pred(m) \rangle_{q^{'}p}), \forall q^{'} \in I_p
+\end{align*}
+
+\subsubsection{Discussion}
+
+While the punctuations approach is powerful as well as easy-to-implement, it has several limitations. In the punctuations framework, the information about the ending of a substream is propagated using ordinary data elements via the data flow network channels. It implies that punctuations are not applicable for cyclic dataflows because an operator that receives elements from a cyclic channel will never receive punctuations from this channel~\cite{carbone2018scalable}.
+
+The high network overhead forms another limitation. This method's amount of service traffic is $O(F||\Pi||^2)$, where $||\Pi||$ is the number of processes and $F$ is the frequency of punctuations injection. It is quadratic in the number of processes, as each process should propagate punctuations to all output channels. Such elements broadcasting may affect the throughput of an SPE. As we demonstrate further, the punctuation technique adds significant performance overhead on regular processing for small substreams (frequent punctuations injection).
