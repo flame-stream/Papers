@@ -19,20 +19,27 @@ All events within the same process $p$ are totally ordered by a local causal ord
 
 \subsubsection{General guarantee}
 
-One defines a substream as a stream, which contains elements $m \in M$ such that predicate $pred(m)$ is true~\cite{Tucker:2003:EPS:776752.776780}. Each element can belong to multiple substreams at the same time, if it satisfies all corresponding predicates. Substreams management problem is to construct function $S(E_{proc})$ such that:
+One defines a substream as a stream, which contains elements $m \in M$ such that predicate $pred(m)$ is true~\cite{Tucker:2003:EPS:776752.776780}. Each element can belong to multiple substreams at the same time, if it satisfies all corresponding predicates. Substreams management problem is to construct function $S(E_{proc})$ such that it returns $1$ if and only if all further events do not satisfy the predicate. More formally function $S(E_{proc})$ can be defined as follows:
 
 \begin{align*}
 & S(E_{proc}) = 1 \Longleftrightarrow \\ 
 & \forall e^{'} = \langle proc,m,M_i\rangle, e^{'} >_p \sup E_{proc} : \neg pred(m)
-\end{align*}
+\end{align*} 
 
-This function considers all processing events of a process $p$ and returns $1$ if and only if all further events do not satisfy the predicate. A process runs this function on each new processing event to be informed when the substream has ended. Further, we say that function $S(E_{proc})$ provides a {\em notification} for an operator on the substream termination.
+Figure~\ref{general_guarantees} illustrates this notion. Terms $a,b,c,d...$ denote ordered processing events of a process $p$. The substream ends after event $c$. Note that $S(E_{proc})$ may be equal to $0$ for some elements after $c$. This is the property of the general guarantee: if $S(E_{proc})=1$, all subsequent elements do not satsify the predicate, but it is not necessarily the exact substream ``border''.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.50\textwidth]{pics/general-guarantee.pdf}
+  \caption{Substreams management: general guarantee}
+  \label{general_guarantees}
+\end{figure}
+
+A process can run this function on each new processing event to be informed when the substream has ended. Further, we say that function $S(E_{proc})$ provides a {\em notification} for an operator on the substream termination.
 
 \subsubsection{Strict guarantee}
 
-The guarantee that any new event will not satisfy the predicate is sufficient for many real-life problems, e.g., SPE can initiate process state pruning on such events. However, some problems require a more strict guarantee that the substream ends {\em exactly} after the last event. For example, epoch-based snapshotting protocol~\cite{2015arXiv150608603C, jacques2016consistent} requires notification that a process handles all elements from a specified epoch and nothing more to take the snapshot. If elements from different epochs are mixed, the snapshot can be inconsistent.
-
-To support such scenarios, function $S(E_{proc})$ should satsify the following condition:
+The guarantee that any new event will not satisfy the predicate is sufficient for many real-life problems, e.g., SPE can initiate process state pruning on such events. However, some problems require a more strict guarantee that the substream ends {\em exactly} after the last event. For example, epoch-based snapshotting protocol~\cite{2015arXiv150608603C, jacques2016consistent} requires notification that a process handles all elements from a specified epoch and nothing more to take the snapshot. If elements from different epochs are mixed, the snapshot can be inconsistent. To support such scenarios, function $S(E_{proc})$ should satsify the following condition:
 
 \begin{align*}
 & S(E_{proc}) = 1  \Longleftrightarrow \\
@@ -40,7 +47,16 @@ To support such scenarios, function $S(E_{proc})$ should satsify the following c
 & \sup E_{proc} = \inf_{e*} \forall e^{'} >_p e^{*} : \neg pred(m) 
 \end{align*}
 
-This condition allows process to determine the exact moment (processing event) that ``divides'' stream into substreams: all elements after the notification will not satisfy the predicate, but all previous elements satsify. To implement such function in practice, it is often required to buffer input events until some condition is fulfilled. Therefore, one may need to define custom order of events processing $R(e)$ as well:
+This condition allows a process to determine the exact moment (processing event) that ``divides'' stream into substreams: all elements after the notification will not satisfy the predicate, but all previous elements satisfy. Figure~\ref{strict_guarantees} illustrates the notion of the strict guarantee. As in the previous example, terms $a,b,c,d...$ denote ordered processing events of a process $p$. However, in this case, $S(E_{proc})=1$ right after the substream terminates and $S(E_{proc})=0$ for all previous events.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.50\textwidth]{pics/strict-guarantee.pdf}
+  \caption{Substreams management: strict guarantee}
+  \label{strict_guarantees}
+\end{figure}
+
+To implement such function in practice, it is often required to buffer input events until some condition is fulfilled. Therefore, one may need to define custom order of events processing $R(e)$ as well:
 
 \begin{align*}
 & R(e=<recv,m>): R(e=\langle recv, x\rangle) > R(e=\langle recv, y\rangle) \\
