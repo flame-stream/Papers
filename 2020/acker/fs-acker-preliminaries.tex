@@ -2,7 +2,7 @@
 
 \subsection{Stream processing}
 
-Typically, distributed stream processing engines are shared-nothing runtimes which continuously ingest input elements, transform them according to a logical dataflow graph, and deliver output elements. The logical dataflow graph consists of user-defined operators. Operators can be stateless or stateful: an output element may depend on the current state and the corresponding input element. A logical graph is mapped to a physical, distributed graph upon deployment. Commonly, all operators in the physical graph are partitioned among workers, i.e., a single logical operator can be deployed on multiple computational nodes. Further, we denote instances of logical operators as {\em processes}.
+Typically, distributed stream processing engines are shared-nothing runtimes which continuously ingest input elements, transform them according to a logical dataflow graph, and deliver output elements. The logical dataflow graph consists of user-defined operators. Operators can be stateless or stateful: an output element may depend on the current state and the corresponding input element. A logical graph is mapped to a physical, distributed graph upon deployment. Commonly, a single logical operator can be deployed on multiple computational nodes. Further, we denote physical instances of logical operators as {\em processes}.
 
 Distributes SPEs can be modeled~\cite{carbone2018scalable} as physical dataflow graph $G=\{\Pi,\mathcal{E}\}$, where $\Pi$ are processes (deployed operators) and $\mathcal{E} \subseteq \Pi \times \Pi$ are network channels between them, $c_{ij}=(p_i,p_j)\in \mathcal{E}; p_i,p_j \in \Pi$. Each process has input channels $I_p = \bigcup_{x \in \Pi} \{c_{xp} | (x,p) \in C\}$ and output channels $O_p = \bigcup_{x \in \Pi} \{c_{px} | (p,x) \in C\}$. Network channels state (all in-transit messages) is denoted as $M$. 
 
@@ -47,7 +47,7 @@ The guarantee that any new event will not satisfy the predicate is sufficient fo
 & \sup E_{proc} = \inf_{e*} \forall e^{'} >_p e^{*} : \neg pred(m) 
 \end{align*}
 
-This condition allows a process to determine the exact moment (processing event) that ``divides'' stream into substreams: all elements after the notification will not satisfy the predicate, but all previous elements satisfy. Figure~\ref{strict_guarantees} illustrates the notion of the strict guarantee. As in the previous example, terms $a,b,c,d...$ denote ordered processing events of a process $p$. However, in this case, $S(E_{proc})=1$ right after the substream terminates and $S(E_{proc})=0$ for all previous events.
+This condition allows a process to determine the exact moment (processing event) when the substream terminates: all elements after the notification will not satisfy the predicate, but all previous elements satisfy. Figure~\ref{strict_guarantees} illustrates the notion of the strict guarantee. As in the previous example, terms $a,b,c,d...$ denote ordered processing events of a process $p$. However, in this case, $S(E_{proc})=1$ right after the substream terminates and $S(E_{proc})=0$ for all previous events.
 
 \begin{figure}[htbp]
   \centering
@@ -69,7 +69,7 @@ To implement such function in practice, it is often required to buffer input eve
 
 The main idea behind the punctuations framework is to divide the stream into substreams by injection of special elements that bear predicate $pred(m)$. Punctuations are injected directly into a system as ordinary data elements by SPE or by external data producers. The injector promises that all further produced records do not satisfy the predicate. Hence, the punctuation itself defines the ``border'' of a substream.
 
-Each process of an SPE propogates a punctuation to all outgoing channels when it receives corresponding punctuations from all input channels. If a process receives punctuations from all inputs, it is guaranteed that it do not receive elements that satisfy the predicate further due to FIFO network channels. Therefore, function $S(E_{proc})$ for punctuations framework is the following:
+Processes withins SPE do not apply user-defined operators to punctuations. Instead, each process propogates a punctuation to all outgoing channels when it receives corresponding punctuations from all input channels. If a process receives punctuations from all inputs, it is guaranteed that it do not receive elements that satisfy the predicate further due to FIFO network channels. Therefore, function $S(E_{proc})$ for punctuations framework is the following:
 
 \begin{align*}
 & S_{punct}(E_{proc}) = \forall q \in I_p, \exists e \in E_{proc} : e = \langle recv,pred(m)\rangle_{qp}
@@ -81,6 +81,8 @@ To make this function satisfy the strict notifications guarantee, one needs to b
 & \exists q \in I_p, e = \langle recv,m \rangle >_p e^{'} = \langle recv,pred(m)\rangle_{qp} \Longrightarrow \\ 
 & R(e) > R(e^{*}= \langle recv,pred(m) \rangle_{q^{'}p}), \forall q^{'} \in I_p
 \end{align*}
+
+The formal proofs that function $S_{punct}(E_{proc})$ with the corresponding ordering satisfy general and strict guarantees are in the appendix~\ref{appendix:punctuations-proof}.
 
 \subsubsection{Discussion}
 
