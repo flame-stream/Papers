@@ -1,0 +1,29 @@
+\label{fs-acker-preliminaries}
+
+\subsection{Overview}
+
+\tracker\ framework bases on another idea of the propagation the fact that the substream ends. Instead of injecting special elements directly into the dataflow, we design a special agent (process) that:
+
+\begin{enumerate}
+    \item Receives signals that a substream terminated from data producers.
+    \item Watches for in-flight elements and if they belong to some substream.
+    \item Notifies dataflow processes when the substream ends {\em for them}, i.e., when they do not receive any elements which satisfy some predicate.
+\end{enumerate}
+
+The general scheme of the \tracker\ mechanism is shown in Figure~\ref{tracker-general}. 
+
+Before diving into implementation details, we should answer the following questions, as explained in the next subsection.
+
+{\bf Q1 How to organize monitoring of in-flight elements?} To notify processes that a substream ends, tracking agent should receive the corresponding signal from data producers and ensure that there are no in-flight elements which belong to the substream. 
+
+{\bf Q2 How to reveal the exact moment when the substream ends?} Unlike punctuations, \tracker notifications are completely async with dataflow elements, because they go through another network channel. Hence, dataflow items and notifications are not ordered that makes it hard to determine an exact event that finishes a substream.
+
+{\bf Q3 What are the functional and performance properties of \tracker?} \tracker\ framework is designed to eliminate the restrictions of punctuations framework. We should demonstrate that it is suitable for cyclic dataflows as well as can provide lower network overhead.
+
+
+\subsection{Discussion}
+
+\subsubsection{Answering Q1: How to organize monitoring of in-flight elements?}
+
+
+% To determine an exact event that finishes a substream, one can define an order between notifications and dataflow items.

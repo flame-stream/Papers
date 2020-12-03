@@ -69,6 +69,15 @@ To implement such function in practice, it is often required to buffer input eve
 
 The main idea behind the punctuations framework is to divide the stream into substreams by injection of special elements that bear predicate $pred(m)$. Punctuations are injected directly into a system as ordinary data elements by SPE or by external data producers. The injector promises that all further produced records do not satisfy the predicate. Hence, the punctuation itself defines the ``border'' of a substream.
 
+Figure~\ref{punctuations_scheme} illustrates the punctuations framework. Green elements indicate elements which belong to some substream, while red elements do not. As we can see, punctuations play the role of delimiter between elements of the substream and all further items.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.50\textwidth]{pics/punctuations-scheme.pdf}
+  \caption{Punctuations framework: an example}
+  \label{punctuations_scheme}
+\end{figure}
+
 Processes withins SPE do not apply user-defined operators to punctuations. Instead, each process propogates a punctuation to all outgoing channels when it receives corresponding punctuations from all input channels. If a process receives punctuations from all inputs, it is guaranteed that it do not receive elements that satisfy the predicate further due to FIFO network channels. Therefore, function $S(E_{proc})$ for punctuations framework is the following:
 
 \begin{align*}
