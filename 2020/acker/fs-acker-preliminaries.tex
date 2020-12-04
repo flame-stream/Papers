@@ -59,8 +59,25 @@ This condition allows a process to determine the exact moment (processing event)
 To implement such function in practice, it is often required to buffer input events until some condition is fulfilled. Therefore, one may need to define custom order of events processing $R(e)$ as well:
 
 \begin{align*}
-& R(e=<recv,m>): R(e=\langle recv, x\rangle) > R(e=\langle recv, y\rangle) \\
+& R(e=\langle recv,m\rangle): R(e=\langle recv, x\rangle) > R(e=\langle recv, y\rangle) \\
 & \Longleftrightarrow e=\langle proc,x,X_i\rangle >_p e=\langle proc,y,Y_i\rangle
+\end{align*}
+
+\subsubsection{Consistent notifications order}
+Some specific applications, including the mentioned earlier epoch-based snapshotting method and techniques for enforcing deterministic processing~\cite{we2018adbis} require an order of notifications to be coincident with the order of substreams endings. For example, if notifications are reordered, then snapshots for consecutive epochs can be inconsistent.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.50\textwidth]{pics/notifications-reordering.pdf}
+  \caption{An example of notifications reordering}
+  \label{notifications_reordering}
+\end{figure}
+
+Notifications reordering is illustrated in Figure~\ref{notifications_reordering}. Terms $a,b,c,d...$ denote ordered processing events of a process $p$. Despite the fact that substream containing events $a,b$ terminates earlier, the notification function $S_1(E_{proc})$ for this substream detects termination after the notification function $S_2(E_{proc})$ for the substream containing events $d,e$. More formally, notification functions $S_1(E_{proc})$, $S_2(E_{proc})$ for corresponding substreams defined by predicates $pred_1(m)$, $pred_2(m)$ are {\em consistently ordered} iff:
+
+\begin{align*}
+& \forall E_{proc}: S_2(E_{proc})=1 \wedge S_1(E_{proc})=0 \Longrightarrow  \\
+& \exists e=\langle recv, x\rangle > \sup E_{proc} : pred_1(x)
 \end{align*}
 
 \subsection{Punctuations framework}
@@ -91,10 +108,10 @@ To make this function satisfy the strict notifications guarantee, one needs to b
 & R(e) > R(e^{*}= \langle recv,pred(m) \rangle_{q^{'}p}), \forall q^{'} \in I_p
 \end{align*}
 
-The formal proofs that function $S_{punct}(E_{proc})$ with the corresponding ordering satisfy general and strict guarantees are in the appendix~\ref{appendix:punctuations-proof}.
+The punctuations framework provides consistent notification order by design because punctuations are naturally ordered with ordinary data elements within the processes. The formal proofs that function $S_{punct}(E_{proc})$ with the corresponding ordering satisfy general and strict guarantees as well as the proof that punctuations framework provides consistent notifications order are in the appendix~\ref{appendix:punctuations-proof}.
 
 \subsubsection{Discussion}
 
-While the punctuations approach is powerful as well as easy-to-implement, it has several limitations. In the punctuations framework, the information about the ending of a substream is propagated using ordinary data elements via the data flow network channels. It implies that punctuations are not applicable for cyclic dataflows because a process that receives elements from a cyclic channel will never receive punctuations from this channel~\cite{carbone2018scalable}.
+While the punctuations approach is powerful and easy-to-implement, it has several limitations. In the punctuations framework, the information about the ending of a substream is propagated using ordinary data elements via the data flow network channels. It implies that punctuations are not applicable for cyclic dataflows because a process that receives elements from a cyclic channel will never receive punctuations from this channel~\cite{carbone2018scalable}.
 
 The high network overhead forms another limitation. This method's amount of service traffic is $O(F||\Pi||^2)$, where $||\Pi||$ is the number of processes and $F$ is the frequency of punctuations injection. It is quadratic in the number of processes, as each process should propagate punctuations to all output channels. Such elements broadcasting may affect the throughput of an SPE. As we demonstrate further, the punctuation technique adds significant performance overhead on regular processing for small substreams (frequent punctuations injection).
