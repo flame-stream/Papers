@@ -12,7 +12,7 @@
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.50\textwidth]{pics/tracker-scheme.pdf}
+  \includegraphics[width=0.35\textwidth]{pics/tracker-scheme.pdf}
   \caption{\tracker\ framework: an example}
   \label{tracker_scheme}
 \end{figure}
@@ -21,7 +21,7 @@ The general scheme of the \tracker\ mechanism is shown in Figure~\ref{tracker_sc
 
 {\bf Q1 How to organize monitoring of in-flight elements?} To notify processes that a substream ends, the tracking agent should receive the corresponding signal from data producers and ensure no in-flight elements belong to the substream. 
 
-{\bf Q2 How to reveal the exact moment when the substream ends?} Unlike punctuations, \tracker\ notifications are completely async with dataflow elements because they go through another network channel. Hence, dataflow items and notifications are not ordered, making it hard to determine an exact event that finishes a substream.
+{\bf Q2 How to provide the consistent notifications order?} Unlike punctuations, \tracker\ notifications are completely async with dataflow elements because they go through another network channel. Hence, dataflow items and notifications are not ordered, making it hard to ensure that notifications order is consistent.
 
 {\bf Q3 What are the functional and performance properties of \tracker?} \tracker\ framework is designed to eliminate the restrictions of punctuations framework. We should demonstrate that it is suitable for cyclic dataflows as well as can provide lower network overhead.
 
@@ -45,7 +45,7 @@ Using this information along with signals from data producers, the tracking agen
 
 Note that the correctness of the general guarantee for \tracker\ depends on the implementation of the tracking agent detailed in the next section. The formal proofs that function $S_{tracker}(E_{proc})$ along with the \tracker\ implementation satisfy the general guarantee are in the appendix~\ref{appendix:tracker-proof}.
 
-\subsubsection{Answering Q2: How to reveal the exact moment when the substream ends?}
+\subsubsection{Answering Q2: How to provide the consistent notifications order?}
 
 \subsubsection{Answering Q3: What are the functional and performance properties of \tracker?}
 % To determine an exact event that finishes a substream, one can define an order between notifications and dataflow items.
