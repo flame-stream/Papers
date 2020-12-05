@@ -73,7 +73,7 @@ Some specific applications, including the mentioned earlier epoch-based snapshot
   \label{notifications_reordering}
 \end{figure}
 
-Notifications reordering is illustrated in Figure~\ref{notifications_reordering}. Terms $a,b,c,d...$ denote ordered processing events of a process $p$. Despite the fact that substream containing events $a,b$ terminates earlier, the notification function $S_1(E_{proc})$ for this substream detects termination after the notification function $S_2(E_{proc})$ for the substream containing events $d,e$. More formally, notification functions $S_1(E_{proc})$, $S_2(E_{proc})$ for corresponding substreams defined by predicates $pred_1(m)$, $pred_2(m)$ are {\em consistently ordered} iff:
+Notifications reordering in case of the general guarantee is illustrated in Figure~\ref{notifications_reordering}. Terms $a,b,c,d...$ denote ordered processing events of a process $p$. Despite the fact that substream containing events $a,b$ terminates earlier, the notification function $S_1(E_{proc})$ for this substream detects termination after the notification function $S_2(E_{proc})$ for the substream containing events $d,e$. More formally, notification functions $S_1(E_{proc})$, $S_2(E_{proc})$ for corresponding substreams defined by predicates $pred_1(m)$, $pred_2(m)$ are {\em consistently ordered} iff:
 
 \begin{align*}
 & \forall E_{proc}: S_2(E_{proc})=1 \wedge S_1(E_{proc})=0 \Longrightarrow  \\
