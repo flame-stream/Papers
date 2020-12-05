@@ -53,6 +53,21 @@ To make this function satisfy the strict notifications guarantee, one needs to b
 The correctness of the notification guarantees for \tracker\ depends on the implementation of the tracking agent detailed in the next section. The formal proofs that functions $S_{tracker}(E_{proc})$, $R_{tracker}(e)$ along with the \tracker\ implementation satisfy the general and strict guarantees are in the appendix~\ref{appendix:tracker-proof}.
 
 \subsubsection{Answering Q2: How to provide the consistent notifications order?}
+To provide a consistent order of notifications, one can define a coincident order between notifications and dataflow items. While in punctuations, such order is provided by design, because punctuations and ordinary data items go through the same FIFO network channels, in \tracker\, this order should be artificially defined.
+
+Assume that SPE assigns to input data elements special totally ordered labels $t(m)$, i.e. $\forall q\in \Pi,a\in A, e=\langle send,m\rangle_{aq}, \exists t(m)$. All data elements which are generated from the input item inherit the label: 
+
+$$\forall q\in \Pi, e=\langle proc,m,M_i\rangle_q, \forall x \in M_i : t(x) = t(m)$$.
+
+In this case, if the order on $t(x)$ coincides with the order of input elements, then \tracker\ can send the notifications according to this order as well. In other words, \tracker\ can reorder its notifications such that they will be consistent with the substreams order. An example of this concept is shown in Figure~\ref{tracker_ordering}. The substream containing element with $t(m)=1$ ends before the substream containing element with $t(m)=2$. As we can see, the order of notifications from \tracker\ coincides with $t(m)$.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.35\textwidth]{pics/tracker-ordering.pdf}
+  \caption{\tracker\ framework: notifications order}
+  \label{tracker_ordering}
+\end{figure}
+
+A vital question here is how to implement the assignment of ordered labels $t(m)$. One way is to use the {\em time oracle} service~\cite{???} which can provide totally ordered labels. A simple alternative implementation is detailed in the next section. 
 
 \subsubsection{Answering Q3: What are the functional and performance properties of \tracker?}
-% To determine an exact event that finishes a substream, one can define an order between notifications and dataflow items.
