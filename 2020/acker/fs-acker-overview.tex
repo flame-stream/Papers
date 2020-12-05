@@ -76,7 +76,7 @@ The change of the method of the propagation the fact that the substream ends all
 
 \begin{enumerate}
     \item {\bf Cyclic dataflows support.} Because the tracking agent is monitoring for the properties of in-flight elements without direct injection of service items into a dataflow, \tracker\ does not face the problem of throwing them through a cycle.
-    \item {\bf Low network overhead.} \tracker\ does not require frequent broadcasting of the elements to all computational nodes. As we show in the next section, the amount of service network needed for \tracker\ is $O(N+C)$, where $N$ is the length of a dataflow, and $C$ is the number of computational nodes. 
+    \item {\bf Low network overhead.} \tracker\ does not require regular broadcasting of the elements to all computational nodes. As we show in the next section, the amount of service network needed for \tracker\ is $O(D+||\Pi||)$, where $D$ is the depth of a dataflow (logical graph), and $||\Pi||$ is the number of computational nodes (processes). 
 \end{enumerate}
 
-At the same time, \tracker\ is able to provide both general and strict guarantees along with the consistent order of notifications. A limitation of the \tracker\ framework is a potentially more complex implementation than punctuations. The details of the straightforward implementation of the \tracker\ framework are discussed in the next section.
+At the same time, \tracker\ can provide both general and strict guarantees along with the consistent order of notifications. A limitation of the \tracker\ framework is a potentially more complex implementation than punctuations. The details of the straightforward implementation of the \tracker\ framework are discussed in the next section.
