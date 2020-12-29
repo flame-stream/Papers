@@ -1,0 +1,125 @@
+\documentclass[sigconf]{acmart}
+
+\usepackage{graphicx}
+\usepackage{algorithm} % for algorithms
+\usepackage{algpseudocode}
+\usepackage{booktabs} % For formal tables
+\usepackage{amsthm} % For claims
+\usepackage{bbm} % indicator function
+\usepackage{acmcopyright}
+
+
+% table
+\usepackage[flushleft]{threeparttable} % http://ctan.org/pkg/threeparttable
+\usepackage{booktabs,caption}
+
+\theoremstyle{remark}
+
+\settopmatter{printacmref=false, printccs=true, printfolios=true}
+\pagestyle{empty} % removes running headers
+
+\newcommand{\PicScale}{0.5}
+\newcommand {\FlameStream} {FlameStream}
+\begin{document}
+
+% \copyrightyear{2019} 
+% \acmYear{2019} 
+% \setcopyright{rightsretained} 
+% \acmConference[DEBS '19]{DEBS '19: The 13th ACM International Conference on Distributed and Event-based Systems}{June 24--28, 2019}{Darmstadt, Germany}
+% \acmBooktitle{DEBS '19: The 13th ACM International Conference on Distributed and Event-based Systems (DEBS '19), June 24--28, 2019, Darmstadt, Germany}\acmDOI{10.1145/3328905.3332514}
+% \acmISBN{978-1-4503-6794-3/19/06}
+
+\title {Towards SQL Query Optimization in Distributed Stream Processing}
+
+% \author{Artem Trofimov,$^ {1,2}$    Mikhail Shavkunov,$^3$    Sergey Reznick,$^4$     Nikita Sokolov,$^{5}$   Mikhail Yutman,$^3$ \\   Igor E. Kuralenok,$^1$    and  Boris Novikov$^ {3}$ }
+% \affiliation{%
+% \institution{$^1$JetBrains Research}
+% }
+% \affiliation{%
+% \institution{$^2$Saint Petersburg State University}
+% }
+% \affiliation{%
+% \institution{$^3$National Research University Higher School of Economics}
+% }
+% \affiliation{%
+% \institution{$^4$ Kofax}
+% }
+% \affiliation{%
+% \institution{$^5$ ITMO University}
+%   \city{St. Petersburg} 
+%   \country{Russia}
+% }
+% \email{\string{trofimov9artem, mv.shavkunov, sergey.reznick, faucct, myutman, ikuralenok\string}@gmail.com, borisnov@acm.org}
+
+\begin{abstract}
+
+Distributed stream processing is widely adopted for real-time data analysis and management. A common language for such applications is SQL that currently supports robust streaming analysis due to the introduction of time-varying relations and event time semantics. However, query optimization in state-of-the-art stream processing engines (SPEs) remains limited. While some SPEs can colocate operators on the same computational node to reduce network communication, in-flight query execution plan rewriting based on the data properties is not commonly applied. 
+
+In this work, we explore the main challenges that SPEs face during the adaptation of database-like optimization: retrieving and predicting data properties, execution graph migration, misfit of SPEs programming interfaces, etc. We propose a roadmap that covers an efficient implementation of SQL query optimization within state-of-the-art SPEs. We demonstrate that the proposed approach is promising within a simple real-world scenario.
+
+\end{abstract}
+
+% \begin{CCSXML}
+% \begin{CCSXML}
+% \begin{CCSXML}
+% <ccs2012>
+% <concept>
+% <concept_id>10002951.10002952.10002953.10010820.10003208</concept_id>
+% <concept_desc>Information systems~Data streams</concept_desc>
+% <concept_significance>500</concept_significance>
+% </concept>
+% <concept>
+% <concept_id>10002951.10003317.10003347.10003356</concept_id>
+% <concept_desc>Information systems~Clustering and classification</concept_desc>
+% <concept_significance>500</concept_significance>
+% </concept>
+% <concept>
+% <concept_id>10002951.10003227.10003351.10003446</concept_id>
+% <concept_desc>Information systems~Data stream mining</concept_desc>
+% <concept_significance>300</concept_significance>
+% </concept>
+% </ccs2012>
+% \end{CCSXML}
+
+% \ccsdesc[500]{Information systems~Data streams}
+% \ccsdesc[500]{Information systems~Clustering and classification}
+% \ccsdesc[300]{Information systems~Data stream mining}
+
+% \keywords{Data streams, text classification, reproducibility, exactly once}
+
+\maketitle
+
+\thispagestyle{empty}
+
+\section {Introduction}
+
+\section {Background and related work}
+
+\subsection{SQL optimization}
+
+\subsection{Streaming SQL dialect}
+
+\subsection{Streaming dataflows optimization}
+
+\section {A motivating example}
+
+\section {Challenges}
+
+\subsection{Fetching and predicting data statistics}
+
+\subsection{Statistics integration in query processing}
+
+\subsection{In-flight execution graph migration}
+
+\section {Roadmap}
+
+\section {Preliminary experiments}
+
+\section {Conclusion}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{../../bibliography/flame-stream}
+
+\end {document}
+
+\endinput
