@@ -53,9 +53,9 @@
 
 \begin{abstract}
 
-Distributed stream processing is widely adopted for real-time data analysis and management. A common language for such applications is SQL that currently supports robust streaming analysis due to the introduction of time-varying relations and event time semantics. However, query optimization in state-of-the-art stream processing engines (SPEs) remains limited. While some SPEs can colocate operators on the same computational node to reduce network communication, in-flight query execution plan rewriting based on the data properties is not commonly applied. 
+Distributed stream processing is widely adopted for real-time data analysis and management. SQL is becoming a common language for robust streaming analysis due to the introduction of time-varying relations and event time semantics. However, query optimization in state-of-the-art stream processing engines (SPEs) remains limited: runtime adjustments to execution plans are not applied. This fact restricts the optimization capabilities because SPEs lack the statistical data properties before query execution begins. Moreover, streaming queries are often long-lived, and these properties can be changed over time. 
 
-In this work, we explore the main challenges that SPEs face during the adaptation of database-like optimization: retrieving and predicting data properties, execution graph migration, misfit of SPEs programming interfaces, etc. We propose a roadmap that covers an efficient implementation of SQL query optimization within state-of-the-art SPEs. We demonstrate that the proposed approach is promising within a simple real-world scenario.
+Adaptive optimization, used in databases for queries with insufficient existing data statistics, can fit the streaming scenario. In this work, we explore the main challenges that SPEs face during the adjustment of adaptive optimization: retrieving and predicting statistical data properties, execution graph migration, misfit of SPEs programming interfaces, etc. We demonstrate the feasibility of the proposed approach within an extension of the Nexmark streaming benchmark and outline our further work on this topic.
 
 \end{abstract}
 
