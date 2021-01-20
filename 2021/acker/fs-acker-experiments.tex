@@ -90,42 +90,56 @@
 % \label{physical_graph}
 % \end{figure}
 
-The experiments examine the benefits of the proposed substreams management framework and show how it performs within several real-world scenarios compared to the state-of-the-art alternatives.
+The experiments examine the general performance properties of the proposed substreams management framework and show how it operates within several real-world scenarios. As a baseline approach, we utilize the punctuations-based method employed in many state-of-the-art stream processing systems such as Flink~\cite{Carbone:2017:SMA:3137765.3137777}, Storm~\cite{apache:storm:state}, Heron~\cite{Kulkarni:2015:THS:2723372.2742788}, IBM Streams~\cite{jacques2016consistent}, etc. To the best of our knowledge, the punctuation framework is the only existing general-purpose substreams management technique.
 
-{\noindent \bf Experimental setup.} To have an ability to compare various techniques within the same streaming engine, we implemented both \tracker\ and punctuation-based methods on the top of an open-source distributed streaming system called \FlameStream. The  \FlameStream\ has similar to state-of-the-art stream processing systems (Flink, Storm, etc.) functionality and use-cases. We did not exploit any system-specific features during the implementation of substream management methods.
+\subsection{Setup}
+
+To mitigate the performance bias by the different SPEs implementations, we compare both \tracker\ and punctuations within the same streaming engine. We implemented both methods on top of an open-source distributed streaming engine called \FlameStream. This SPE has similar to state-of-the-art stream processing systems (Flink, Storm, etc.) functionality and use-cases. We did not exploit any system-specific features during the implementation of substream management methods.
 
 We run all experiments on a cluster of 20 virtual machines with a single CPU and 4 GB RAM from one of the biggest cloud providers. Each node runs a \FlameStream\ worker. We deploy \tracker\ on nodes excluded from regular processing: a single one for centralized configuration and two for distributed configuration. 
 % If it is not specified, the number of machines used in an experiment is 20, the graph size is 30, and the granularity is 10. 
 
 We divided our evaluation of \tracker\ framework into two parts. Each of these parts encapsulates logically connected experiments that examine the performance of \tracker\ mechanism in various perspectives.
 
-{\noindent \bf Overall performance.} In Section~\ref{overhead}, we demonstrate the performance of the \tracker\ framework itself. First, we measure the amount of extra network traffic for different cluster sizes, the number of nodes in a logical graph, and the sizes of substreams. We also show throughput overhead on regular processing for a fixed streaming setup. Second, we evaluate notifications latency, i.e., the time interval between substream ends and the corresponding notifications are received by subscribers.  Eventually, we demonstrate \tracker\ scalability due to its distributed implementation. 
+\subsubsection{Overall performance scenarios}
 
-As a baseline approach, we utilize the punctuations-based method employed in many state-of-the-art stream processing systems such as Flink~\cite{Carbone:2017:SMA:3137765.3137777}, Storm~\cite{apache:storm:state}, Heron~\cite{Kulkarni:2015:THS:2723372.2742788}, IBM Streams~\cite{jacques2016consistent}, etc. To the best of our knowledge, the punctuation framework is the only existing general-purpose substreams management technique.
+% {\noindent \bf Overall performance scenarios.} 
 
-{\noindent \bf Real-world scenarios.} Section~\ref{real-world-scenarios} contains the evaluation of \tracker\ applied to several real-world problems. The first problem is state garbage collection. Often, the state maintained by streaming operators is divided by keys. When some keys become out-of-date (e.g., data source promises that it will never send elements with such keys further), the corresponding state should be removed. Otherwise, a streaming operator may run out-of-memory. A simple but efficient solution is to apply a fixed-sized LRU cache that spills outdated data on disk. We compare two strategies for freeing keys in the cache:
+In Section~\ref{overhead}, we demonstrate the performance of the \tracker\ framework itself. First, we measure the amount of extra network traffic for different cluster sizes, the number of nodes in a logical graph, and the substream sizes. We also show throughput overhead on regular processing for a fixed streaming setup. Second, we evaluate notifications latency, i.e., the time interval between substream ends and the corresponding notifications are received by subscribers.  Eventually, we demonstrate \tracker\ scalability due to its distributed implementation. 
+
+\subsubsection{Real-world scenarios}
+
+% {\noindent \bf Real-world scenarios.} 
+
+Section~\ref{real-world-scenarios} contains the evaluation of \tracker\ applied to several real-world problems. The first problem is windowed join. Join operation is widely used in online analytics scenarios. Windowed join adapts this operation for streaming: join is computed independently for the finite amount of elements from continuous time intervals called {\em windows}~\cite{Begoli:2019:OSR:3299869.3314040}. The operation should receive the notification that there are no more elements upstream that belong to this interval to produce a regular result. Within this scenario, we compare punctuations and \tracker\ approaches by the processing throughput and latency. We also examine various window sizes.
+
+The second scenario is a state garbage collection. Often, the state maintained by streaming operators is divided by keys. When some keys become out-of-date (e.g., data source promises that it will never send elements with such keys further), the corresponding state should be removed. Otherwise, a streaming operator may run out-of-memory~\cite{Tucker:2003:EPS:776752.776780}. A simple but efficient solution is to apply a fixed-sized LRU cache that spills outdated data on disk. We compare two strategies for freeing keys in the cache:
 \begin{enumerate}
     \item Free keys using some pre-defined TTL.
     \item Free keys on notifications by \tracker\ and punctuations that there will be no more elements with such keys.
 \end{enumerate}
 As a performance metric, we use the cache misses ratio.
 
-The second scenario is hot keys detection. The distribution of keys of data elements that entering SPE can be skewed, and some (hot) keys can occur very often. In this case, load distribution between computational nodes may be imbalanced, and the throughput of an SPE may decrease~\cite{liao2019efficient}. If SPE is able to detect hot keys, it can forbid entering elements with such keys or rebalance load distribution. In this scenario, we evaluate \tracker\ latency and accuracy of hot keys detection. As a baseline approach, we use a naive method that counts keys occurrences independently on each computational node.
+% The second scenario is hot keys detection. The distribution of keys of data elements that entering SPE can be skewed, and some (hot) keys can occur very often. In this case, load distribution between computational nodes may be imbalanced, and the throughput of an SPE may decrease~\cite{liao2019efficient}. If SPE can detect hot keys, it can forbid entering elements with such keys or rebalance load distribution. In this scenario, we evaluate \tracker\ latency and accuracy of hot keys detection. As a baseline approach, we use a naive method that counts keys occurrences independently on each computational node.
 
 The third problem is state snapshotting. Many state-of-the-art stream processing systems, including Flink~\cite{Carbone:2017:SMA:3137765.3137777}, Storm~\cite{Toshniwal:2014:STO:2588555.2595641}, and Samza~\cite{Noghabi:2017:SSS:3137765.3137770}, use state snapshotting protocol~\cite{2015arXiv150608603C} for fault tolerance that requires substreams management. Although this technique is popular, it leads to latency spikes that depend on the latency of notifications that a substream (epoch) ends. In our experiments, we compare latency spikes for punctuations and \tracker\ substreams management frameworks within this state snapshotting protocol.
 
-{\noindent \bf Workloads.} An execution graph for the overall \tracker\ evaluation should be flexible in order to analyze performance with less bias on a specific task. We use synthetic directed graphs of various lengths. All vertices pass an input element to the next operation. All items are re-partitioned (round-robin) before each vertex, as it is shown in Figure~\ref{physical_graph}. This setup does not induce possible overhead by heavy computations while covering many realistic scenarios. Graphs with few vertices (under 30) may fit almost any acyclic streaming pipeline~\cite{akidau2018streaming}. On the other hand, more massive pipelines can be considered as flattened iterative dataflows such as PageRank or Connected Components~\cite{Murray:2013:NTD:2517349.2522738, xu2016efficient}.
+\subsubsection{Workloads}
+
+% {\noindent \bf Workloads.} 
+
+An execution graph for the overall \tracker\ evaluation should be flexible in order to analyze performance with less bias on a specific task. We use synthetic directed graphs of various lengths. All vertices pass an input element to the next operation. All items are re-partitioned (round-robin) before each vertex, as shown in Figure~\ref{physical_graph}. This setup does not induce possible overhead by heavy computations while covering many realistic scenarios. Graphs with few vertices (under 30) may fit almost any acyclic streaming pipeline~\cite{akidau2018streaming}. On the other hand, more massive pipelines can be considered as flattened iterative dataflows such as PageRank or Connected Components~\cite{Murray:2013:NTD:2517349.2522738, xu2016efficient}.
 
 For the practical scenarios, we apply two workloads that are representative for todays stream processing problems. The first is breadth-first-search computation on a big social graph. This execution graph can be used for social networks near real-time analysis~\cite{wang2011understanding}. Another application is heuristic search algorithms applied in motion planning for robotics~\cite{sud2007real}. As a dataset for this execution graph, we employ a large social graph provided by Twitter~\cite{kwak2010twitter}. This workload has several distinctive features:
 \begin{enumerate}
     \item The execution graph is cyclic. It allows us to evaluate the performance of \tracker\ for cyclic dataflows, where punctuations are inapplicable.
-    \item As we demonstrated in Section~\ref{intro-examples}, the state of this dataflow is growing fast, so it can easily run out-of-memory without garbage collection of outdated keys.
+    \item As we demonstrated in Section~\ref{intro-examples}, the state of this dataflow is growing fast, so it can quickly run out-of-memory without garbage collection of outdated keys.
     \item Vertices of a social graph are used as keys in this dataflow. Some of them may have significantly more edges than others. Therefore, the load distribution can be imbalanced, and an SPE may require hot keys detection.
 \end{enumerate}
 
-The second workflow is near real-time text classification. It has a wide range of applications, including detection of emerging news and current user interests, suspicious traffic analysis, spam filtering, etc~\cite{webirte}. As a dataset, we used an open corpus of news articles from Russian media resource lenta.ru~\cite{lentaru}. This workload has the following properties:
+The second workflow is near real-time text classification. It has a wide range of applications, including detection of emerging news and current user interests, suspicious traffic analysis, spam filtering, etc~\cite{webirte}. As a dataset, we used an open corpus of news articles from the Russian media resource lenta.ru~\cite{lentaru}. This workload has the following properties:
 \begin{enumerate}
-    \item The state of this dataflow is growing fast as well, so it also requires keys garbage collection.
+    \item The state of this dataflow is growing fast, so it also requires keys garbage collection.
     \item The dataflow is acyclic so that we can compare \tracker\ with punctuations within garbage collection and state snapshotting tasks.
     \item This dataflow uses TF-IDF as a feature for text classification. Words are used as keys to compute IDF. Hence, the load distribution can be imbalanced due to Zipf law. This scenario may also require hot keys detection in order to rebalance load more optimal. 
 \end{enumerate}
@@ -154,11 +168,11 @@ The second workflow is near real-time text classification. It has a wide range o
 
 \subsection{Real-world scenarios} \label{real-world-scenarios}
 
+\subsubsection{Windowed join}
+
 \subsubsection{State garbage collection}
 
 \subsubsection{State snapshotting}
-
-\subsubsection{Hot keys detection}
 
 % \begin{figure}
 % \centering
