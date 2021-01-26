@@ -49,7 +49,7 @@ As we mentioned above, tracking agent has enough information to detect the soft 
 & S_{tracker}(E_{proc}) = \exists e^{n} \in E_{proc} : e^{n} = \langle recv,pred(m)\rangle_{tracker,p}
 \end{align*}
 
-To make this function satisfy the firm notifications guarantee, one needs to block an input channel if the element that does not belong to the substream arrives. After the notification from \tracker\ arrives, the channel is unblocked. This technique is quite similar to the punctuations alignment, mentioned in the previous section. The processing order function $R_{tracker}(e)$ for this case should satisfy the following condition:
+To make this function satisfy the firm notifications guarantee, one needs to block an input channel if the element that does not belong to the substream arrives. After the notification from the tracking agent arrives, the channel is unblocked. This technique is quite similar to the punctuations alignment, mentioned in the previous section. The processing order function $R_{tracker}(e)$ for this case should satisfy the following condition:
 
 \begin{align*}
 & \exists q \in I_p, e = \langle recv,m \rangle_{q,p}: \neg pred(m) \Longrightarrow \\ 
@@ -82,7 +82,7 @@ The change of the method of the propagation the fact that the substream ends all
 
 \begin{enumerate}
     \item {\bf Cyclic dataflows support.} Because the tracking agent is monitoring for the properties of in-flight elements without direct injection of service items into a dataflow, \tracker\ does not face the problem of throwing them through a cycle.
-    \item {\bf Low network overhead.} \tracker\ does not require regular broadcasting of the elements to all computational nodes. As we show in the next section, the amount of service network needed for \tracker\ is $O(D+||\Pi||)$, where $D$ is the depth of a dataflow (logical graph), and $||\Pi||$ is the number of computational nodes (processes). 
+    \item {\bf Low network overhead.} \tracker\ does not require regular broadcasting of the elements to all computational nodes, because all service traffic goes through a single agent. Hence, the amount of extra network traffic needed for \tracker\ is $O(||\Pi||)$, where $||\Pi||$ is the number of computational nodes (processes). 
 \end{enumerate}
 
 At the same time, \tracker\ can provide both soft and firm bound guarantees along with the consistent order of notifications. A limitation of the \tracker\ framework is a potentially more complex implementation than punctuations. The details of the straightforward implementation of the \tracker\ framework are discussed in the next section.

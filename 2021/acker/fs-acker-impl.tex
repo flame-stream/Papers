@@ -1,8 +1,8 @@
 \label {fs-acker-impl}
 
-In the previous section, we introduced a general schema of the \tracker\ framework. In this section, we deepen into its implementation details. We describe the in-flight elements monitoring mechanism and explore its properties. We detail the spawn technique for the substream end notifications. After that, we focus on the single node implementation and local agent optimization. Distributed implementation of the tracking agent concludes this part.
+In the previous section, we introduced a general schema of the \tracker\ framework. In this section, we deepen into its implementation details. We describe and explore the properties of the mechanism that produces the bound notifications and. Following this, the technique to achieve consistent notifications order is detailed. After that, we focus on the single node implementation and local agent optimization. Distributed implementation of the tracking agent concludes this part.
 
-\subsection{Monitoring of in-flight elements}
+\subsection{Bound guarantees notifications}
 
 As we stated earlier, each process sends to tracking agent the following reports about each sending or receiving event $e = <action,m>$:
 \begin{enumerate}
@@ -11,10 +11,10 @@ As we stated earlier, each process sends to tracking agent the following reports
     \item process (or {\em segment}) identifier.
 \end{enumerate}
 
-The tracking agent aggregates this information into the table illustrated in Table~\ref{tracker-table-simple}. In this table, for each predicate, there is information if a {\em graph segment} contains in-flight elements satisfying the predicate. Segments are subgraphs that incapsulate cycles. Substream end notifications can be sent for a subgraph if all upstream subgraphs do not contain the corresponding elements. The substream ends for the whole graph if all segments do not contain elements satisfying the prodicate~\footnote{Data source should also guarantee that it will not spawn any elements from this substream}. Therefore, the notifications for predicates $h(x)$ and $z(x)$ should be generated.
+The tracking agent aggregates this information into the table illustrated in Table~\ref{tracker-table-simple}. Tracking agent builds for each predicate an indicator if a {\em graph segment} contains in-flight elements satisfying the predicate. Segments are subgraphs that incapsulate cycles. Soft substream end notifications can be sent for a subgraph if all upstream subgraphs do not contain the corresponding elements. The substream ends for the whole graph if all segments do not contain elements satisfying the prodicate~\footnote{Data source should also guarantee that it will not spawn any elements from this substream}. Therefore, the soft bound notifications for predicates $h(x)$ and $z(x)$ should be generated.
 
 \begin{table}[htbp]
-\caption{\tracker\ table: an example}
+\caption{\tracker\ table: a general example}
   \label{tracker-table-simple}
   \centering
   \begin{tabular}{|c|c|c|>{\bfseries}c|} 
@@ -29,30 +29,51 @@ The tracking agent aggregates this information into the table illustrated in Tab
   \end{tabular}
 \end{table}
 
-A graph shown in Figure~\ref{fig:tracker-acker-comparison} illustrates the notion of segments. This graph has two segments: $A$ and $B$. Note that according to Table~\ref{tracker-table-simple}, a substream end notification for predicate $q(x)$ can be spawn for a segment $A$, but not for a segment $B$. This behavior is similar to punctuations: notifications can be spawned earlier for the upstream processes.
+A graph shown in Figure~\ref{fig:tracker-acker-comparison} illustrates the notion of segments. This graph has two segments: $A$ and $B$. Note that according to Table~\ref{tracker-table-simple}, a substream end notification for predicate $q(x)$ can be sent for a segment $A$, but not for a segment $B$. This behavior is similar to punctuations: notifications can be spawned earlier for the upstream processes.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.3\textwidth]{pics/graph-segments.pdf}
+  \includegraphics[width=0.3\textwidth]{pics/segments-example.pdf}
   \caption{Graph segmentation example}
   \label{fig:tracker-acker-comparison}
 \end{figure}
 
-% \begin{table}
-% \caption{\tracker\ table}
-%   \label{tracker-table-xor}
-%   \centering
-%   \begin{tabular}{|c|c|c|c|c|} 
-%     \hline
-%     Notified & Predicate & Segment & Local XOR & XOR  \\ \hline \hline
-%     \multirow{2}{*}{\checkmark} & \multirow{2}{*}{h(x)} & A & 000 & \multirow{2}{*}{000} \\ \cline{3-4}
-%     & & B & 000 & \\ \hline
-%     \multirow{2}{*}{} & \multirow{2}{*}{q(x)} & A & 000 & \multirow{2}{*}{110} \\ \cline{4-4}
-%     & & B & 110 & \\ \hline
-%     \multirow{2}{*}{\checkmark} & \multirow{2}{*}{z(x)} & A & 000 & \multirow{2}{*}{000} \\ \cline{3-4}
-%     & & B & 000 & \\ \hline
-%   \end{tabular}
-% \end{table}
+There are several possible methods to build the indicator that the segment contains elements from a substream using the reports from processes. Our implementation uses the trick applied in Apache Storm to monitor the completeness of processing~\cite{apache:storm:acker}. 
+
+Each report is labeled by a random number $X$, and this number is the same for the send action and the corresponding receive action. This trick makes a ``link'' in the reports chain and guarantees that there are no in-flight elements satisfying predicate $h(x)$ if and only if each report with $h(x)=1$ and a corresponding value $X$ is forwarded to the tracking agent exactly twice.
+
+The latter condition can be easily checked by the tracking agent using XOR operation for all numbers received from the chain, which will turn into 0. The result of the XOR operation can accidentally become zero, but the probability of this event is controlled by the length of the random number $X$ so that it can be neglected in practice~\cite{apache:storm:acker}.
+
+Figure~\ref{fig:tracker-reports} illustrates the reports with random numbers. The elements satisfying a predicate $h(x)$ flow through a dataflow. The first process generates an output and sends the report with $X=5$. The corresponding receiving report by the second process also has $X=5$ because this process receives the element from the first one. The second process sends a new element that satisfies $h(x)$ further, and the new report with $X=12$ is produced. The third operator receives this element and also produces a report with $X=12$. If there are no more elements such that $h(x)=1$, then we can send notification about substream defined by $h(x)$ ends because {\em 5 XOR 5 XOR 12 XOR 12 = 0}. 
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.3\textwidth]{pics/tracker-segments-example.pdf}
+  \caption{Reports example}
+  \label{fig:tracker-reports}
+\end{figure}
+
+Table~\ref{tracker-table-xor} illustrates the actual \tracker\ table for the mentioned technique. All reports from processes are grouped by the satisfying predicate and the segment. Random numbers from these reports are XORed into the result shown in columns {\em Segment XOR} and {\em XOR}. If the XOR value is equal to 0, then the tracking agent can send the soft bound notification for the corresponding predicate.
+
+\begin{table}[htbp]
+\caption{\tracker\ table: an example with XORing technique}
+  \label{tracker-table-xor}
+  \centering
+  \begin{tabular}{|c|c|c|>{\bfseries}c|>{\bfseries}c|} 
+    \hline
+    Notified & Predicate & Segment & Segment XOR & XOR  \\ \hline \hline
+    \multirow{2}{*}{\checkmark} & \multirow{2}{*}{h(x)} & A & 000 & \multirow{2}{*}{000} \\ \cline{3-4}
+    & & B & 000 & \\ \hline
+    \multirow{2}{*}{} & \multirow{2}{*}{q(x)} & A & 000 & \multirow{2}{*}{110} \\ \cline{4-4}
+    & & B & 110 & \\ \hline
+    \multirow{2}{*}{\checkmark} & \multirow{2}{*}{z(x)} & A & 000 & \multirow{2}{*}{000} \\ \cline{3-4}
+    & & B & 000 & \\ \hline
+  \end{tabular}
+\end{table}
+
+As we described earlier, to ensure the firm notifications guarantee, one needs to block an input channel of a process if the element that does not belong to the substream arrives. After the notification from the tracking agent arrives, the channel is unblocked.
+
+The amount of service network needed for \tracker\ is $O(||\Pi||)$, where $||\Pi||$ is the number of processes because all processes send reports to the tracking agent and the tracking agent sends notifications back to the processes. Therefore, traffic goes through a single agent without broadcasts between all processes. Further, we demonstrate how to make this agent distributed while keeping the same amount of extra traffic.
 
 % \subsection{Consistent notifications order}
 
