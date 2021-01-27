@@ -2,7 +2,7 @@
 
 In the previous section, we introduced a general schema of the \tracker\ framework. In this section, we deepen into its implementation details. We describe and explore the properties of the mechanism that produces the bound notifications and. Following this, the technique to achieve consistent notifications order is detailed. After that, we focus on the single node implementation and local agent optimization. Distributed implementation of the tracking agent concludes this part.
 
-\subsection{Bound guarantees notifications}
+\subsection{Bound guarantees}
 
 As we stated earlier, each process sends to tracking agent the following reports about each sending or receiving event $e = <action,m>$:
 \begin{enumerate}
@@ -75,23 +75,41 @@ As we described earlier, to ensure the firm notifications guarantee, one needs t
 
 The amount of service network needed for \tracker\ is $O(||\Pi||)$, where $||\Pi||$ is the number of processes because all processes send reports to the tracking agent and the tracking agent sends notifications back to the processes. Therefore, traffic goes through a single agent without broadcasts between all processes. Further, we demonstrate how to make this agent distributed while keeping the same amount of extra traffic.
 
-% \subsection{Consistent notifications order}
+\subsection{Consistent notifications order}
 
-% \begin{table}
-% \caption{\tracker\ table for consistent notifications order}
-%   \label{tracker-table-oder}
-%   \centering
-%   \begin{tabular}{|c|c|>{\bfseries}c|c|c|c|} 
-%     \hline
-%     Notified & Predicate & t(x) & Segment & Local XOR & XOR  \\ \hline \hline
-%     \multirow{2}{*}{\checkmark} & \multirow{2}{*}{h(x)} & \multirow{2}{*}{1} & A & 000 & \multirow{2}{*}{000} \\ \cline{4-5}
-%     & & & B & 000 & \\ \hline
-%     \multirow{2}{*}{} & \multirow{2}{*}{q(x)} & \multirow{2}{*}{2} & A & 000 & \multirow{2}{*}{110} \\ \cline{4-5}
-%     & & & B & 110 & \\ \hline
-%     \multirow{2}{*}{blocked} & \multirow{2}{*}{z(x)} & \multirow{2}{*}{3} & A & 000 & \multirow{2}{*}{000} \\ \cline{4-5}
-%     & & & B & 000 & \\ \hline
-%   \end{tabular}
-% \end{table}
+To achieve consistent order of notifications, we need to define $t(x), x\in M$ such that the order on $t(x)$ coincides with the order of input elements. In this case, all reports that processes send to the tracking agent should be labeled by the $t(x)$. In turn, the tracking agent sends the notifications according to the order on $t(x)$.
+
+Table~\ref{tracker-table-oder} illustrates the \tracker\ table in case of consistent notifications order. Column {\em min t(x)} indicates the minimal $t(x)$ among the elements that satisfy the corresponding predicate. The tracking agent sends notifications for the substream if the $XOR$ value is 0 and all substreams that contain elements with less {\em min t(x)} have finished (notifications has been produced). Therefore, notification for the substream defined by the predicate $h(x)$ is not sent until the notification for the predicate $q(x)$ is generated. 
+
+\begin{table}[htbp]
+\caption{\tracker\ table: an example with consistent notifications order}
+  \label{tracker-table-oder}
+  \centering
+  \begin{tabular}{|c|c|>{\bfseries}c|c|} 
+    \hline
+    Notified & Predicate & min t(x) &  XOR  \\ \hline \hline
+    \multirow{2}{*}{waits for q(x) finish} & \multirow{2}{*}{h(x)} & \multirow{2}{*}{5} & \multirow{2}{*}{000} \\
+    & & & \\ \hline
+    \multirow{2}{*}{} & \multirow{2}{*}{q(x)} & \multirow{2}{*}{4} & \multirow{2}{*}{110} \\
+    & & & \\ \hline
+    \multirow{2}{*}{\checkmark} & \multirow{2}{*}{z(x)} & \multirow{2}{*}{1} & \multirow{2}{*}{000} \\
+    & & & \\ \hline
+  \end{tabular}
+\end{table}
+
+If input elements arrive through a single node, $t(x)$ can denote the monotonic system time of the element $x$ arrival. If there are multiple source processes, one can use time oracle agent~\cite{10.14778/3055330.3055335} as a service for generation a monotonic sequence of unique timestamps. However, in this case, there is a need to manage one more subsystem.
+
+A simple technique to build $t(x)$ without extra agents bases on systematic synchronization of the system clocks. Assume that clock differences are no more than some fixed $\delta$, which we reference as synchronization slack. Let $\tau(x)$ be precise physical time of input data item $x$ arrival, and $s(x)$ be local system time of the source node where $x$ arrived. The true order of events $\tau(d_1) > \tau(d_2)$ coming from different sources can be sometimes restored by their system timestamps $s(d_1)$ and $s(d_2)$. If these timestamps differ more than time synchronization slack, then the order is clear: $s(d_1) > s(d_2) + \delta \Rightarrow \tau(d_1) > \tau(d_2)$.
+
+This fact allows us to define $t(x)$ such that $t(x) = [s(x) / \delta]$. This way we make $t(x)$ less precise, but this trick gives us an ability to compare global time associated by different source nodes. If $t(x_1)$ is greater by one than the $t(x_2)$ then their order is defined even if they arrived from different source nodes:  $t(x_1) > t(x_2) + 1 \Rightarrow \tau(x_1) > \tau(x_2)$. Therefore, the order on $t(x)$ coincides with the order of input elements, so it is suitable for the defined problem. Here is the summary of the mechanism that ensures consitent order notifications:
+\begin{enumerate}
+    \item On receiving of input item, source node gets the system timestamp
+    \item The system timestamp is shrunk up to synchronization slack (practically we achieve 10ms slack)
+    \item Each report for the tracking agent is labeled by the result of $t(x)$
+    \item Tracking agent sends bound notifications according to the order on $t(x)$
+\end{enumerate}
+
+% To make our system tolerant to the time difference between sources, we systematically synchronize the system clocks of them. We assume that clock differences are no more than some fixed $\delta$, which we reference as synchronization slack.
 
 % \subsection{Elements ordering}
 % In Section~\ref{sec:acker-analysis}, we have introduced the notion of \textit{global time}, without details of its practical implementation. One can use time oracle agent~\cite{10.14778/3055330.3055335} to generate a monotonic sequence of unique timestamps. However, in this case, the system will have a single point of failure. 
