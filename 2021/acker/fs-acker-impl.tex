@@ -1,6 +1,6 @@
 \label {fs-acker-impl}
 
-In the previous section, we introduced a general schema of the \tracker\ framework. In this section, we deepen into its implementation details. We describe and explore the properties of the mechanism that produces the bound notifications and. Following this, the technique to achieve consistent notifications order is detailed. After that, we focus on the single node implementation and local agent optimization. Distributed implementation of the tracking agent concludes this part.
+In the previous section, we introduced a general schema of the \tracker\ framework. In this section, we deepen into its implementation details. We describe and explore the properties of the tracking agent that produces the bound notifications. After that, the technique to achieve consistent notifications order is detailed. Distributed implementation of the tracking agent concludes this part.
 
 \subsection{Bound guarantees}
 
@@ -73,7 +73,11 @@ Table~\ref{tracker-table-xor} illustrates the actual \tracker\ table for the men
 
 As we described earlier, to ensure the firm notifications guarantee, one needs to block an input channel of a process if the element that does not belong to the substream arrives. After the notification from the tracking agent arrives, the channel is unblocked.
 
-The amount of service network needed for \tracker\ is $O(||\Pi||)$, where $||\Pi||$ is the number of processes because all processes send reports to the tracking agent and the tracking agent sends notifications back to the processes. Therefore, traffic goes through a single agent without broadcasts between all processes. Further, we demonstrate how to make this agent distributed while keeping the same amount of extra traffic.
+Due to the XOR operation's commutative nature, we can optimize tracking agent incoming traffic by aggregating reports locally within the processes. For each process, we introduce a {\em local tracking agent} component. It serves as a mediator between the process and the global agent, buffering the outgoing reports and flushing them periodically. 
+
+The flushing window is the parameter that allows us to balance between the notifications latency and the service traffic. Note that substreams last a finite time period by definition, so we assume that each process sends aggregated reports a constant number of times that does not depend on the number of substreams and processes. Therefore, the amount of extra network traffic for the reports is $O(||\Pi||)$, so the total estimation with the overhead on the notifications is $O(K||\Pi||)$.
+
+% The amount of service network needed for \tracker\ is $O(||\Pi||)$, where $||\Pi||$ is the number of processes because all processes send reports to the tracking agent and the tracking agent sends notifications back to the processes. Therefore, traffic goes through a single agent without broadcasts between all processes. Further, we demonstrate how to make this agent distributed while keeping the same amount of extra traffic.
 
 \subsection{Consistent notifications order}
 
@@ -108,6 +112,10 @@ This fact allows us to define $t(x)$ such that $t(x) = [s(x) / \delta]$. This wa
     \item Each report for the tracking agent is labeled by the result of $t(x)$
     \item Tracking agent sends bound notifications according to the order on $t(x)$
 \end{enumerate}
+
+\subsection{Distributed tracking agent}
+
+As the tracking agent accumulates all the service traffic from the entire system, it may become a bottleneck. To deal with this problem, we introduce a distributed version of the tracking agent.
 
 % To make our system tolerant to the time difference between sources, we systematically synchronize the system clocks of them. We assume that clock differences are no more than some fixed $\delta$, which we reference as synchronization slack.
 
