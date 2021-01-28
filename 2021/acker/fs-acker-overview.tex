@@ -2,7 +2,9 @@
 
 \subsection{Overview}
 
-\tracker\ framework is designed to fit small substreams and cyclic dataflows. It bases on another idea of the propagation the fact that the substream ends. Instead of injecting special elements directly into the dataflow, we design a special agent (process) that:
+A substream management system should inform all processes that a substream ends, so the amount of extra traffic cannot be lower than $O(||\Pi||)$. To achieve this lower bound, one can apply an additional agent (process) that receives information about substreams from processes and send them back bound notifications. 
+
+In this case, the fact that substream ends is propagated through this agent without broadcasting between processes, so the amount of extra traffic can be linear by the number of processes. Such propagation method is suitable for cyclic dataflows because there is no need to forward service traffic through the cycles. Therefore, we design a {\em tracking agent} that:
 
 \begin{enumerate}
     \item Receives signals that a substream terminated from data producers.
@@ -10,14 +12,9 @@
     \item Notifies dataflow processes when the substream ends {\em for them}, i.e., when they do not receive any elements which satisfy some predicate.
 \end{enumerate}
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.35\textwidth]{pics/tracker-scheme.pdf}
-  \caption{\tracker\ framework: an example}
-  \label{tracker_scheme}
-\end{figure}
+% \tracker\ framework is designed to fit small substreams and cyclic dataflows. It bases on another idea of the propagation the fact that the substream ends. Instead of injecting special elements directly into the dataflow, 
 
-The general scheme of the \tracker\ mechanism is shown in Figure~\ref{tracker_scheme}. Special (possibly distributed) {\em tracking agent} receives signals from data sources, fetches information about in-flight elements, and then decides to send notifications about substream end. Before diving into implementation details, we should answer the following questions regarding \tracker\ framework, as explained in the next subsection.
+The general scheme of the \tracker\ mechanism is shown in Figure~\ref{tracker_scheme}. Special (possibly distributed) tracking agent receives signals from data sources, fetches information about in-flight elements, and then decides to send notifications about substream end. Before diving into implementation details, we should answer the following questions regarding \tracker\ framework, as explained in the next subsection.
 
 {\bf Q1 How to organize monitoring of in-flight elements?} To detect that a substream ends, the tracking agent should receive the corresponding signal from data producers and ensure no in-flight elements belong to the substream. 
 
@@ -26,6 +23,13 @@ The general scheme of the \tracker\ mechanism is shown in Figure~\ref{tracker_sc
 {\bf Q3 How to provide the consistent notifications order?} Unlike punctuations, \tracker\ notifications are completely async with dataflow elements because they go through another network channel. Hence, dataflow items and notifications are not ordered, making it hard to ensure that notifications order is consistent.
 
 {\bf Q4 What are the functional and performance properties of \tracker?} \tracker\ framework is designed to eliminate the limitations of punctuations framework. We should demonstrate that it is suitable for cyclic dataflows as well as can provide lower network overhead.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.35\textwidth]{pics/tracker-scheme.pdf}
+  \caption{\tracker\ framework: an example}
+  \label{tracker_scheme}
+\end{figure}
 
 \subsection{Discussion}
 
