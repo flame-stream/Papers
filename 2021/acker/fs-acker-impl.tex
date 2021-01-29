@@ -117,6 +117,16 @@ This fact allows us to define $t(x)$ such that $t(x) = [s(x) / \delta]$. This wa
 
 As the tracking agent accumulates all the service traffic from the entire system, it may become a bottleneck. To deal with this problem, we introduce a distributed version of the tracking agent.
 
+A straightforward approach is to partition predicates between the shards of the tracking agent. For example, one shard can handle all reports for the predicate $h(x)$, while the second all reports for the predicate $q(x)$. In this case, processes need to discover which shard is responsible for a predicate. Note that the network traffic complexity remains the same $O(K||\Pi||)$ because each process sends each report to only a single shard depending on the predicate.
+
+The main problem regarding this approach is to enforce the consistent notifications order. Centralized agent sends EOS through the FIFO network channels, so the EOS elements for the same processes cannot be reordered. There can be a race between EOS from various shards due to asynchronous network channels in the distributed case.
+
+A simple solution for this issue is on each EOS from some shard, wait for EOS from all other shards, but with greater $t(x)$. For example, if a process receives EOS for some predicate with $min t(x) = 3$, then it needs to wait until receiving EOS with $t(x) > 3$ from all other shards to produce the notification. However, this method can increase the latency between the substream end and the notification providing.
+
+We employ the vector clock algorithm to mitigate latency overhead. Each process either periodically sends its system time to all tracking agent shards. In turn, tracking agents also periodically sends the minimal vector among the in-flight elements. Therefore, if a process receives EOS for some predicate with $min t(x) = 3, vec=[0,4,1]$, then it needs to wait until receiving of vectors component-wise greater than $[0,4,1]$ from all shards to produce the notification.
+
+The vector clock introduction increases the service traffic but allows to eliminate bottleneck from the system. The service traffic complexity remains the same, but the $O$ factor increases. In the experimental section, we will study how significant is this increase.
+
 % To make our system tolerant to the time difference between sources, we systematically synchronize the system clocks of them. We assume that clock differences are no more than some fixed $\delta$, which we reference as synchronization slack.
 
 % \subsection{Elements ordering}
