@@ -130,4 +130,3 @@ While the punctuations approach is robust and easy-to-implement, it has several 
 The high network overhead forms another limitation. This method's amount of service traffic is $O(K||\Pi||^2)$, where $||\Pi||$ is the number of processes and $K$ is the number of substreams. As we can see, this estimation is far from the lower bound ($O(||\Pi||)$). It is quadratic in the number of processes, as each process should propagate punctuations to all output channels. 
 
 Such elements broadcasting may affect the throughput of an SPE. As we demonstrate further, the punctuation technique adds significant performance overhead on regular processing for small substreams (frequent punctuations injection). In the next sections, we demonstrate that it is possible to design a substreams management system without frequent broadcasting and achieve the optimal network traffic overhead.
-
