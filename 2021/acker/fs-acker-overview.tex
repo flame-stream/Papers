@@ -41,7 +41,7 @@ Assume that each process sends to tracking agent the following reports about eac
     \item process identifier.
 \end{enumerate}
 
-Note that the result of applying predicates can be a vector if we are tracking multiple substreams. Process identifier is an optional field that can be used to send notifications independently for various processes or parts of the physical graph. We will discuss it in detail in the next section.
+Further in this paper, we will denote them as {\em SND report} and {\em RCV report}. Note that the result of applying predicates can be a vector if we are tracking multiple substreams. Process identifier is an optional field that can be used to send notifications independently for various processes or parts of the physical graph. We will discuss it in detail in the next section.
 
 The tracking agent can monitor the existing substreams: if there are no reports for the specific predicate, the dataflow does not contain elements from the corresponding substream. Using this information along with signals from data producers, the tracking agent can detect when there is a soft guarantee that a substream ends.
 
@@ -49,13 +49,13 @@ A na\"ve implementation of the reports requires an extra network message for eac
 
 \subsubsection{Answering Q2: How to ensure bound guarantees?}
 
-As we mentioned above, tracking agent has enough information to detect the soft substream bound, so it can spawn a corresponding notification $e^{n} = <send,pred(m)>$. Therefore, function $S(E_{proc})$ for the \tracker\ framework is the following:
+As we mentioned above, tracking agent has enough information to detect the soft substream bound, so it can spawn an {\em end-of-substream event} (EOS), $e^{n} = <send,pred(m)>$. Therefore, function $S(E_{proc})$ for the \tracker\ framework is the following:
 
 \begin{align*}
 & S_{tracker}(E_{proc}) = \exists e^{n} \in E_{proc} : e^{n} = \langle recv,pred(m)\rangle_{tracker,p}
 \end{align*}
 
-To make this function satisfy the firm notifications guarantee, one needs to block an input channel if the element that does not belong to the substream arrives. After the notification from the tracking agent arrives, the channel is unblocked. This technique is quite similar to the punctuations alignment, mentioned in the previous section. The processing order function $R_{tracker}(e)$ for this case should satisfy the following condition:
+To make this function satisfy the firm notifications guarantee, one needs to block an input channel if the element that does not belong to the substream arrives. After the EOS from the tracking agent arrives, the channel is unblocked. This technique is quite similar to the punctuations alignment, mentioned in the previous section. The processing order function $R_{tracker}(e)$ for this case should satisfy the following condition:
 
 \begin{align*}
 & \exists q \in I_p, e = \langle recv,m \rangle_{q,p}: \neg pred(m) \Longrightarrow \\ 
@@ -71,7 +71,7 @@ Assume that SPE assigns to input data elements special totally ordered labels $t
 
 $$\forall q\in \Pi, e=\langle proc,m,M_i\rangle_q, \forall x \in M_i : t(x) = t(m)$$.
 
-In this case, if the order on $t(x)$ coincides with the order of input elements, then \tracker\ can send the notifications according to this order as well. In other words, \tracker\ can reorder its notifications such that they will be consistent with the substreams order. An example of this concept is shown in Figure~\ref{tracker_ordering}. The substream containing element with $t(m)=1$ ends before the substream containing element with $t(m)=2$. As we can see, the order of notifications from \tracker\ coincides with $t(m)$.
+In this case, if the order on $t(x)$ coincides with the order of input elements, then \tracker\ can produce the EOS events according to this order as well. In other words, \tracker\ can reorder the EOS events such that they will be consistent with the substreams order. An example of this concept is shown in Figure~\ref{tracker_ordering}. The substream containing element with $t(m)=1$ ends before the substream containing element with $t(m)=2$. As we can see, the order of EOS elements from \tracker\ coincides with $t(m)$.
 
 \begin{figure}[htbp]
   \centering
@@ -84,11 +84,11 @@ A vital question here is how to implement the assignment of ordered labels $t(m)
 
 \subsubsection{Answering Q4: What are the functional and performance properties of \tracker?}
 
-\tracker\ does not require regular broadcasting of the elements to all computational nodes, because all service traffic goes through a single agent. This change of the method of the propagation the fact that the substream ends allows \tracker\ to have the following features by design:
+\tracker\ does not require regular broadcasting of the elements to all computational nodes because all service traffic goes through a single agent. This change of the method of the propagation the fact that the substream ends allows \tracker\ to have the following features by design:
 
 \begin{enumerate}
     \item {\bf Cyclic dataflows support.} Because the tracking agent is monitoring for the properties of in-flight elements without direct injection of service items into a dataflow, \tracker\ does not face the problem of throwing them through a cycle.
-    \item {\bf Low network overhead.} As we demonstrate further, processes can send reports once per a fixed time period, so there is a constant time of such reports per a finite substream. The reports require $O(||\Pi||)$ extra messages, while the notifications $O(K||\Pi||)$. The total amount is $O(K||\Pi|| + ||\Pi||) = O(K||\Pi||)$ that is optimal for the substream management problem. 
+    \item {\bf Low network overhead.} As we demonstrate further, processes can send reports once per a fixed time period, so there is a constant time of such reports per a finite substream. The reports require $O(||\Pi||)$ extra messages, while the EOS events $O(K||\Pi||)$. The total amount is $O(K||\Pi|| + ||\Pi||) = O(K||\Pi||)$ that is optimal for the substream management problem. 
 \end{enumerate}
 
 At the same time, \tracker\ can provide both soft and firm bound guarantees along with the consistent order of notifications. A limitation of the \tracker\ framework is a potentially more complex implementation than punctuations. The details of the straightforward implementation of the \tracker\ framework are discussed in the next section.
