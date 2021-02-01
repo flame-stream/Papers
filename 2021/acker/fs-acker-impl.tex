@@ -1,17 +1,17 @@
 \label {fs-acker-impl}
 
-In the previous section, we introduced a general schema of the \tracker\ framework. In this section, we deepen into its implementation details. We describe and explore the properties of the mechanism that produces the bound notifications and. Following this, the technique to achieve consistent notifications order is detailed. After that, we focus on the single node implementation and local agent optimization. Distributed implementation of the tracking agent concludes this part.
+In the previous section, we introduced a general schema of the \tracker\ framework. In this section, we deepen into its implementation details. We describe and explore the properties of the tracking agent that produces the bound notifications. After that, the technique to achieve consistent notifications order is detailed. Distributed implementation of the tracking agent concludes this part.
 
 \subsection{Bound guarantees}
 
-As we stated earlier, each process sends to tracking agent the following reports about each sending or receiving event $e = <action,m>$:
+As we stated earlier, each process sends to tracking agent the SND and RCV reports about each sending or receiving event $e = <action,m>$:
 \begin{enumerate}
     \item $action$: send or receive.
     \item $pred(m)$: the result of applying a substream predicate.
     \item process (or {\em segment}) identifier.
 \end{enumerate}
 
-The tracking agent aggregates this information into the table illustrated in Table~\ref{tracker-table-simple}. Tracking agent builds for each predicate an indicator if a {\em graph segment} contains in-flight elements satisfying the predicate. Segments are subgraphs that incapsulate cycles. Soft substream end notifications can be sent for a subgraph if all upstream subgraphs do not contain the corresponding elements. The substream ends for the whole graph if all segments do not contain elements satisfying the prodicate~\footnote{Data source should also guarantee that it will not spawn any elements from this substream}. Therefore, the soft bound notifications for predicates $h(x)$ and $z(x)$ should be generated.
+The tracking agent aggregates this information into the table illustrated in Table~\ref{tracker-table-simple}. Tracking agent builds for each predicate an indicator if a {\em graph segment} contains in-flight elements satisfying the predicate. Segments are subgraphs that incapsulate cycles. EOS that ensures soft substream end notifications can be sent for a subgraph if all upstream subgraphs do not contain the corresponding elements. The substream ends for the whole graph if all segments do not contain elements satisfying the prodicate~\footnote{Data source should also guarantee that it will not spawn any elements from this substream}. Therefore, the soft bound notifications for predicates $h(x)$ and $z(x)$ should be generated.
 
 \begin{table}[htbp]
 \caption{\tracker\ table: a general example}
@@ -29,7 +29,7 @@ The tracking agent aggregates this information into the table illustrated in Tab
   \end{tabular}
 \end{table}
 
-A graph shown in Figure~\ref{fig:tracker-acker-comparison} illustrates the notion of segments. This graph has two segments: $A$ and $B$. Note that according to Table~\ref{tracker-table-simple}, a substream end notification for predicate $q(x)$ can be sent for a segment $A$, but not for a segment $B$. This behavior is similar to punctuations: notifications can be spawned earlier for the upstream processes.
+A graph shown in Figure~\ref{fig:tracker-acker-comparison} illustrates the notion of segments. This graph has two segments: $A$ and $B$. Note that according to Table~\ref{tracker-table-simple}, the EOS for predicate $q(x)$ can be sent for a segment $A$, but not for a segment $B$. This behavior is similar to punctuations: notifications can be spawned earlier for the upstream processes.
 
 \begin{figure}[htbp]
   \centering
@@ -44,7 +44,7 @@ Each report is labeled by a random number $X$, and this number is the same for t
 
 The latter condition can be easily checked by the tracking agent using XOR operation for all numbers received from the chain, which will turn into 0. The result of the XOR operation can accidentally become zero, but the probability of this event is controlled by the length of the random number $X$ so that it can be neglected in practice~\cite{apache:storm:acker}.
 
-Figure~\ref{fig:tracker-reports} illustrates the reports with random numbers. The elements satisfying a predicate $h(x)$ flow through a dataflow. The first process generates an output and sends the report with $X=5$. The corresponding receiving report by the second process also has $X=5$ because this process receives the element from the first one. The second process sends a new element that satisfies $h(x)$ further, and the new report with $X=12$ is produced. The third operator receives this element and also produces a report with $X=12$. If there are no more elements such that $h(x)=1$, then we can send notification about substream defined by $h(x)$ ends because {\em 5 XOR 5 XOR 12 XOR 12 = 0}. 
+Figure~\ref{fig:tracker-reports} illustrates the reports with random numbers. The elements satisfying a predicate $h(x)$ flow through a dataflow. The first process generates an output and sends the SND report with $X=5$. The corresponding RCV report by the second process also has $X=5$ because this process receives the element from the first one. The second process sends a new element that satisfies $h(x)$ further, and the new SND report with $X=12$ is produced. The third operator receives this element and also produces an RCV report with $X=12$. If there are no more elements such that $h(x)=1$, then we can send EOS for the substream defined by $h(x)$ ends because {\em 5 XOR 5 XOR 12 XOR 12 = 0}. 
 
 \begin{figure}[htbp]
   \centering
@@ -53,7 +53,7 @@ Figure~\ref{fig:tracker-reports} illustrates the reports with random numbers. Th
   \label{fig:tracker-reports}
 \end{figure}
 
-Table~\ref{tracker-table-xor} illustrates the actual \tracker\ table for the mentioned technique. All reports from processes are grouped by the satisfying predicate and the segment. Random numbers from these reports are XORed into the result shown in columns {\em Segment XOR} and {\em XOR}. If the XOR value is equal to 0, then the tracking agent can send the soft bound notification for the corresponding predicate.
+Table~\ref{tracker-table-xor} illustrates the actual \tracker\ table for the mentioned technique. All reports from processes are grouped by the satisfying predicate and the segment. Random numbers from these reports are XORed into the result shown in columns {\em Segment XOR} and {\em XOR}. If the XOR value is equal to 0, then the tracking agent can send the EOS, providing the soft bound guarantee for the corresponding predicate.
 
 \begin{table}[htbp]
 \caption{\tracker\ table: an example with XORing technique}
@@ -71,13 +71,17 @@ Table~\ref{tracker-table-xor} illustrates the actual \tracker\ table for the men
   \end{tabular}
 \end{table}
 
-As we described earlier, to ensure the firm notifications guarantee, one needs to block an input channel of a process if the element that does not belong to the substream arrives. After the notification from the tracking agent arrives, the channel is unblocked.
+As we described earlier, to ensure the firm notifications guarantee, one needs to block an input channel of a process if the element that does not belong to the substream arrives. After the EOS from the tracking agent arrives, the channel is unblocked.
 
-The amount of service network needed for \tracker\ is $O(||\Pi||)$, where $||\Pi||$ is the number of processes because all processes send reports to the tracking agent and the tracking agent sends notifications back to the processes. Therefore, traffic goes through a single agent without broadcasts between all processes. Further, we demonstrate how to make this agent distributed while keeping the same amount of extra traffic.
+Due to the XOR operation's commutative nature, we can optimize tracking agent incoming traffic by aggregating reports locally within the processes. For each process, we introduce a {\em local tracking agent} component. It serves as a mediator between the process and the global agent, buffering the outgoing reports and flushing them periodically. 
+
+The flushing window is the parameter that allows us to balance between the notifications latency and the service traffic. Note that substreams last a finite time period by definition, so we assume that each process sends aggregated reports a constant number of times that does not depend on the number of substreams and processes. Therefore, the amount of extra network traffic for the reports is $O(||\Pi||)$, so the total estimation with the overhead on the notifications is $O(K||\Pi||)$.
+
+% The amount of service network needed for \tracker\ is $O(||\Pi||)$, where $||\Pi||$ is the number of processes because all processes send reports to the tracking agent and the tracking agent sends notifications back to the processes. Therefore, traffic goes through a single agent without broadcasts between all processes. Further, we demonstrate how to make this agent distributed while keeping the same amount of extra traffic.
 
 \subsection{Consistent notifications order}
 
-To achieve consistent order of notifications, we need to define $t(x), x\in M$ such that the order on $t(x)$ coincides with the order of input elements. In this case, all reports that processes send to the tracking agent should be labeled by the $t(x)$. In turn, the tracking agent sends the notifications according to the order on $t(x)$.
+To achieve consistent order of notifications, we need to define $t(x), x\in M$ such that the order on $t(x)$ coincides with the order of input elements. In this case, all reports that processes send to the tracking agent should be labeled by the $t(x)$. In turn, the tracking agent sends the EOS elements according to the order on $t(x)$.
 
 Table~\ref{tracker-table-oder} illustrates the \tracker\ table in case of consistent notifications order. Column {\em min t(x)} indicates the minimal $t(x)$ among the elements that satisfy the corresponding predicate. The tracking agent sends notifications for the substream if the $XOR$ value is 0 and all substreams that contain elements with less {\em min t(x)} have finished (notifications has been produced). Therefore, notification for the substream defined by the predicate $h(x)$ is not sent until the notification for the predicate $q(x)$ is generated. 
 
@@ -103,11 +107,25 @@ A simple technique to build $t(x)$ without extra agents bases on systematic sync
 
 This fact allows us to define $t(x)$ such that $t(x) = [s(x) / \delta]$. This way we make $t(x)$ less precise, but this trick gives us an ability to compare global time associated by different source nodes. If $t(x_1)$ is greater by one than the $t(x_2)$ then their order is defined even if they arrived from different source nodes:  $t(x_1) > t(x_2) + 1 \Rightarrow \tau(x_1) > \tau(x_2)$. Therefore, the order on $t(x)$ coincides with the order of input elements, so it is suitable for the defined problem. Here is the summary of the mechanism that ensures consitent order notifications:
 \begin{enumerate}
-    \item On receiving of input item, source node gets the system timestamp
+    \item On input item arrival, source node gets the system timestamp
     \item The system timestamp is shrunk up to synchronization slack (practically we achieve 10ms slack)
     \item Each report for the tracking agent is labeled by the result of $t(x)$
     \item Tracking agent sends bound notifications according to the order on $t(x)$
 \end{enumerate}
+
+\subsection{Distributed tracking agent}
+
+As the tracking agent accumulates all the service traffic from the entire system, it may become a bottleneck. To deal with this problem, we introduce a distributed version of the tracking agent.
+
+A straightforward approach is to partition predicates between the shards of the tracking agent. For example, one shard can handle all reports for the predicate $h(x)$, while the second all reports for the predicate $q(x)$. In this case, processes need to discover which shard is responsible for a predicate. Note that the network traffic complexity remains the same $O(K||\Pi||)$ because each process sends each report to only a single shard depending on the predicate.
+
+The main problem regarding this approach is to enforce the consistent notifications order. Centralized agent sends EOS through the FIFO network channels, so the EOS elements for the same processes cannot be reordered. There can be a race between EOS from various shards due to asynchronous network channels in the distributed case.
+
+A simple solution for this issue is on each EOS from some shard, wait for EOS from all other shards, but with greater $t(x)$. For example, if a process receives EOS for some predicate with $min t(x) = 3$, then it needs to wait until receiving EOS with $t(x) > 3$ from all other shards to produce the notification. However, this method can increase the latency between the substream end and the notification providing.
+
+We employ the vector clock algorithm to mitigate latency overhead. Each process either periodically sends its system time to all tracking agent shards. In turn, tracking agents also periodically sends the minimal vector among the in-flight elements. Therefore, if a process receives EOS for some predicate with $min t(x) = 3, vec=[0,4,1]$, then it needs to wait until receiving of vectors component-wise greater than $[0,4,1]$ from all shards to produce the notification.
+
+The vector clock introduction increases the service traffic but allows to eliminate bottleneck from the system. The service traffic complexity remains the same, but the $O$ factor increases. In the experimental section, we will study how significant is this increase.
 
 % To make our system tolerant to the time difference between sources, we systematically synchronize the system clocks of them. We assume that clock differences are no more than some fixed $\delta$, which we reference as synchronization slack.
 

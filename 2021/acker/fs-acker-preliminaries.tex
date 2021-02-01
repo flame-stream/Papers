@@ -8,9 +8,9 @@ Distributes SPEs can be modeled~\cite{carbone2018scalable} as physical dataflow 
 
 Each process $p\in \Pi$ can handle the following events:
 \begin{enumerate}
-    \item Receiving element: $\langle recv,m\rangle_{qp}, q\in I_p, m\in M$
-    \item Sending element: $\langle send,m\rangle_{pq}, q\in O_p, m\in M$
-    \item Processing element: $\langle proc,m,M_i\rangle, q\in O_p, m\in M, M_i \subseteq M$
+    \item Receiving: $\langle recv,m\rangle_{qp}, q\in I_p, m\in M$
+    \item Sending: $\langle send,m\rangle_{pq}, q\in O_p, m\in M$
+    \item Processing: $\langle proc,m,M_i\rangle, q\in O_p, m\in M, M_i \subseteq M$
 \end{enumerate}
 
 All events within the same process $p$ are totally ordered by a local causal order relation $<_p$: $e^{0}_p,e^{1}_p,...,e^{i}_p,...$. The set of processing events is denoted as $E_{proc}$.
@@ -80,6 +80,19 @@ Notifications reordering in case of the soft bound guarantee is illustrated in F
 & \exists e=\langle proc, m, M_i\rangle > \sup E_{proc} : pred_1(m)
 \end{align*}
 
+\subsubsection{Network overhead}
+
+A vital performance property of a substream management system is the amount of extra network traffic. If substreams are fine-grained, an inefficient substream management system can reduce the throughput of an SPE itself~\cite{Li:2008:OPN:1453856.1453890} or affect the performance of state checkpointing~\cite{zhang2021research}. Let $||\Pi||$ be a number of processes, and $K$ be a number of substreams. 
+
+\begin{lemma}
+The network overhead induced by a substream management system cannot be lower than $O(K||\Pi||)$. 
+\end{lemma}
+\begin{proof}
+When a substream management system detects the end of a substream, it should inform all processes about that. Hence, for each substream, at least one notification is sent to each process.
+\end{proof}
+
+Despite this lemma's simplicity, we will further use it to figure out how far is some substream management system from this bound. We can also claim a solution as {\em optimal} if its extra traffic estimation is equal to the lower bound from the lemma.
+
 \subsection{Punctuations framework}
 
 \subsubsection{Framework overview}
@@ -114,4 +127,6 @@ The punctuations framework provides consistent notification order by design beca
 
 While the punctuations approach is robust and easy-to-implement, it has several limitations. In the punctuations framework, the information about the ending of a substream is propagated using ordinary data elements via the data flow network channels. It implies that punctuations are not applicable for cyclic dataflows because a process that receives elements from a cyclic channel will never receive punctuations from this channel~\cite{carbone2018scalable}.
 
-The high network overhead forms another limitation. This method's amount of service traffic is $O(F||\Pi||^2)$, where $||\Pi||$ is the number of processes and $F$ is the frequency of punctuations injection. It is quadratic in the number of processes, as each process should propagate punctuations to all output channels. Such elements broadcasting may affect the throughput of an SPE. As we demonstrate further, the punctuation technique adds significant performance overhead on regular processing for small substreams (frequent punctuations injection).
+The high network overhead forms another limitation. This method's amount of service traffic is $O(K||\Pi||^2)$, where $||\Pi||$ is the number of processes and $K$ is the number of substreams. As we can see, this estimation is far from the lower bound ($O(||\Pi||)$). It is quadratic in the number of processes, as each process should propagate punctuations to all output channels. 
+
+Such elements broadcasting may affect the throughput of an SPE~\cite{Li:2008:OPN:1453856.1453890}. As we demonstrate further, the punctuation technique adds significant performance overhead on regular processing for small substreams (frequent punctuations injection). In the next sections, we demonstrate that it is possible to design a substreams management system without frequent broadcasting and achieve the optimal network traffic overhead.
