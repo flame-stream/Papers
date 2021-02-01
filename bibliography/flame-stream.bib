@@ -1901,3 +1901,21 @@ numpages = {12}
   year={2002},
   organization={Elsevier}
 }
+
+@inproceedings{grulich2020grizzly,
+author = {Grulich, Philipp M. and Sebastian, Bre\ss{} and Zeuch, Steffen and Traub, Jonas and Bleichert, Janis von and Chen, Zongxiong and Rabl, Tilmann and Markl, Volker},
+title = {Grizzly: Efficient Stream Processing Through Adaptive Query Compilation},
+year = {2020},
+isbn = {9781450367356},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3318464.3389739},
+doi = {10.1145/3318464.3389739},
+abstract = {Stream Processing Engines (SPEs) execute long-running queries on unbounded data streams. They follow an interpretation-based processing model and do not perform runtime optimizations. This limits the utilization of modern hardware and neglects changing data characteristics at runtime. In this paper, we present Grizzly, a novel adaptive query compilation-based SPE, to enable highly efficient query execution. We extend query compilation and task-based parallelization for the unique requirements of stream processing and apply adaptive compilation to enable runtime re-optimizations. The combination of light-weight statistic gathering with just-in-time compilation enables Grizzly to adjust to changing data-characteristics dynamically at runtime. Our experiments show that Grizzly outperforms state-of-the-art SPEs by up to an order of magnitude in throughput.},
+booktitle = {Proceedings of the 2020 ACM SIGMOD International Conference on Management of Data},
+pages = {2487–2503},
+numpages = {17},
+keywords = {adaptive query processing, stream processing, mutli-core, code generation, query compilation, hardware},
+location = {Portland, OR, USA},
+series = {SIGMOD '20}
+}

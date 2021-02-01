@@ -1,0 +1,32 @@
+\label {fs-optimization-introduction}
+
+Modern day data analytics commonly requires online processing of unbounded streams of continuously changing data. A standard way of defining a stream processing pipeline is an execution graph, each node of which represents an operation performed over stream elements. A preferred way of defining streaming pipelines is a declarative approach, widely used in bounded data analytics. SQL is one of the implementations of the declarative approach to data processing. 
+
+Application of SQL to stream processing has been an area of active research for the last two decades, however, there have not been many productive attempts at providing a standard for robust streaming SQL. One such attempt \cite{Begoli:2019:OSR:3299869.3314040} is fairly recent (2019); its predecessors, such as CQL \cite{Arasu:2006:CCQ:1146461.1146463}, haven't found much popularity, and modern stream processing engines (SPEs) typically implement only a subset of SQL features.
+
+Seeing as there is no uniform standard for streaming SQL implemented in popular SPEs as of yet, not many attempts have been made at streaming SQL query optimization. Similar to database query execution, SPEs parse the query text into an abstract syntax tree with each node representing a relational algebra operator, which is later transformed into a logical graph, and then into a physical graph. Since one query can be represented by multiple execution graphs, a query planner (optimizer) must choose the best possible graph (i.e. the one providing the best performance). Database query optimization is a well-researched topic [this is the part where i say that it allows for complex optimizations but no such results have been achieved in stream processing where optimizations are performed on the physical level --- cite the grizzly article --- so it's limited by non-declarative approach]
+
+
+
+
+\subsection{Proposed contribution}
+
+In this paper we:
+\begin{itemize}
+    \item Identify which features stream processing engines lack in order to support query execution graph optimization at the logical level;
+    \item Describe preliminary experiments that we have conducted in order to demonstrate feasibility of streaming SQL optimization;
+    \item Outline the next steps in implementing streaming SQL optimization support; % in dire need of a synonym
+\end{itemize}
+
+\subsection{Paper structure}
+The rest of the paper is organized into the following sections:
+
+\begin{itemize}
+    \item Section \ref{sec:fs-optimization-example} introduces a running example of a streaming SQL query to demonstrate the optimization problem;
+    \item Section \ref{sec:fs-optimization-challenges} describes the challenges of adapting database optimization techniques to streaming queries due to the specifics of stream processing;
+    \item Section \ref{sec:fs-optimization-experiments} presents the preliminary experiments [TODO]
+    \item In section \ref{sec:fs-optimization-discussion} we discuss the results of the experiments described in section \ref{sec:fs-optimization-experiments} and propose the next steps in implementing support for streaming SQL optimization at the logical level;
+    \item Section \ref{sec:fs-optimization-related-work} presents an overview of the area as well as details recent contributions in query processing optimization.
+\end{itemize}
+
+

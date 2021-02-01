@@ -1,0 +1,7 @@
+Cost-based query optimization requires knowledge of certain statistics about the data being processed. For example, one such statistic might be the arrival rate of the elements in the stream. For database tables, most enterprise database management systems only use cardinality, and since it is common for DBMS to execute many different queries over \textit{immutable} data, cardinality is immutable throughout the query execution as well and is known beforehand. 
+
+This is not the case with data streams. When the elements first start arriving, the SPE has no prior knowledge about their rate or any other statistics. Additionally, since SPEs have to keep running the same query over long periods of time, the statistics are likely to change over the course of query processing with the arrival of new data. 
+
+In order to obtain and use statistics for streaming data, we propose collecting statistics for each window, which can be difficult in distributed stream processing systems, as throughput and latency can be affected. However, predicting statistics for the next window could be used for calculating a cost function value to be used for streaming query optimization. The previous window statistics present a strong baseline for this case.
+
+% those were my notes: we need to collect statistics but we can't bc of distributed system w/o affecting throughput latency etc and we'd like to predict them we can collect for previous window 

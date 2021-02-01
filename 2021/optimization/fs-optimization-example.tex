@@ -1,7 +1,58 @@
-\label {fs-optimization-example}
+\label {sec:fs-optimization-example}
 
-\subsection{Query}
+In this section we demonstrate the streaming SQL optimization problem on a running example of a query executed on a stream processing engine. \\
 
-\subsection{Implementation}
 
-\subsection{Idea}
+We are using the NEXMark benchmark \cite{tucker2008nexmark} for our query. The NEXMark benchmark suite, designed for queries over continuous data streams, is an extension of the XMark benchmark \cite{schmidt2002xmark} adopted for use with streaming data. The NEXMark scenario simulates an on-line auction system with three kinds of entities: people selling items or bidding on items, items submitted for auction, and bids on items. These kinds of entities will be referred to as \texttt{Person}, \texttt{Auction}, and \texttt{Bid} respectively. The original NEXMark benchmark includes eight queries which utilize the full spectrum of SQL features, but none of them contain more than one join operator. We add the following query based on the NEXMark model: \\
+
+% TODO proper formatting
+\texttt{SELECT P.name, P.city, P.state, B.price, A.itemName FROM Person P INNER JOIN Bid B on B.bidder = P.id INNER JOIN Auction A on A.seller = P.id} \\
+% TODO this should be like a listing with a caption.
+% the caption being: 
+% The proposed query with the Apache Calcite SQL dialect
+
+This query selects all the people who have joined the auction as both bidders and sellers; for each such person their name, city and state of residence are selected, as well as the price of each of their bids and the name of each item they are selling at the auction. 
+
+This query contains two join operators, which means that there are at least two ways to execute this query: for example, first performing the join between \texttt{Person} and \texttt{Bid}, then joining the result with \texttt{Auction}, or vice-versa. 
+
+Similarly to database SQL queries, streaming queries are parsed into abstract syntax trees from which the logical plan is built, and the logical plan is transformed into a physical plan. The logical and physical plans for our example are as follows: \\
+
+[there are plans in the comments. they'd be in two columns]
+
+% TODO Once again, formatting, preferrably two columns of listings
+% logical
+%LogicalProject(name, city, state, price=)
+%  LogicalJoin(condition, joinType=inner) 
+%    LogicalJoin(condition, joinType=inner)
+%      BeamIOSourceRel(table=Person)
+%      BeamIOSourceRel(table=Bid)
+%    BeamIOSourceRel(table=Auction)
+
+% physical 
+%BeamCalcRel(name, city, state, price)
+%  BeamCoGBKJoinRel(condition, joinType=inner)
+%    BeamIOSourceRel(table=Auction)
+%    BeamCoGBKJoinRel(condition, joinType=inner)
+%      BeamIOSourceRel(table=Person)
+%      BeamIOSourceRel(table=Bid)
+
+However, it is also possible to use the following physical plan for this query, with the two join operators in a different order: \\
+
+[see the comments]
+
+% physical 
+%BeamCalcRel(name, city, state, price)
+%  BeamCoGBKJoinRel(condition, joinType=inner)
+%    BeamIOSourceRel(table=Bid)
+%    BeamCoGBKJoinRel(condition, joinType=inner)
+%      BeamIOSourceRel(table=Person)
+%      BeamIOSourceRel(table=Auction)
+
+A database optimizer typically selects a plan to be used for execution based upon certain table statistics, such as table cardinality or selectivity of a predicate used in the join operator. A cost function value is computed using these statistics and the plan with the minimum cost function value is selected for execution. A non-optimal order of operators might lead to an increase in the processing time of the query. 
+
+% TODO Probably say something about adaptive optimization in databases, which is A Thing??
+
+While it is possible to apply the same kind of thinking to stream processing optimization, current stream processing engines are not designed to collect and use any statistics for data streams. For example, Apache Beam, % TODO can we cite source code
+which uses Apache Calcite for its SQL processing functionality, passes constant values as data stream statistics to the Calcite query planner. Had it been possible to pass the actual per-window statistics collected and/or predicted during the query execution to the query planner, it would have allowed for a plan optimized specifically for the current data to be used; moreover, if, as it is typical for streaming data, the statistics would change so much at some point that the previous plan would no longer be optimal for the current data, it would be possible to perform adaptive optimization of the graph. % definitely need to explain this term
+
+
