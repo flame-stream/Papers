@@ -1,15 +1,17 @@
 \label {fs-optimization-introduction}
 
-Modern day data analytics commonly requires online processing of unbounded streams of continuously changing data. A standard way of defining a stream processing pipeline is an execution graph, each node of which represents an operation performed over stream elements. A preferred way of defining streaming pipelines is a declarative approach, widely used in bounded data analytics. SQL is one of the implementations of the declarative approach to data processing. 
+Modern day data analytics commonly requires near real-time online processing of continuously changing data arriving from unbounded streams. A standard way of defining a stream processing pipeline is an execution graph, each node of which represents an operation performed over stream elements. However, a declarative approach to defining computations is widely preferred in data analytics, but the known advantages of the declarative approach have not gained wide use in streaming systems. SQL, typically used for executing database queries, is one of the implementations of the declarative approach to data processing. Among the many advantages of SQL are its popularity and ease of adoption, as well as its support of windowed aggregations and joins, which are common tasks in stream processing. 
 
-Application of SQL to stream processing has been an area of active research for the last two decades, however, there have not been many productive attempts at providing a standard for robust streaming SQL. One such attempt \cite{Begoli:2019:OSR:3299869.3314040} is fairly recent (2019); its predecessors, such as CQL \cite{Arasu:2006:CCQ:1146461.1146463}, haven't found much popularity, and modern stream processing engines (SPEs) typically implement only a subset of SQL features.
+Application of SQL to stream processing has been an area of active research for the last two decades; however, there have not been many productive attempts at proposing a standard for robust streaming SQL. One such attempt \cite{Begoli:2019:OSR:3299869.3314040} is fairly recent (2019); its predecessors, such as CQL \cite{Arasu:2006:CCQ:1146461.1146463}, haven't found much popularity, and modern stream processing engines (SPEs) typically implement only a subset of SQL features. We hope that with the recent efforts in providing a standard for streaming SQL the declarative approach to stream processing gains popularity, which would mean that declarative streaming query optimization is a task of great current interest.
 
-Seeing as there is no uniform standard for streaming SQL implemented in popular SPEs as of yet, not many attempts have been made at streaming SQL query optimization. Similar to database query execution, SPEs parse the query text into an abstract syntax tree with each node representing a relational algebra operator, which is later transformed into a logical graph, and then into a physical graph. Since one query can be represented by multiple execution graphs, a query planner (optimizer) must choose the best possible graph (i.e. the one providing the best performance). Database query optimization is a well-researched topic [this is the part where i say that it allows for complex optimizations but no such results have been achieved in stream processing where optimizations are performed on the physical level --- cite the grizzly article --- so it's limited by non-declarative approach]
+Optimization is one of the stages of executing a declarative query. The execution stages are as follows: first, a query is \textit{parsed} into an abstract syntax tree, each node of which represents a relational algebra operator; second, the query is simplified during the \textit{rewriting} phase into a logical plan (or graph; we will be using these two terms interchangeably in the following text); third, the logical plan is transformed into a physical plan during \textit{optimization}; finally, the query is \textit{executed} and the result is delivered to the user \cite{Pitoura2018processing}. The correspondence between queries and plans is not one-on-one; for each query, there can be multiple execution plans. The purpose of query rewriting is to reduce the space of execution plans and to standardize and simplify the query for further processing \cite{Pitoura2018rewriting}; as for optimization, the query planner transforms each logical operator into its physical implementation: for example, a join operation can be implemented using the hash join algorithm or the merge join algorithm \cite{Neumann2018optimization}, or a join operation in a distributed system might be preceded by sharding.  
+
+Database query optimization is a well-researched topic \cite{astrahan1976system, haas1989extensible, graefe1993volcano}. 
+The two common approaches to query optimization are rule-based and cost-based. Rule-based optimization applies data-independent transformations that are guaranteed to always improve the performance. One such transformation is pushing filtration and projection operators down as low as possible unless it could influence other operators. Cost-based optimization estimates a cost function value for each plan and selects the plan with the minimum cost value. The cost function is typically a linear combination of expected I/O and CPU costs, with CPU costs of each operation estimated based on relation cardinality and operator selectivity. Therefore, cost-based optimization requires knowledge of statistical information \cite{Neumann2018optimization}. However, obtaining such knowledge in streaming systems presents certain difficulties, discussed further in the paper.
 
 
+The research on streaming SQL query optimization is scarce due to the previous lack of a uniform standard. Efforts to optimize streaming queries execution mostly focus on physical level optimizations \cite{grulich2020grizzly, gedik2009code} and not logical level optimizations, especially for SQL queries in particular. Therefore, the problem of logical level declarative query optimization is currently relevant and presents a challenge.
 
-
-\subsection{Proposed contribution}
 
 In this paper we:
 \begin{itemize}
@@ -18,15 +20,7 @@ In this paper we:
     \item Outline the next steps in implementing streaming SQL optimization support; % in dire need of a synonym
 \end{itemize}
 
-\subsection{Paper structure}
-The rest of the paper is organized into the following sections:
+The remainder of this paper is structured as follows. First, we state the problem as illustrated by a running example (\ref{sec:fs-optimization-problem-statement}). Second, we list the challenges in adaptive optimization of streaming SQL queries (\ref{sec:fs-optimization-challenges}). Then, we present the preliminary experiments we executed on our running example to demonstrate the feasibility of the proposed approach to query optimization (\ref{sec:fs-optimization-experiments}) and discuss the results (\ref{sec:fs-optimization-discussion}). Finally, we discuss related work (\ref{sec:fs-optimization-related-work}).     
 
-\begin{itemize}
-    \item Section \ref{sec:fs-optimization-example} introduces a running example of a streaming SQL query to demonstrate the optimization problem;
-    \item Section \ref{sec:fs-optimization-challenges} describes the challenges of adapting database optimization techniques to streaming queries due to the specifics of stream processing;
-    \item Section \ref{sec:fs-optimization-experiments} presents the preliminary experiments [TODO]
-    \item In section \ref{sec:fs-optimization-discussion} we discuss the results of the experiments described in section \ref{sec:fs-optimization-experiments} and propose the next steps in implementing support for streaming SQL optimization at the logical level;
-    \item Section \ref{sec:fs-optimization-related-work} presents an overview of the area as well as details recent contributions in query processing optimization.
-\end{itemize}
 
 

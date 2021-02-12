@@ -1,1 +1,4 @@
-fs-classification.pdf
+fs-optimization.pdf
+*.aux
+*.log
+*.out

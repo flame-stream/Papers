@@ -8,6 +8,11 @@
 \usepackage{bbm} % indicator function
 \usepackage{acmcopyright}
 
+% listings
+\usepackage{xcolor,listings}
+\usepackage{textcomp}
+\lstset{upquote=true}
+
 
 % table
 \usepackage[flushleft]{threeparttable} % http://ctan.org/pkg/threeparttable
@@ -94,8 +99,8 @@ Adaptive optimization, used in databases for queries with insufficient existing 
 \section{Introduction}
 \input{fs-optimization-introduction}
 
-\section{A running example}
-\input{fs-optimization-example}
+\section{Problem statement}
+\input{fs-optimization-problem-statement}
 
 \section{Challenges}
 \input{fs-optimization-challenges}
@@ -122,7 +127,7 @@ Adaptive optimization, used in databases for queries with insufficient existing 
 \input{fs-optimization-conclusion}
 
 \bibliographystyle{ACM-Reference-Format}
-\bibliography{bibliography/flame-stream.bib}
+\bibliography{../../bibliography/flame-stream}
 
 \end {document}
 

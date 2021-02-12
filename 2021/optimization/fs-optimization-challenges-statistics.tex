@@ -1,7 +1,12 @@
-Cost-based query optimization requires knowledge of certain statistics about the data being processed. For example, one such statistic might be the arrival rate of the elements in the stream. For database tables, most enterprise database management systems only use cardinality, and since it is common for DBMS to execute many different queries over \textit{immutable} data, cardinality is immutable throughout the query execution as well and is known beforehand. 
+Cost-based optimization requires statistical information on data in order to calculate cost function values for each plan. However, upon the start of a streaming query execution no information about the data, such as its arrival rate, is available. Therefore, in order to properly apply cost-based optimization to streaming SQL queries, it is necessary to collect data statistics over the course of query execution. Moreover, since we possess no definitive knowledge about the arriving data, in order to utilize an optimal plan for the upcoming windows, we need to predict statistics for each next window based on statistics for previous windows. To this end, we identify two challenges in using statistics for streaming query optimization:
 
-This is not the case with data streams. When the elements first start arriving, the SPE has no prior knowledge about their rate or any other statistics. Additionally, since SPEs have to keep running the same query over long periods of time, the statistics are likely to change over the course of query processing with the arrival of new data. 
+\begin{itemize}
+    \item \textbf{Technical}:
+    Statistical information on stream elements, such as their arrival rate, needs to be collected during execution at runtime.
+    \item \textbf{Research}
+    Next window statistics should be predicted using statistics collected for previous windows. We assume that previous window statistics would present a decent baseline; however, this assumption needs to be tested. 
+\end{itemize}
 
-In order to obtain and use statistics for streaming data, we propose collecting statistics for each window, which can be difficult in distributed stream processing systems, as throughput and latency can be affected. However, predicting statistics for the next window could be used for calculating a cost function value to be used for streaming query optimization. The previous window statistics present a strong baseline for this case.
+Popular SPEs do not offer any statistics fetching or predicting. For example, Apache Beam, which utilizes Apache Calcite, a dynamic data management framework, for its SQL processing functionality, passes constant values to the query planner instead of any actual data statistics.
 
-% those were my notes: we need to collect statistics but we can't bc of distributed system w/o affecting throughput latency etc and we'd like to predict them we can collect for previous window 
+% idk how to describe it. is selecting a good regressor a research challenge? should it be general or detailed? should we include other components of typical ML research?
