@@ -35,7 +35,7 @@
 
 % Include information below and uncomment for camera ready
 \vldbTitle{Substreams Management in Distributed Streaming Dataflows}
-\vldbAuthors{Nikita Sokolov, Artem Trofimov, Igor Kuralenok, Nikita Marshalkin, and Boris Novikov}
+\vldbAuthors{Artem Trofimov, Nikita Sokolov, Igor Kuralenok, Nikita Marshalkin, and Boris Novikov}
 \vldbDOI{https://doi.org/10.14778/xxxxxxx.xxxxxxx}
 \vldbVolume{12}
 \vldbNumber{xxx}
@@ -43,58 +43,43 @@
 
 \begin{document}
 
-\title {Substreams Management in Distributed Streaming Dataflows}
+\title {Substream Management in Distributed Streaming Dataflows}
 
-% \numberofauthors{5}
+\numberofauthors{5}
 
-% \author{
-% \alignauthor
-% Nikita Sokolov\\
-%     \affaddr{ITMO University}\\
-%     \affaddr{Saint Petersburg, Russia}\\
-%     \email{faucct@gmail.com}
-% \alignauthor
-% Artem Trofimov\\
-%     \affaddr{Yandex}\\
-%     \affaddr{Saint Petersburg, Russia}\\
-%     \email{tomato@yandex-team.ru}
-% \alignauthor
-% Igor Kuralenok\\
-%     \affaddr{Yandex}\\
-%     \affaddr{Saint Petersburg, Russia}\\
-%     \email{solar@yandex-team.ru}
-% \and 
-% \alignauthor
-% Nikita Marshalkin\\
-%     \affaddr{VK}\\
-%     \affaddr{Saint Petersburg, Russia}\\
-%     \email{n.marshalkin@corp.vk.com}
-% \alignauthor
-% Boris Novikov\\
-%     \affaddr{National Research University Higher School of Economics}\\
-%     \affaddr{Saint Petersburg, Russia}\\
-%     \email{borisnov@acm.org}
-% }
+\author{
+\alignauthor
+Artem Trofimov\\
+    \affaddr{Yandex}\\
+    \affaddr{Saint Petersburg, Russia}\\
+    \email{tomato@yandex-team.ru}
+\alignauthor
+Nikita Sokolov\\
+    \affaddr{Yandex}\\
+    \affaddr{Saint Petersburg, Russia}\\
+    \email{faucct@yandex-team.ru}
+\alignauthor
+Igor Kuralenok\\
+    \affaddr{Yandex}\\
+    \affaddr{Saint Petersburg, Russia}\\
+    \email{solar@yandex-team.ru}
+\and 
+\alignauthor
+Nikita Marshalkin\\
+    \affaddr{VK}\\
+    \affaddr{Saint Petersburg, Russia}\\
+    \email{n.marshalkin@corp.vk.com}
+\alignauthor
+Boris Novikov\\
+    \affaddr{HSE University}\\
+    \affaddr{Saint Petersburg, Russia}\\
+    \email{borisnov@acm.org}
+}
 
 \maketitle
 
 \begin{abstract}
-%The majority of state-of-the-art stream processing systems faces a problem of obtaining notifications when the specific set of input elements have already been applied to all operators in a dataflow. Such notifications are commonly used to take consistent state snapshots or to release all descendants of an input element atomically while preserving exactly-once delivery guarantee. To generate these notifications, there is a need to track dependencies between input and their descendants and to inform when all descendants have been completely processed. In this work, we propose a method for tracking dependencies between streaming elements that can be applied for both cyclic (iterative) and acyclic dataflows. We demonstrate that our technique has low latency and throughput overhead within various setups and can significantly outperform methods employed by state-of-the-art stream processing systems.
-
-% In distributed stream processing, it is hard to determine a correspondence between input and output elements due to complex transformations, filterings, and so on. On the other hand, mechanisms for taking consistent state snapshots and for transactional stream processing require understanding when a system has already processed a specific set of input elements and the elements induced by them. To achieve this understanding, one needs to track dependencies between items in a dataflow. In this work, we propose a method for monitoring dependencies between streaming elements that is applicable to cyclic dataflows, as well. Our technique is based on an agent that watches for the computational progress and broadcasts system notifications when certain elements processing is finished. These notifications indicate when a system completely processed all descendants of concrete input elements. We demonstrate that our technique provides low notification latency while having low throughput overhead on regular processing, and can outperform methods employed by state-of-the-art stream processing systems.
-
-% In distributed stream processing, a system often needs to determine a correspondence between input and output elements, e.g. to take state snapshot affected by  or to release all descendants of an input element atomically while preserving exactly-once delivery guarantee. This task is hard due to complex transformations, filterings, producing multiple elements from a single, etc. 
-
-% 1. На практике в основном работают с бесконечным потоком как со смесью конечных потоков. Примеры задач
-% 2. Наибелее популярный сейчас способ - пунктуации, специальные элементы, которые инъектируются в поток и несут предикат. Они используют свойство упорядоченности элементов в рамках одного процесса. Проблемы пунктуаций - циклы, большой дополнительный трафик из-за броадкаста, неподходит для быстроизменяющихся свойств.
-% 2. В этой статье мы предлагаем способ разделять элементы с помощью меток, которые приклеиваются к элементам потока. Потоковые операторы отправляют метки элементов, а также предикаты, которым эти элементы удовлетворяют специальному агенту. Агент аггрегирует все сообщения и бродкастит нотификации о том, что в потоке больше нет элементов, удовлетворяющих тому или иному предикату. В зависимости от того, как объявить порядок на метках, можно получить различные свойства, в т.ч. аналогичные пунктуациям и подходящие для снепшота состояния. 
-
-% In a plenty of real-world streaming applications, potentially infinite input stream is considered as a mixture of finite substreams with distinct properties. For example, stateful operators can maintain unbounded
-
 Stream Processing Engines (SPEs) handle a potentially infinite sequence of data elements. This sequence often can be viewed as a mixture of finite substreams with distinct properties: event times ranges, payload values, etc. Some operators ought to know since then there will be no longer elements with specified properties, i.e., when the substream ends. For instance, stateful streaming operators should clear outdated state to avoid running out of memory. Time window operators should release output after all elements within the specified time range arrived. Most state-of-the-art SPEs use {\em punctuations} to manage substreams. The punctuations approach is powerful but has limitations: it does not support cyclic dataflows, poorly scalable due to frequent broadcasts, and is inefficient for small substreams because of high network traffic overhead. In this work, we present a new substream management framework called \tracker\ that supports cyclic dataflows and tiny substreams (even substreams containing a single element). This method bases on the idea that a special agent within an SPE monitors for substreams and notifies SPE nodes about substreams lifespan events. We demonstrate that our implementation can provide the same semantics of notifications as punctuations but implies lower network traffic overhead. Experiments show that our technique is scalable, efficiently handles real-world cyclic dataflows, and outperforms punctuations for small substreams.
-
-% 
-
 \end{abstract}
 
 % \keywords{Data streams, exactly-once, drifting state, optimistic OOP}
@@ -104,7 +89,7 @@ Stream Processing Engines (SPEs) handle a potentially infinite sequence of data 
 \section {Introduction}
 \input {fs-acker-intro}
 
-\section{Preliminaries}
+\section{Substreams management}
 \input {fs-acker-preliminaries}
 
 \section{Tracker framework}
