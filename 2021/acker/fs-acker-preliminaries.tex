@@ -25,13 +25,13 @@ A handler of these events is defined by a user or an SPE itself. It can be a use
 
 \subsubsection{Soft bound}
 
-Many applications that apply substream management systems do not require any special properties of termination events. In this case, we denote the guarantee provided by such events as {\em soft bound}, because termination events indicate only the fact that the substream ended some time ago, and other input elements could be processed after that. More formally, the soft bound guarantee of the termination event $\langle end, pred(m)\rangle$ can be defined as follows:
+Many applications that apply substream management systems do not require any special properties of termination events. In this case, we denote the guarantee provided by such events as {\em soft bound}, because termination events indicate only the fact that the substream ended some time ago, and other input elements could be processed after that. More formally, the soft bound guarantee of the termination event $\langle eos_{soft}, pred(m)\rangle$ can be defined as follows:
 
 \begin{align*}
-\forall e^{'} = \langle proc,m\rangle, e^{'} >_p \langle end,pred(m)\rangle : \neg pred(m)
+\forall e^{'} = \langle proc,m\rangle, e^{'} >_p \langle eos_{soft}, pred(m)\rangle : \neg pred(m)
 \end{align*}
 
-Figure~\ref{general_guarantees} illustrates this notion. Terms $a,b,c,d...$ denote ordered processing events of a process $p$. The substream ends after event $c$. Note that there are several other events between the termination one and $c$. This is the property of a {\em soft bound} guarantee: if $\langle end, pred(m)\rangle$ occurs, all subsequent elements do not satisfy the predicate, but it is not necessarily the exact substream ``border''.
+Figure~\ref{general_guarantees} illustrates this notion. Terms $a,b,c,d...$ denote ordered processing events of a process $p$. The substream ends after event $c$. Note that there are several other events between the termination one and $c$. This is the property of a {\em soft bound} guarantee: if $\langle eos, pred(m)\rangle$ occurs, all subsequent elements do not satisfy the predicate, but it is not necessarily the exact substream ``border''.
 
 \begin{figure}[htbp]
   \centering
@@ -44,16 +44,16 @@ Figure~\ref{general_guarantees} illustrates this notion. Terms $a,b,c,d...$ deno
 
 The guarantee that any new event will not satisfy the predicate is sufficient for many real-life problems, e.g., SPE can initiate process state pruning on such events. However, some problems require a {\em firm bound}: guarantee that the substream ends {\em exactly} after the termination event. 
 
-For example, epoch-based snapshotting protocol~\cite{2015arXiv150608603C, jacques2016consistent} bases on a notion of {\em epoch}. Epoch is a special substream that should be atomically processed. Therefore, SPE requires the termination event for an epoch that occurs right after the last processing event for this epoch. Otherwise, the snapshot can be inconsistent, because it captures elements from various epochs. To support such scenarios, function the termincation event $\langle end, pred(m)\rangle$ should satsify the following conditions:
+For example, epoch-based snapshotting protocol~\cite{2015arXiv150608603C, jacques2016consistent} bases on a notion of {\em epoch}. Epoch is a special substream that should be atomically processed. Therefore, SPE requires the termination event for an epoch that occurs right after the last processing event for this epoch. Otherwise, the snapshot can be inconsistent, because it captures elements from various epochs. To support such scenarios, the termincation event $\langle eos_{firm}, pred(m)\rangle$ should satsify the following conditions:
 
 \begin{align*}
-&1. \forall e^{'} = \langle proc,m\rangle, e^{'} >_p \langle end,pred(m)\rangle : \neg pred(m) \\
-&\boldsymbol{2. \forall e^{*} = \langle proc,m\rangle, e^{*} <_p \langle end,pred(m)\rangle : pred(m)} \\
+&1. \forall e^{'} = \langle proc,m\rangle, e^{'} >_p \langle eos_{firm}, pred(m)\rangle : \neg pred(m) \\
+&\boldsymbol{2. \forall e^{*} = \langle proc,m\rangle, e^{*} <_p \langle eos_{firm}, pred(m)\rangle : pred(m)} \\
 \end{align*}
 
-The first condition is the same as for soft bound guarantee. The second one allows a process to determine the exact processing event when the substream terminates: all elements after the termination event will not satisfy the predicate, but all previous elements have satisfied. 
+The first condition is the same as for the soft bound guarantee. The second one allows a process to determine the exact processing event when the substream terminates: all elements after the termination event will not satisfy the predicate, but all previous elements have been satisfied. 
 
-Figure~\ref{strict_guarantees} illustrates the notion of the firm bound. As in the previous example, terms $a,b,c,d...$ denote ordered processing events of a process $p$. However, in this case, event $\langle end, pred(m)\rangle$ occurs right after the substream terminates.
+Figure~\ref{strict_guarantees} illustrates the notion of the firm bound. As in the previous example, terms $a,b,c,d...$ denote ordered processing events of a process $p$. However, in this case, event $\langle eos_{firm}, pred(m)\rangle$ occurs right after the substream terminates.
 
 \begin{figure}[htbp]
   \centering
@@ -72,32 +72,19 @@ Some specific applications, including the mentioned earlier epoch-based snapshot
   \label{notifications_reordering}
 \end{figure}
 
-Notifications reordering in case of the soft bound guarantee is illustrated in Figure~\ref{notifications_reordering}. Terms $a,b,c,d...$ denote ordered processing events of a process $p$. Despite the fact that substream containing events $a,b$ terminates earlier, the termination event for this substream occurs after the termination event for the substream containing events $d,e$. 
+Notifications reordering in case of the soft bound guarantee is illustrated in Figure~\ref{notifications_reordering}. Terms $a,b,c,d...$ denote ordered processing events of a process $p$. Although the substream containing events $a,b$ terminates earlier, the termination event for this substream occurs after the termination event for the substream containing events $d,e$. 
 
-Let $e^{*}_1$ and $e^{*}_2$ be the last elements of substreams defined by predicates $pred_1(m)$ and $pred_2(m)$. Termination events $\langle end, pred_1(m)\rangle$ and $\langle end, pred_2(m)\rangle$ are {\em consistently ordered} iff:
+Let $e^{*}_1$ and $e^{*}_2$ be the last elements of substreams defined by predicates $pred_1(m)$ and $pred_2(m)$. Termination events $\langle eos, pred_1(m)\rangle$ and $\langle eos, pred_2(m)\rangle$ are {\em consistently ordered} iff:
 
 \begin{align*}
-e^{*}_1 >_p e^{*}_2 \Longrightarrow \langle end, pred_1(m)\rangle >_p \langle end, pred_2(m)\rangle
+e^{*}_1 >_p e^{*}_2 \Longrightarrow \langle eos, pred_1(m)\rangle >_p \langle eos, pred_2(m)\rangle
 \end{align*}
-
-\subsubsection{Network overhead}
-
-A vital performance property of a substream management system is the amount of extra network traffic. If substreams are fine-grained, an inefficient substream management system can reduce the throughput of an SPE itself~\cite{Li:2008:OPN:1453856.1453890} or affect the performance of state checkpointing~\cite{zhang2021research}. Let $||\Pi||$ be a number of processes, and $K$ be a number of substreams. 
-
-\begin{lemma}
-The network overhead induced by a substream management system cannot be lower than $O(K||\Pi||)$. 
-\end{lemma}
-\begin{proof}
-When a substream management system detects the end of a substream, it should inform all processes about that. Hence, for each substream, at least one notification is sent to each process.
-\end{proof}
-
-Despite this lemma's simplicity, we will further use it to figure out how far is some substream management system from this bound. We can also claim a solution as {\em optimal} if its extra traffic estimation is equal to the lower bound from the lemma.
 
 \subsection{Punctuations framework}
 
 \subsubsection{Framework overview}
 
-The main idea behind the punctuations framework is to divide the stream into substreams by injection of special elements that bear predicate $pred(m)$. Punctuations are injected directly into a system as ordinary data elements by SPE or by external data producers. The injector promises that all further produced records do not satisfy the predicate. Hence, the punctuation itself defines the ``border'' of a substream.
+The main idea behind the punctuations framework is to divide the stream into substreams by injection of special elements that bear predicate $punct$. Punctuations are injected directly into a system as ordinary data elements by SPE or by external data producers. The injector promises that all further produced records do not satisfy the predicate. Hence, the punctuation itself defines the ``border'' of a substream.
 
 Figure~\ref{punctuations_scheme} illustrates the punctuations framework. Green elements indicate elements that belong to some substream, while red elements do not. As we can see, punctuations play the role of delimiter between the substream elements and all further items.
 
@@ -108,25 +95,40 @@ Figure~\ref{punctuations_scheme} illustrates the punctuations framework. Green e
   \label{punctuations_scheme}
 \end{figure}
 
-Processes withins SPE do not apply user-defined operators to punctuations. Instead, each process propogates a punctuation to all outgoing channels when it receives corresponding punctuations from all input channels. If a process receives punctuations from all inputs, it is guaranteed that it do not receive elements that satisfy the predicate further due to FIFO network channels. Therefore, function $S(E_{proc})$ for punctuations framework is the following:
+Processes within SPE do not apply user-defined operators to punctuations. Instead, each process propagates punctuation to all outgoing channels when it receives corresponding punctuations from all input channels. If a process receives punctuations from all inputs, it is guaranteed that it does not receive elements that satisfy the predicate further due to FIFO network channels. The soft bound termination event $\langle eos_{soft}, pred(m)\rangle$ is generated iff:
 
 \begin{align*}
-& S_{punct}(E_{proc}) = \forall q \in I_p, \exists e \in E_{proc} : e = \langle recv,pred(m)\rangle_{qp}
+\forall q \in I_p, \exists punct_{qp} \in B_p, \forall m\in B : \neg pred(m)
 \end{align*}
 
-To make this function satisfy the firm bound guarantee, one needs to block input channels which received punctuations until all other channels receive them. In~\cite{Carbone:2017:SMA:3137765.3137777} such behavior is called {\em watermark (punctuation) alignment}. The processing order function $R_{punct}(e)$ for this case should satisfy the following condition:
+To satisfy the firm bound guarantee, one needs to block input channels which received punctuations until all other channels receive them. In~\cite{Carbone:2017:SMA:3137765.3137777} such behavior is called {\em watermark (punctuation) alignment}. The sendbox procedure should ensure the following order of elements processing to achieve firm bound:
 
 \begin{align*}
-& \exists q \in I_p, e = \langle recv,m \rangle >_p e^{'} = \langle recv,pred(m)\rangle_{qp} \Longrightarrow \\ 
-& R(e) > R(e^{*}= \langle recv,pred(m) \rangle_{q^{'}p}), \forall q^{'} \in I_p
+& \exists q \in I_p, e = \langle recv,m_{qp} \rangle >_p e^{'} = \langle recv,punct_{qp}\rangle \Longrightarrow \\ 
+& <proc, m_{qp}> >_p \langle eos_{soft}, pred(m)\rangle
 \end{align*}
 
-The punctuations framework provides consistent notification order by design because punctuations are naturally ordered with ordinary data elements within the processes. The formal proofs that function $S_{punct}(E_{proc})$ with the corresponding ordering satisfy soft bound and firm bound guarantees as well as the proof that punctuations framework provides consistent notifications order are in the appendix~\ref{appendix:punctuations-proof}.
+If this condition is satisfied, then $\langle eos_{firm}, pred(m)\rangle$ = $\langle eos_{soft}, pred(m)\rangle$ for the punctuations. The punctuations framework provides consistent notification order by design because punctuations are naturally ordered with ordinary data elements within the processes.
 
-\subsubsection{Discussion}
+\subsection{Discussion}
+
+\subsubsection{Limitations of punctuations}
 
 While the punctuations approach is robust and easy-to-implement, it has several limitations. In the punctuations framework, the information about the ending of a substream is propagated using ordinary data elements via the data flow network channels. It implies that punctuations are not applicable for cyclic dataflows because a process that receives elements from a cyclic channel will never receive punctuations from this channel~\cite{carbone2018scalable}.
 
 The high network overhead forms another limitation. This method's amount of service traffic is $O(K||\Pi||^2)$, where $||\Pi||$ is the number of processes and $K$ is the number of substreams. As we can see, this estimation is far from the lower bound ($O(||\Pi||)$). It is quadratic in the number of processes, as each process should propagate punctuations to all output channels. 
 
-Such elements broadcasting may affect the throughput of an SPE~\cite{Li:2008:OPN:1453856.1453890}. As we demonstrate further, the punctuation technique adds significant performance overhead on regular processing for small substreams (frequent punctuations injection). In the next sections, we demonstrate that it is possible to design a substreams management system without frequent broadcasting and achieve the optimal network traffic overhead.
+Such elements broadcasting may affect the throughput of an SPE~\cite{Li:2008:OPN:1453856.1453890}. As we demonstrate further, the punctuation technique adds significant performance overhead on regular processing for small substreams (frequent punctuations injection).
+
+\subsubsection{Optimal traffic overhead}
+
+A vital performance property of a substream management system is the amount of extra network traffic. If substreams are fine-grained, an inefficient substream management system can reduce the throughput of an SPE itself~\cite{Li:2008:OPN:1453856.1453890} or affect the performance of state checkpointing~\cite{zhang2021research}. Let $||\Pi||$ be a number of processes, and $K$ be a number of substreams. 
+
+\begin{lemma}
+The network overhead induced by a substream management system cannot be lower than $O(K||\Pi||)$. 
+\end{lemma}
+\begin{proof}
+When a substream management system detects the end of a substream, it should inform all processes about that. Hence, for each substream, at least one notification is sent to each process.
+\end{proof}
+
+Despite this lemma's simplicity, we will further use it to figure out how far is some substream management system from this bound. We can also claim a solution as {\em optimal} if its extra traffic estimation is equal to the lower bound from the lemma. In the next sections, we demonstrate that it is possible to design a substreams management system that achieves optimal network traffic overhead.
