@@ -1920,12 +1920,180 @@ location = {Portland, OR, USA},
 series = {SIGMOD '20}
 }
 
+@Inbook{Pitoura2018processing,
+author="Pitoura, Evaggelia",
+editor="Liu, Ling
+and {\"O}zsu, M. Tamer",
+title="Query Processing",
+bookTitle="Encyclopedia of Database Systems",
+year="2018",
+publisher="Springer New York",
+address="New York, NY",
+pages="3026--3027",
+isbn="978-1-4614-8265-9",
+doi="10.1007/978-1-4614-8265-9_860",
+url="https://doi.org/10.1007/978-1-4614-8265-9_860"
+}
 
-@article{zhang2021research,
-  title={Research on Optimal Checkpointing-Interval for Flink Stream Processing Applications},
-  author={Zhang, Zhan and Li, Wenhao and Qing, Xiao and Liu, Xian and Liu, Hongwei},
-  journal={Mobile Networks and Applications},
-  pages={1--10},
-  year={2021},
-  publisher={Springer}
+@Inbook{Pitoura2018rewriting,
+author="Pitoura, Evaggelia",
+editor="Liu, Ling
+and {\"O}zsu, M. Tamer",
+title="Query Rewriting",
+bookTitle="Encyclopedia of Database Systems",
+year="2018",
+publisher="Springer New York",
+address="New York, NY",
+pages="3060--3060",
+isbn="978-1-4614-8265-9",
+doi="10.1007/978-1-4614-8265-9_863",
+url="https://doi.org/10.1007/978-1-4614-8265-9_863"
+}
+
+@Inbook{Neumann2018optimization,
+author="Neumann, Thomas",
+editor="Liu, Ling
+and {\"O}zsu, M. Tamer",
+title="Query Optimization (in Relational Databases)",
+bookTitle="Encyclopedia of Database Systems",
+year="2018",
+publisher="Springer New York",
+address="New York, NY",
+pages="3009--3015",
+isbn="978-1-4614-8265-9",
+doi="10.1007/978-1-4614-8265-9_293",
+url="https://doi.org/10.1007/978-1-4614-8265-9_293"
+}
+
+@article{astrahan1976system,
+  title={System R: Relational approach to database management},
+  author={Astrahan, Morton M. and Blasgen, Mike W. and Chamberlin, Donald D. and Eswaran, Kapali P. and Gray, Jim N and Griffiths, Patricia P. and King, W Frank and Lorie, Raymond A. and McJones, Paul R. and Mehl, James W. and others},
+  journal={ACM Transactions on Database Systems (TODS)},
+  volume={1},
+  number={2},
+  pages={97--137},
+  year={1976},
+  publisher={ACM New York, NY, USA}
+}
+
+@inproceedings{haas1989extensible,
+  title={Extensible query processing in Starburst},
+  author={Haas, Laura M and Freytag, Johann Christoph and Lohman, Guy M and Pirahesh, Hamid},
+  booktitle={Proceedings of the 1989 ACM SIGMOD international conference on Management of data},
+  pages={377--388},
+  year={1989}
+}
+
+@inproceedings{graefe1993volcano,
+  title={The volcano optimizer generator: Extensibility and efficient search},
+  author={Graefe, Goetz and McKenna, William J},
+  booktitle={Proceedings of IEEE 9th International Conference on Data Engineering},
+  pages={209--218},
+  year={1993},
+  organization={IEEE}
+}
+
+@inproceedings{gedik2009code,
+  title={A code generation approach to optimizing high-performance distributed data stream processing},
+  author={Gedik, Bu{\u{g}}ra and Andrade, Henrique and Wu, Kun-Lung},
+  booktitle={Proceedings of the 18th ACM conference on Information and knowledge management},
+  pages={847--856},
+  year={2009}
+}
+
+@article{deshpande2007adaptive,
+author = {Deshpande, Amol and Ives, Zachary and Raman, Vijayshankar},
+title = {Adaptive Query Processing},
+year = {2007},
+issue_date = {January 2007},
+publisher = {Now Publishers Inc.},
+address = {Hanover, MA, USA},
+volume = {1},
+number = {1},
+issn = {1931-7883},
+abstract = {As the data management field has diversified to consider settings in which queries are increasingly complex, statistics are less available, or data is stored remotely, there has been an acknowledgment that the traditional optimize-then-execute paradigm is insufficient. This has led to a plethora of new techniques, generally placed under the common banner of adaptive query processing, that focus on using runtime feed-back to modify query processing in a way that provides better response time or more efficient CPU utilization.In this survey paper, we identify many of the common issues, themes, and approaches that pervade this work, and the settings in which each piece of work is most appropriate. Our goal with this paper is to be a "value-add" over the existing papers on the material, providing not only a brief overview of each technique, but also a basic framework for understanding the field of adaptive query processing in general. We focus primarily on intra-query adaptivity of long-running, but not full-fledged streaming, queries. We conclude with a discussion of open research problems that are of high importance.},
+journal = {Found. Trends Databases},
+month = jan,
+pages = {1–140},
+numpages = {140}
+}
+
+@inproceedings{zhu2004dynamic,
+author = {Zhu, Yali and Rundensteiner, Elke A. and Heineman, George T.},
+title = {Dynamic Plan Migration for Continuous Queries over Data Streams},
+year = {2004},
+isbn = {1581138598},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/1007568.1007617},
+doi = {10.1145/1007568.1007617},
+abstract = {Dynamic plan migration is concerned with the on-the-fly transition from one continuous query plan to a semantically equivalent yet more efficient plan. Migration is important for stream monitoring systems where long-running queries may have to withstand fluctuations in stream workloads and data characteristics. Existing migration methods generally adopt a pause-drain-resume strategy that pauses the processing of new data, purges all old data in the existing plan, until finally the new plan can be plugged into the system. However, these existing strategies do not address the problem of migrating query plans that contain stateful operators, such as joins. We now develop solutions for online plan migration for continuous stateful plans. In particular, in this paper, we propose two alternative strategies, called the moving state strategy and the parallel track strategy, one exploiting reusability and the second employs parallelism to seamlessly migrate between continuous join plans without affecting the results of the query. We develop cost models for both migration strategies to analytically compare them. We embed these migration strategies into the CAPE [7], a prototype system of a stream query engine, and conduct a comparative experimental study to evaluate these two strategies for window-based join plans. Our experimental results illustrate that the two strategies can vary significantly in terms of output rates and intermediate storage spaces given distinct system configurations and stream workloads.},
+booktitle = {Proceedings of the 2004 ACM SIGMOD International Conference on Management of Data},
+pages = {431–442},
+numpages = {12},
+location = {Paris, France},
+series = {SIGMOD '04}
+}
+
+@article{kossmann2000thestate,
+author = {Kossmann, Donald},
+title = {The State of the Art in Distributed Query Processing},
+year = {2000},
+issue_date = {Dec. 2000},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {32},
+number = {4},
+issn = {0360-0300},
+url = {https://doi.org/10.1145/371578.371598},
+doi = {10.1145/371578.371598},
+abstract = {Distributed data processing is becoming a reality. Businesses want to do it for many reasons, and they often must do it in order to stay competitive. While much of the infrastructure for distributed data processing is already there (e.g., modern network technology), a number of issues make distributed data processing still a complex undertaking: (1) distributed systems can become very large, involving thousands of heterogeneous sites including PCs and mainframe server machines; (2) the state of a distributed system changes rapidly because the load of sites varies over time and new sites are added to the system; (3) legacy systems need to be integrated—such legacy systems usually have not been designed for distributed data processing and now need to interact with other (modern) systems in a distributed environment. This paper presents the state of the art of query processing for distributed database and information systems.  The paper presents the “textbook” architecture for distributed query processing and a series of techniques that are particularly useful for distributed database systems. These techniques include special join techniques, techniques to exploit intraquery paralleli sm, techniques to reduce communication costs, and techniques to exploit caching and replication of data. Furthermore, the paper discusses different kinds of distributed systems such as client-server, middleware (multitier), and heterogeneous database systems, and shows how query processing works in these systems.},
+journal = {ACM Comput. Surv.},
+month = dec,
+pages = {422–469},
+numpages = {48},
+keywords = {dissemination-based information systems, query optimization, economic models for query processing, replication, client-server databases, query execution, multitier architectures, database application systems, wrappers, middleware, caching}
+}
+
+@inproceedings{liu2015cardinality,
+author = {Liu, Henry and Xu, Mingbin and Yu, Ziting and Corvinelli, Vincent and Zuzarte, Calisto},
+title = {Cardinality Estimation Using Neural Networks},
+year = {2015},
+publisher = {IBM Corp.},
+address = {USA},
+abstract = {Database query optimizers benefit greatly from accurate cardinality estimation; however, this is hard to achieve on tables with correlated and/or skewed columns. We present a novel approach using neural networks to learn and approximate selectivity functions that take a bounded range on each column as input, effectively estimating selectivities for all relational operators. Experimental results with a simplified prototype show a significant improvement over state-of-the-art cardinality estimators on constructed datasets in terms of accuracy, efficiency, and amount of user input required.},
+booktitle = {Proceedings of the 25th Annual International Conference on Computer Science and Software Engineering},
+pages = {53–59},
+numpages = {7},
+keywords = {cardinality estimation, neural network, relational database, machine learning},
+location = {Markham, Canada},
+series = {CASCON '15}
+}
+
+@article{kipf2018learned,
+  title={Learned cardinalities: Estimating correlated joins with deep learning},
+  author={Kipf, Andreas and Kipf, Thomas and Radke, Bernhard and Leis, Viktor and Boncz, Peter and Kemper, Alfons},
+  journal={arXiv preprint arXiv:1809.00677},
+  year={2018}
+}
+
+@article{ortiz2019empirical,
+  title={An empirical analysis of deep learning for cardinality estimation},
+  author={Ortiz, Jennifer and Balazinska, Magdalena and Gehrke, Johannes and Keerthi, S Sathiya},
+  journal={arXiv preprint arXiv:1905.06425},
+  year={2019}
+}
+
+@article{CHEN20211047,
+title = {Join cardinality estimation by combining operator-level deep neural networks},
+journal = {Information Sciences},
+volume = {546},
+pages = {1047-1062},
+year = {2021},
+issn = {0020-0255},
+doi = {https://doi.org/10.1016/j.ins.2020.09.065},
+url = {https://www.sciencedirect.com/science/article/pii/S0020025520309750},
+author = {Ling Chen and Heqing Huang and Donghui Chen},
+keywords = {Join cardinality estimation, Deep learning, Sampling},
+abstract = {Join cardinality estimation is fundamental to cost-based query optimizers. The state-of-the-art deep learning based join cardinality estimation methods do not fully take the structure of a query plan into account and lack of data information about joins, causing significant performance degradation when the number of joins in a query increases. In this paper, we propose CAPE, a join cardinality estimation method combining operator-level deep neural networks. CAPE introduces two operator-level deep neural networks for selection operators and join operators, as well as an output deep neural network that maps the intermediate representations to join cardinality estimates. Given the query plan rooted at a join operator, CAPE generates a plan-level deep neural network by combining operator-level deep neural networks. In this way, CAPE can handle arbitrary query plans with simple operator-level deep neural networks rather than a single complicated model. In addition, we introduce join-crossing sampling information to detect join-crossing correlations. Experiments are conducted on a dataset constructed from the IMDb dataset, and the experimental results show that CAPE is significantly better than the state-of-the-art methods.}
 }
