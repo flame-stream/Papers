@@ -14,7 +14,7 @@ The transition between sendbox and processing is managed by a {\em sendbox proce
 
 \begin{enumerate}
     \item Processing: $\langle proc,m_{qp}\rangle, m_{qp}\in B_p$
-    \item Substream termination: $\langle end,pred(m)\rangle$
+    \item Substream termination: $\langle eos,pred(m)\rangle$
 \end{enumerate}
 
 Predicate $pred(m)$ defines a substream: it is true if an element $m$ belongs to the substream~\cite{Tucker:2003:EPS:776752.776780}. Each element can belong to multiple substreams at the same time if it satisfies all corresponding predicates. 
@@ -25,16 +25,13 @@ A handler of these events is defined by a user or an SPE itself. It can be a use
 
 \subsubsection{Soft bound}
 
-% One defines a substream as a stream, which contains elements $m \in M$ such that predicate $pred(m)$ is true~\cite{Tucker:2003:EPS:776752.776780}. Each element can belong to multiple substreams at the same time, if it satisfies all corresponding predicates. Substreams management problem is to construct function $S(E_{proc})$ such that it returns $1$ if and only if all further events do not satisfy the predicate. More formally function $S(E_{proc})$ can be defined as follows:
+Many applications that apply substream management systems do not require any special properties of termination events. In this case, we denote the guarantee provided by such events as {\em soft bound}, because termination events indicate only the fact that the substream ended some time ago, and other input elements could be processed after that. More formally, the soft bound guarantee of the termination event $\langle end, pred(m)\rangle$ can be defined as follows:
 
-% \begin{align*}
-% & S(E_{proc}) = 1 \Longleftrightarrow \\ 
-% & \forall e^{'} = \langle proc,m,M_i\rangle, e^{'} >_p \sup E_{proc} : \neg pred(m)
-% \end{align*} 
+\begin{align*}
+\forall e^{'} = \langle proc,m\rangle, e^{'} >_p \langle end,pred(m)\rangle : \neg pred(m)
+\end{align*}
 
-Some applications, including 
-
-Figure~\ref{general_guarantees} illustrates this notion. Terms $a,b,c,d...$ denote ordered processing events of a process $p$. The substream ends after event $c$. Note that $S(E_{proc})$ may be equal to $0$ for some elements after $c$. This is the property of a {\em soft bound} guarantee: if $S(E_{proc})=1$, all subsequent elements do not satsify the predicate, but it is not necessarily the exact substream ``border''.
+Figure~\ref{general_guarantees} illustrates this notion. Terms $a,b,c,d...$ denote ordered processing events of a process $p$. The substream ends after event $c$. Note that there are several other events between the termination one and $c$. This is the property of a {\em soft bound} guarantee: if $\langle end, pred(m)\rangle$ occurs, all subsequent elements do not satisfy the predicate, but it is not necessarily the exact substream ``border''.
 
 \begin{figure}[htbp]
   \centering
@@ -43,19 +40,20 @@ Figure~\ref{general_guarantees} illustrates this notion. Terms $a,b,c,d...$ deno
   \label{general_guarantees}
 \end{figure}
 
-A process can run this function on each new processing event to be informed when the substream has ended. Further, we say that function $S(E_{proc})$ provides a {\em notification} for an operator on the substream termination.
-
 \subsubsection{Firm bound}
 
-The guarantee that any new event will not satisfy the predicate is sufficient for many real-life problems, e.g., SPE can initiate process state pruning on such events. However, some problems require a {\em firm bound}: guarantee that the substream ends {\em exactly} after the last event. For example, epoch-based snapshotting protocol~\cite{2015arXiv150608603C, jacques2016consistent} requires notification that a process handles all elements from a specified epoch and nothing more to take the snapshot. If elements from different epochs are mixed, the snapshot can be inconsistent. To support such scenarios, function $S(E_{proc})$ should satsify the following condition:
+The guarantee that any new event will not satisfy the predicate is sufficient for many real-life problems, e.g., SPE can initiate process state pruning on such events. However, some problems require a {\em firm bound}: guarantee that the substream ends {\em exactly} after the termination event. 
+
+For example, epoch-based snapshotting protocol~\cite{2015arXiv150608603C, jacques2016consistent} bases on a notion of {\em epoch}. Epoch is a special substream that should be atomically processed. Therefore, SPE requires the termination event for an epoch that occurs right after the last processing event for this epoch. Otherwise, the snapshot can be inconsistent, because it captures elements from various epochs. To support such scenarios, function the termincation event $\langle end, pred(m)\rangle$ should satsify the following conditions:
 
 \begin{align*}
-& S(E_{proc}) = 1  \Longleftrightarrow \\
-& \forall e^{'} = \langle proc,m,M_i\rangle, e^{'} >_p \sup E_{proc} : \neg pred(m), \\
-& \sup E_{proc} = \inf_{e*} \forall e^{'} >_p e^{*} : \neg pred(m) 
+&1. \forall e^{'} = \langle proc,m\rangle, e^{'} >_p \langle end,pred(m)\rangle : \neg pred(m) \\
+&\boldsymbol{2. \forall e^{*} = \langle proc,m\rangle, e^{*} <_p \langle end,pred(m)\rangle : pred(m)} \\
 \end{align*}
 
-This condition allows a process to determine the exact moment (processing event) when the substream terminates: all elements after the notification will not satisfy the predicate, but all previous elements satisfy. Figure~\ref{strict_guarantees} illustrates the notion of the firm bound. As in the previous example, terms $a,b,c,d...$ denote ordered processing events of a process $p$. However, in this case, $S(E_{proc})=1$ right after the substream terminates and $S(E_{proc})=0$ for all previous events.
+The first condition is the same as for soft bound guarantee. The second one allows a process to determine the exact processing event when the substream terminates: all elements after the termination event will not satisfy the predicate, but all previous elements have satisfied. 
+
+Figure~\ref{strict_guarantees} illustrates the notion of the firm bound. As in the previous example, terms $a,b,c,d...$ denote ordered processing events of a process $p$. However, in this case, event $\langle end, pred(m)\rangle$ occurs right after the substream terminates.
 
 \begin{figure}[htbp]
   \centering
@@ -64,15 +62,8 @@ This condition allows a process to determine the exact moment (processing event)
   \label{strict_guarantees}
 \end{figure}
 
-To implement such function in practice, it is often required to buffer input events until some condition is fulfilled. Therefore, one may need to define custom order of events processing $R(e)$ as well:
-
-\begin{align*}
-& R(e=\langle recv,m\rangle): R(e=\langle recv, x\rangle) > R(e=\langle recv, y\rangle) \\
-& \Longleftrightarrow e=\langle proc,x,X_i\rangle >_p e=\langle proc,y,Y_i\rangle
-\end{align*}
-
 \subsubsection{Consistent notifications order}
-Some specific applications, including the mentioned earlier epoch-based snapshotting method and techniques for enforcing deterministic processing~\cite{we2018adbis} require an order of notifications to be coincident with the order of substreams endings. For example, if notifications are reordered, then snapshots for consecutive epochs can be inconsistent.
+Some specific applications, including the mentioned earlier epoch-based snapshotting method and techniques for enforcing deterministic processing~\cite{we2018adbis} require an order of notifications to be coincident with the order of substreams endings (events from data sources). For example, if notifications are reordered, then snapshots for consecutive epochs can be inconsistent. Another example is deterministic join that also requires the defined order of termination events~\cite{gulisano2016scalejoin}.
 
 \begin{figure}[htbp]
   \centering
@@ -81,11 +72,12 @@ Some specific applications, including the mentioned earlier epoch-based snapshot
   \label{notifications_reordering}
 \end{figure}
 
-Notifications reordering in case of the soft bound guarantee is illustrated in Figure~\ref{notifications_reordering}. Terms $a,b,c,d...$ denote ordered processing events of a process $p$. Despite the fact that substream containing events $a,b$ terminates earlier, the notification function $S_1(E_{proc})$ for this substream detects termination after the notification function $S_2(E_{proc})$ for the substream containing events $d,e$. More formally, notification functions $S_1(E_{proc})$, $S_2(E_{proc})$ for corresponding substreams defined by predicates $pred_1(m)$, $pred_2(m)$ are {\em consistently ordered} iff:
+Notifications reordering in case of the soft bound guarantee is illustrated in Figure~\ref{notifications_reordering}. Terms $a,b,c,d...$ denote ordered processing events of a process $p$. Despite the fact that substream containing events $a,b$ terminates earlier, the termination event for this substream occurs after the termination event for the substream containing events $d,e$. 
+
+Let $e^{*}_1$ and $e^{*}_2$ be the last elements of substreams defined by predicates $pred_1(m)$ and $pred_2(m)$. Termination events $\langle end, pred_1(m)\rangle$ and $\langle end, pred_2(m)\rangle$ are {\em consistently ordered} iff:
 
 \begin{align*}
-& \forall E_{proc}: S_2(E_{proc})=1 \wedge S_1(E_{proc})=0 \Longrightarrow  \\
-& \exists e=\langle proc, m, M_i\rangle > \sup E_{proc} : pred_1(m)
+e^{*}_1 >_p e^{*}_2 \Longrightarrow \langle end, pred_1(m)\rangle >_p \langle end, pred_2(m)\rangle
 \end{align*}
 
 \subsubsection{Network overhead}
