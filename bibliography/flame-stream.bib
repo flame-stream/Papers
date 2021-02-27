@@ -2097,3 +2097,40 @@ author = {Ling Chen and Heqing Huang and Donghui Chen},
 keywords = {Join cardinality estimation, Deep learning, Sampling},
 abstract = {Join cardinality estimation is fundamental to cost-based query optimizers. The state-of-the-art deep learning based join cardinality estimation methods do not fully take the structure of a query plan into account and lack of data information about joins, causing significant performance degradation when the number of joins in a query increases. In this paper, we propose CAPE, a join cardinality estimation method combining operator-level deep neural networks. CAPE introduces two operator-level deep neural networks for selection operators and join operators, as well as an output deep neural network that maps the intermediate representations to join cardinality estimates. Given the query plan rooted at a join operator, CAPE generates a plan-level deep neural network by combining operator-level deep neural networks. In this way, CAPE can handle arbitrary query plans with simple operator-level deep neural networks rather than a single complicated model. In addition, we introduce join-crossing sampling information to detect join-crossing correlations. Experiments are conducted on a dataset constructed from the IMDb dataset, and the experimental results show that CAPE is significantly better than the state-of-the-art methods.}
 }
+
+@article{zhang2021research,
+  title={Research on Optimal Checkpointing-Interval for Flink Stream Processing Applications},
+  author={Zhang, Zhan and Li, Wenhao and Qing, Xiao and Liu, Xian and Liu, Hongwei},
+  journal={Mobile Networks and Applications},
+  pages={1--10},
+  year={2021},
+  publisher={Springer}
+}
+
+Computing aggregates over windows is at the core of virtually every stream processing job. Typical stream processing applications involve overlapping windows and, therefore, cause redundant computations. Several techniques prevent this redundancy by sharing partial aggregates among windows. However, these techniques do not support out-of-order processing and session windows. Out-of-order processing is a key requirement to deal with delayed tuples in case of source failures such as temporary sensor outages. Session windows are widely used to separate different periods of user activity from each other. In this paper, we present Scotty, a high throughput operator for window discretization and aggregation. Scotty splits streams into non-overlapping slices and computes partial aggregates per slice. These partial aggregates are shared among all concurrent queries with arbitrary combinations of tumbling, sliding, and session windows. Scotty introduces the first slicing technique which (1) enables stream slicing for session windows in addition to tumbling and sliding windows and (2) processes out-of-order tuples efficiently. Our technique is generally applicable to a broad group of dataflow systems which use a unified batch and stream processing model. Our experiments show that we achieve a throughput an order of magnitude higher than alternative state-of-the-art solutions.
+@inproceedings{traub2018scotty,
+  title={Scotty: Efficient window aggregation for out-of-order stream processing},
+  author={Traub, Jonas and Grulich, Philipp Marian and Cuellar, Alejandro Rodriguez and Bre{\ss}, Sebastian and Katsifodimos, Asterios and Rabl, Tilmann and Markl, Volker},
+  booktitle={2018 IEEE 34th International Conference on Data Engineering (ICDE)},
+  pages={1300--1303},
+  year={2018},
+  organization={IEEE}
+}
+
+Despite the established scientific knowledge on efficient parallel and elastic data stream processing, it is challenging to combine generality and high level of abstraction (targeting ease of use) with fine-grained processing aspects (targeting efficiency) in stream processing frameworks. Towards this goal, we propose STRETCH, a framework that aims at guaranteeing (i) high efficiency in throughput and latency of stateful analysis and (ii) fast elastic reconfigurations (without requiring state transfer) for intra-node streaming applications. To achieve these, we introduce virtual shared-nothing parallelization and propose a scheme to implement it in STRETCH, enabling users to leverage parallelization techniques while also taking advantage of shared-memory synchronization, which has been proven to boost the scaling-up of streaming applications while supporting determinism. We provide a fully-implemented prototype and, together with a thorough evaluation, correctness proofs for its underlying claims supporting determinism and a model (also validated empirically) of virtual shared-nothing and pure shared-nothing scalability behavior. As we show, STRETCH can match the throughput and latency figures of the front of state-of-the-art solutions, while also achieving fast elastic reconfigurations (taking only a few milliseconds).
+@inproceedings{najdataei2019stretch,
+  title={Stretch: Scalable and elastic deterministic streaming analysis with virtual shared-nothing parallelism},
+  author={Najdataei, Hannaneh and Nikolakopoulos, Yiannis and Papatriantafilou, Marina and Tsigas, Philippas and Gulisano, Vincenzo},
+  booktitle={Proceedings of the 13th ACM International Conference on Distributed and Event-based Systems},
+  pages={7--18},
+  year={2019}
+}
+
+The inherently large and varying volumes of information generated in large scale systems demand near real-time processing of data streams. In this context, data streaming is imperative for data-intensive processing infrastructures. Stream joins, the streaming counterpart of database joins, compare tuples coming from different streams and constitute one of the most important and expensive data streaming operators. Algorithmic implementations of stream joins have to be capable of efficiently processing bursty and rate-varying data streams in a deterministic and skew-resilient fashion. To leverage the design of modern multicore architectures, scalability and parallelism need to be addressed also in the algorithmic design. In this paper we present ScaleJoin, an algorithmic construction for deterministic and parallel stream joins that guarantees all the above properties, thus filling in a gap in the existing state-of-theart. Key to the novelty of ScaleJoin is the ScaleGate data structure and its lock-free implementation. ScaleGate facilitates concurrent data exchange and balances independent actions among processing threads; enabling fine-grain parallelism and deterministic processing. It allows ScaleJoin to run on an arbitrary number of processing threads, evenly sharing the overall comparisons run in parallel and achieving disjoint and skew-resilient high processing throughput and low processing latency.
+@article{gulisano2016scalejoin,
+  title={Scalejoin: A deterministic, disjoint-parallel and skew-resilient stream join},
+  author={Gulisano, Vincenzo and Nikolakopoulos, Yiannis and Papatriantafilou, Marina and Tsigas, Philippas},
+  journal={IEEE Transactions on Big Data},
+  year={2016},
+  publisher={IEEE}
+}
