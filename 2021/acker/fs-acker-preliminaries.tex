@@ -1,30 +1,38 @@
 \label{fs-acker-preliminaries}
 
-\subsection{Stream processing model}
+\subsection{Processing model}
 
 Typically, distributed stream processing engines are shared-nothing runtimes that continuously ingest input elements, transform them according to a logical dataflow graph, and deliver output elements. The logical dataflow graph consists of user-defined operators. Operators can be stateless or stateful: an output element may depend on the current state and the corresponding input element. A logical graph is mapped to a physical, distributed graph upon deployment. Commonly, a single logical operator can be deployed on multiple computational nodes. Further, we denote physical instances of logical operators as {\em processes}.
 
-Distributes SPEs can be modeled~\cite{carbone2018scalable} as physical dataflow graph $G=\{\Pi,\mathcal{E}\}$, where $\Pi$ are processes (deployed operators) and $\mathcal{E} \subseteq \Pi \times \Pi$ are network channels between them, $c_{ij}=(p_i,p_j)\in \mathcal{E}; p_i,p_j \in \Pi$. Each process has input channels $I_p = \bigcup_{x \in \Pi} \{c_{xp} | (x,p) \in C\}$ and output channels $O_p = \bigcup_{x \in \Pi} \{c_{px} | (p,x) \in C\}$. Processes $A\in \Pi$ that do not have any input channels are called {\em sources}, and processes $\Omega \in \Pi$ that do not have any output channels are called {\em sinks}. Network channels state (all in-transit messages) is denoted as $M$. 
+Distributes SPEs can be modeled~\cite{carbone2018scalable} as physical dataflow graph $G=\{\Pi,\mathcal{E}\}$, where $\Pi$ are processes (deployed operators) and $\mathcal{E} \subseteq \Pi \times \Pi$ are network channels between them, $c_{ij}=(q,p)\in \mathcal{E}; q,p \in \Pi$. Each process has input channels $I_p = \bigcup_{q \in \Pi} \{c_{qp} | (q,p) \in \mathcal{E}\}$.
 
-Each process $p\in \Pi$ can handle the following events:
+Network channels state (all in-transit messages) is denoted as $M$. Each process $p$ can handle elements $m\in M$ from its input channels, e.g. an input element $m_{qp}$ arrives from a process $q$ at a process $p$. On element receiving, process puts it to a {\em sendbox} $B_p$. We denote this event as $\langle recv,m_{qp}\rangle$:
+
+$$\langle recv,m_{qp}\rangle, q\in I_p, M:=M\setminus{m_{qp}}, B_p:=B_p\cup\{m_{qp}\}$$
+
+The transition between sendbox and processing is managed by a {\em sendbox procedure} $S(B)$. Each input event triggers procedure $S(B)$ that can generate the following events in turn:
+
 \begin{enumerate}
-    \item Receiving: $\langle recv,m\rangle_{qp}, q\in I_p, m\in M$
-    \item Sending: $\langle send,m\rangle_{pq}, q\in O_p, m\in M$
-    \item Processing: $\langle proc,m,M_i\rangle, q\in O_p, m\in M, M_i \subseteq M$
+    \item Processing: $\langle proc,m_{qp}\rangle, m_{qp}\in B_p$
+    \item Substream termination: $\langle end,pred(m)\rangle$
 \end{enumerate}
 
-All events within the same process $p$ are totally ordered by a local causal order relation $<_p$: $e^{0}_p,e^{1}_p,...,e^{i}_p,...$. The set of processing events is denoted as $E_{proc}$.
+Predicate $pred(m)$ defines a substream: it is true if an element $m$ belongs to the substream~\cite{Tucker:2003:EPS:776752.776780}. Each element can belong to multiple substreams at the same time if it satisfies all corresponding predicates. 
 
-\subsection{Substreams management}
+A handler of these events is defined by a user or an SPE itself. It can be a user-defined operator, e.g., join, or internal SPE functionality, e.g., state snapshotting procedure. We omit the explicit definition of output elements to simplify the model. Note that all events within the same process $p$ are totally ordered by a local causal order relation $<_p$: $e^{0}_p,e^{1}_p,...,e^{i}_p,...$.
+
+\subsection{Lifespan events}
 
 \subsubsection{Soft bound}
 
-One defines a substream as a stream, which contains elements $m \in M$ such that predicate $pred(m)$ is true~\cite{Tucker:2003:EPS:776752.776780}. Each element can belong to multiple substreams at the same time, if it satisfies all corresponding predicates. Substreams management problem is to construct function $S(E_{proc})$ such that it returns $1$ if and only if all further events do not satisfy the predicate. More formally function $S(E_{proc})$ can be defined as follows:
+% One defines a substream as a stream, which contains elements $m \in M$ such that predicate $pred(m)$ is true~\cite{Tucker:2003:EPS:776752.776780}. Each element can belong to multiple substreams at the same time, if it satisfies all corresponding predicates. Substreams management problem is to construct function $S(E_{proc})$ such that it returns $1$ if and only if all further events do not satisfy the predicate. More formally function $S(E_{proc})$ can be defined as follows:
 
-\begin{align*}
-& S(E_{proc}) = 1 \Longleftrightarrow \\ 
-& \forall e^{'} = \langle proc,m,M_i\rangle, e^{'} >_p \sup E_{proc} : \neg pred(m)
-\end{align*} 
+% \begin{align*}
+% & S(E_{proc}) = 1 \Longleftrightarrow \\ 
+% & \forall e^{'} = \langle proc,m,M_i\rangle, e^{'} >_p \sup E_{proc} : \neg pred(m)
+% \end{align*} 
+
+Some applications, including 
 
 Figure~\ref{general_guarantees} illustrates this notion. Terms $a,b,c,d...$ denote ordered processing events of a process $p$. The substream ends after event $c$. Note that $S(E_{proc})$ may be equal to $0$ for some elements after $c$. This is the property of a {\em soft bound} guarantee: if $S(E_{proc})=1$, all subsequent elements do not satsify the predicate, but it is not necessarily the exact substream ``border''.
 
