@@ -38,7 +38,7 @@ Figure~\ref{general_guarantees} illustrates this notion. Terms $a,b,c,d...$ deno
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.50\textwidth]{pics/general-guarantee.pdf}
-  \caption{Substreams management: soft bound}
+  \caption{Substream management: soft bound}
   \label{general_guarantees}
 \end{figure}
 
@@ -60,7 +60,7 @@ Figure~\ref{strict_guarantees} illustrates the notion of the firm bound. As in t
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.50\textwidth]{pics/strict-guarantee.pdf}
-  \caption{Substreams management: firm bound}
+  \caption{Substream management: firm bound}
   \label{strict_guarantees}
 \end{figure}
 
@@ -133,4 +133,4 @@ The network overhead induced by a substream management system cannot be lower th
 When a substream management system detects the end of a substream, it should inform processes about that. In a general case, e.g., for a state snapshotting problem, it should inform all (stateful) processes. Hence, at least one network message (termination notification) must be sent to each process for each substream.
 \end{proof}
 
-Despite this lemma's simplicity, we will further use it to figure out how far is some substream management system from this bound. We can also claim a solution as {\em optimal} if its extra traffic estimation is equal to the lower bound from the lemma. In the next sections, we demonstrate that it is possible to design a substreams management system that achieves optimal network traffic overhead.
+Despite this lemma's simplicity, we will further use it to figure out how far is some substream management system from this bound. We can also claim a solution as {\em optimal} if its extra traffic estimation is equal to the lower bound from the lemma. In the next sections, we demonstrate that it is possible to design a substream management system that achieves optimal network traffic overhead.
