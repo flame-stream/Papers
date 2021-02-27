@@ -1,0 +1,31 @@
+\begin{tikzpicture}
+\begin{axis}[
+    ytick={500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500},
+    yticklabels={$500$, $1000$, $1500$, $2000$, $2500$, $3000$, $3500$, $4000$, $4500$},
+    xtick={5, 10, 15, 20, 25},
+    xticklabels={$5$, $10$, $15$, $20$, $25$},
+    legend cell align=left,
+    legend pos=north west
+]
+\addplot[smooth, red] coordinates {
+(2,251.49)
+(5,1022.13)
+(10,1729.58)
+(15,2538.23)
+(20,3551.79)
+(25,4414.84)
+};
+\addplot[smooth, teal] coordinates {
+(2,263.85)
+(5,117.58)
+(10,1409.64)
+(15,2041.09)
+(20,2133.5)
+(25,2722.84)
+};
+\legend{
+    $5:90:5$\\
+    $5:5:90$\\
+}
+\end{axis}
+\end{tikzpicture}

@@ -13,6 +13,8 @@
 \usepackage{textcomp}
 \lstset{upquote=true}
 
+% plots
+\usepackage{pgfplots}
 
 % table
 \usepackage[flushleft]{threeparttable} % http://ctan.org/pkg/threeparttable
@@ -36,6 +38,15 @@
 
 \title {Towards Adaptive SQL Query Optimization in Distributed Stream Processing}
 
+% \author{Alexander Chernokoz, Darya Sharkova, Artem Trofimov, Nikita Sokolov, Ekaterina Gorshkova, and Boris Novikov}
+% \affiliation{%
+% \institution{$^5$ ITMO University}
+%   \city{St. Petersburg} 
+%   \country{Russia}
+% }
+% \affiliation{%
+% \institution{$^1$Higher School of Economics}
+% }
 % \author{Artem Trofimov,$^ {1,2}$    Mikhail Shavkunov,$^3$    Sergey Reznick,$^4$     Nikita Sokolov,$^{5}$   Mikhail Yutman,$^3$ \\   Igor E. Kuralenok,$^1$    and  Boris Novikov$^ {3}$ }
 % \affiliation{%
 % \institution{$^1$JetBrains Research}
@@ -109,16 +120,13 @@ Adaptive optimization, used in databases for queries with insufficient existing 
 \input{fs-optimization-challenges-statistics}
 
 \subsection{Using statistics for streaming query optimization}
-\input{fs-optimization-using-statistics}
+\input{fs-optimization-challenges-using-statistics}
 
 \subsection{Execution graph migration in runtime}
 \input{fs-optimization-challenges-graph-migration}
 
 \section {Preliminary experiments}
 \input{fs-optimization-experiments}
-
-\section{Discussion}
-\input{fs-optimization-discussion}
 
 \section{Related work}
 \input{fs-optimization-related-work}

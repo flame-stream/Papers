@@ -25,7 +25,7 @@ SELECT P.name, P.city, P.state,
 
 This query selects all the people who have joined the auction as both bidders and sellers; for each such person their name, city and state of residence are selected, as well as the price of each of their bids and the name of each item they are selling at the auction. 
 
-This query contains two join operators, which means that there are at least two ways to execute this query: for example, first performing the join between \texttt{Person} and \texttt{Bid}, then joining the result with \texttt{Auction}, or vice-versa. 
+This query contains two join operators, which means that there are at least two ways to execute this query: for example, first performing the join between \texttt{Person} and \texttt{Auction}, then joining the result with \texttt{Bid}, or vice-versa. 
 
 The logical and physical plans (with substituted variable names omitted; using Apache Beam transforms as operators) for our example query are as follows: \\
 
@@ -58,10 +58,10 @@ LogicalProject(name, city, state,
         ]
 BeamCalcRel(name, city, state, price, itemName)
   BeamCoGBKJoinRel(condition, joinType=inner)
-    BeamIOSourceRel(table=Auction)
+    BeamIOSourceRel(table=Bid)
     BeamCoGBKJoinRel(condition, joinType=inner)
       BeamIOSourceRel(table=Person)
-      BeamIOSourceRel(table=Bid)
+      BeamIOSourceRel(table=Auction)
 \end{lstlisting}
 
 
@@ -78,10 +78,10 @@ However, it is also possible to use the following physical plan for this query, 
         ]
 BeamCalcRel(name, city, state, price, itemName)
   BeamCoGBKJoinRel(condition, joinType=inner)
-    BeamIOSourceRel(table=Bid)
+    BeamIOSourceRel(table=Auction)
     BeamCoGBKJoinRel(condition, joinType=inner)
       BeamIOSourceRel(table=Person)
-      BeamIOSourceRel(table=Auction)
+      BeamIOSourceRel(table=Bid)        
 \end{lstlisting}
 
 
