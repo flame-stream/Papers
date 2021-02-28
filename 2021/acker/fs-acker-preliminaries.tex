@@ -16,7 +16,7 @@ The transition between sendbox and processing is managed by a {\em sendbox proce
 
 \begin{enumerate}
     \item Processing: $\langle proc,m_{qp}\rangle, m_{qp}\in B_p$
-    \item Substream termination: $\langle eos,pred(m)\rangle$
+    \item Substream termination: $\langle eoss,pred(m)\rangle$
 \end{enumerate}
 
 Predicate $pred(m)$ defines a substream: it is true if an element $m$ belongs to the substream~\cite{Tucker:2003:EPS:776752.776780}. Each element can belong to multiple substreams at the same time if it satisfies all corresponding predicates. 
@@ -27,13 +27,13 @@ A handler of these events is defined by a user or an SPE itself. It can be a use
 
 \subsubsection{Soft bound}
 
-Many applications that apply substream management systems do not require any special properties of termination events. In this case, we denote the guarantee provided by such events as {\em soft bound}, because termination events indicate only the fact that the substream ended some time ago, and other input elements could be processed after that. More formally, we define the soft bound guarantee of the termination event $\langle eos_{soft}, pred(m)\rangle$ as follows:
+Many applications that apply substream management systems do not require any special properties of termination events. In this case, we denote the guarantee provided by such events as {\em soft bound}, because termination events indicate only the fact that the substream ended some time ago, and other input elements could be processed after that. More formally, we define the soft bound guarantee of the termination event (end-of-substream) $\langle eoss_{soft}, pred(m)\rangle$ as follows:
 
 \begin{align*}
-\forall e^{'} = \langle proc,m\rangle, e^{'} >_p \langle eos_{soft}, pred(m)\rangle : \neg pred(m)
+\forall e^{'} = \langle proc,m\rangle, e^{'} >_p \langle eoss_{soft}, pred(m)\rangle : \neg pred(m)
 \end{align*}
 
-Figure~\ref{general_guarantees} illustrates this notion. Terms $a,b,c,d...$ denote ordered processing events of a process $p$. The substream ends after event $c$. Note that there are several other events between the termination one and $c$. This is the property of a {\em soft bound} guarantee: if $\langle eos, pred(m)\rangle$ occurs, all subsequent elements do not satisfy the predicate, but it is not necessarily the exact substream ``border''.
+Figure~\ref{general_guarantees} illustrates this notion. Terms $a,b,c,d...$ denote ordered processing events of a process $p$. The substream ends after event $c$. Note that there are several other events between the end-of-substream and $c$. This is the property of a {\em soft bound} guarantee: if $\langle eoss, pred(m)\rangle$ occurs, all subsequent elements do not satisfy the predicate, but it is not necessarily the exact substream ``border''.
 
 \begin{figure}[htbp]
   \centering
@@ -46,16 +46,16 @@ Figure~\ref{general_guarantees} illustrates this notion. Terms $a,b,c,d...$ deno
 
 The guarantee that any new event will not satisfy the predicate is sufficient for many real-life problems, e.g., SPE can initiate process state pruning on such events. However, some problems require a {\em firm bound}: guarantee that the substream ends {\em exactly} after the termination event. 
 
-For example, epoch-based snapshotting protocol~\cite{2015arXiv150608603C, jacques2016consistent} bases on a notion of {\em epoch}. Epoch is a special substream that should be atomically processed. Therefore, SPE requires the termination event for an epoch that occurs right after the last processing event for this epoch. Otherwise, the snapshot can be inconsistent, because it captures elements from various epochs. To support such scenarios, the termincation event $\langle eos_{firm}, pred(m)\rangle$ should satsify the following conditions:
+For example, epoch-based snapshotting protocol~\cite{2015arXiv150608603C, jacques2016consistent} bases on a notion of {\em epoch}. Epoch is a special substream that should be atomically processed. Therefore, SPE requires the termination event for an epoch that occurs right after the last processing event for this epoch. Otherwise, the snapshot can be inconsistent, because it captures elements from various epochs. To support such scenarios, the end-of-substream event $\langle eoss_{firm}, pred(m)\rangle$ should satsify the following conditions:
 
 \begin{align*}
-&1. \forall e^{'} = \langle proc,m\rangle, e^{'} >_p \langle eos_{firm}, pred(m)\rangle : \neg pred(m) \\
-&\boldsymbol{2. \forall e^{*} = \langle proc,m\rangle, e^{*} <_p \langle eos_{firm}, pred(m)\rangle : pred(m)} \\
+&1. \forall e^{'} = \langle proc,m\rangle, e^{'} >_p \langle eoss_{firm}, pred(m)\rangle : \neg pred(m) \\
+&\boldsymbol{2. \forall e^{*} = \langle proc,m\rangle, e^{*} <_p \langle eoss_{firm}, pred(m)\rangle : pred(m)} \\
 \end{align*}
 
 The first condition is the same as for the soft bound guarantee. The second one allows a process to determine the exact processing event when the substream terminates: all elements after the termination event will not satisfy the predicate, but all previous elements have been satisfied. 
 
-Figure~\ref{strict_guarantees} illustrates the notion of the firm bound. As in the previous example, terms $a,b,c,d...$ denote ordered processing events of a process $p$. However, in this case, event $\langle eos_{firm}, pred(m)\rangle$ occurs right after the substream terminates.
+Figure~\ref{strict_guarantees} illustrates the notion of the firm bound. As in the previous example, terms $a,b,c,d...$ denote ordered processing events of a process $p$. However, in this case, event $\langle eoss_{firm}, pred(m)\rangle$ occurs right after the substream terminates.
 
 \begin{figure}[htbp]
   \centering
@@ -74,12 +74,12 @@ Some specific applications, including the mentioned earlier epoch-based snapshot
   \label{notifications_reordering}
 \end{figure}
 
-Termination events reordering in case of the soft bound guarantee is illustrated in Figure~\ref{notifications_reordering}. Terms $a,b,c,d...$ denote ordered processing events of a process $p$. Although the substream containing events $a,b$ terminates earlier, the termination event for this substream occurs after the termination event for the substream containing events $d,e$. 
+Termination events reordering in case of the soft bound guarantee is illustrated in Figure~\ref{notifications_reordering}. Terms $a,b,c,d...$ denote ordered processing events of a process $p$. Although the substream containing events $a,b$ terminates earlier, the end-of-substream event for this substream occurs after the termination event for the substream containing events $d,e$. 
 
-Let $e^{*}_1$ and $e^{*}_2$ be the last elements of substreams defined by predicates $pred_1(m)$ and $pred_2(m)$. Termination events $\langle eos, pred_1(m)\rangle$ and $\langle eos, pred_2(m)\rangle$ are {\em consistently ordered} iff:
+Let $e^{*}_1$ and $e^{*}_2$ be the last elements of substreams defined by predicates $pred_1(m)$ and $pred_2(m)$. Termination events $\langle eoss, pred_1(m)\rangle$ and $\langle eoss, pred_2(m)\rangle$ are {\em consistently ordered} iff:
 
 \begin{align*}
-e^{*}_1 >_p e^{*}_2 \Longrightarrow \langle eos, pred_1(m)\rangle >_p \langle eos, pred_2(m)\rangle
+e^{*}_1 >_p e^{*}_2 \Longrightarrow \langle eoss, pred_1(m)\rangle >_p \langle eoss, pred_2(m)\rangle
 \end{align*}
 
 \subsection{Punctuations framework}
@@ -97,20 +97,20 @@ Figure~\ref{punctuations_scheme} illustrates the punctuations framework. Green e
   \label{punctuations_scheme}
 \end{figure}
 
-Processes within SPE do not apply user-defined operators to punctuations. Instead, each process propagates punctuation to all outgoing channels when it receives corresponding punctuations from all input channels. If a process receives punctuations from all inputs, it is guaranteed that it will not receive elements that satisfy the predicate further due to FIFO network channels. The soft bound termination event $\langle eos_{soft}, pred(m)\rangle$ is generated iff:
+Processes within SPE do not apply user-defined operators to punctuations. Instead, each process propagates punctuation to all outgoing channels when it receives corresponding punctuations from all input channels. If a process receives punctuations from all inputs, it is guaranteed that it will not receive elements that satisfy the predicate further due to FIFO network channels. The soft bound termination event $\langle eoss_{soft}, pred(m)\rangle$ is generated iff:
 
 \begin{align*}
 \forall q \in I_p, \exists punct_{qp} \in B_p, \forall m\in B : \neg pred(m)
 \end{align*}
 
-To satisfy the firm bound guarantee, one needs to block input channels which received punctuations until all other channels receive them. In~\cite{Carbone:2017:SMA:3137765.3137777} such behavior is called {\em watermark (punctuation) alignment}. The sendbox procedure should ensure the following order of elements processing to achieve firm bound:
+To satisfy the firm bound guarantee, one needs to hold elements in the sendbox until all punctuations have arrived from all input channels. In~\cite{Carbone:2017:SMA:3137765.3137777} such behavior is called {\em watermark (punctuation) alignment}. More formally, the sendbox procedure should ensure the following order of elements processing to achieve firm bound:
 
 \begin{align*}
 & \exists q \in I_p, e = \langle recv,m_{qp} \rangle >_p e^{'} = \langle recv,punct_{qp}\rangle \Longrightarrow \\ 
-& <proc, m_{qp}> >_p \langle eos_{soft}, pred(m)\rangle
+& <proc, m_{qp}> >_p \langle eoss_{soft}, pred(m)\rangle
 \end{align*}
 
-If this condition is satisfied, then $\langle eos_{firm}, pred(m)\rangle$ = $\langle eos_{soft}, pred(m)\rangle$ for the punctuations. The punctuations framework provides consistent termination events order by design because punctuations are naturally ordered with ordinary data elements within the processes.
+If this condition is satisfied, then $\langle eoss_{firm}, pred(m)\rangle$ = $\langle eoss_{soft}, pred(m)\rangle$ for the punctuations. The punctuations framework provides consistent termination events order by design because punctuations are naturally ordered with ordinary data elements within the processes.
 
 \subsection{Discussion}
 
