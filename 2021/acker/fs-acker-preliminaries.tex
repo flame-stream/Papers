@@ -97,10 +97,11 @@ Figure~\ref{punctuations_scheme} illustrates the punctuations framework. Green e
   \label{punctuations_scheme}
 \end{figure}
 
-Processes within SPE do not apply user-defined operators to punctuations. Instead, each process propagates punctuation to all outgoing channels when it receives corresponding punctuations from all input channels. If a process receives punctuations from all inputs, it is guaranteed that it will not receive elements that satisfy the predicate further due to FIFO network channels. The soft bound termination event $\langle eoss_{soft}, pred(m)\rangle$ is generated iff:
+Processes within SPE do not apply user-defined operators to punctuations. Instead, each process propagates punctuation to all outgoing channels when it receives corresponding punctuations from all input channels. If a process receives punctuations from all inputs, it is guaranteed that it will not receive elements that satisfy the predicate further due to FIFO network channels. Hence, the formal condition of soft bound termination event $\langle eoss_{soft}, pred(m)\rangle$ is the following:
 
 \begin{align*}
-\forall q \in I_p, \exists punct_{qp} \in B_p, \forall m\in B : \neg pred(m)
+& \langle eoss_{soft}, pred(m)\rangle \Longleftrightarrow \\ 
+& \forall q \in I_p, \exists punct_{qp} \in B_p, \forall m\in B : \neg pred(m)
 \end{align*}
 
 To satisfy the firm bound guarantee, one needs to hold elements in the sendbox until all punctuations have arrived from all input channels. In~\cite{Carbone:2017:SMA:3137765.3137777} such behavior is called {\em watermark (punctuation) alignment}. More formally, the sendbox procedure should ensure the following order of elements processing to achieve firm bound:
