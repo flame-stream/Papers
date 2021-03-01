@@ -15,25 +15,34 @@ Typically, distributed stream processing engines are shared-nothing runtimes tha
 
 A deployed physical graph is a distributed system and could be described in terms of Chandy-Lamport model~\cite{lamport}. In this model authors introduce \textit{events} that allows to observe a state of the system. Each event is presented in tuple of 5 elements $e = (p, s, s', c, M)$, where $p$ is one of the deployed processes, $s$ and $s'$ are state of the process before and after processing, $c$ one of network FIFO channels that connect processes with each other, and $M$ is a message generated during processing. The generated event $M$ come to a channel state $C$ until it will be received by destination process. Processes and channels forms a physical graph of the system $G=\{\Pi,\mathcal{E}\}$.
 
-In a stream processing engine we need to specify a process $p$ to reflect a specifics of this type of processing. Besides user-defined state each SPE process has a special storage for messages. We call this storage \textit{sendbox} $B_p$. This storage is needed for many reasons as will be discussed later in the paper. Here we justify the existence of \textit{sendbox} by necessity to send multiple events from one user-defined model to multiple recipients which contradicts with the original model. To manage the sendbox SPEs have a special agent. In our model we extend a role of this agent to inject a substream management there. Find a schematic representation of the model in Fig.~\ref{fig:spe_process}.
+In a stream processing engine we need to specify a process $p$ to reflect a specifics of this type of processing. Besides user-defined state each SPE process has a special storage for messages. We call this storage \textit{mailbox} $B_p$. This storage is needed for many reasons as will be discussed later in the paper. Here we justify the existence of \textit{mailbox} by necessity to send multiple events from one user-defined model to multiple recipients which contradicts with the original model. To manage the mailbox SPEs have a special agent. In our model we extend a role of this agent to inject a substream management there. Find a schematic representation of the model in Fig.~\ref{fig:spe_process}.
 
 With the specified process we need to introduce special cases of system events:
 \begin{itemize}
-    \item Communication events: $recv$, $send$, these events are executed by sendbox controller
+    \item Communication events: $recv$, $send$, these events are executed by mailbox controller
     \item Processing events: user-defined procedures are isolated here
     \item System events: consistency, substreams and other events in the system that provide its properties
 \end{itemize}
 
-Communication events are straightforward: $<recv, M> = (sendbox\_controller_p, B_p, B_p' = B_p\cup \{M\}, c_qp, M)$, $<send, M> = (sendbox\_controller_p, B_p, B_p' = B_p\setminus\{M\}, c_{p, dst(M)}, M)$. Note that we need to be able to get destination process directly from the message and in general message contains its source and destination, this allows us to abstract away from the physical channels which are unknown to the user-defined procedure that emits the event. As a practical case of this abstraction is a sharding scheme for some key: user-defined procedure emits event for some key and a system is responsible to find a proper physical channel to deliver this message.
+Communication events are straightforward: $\langle recv, M\rangle = (mb\_controller_p, B_p, B_p' = B_p\cup \{M\}, c_qp, M)$, $\langle send, M \rangle = (mb\_controller_p, B_p, B_p' = B_p\setminus\{M\}, c_{p, dst(M)}, M)$. Note that we need to be able to get destination process directly from the message and in general message contains its source and destination, this allows us to abstract away from the physical channels which are unknown to the user-defined procedure that emits the event. As a practical case of this abstraction is a sharding scheme for some key: user-defined procedure emits event for some key and a system is responsible to find a proper physical channel to deliver this message.
 
-Processing events are triggered by a process and allows to execute user-defined logic with the events provided by sendbox controller. Please note, that these events does not communicate with other processes and are isolated in the state of the SPE process. $<proc, M> = (func_p, s\setminus M, s \cup \{func_p(M)\}, null, null>$.
+Processing events are triggered by a process and allows to execute user-defined logic with the events provided by mailbox controller. Please note, that these events does not communicate with other processes and are isolated in the state of the SPE process. $\langle proc, M\rangle = (func_p, s\setminus M, s \cup \{func_p(M)\}, null, null)$.
 
 System events set depends on the system and will be defined latter in the description of particular implementation.
 
 Note that all events within the same process $p$ are totally ordered by a local causal order relation $<_p$: $e^{0}_p,e^{1}_p,...,e^{i}_p,...$. Atomicity of the events and their sequential nature allows a system to build guaranties for processing and state management.
 
 \subsection{Predicates on system events}
-As stated in the introduction we want to allow a user or a system itself to define predicates for events in the system, track their values for all messages in the system ($S = C \cup \cup_p B_P$) . This will give opportunity to define and track quantifier expressions, that could be basis of guarantee mechanisms.
+As stated in the introduction we want to allow a user or a system itself to define predicates for events in the system and track their values for entire system or its part. This will give opportunity to define and track quantifier expressions, that could be basis of guarantee mechanisms.
+
+Formally we define propositional formula $Pred$ for any event. In this paper we are interested in such $Pred$, that has limited lifespan: there is some point in time when the formula may become true at some events in the system and another point when it is guaranteed, that none of elements in the stream will satisfy $Pred$. More formally: $\forall p, \exists t_0^p, t_1^p: \exists e: e_{t_0^p} <_p e <_p e_{t_1^p}, Pred(e) \And \forall e': e_{t_1^p} <_p e', \neg Pred(e')$.
+
+Sometimes it is more practical to define predicates not on events, but on messages: ``the message received in time window $w$'', or ``user session id equals 0x0321da83'', etc. On the other hand, only events are ordered in the system and we will need this order in latter sections. To induce predicate on a message to predicate on event we use input messages for processing events. The other notation issue is that system put additional information for user-defined messages (such as source and recipient of the message) and we reference user-defines messages with $m$ and system messages as $M$. More formally $Pred(e) = (e=\langle proc_p, M \rangle \And pred(m))$. We reference message predicates instead of event predicates throughout the paper and speaking on the order of messages we use the order of associated events.
+
+We defined substream bounds for each individual process, but they depend on input from other processes in the system and to get the exact bound is a challenging task that requires synchronization between processes. To stay in asynchronous setting a system requires a special mechanism that estimates substream bound for each process. Substream management problem is to define such a mechanism.
+
+In our system paradigm we need to define a system event, that indicates the bound of a substream for a process. We call this termination event or end-of-substream event
+$\langle eoss, pred(m)\rangle = (mb\_controller_p, B_p, B_p\cup eoss(pred), null, null)$. Different problems require various properties of these termination events.
 
 \subsubsection{Soft bound}
 
@@ -114,7 +123,7 @@ Processes within SPE do not apply user-defined operators to punctuations. Instea
 & \forall q \in I_p, \exists punct_{qp} \in B_p, \forall m\in B : \neg pred(m)
 \end{align*}
 
-To satisfy the firm bound guarantee, one needs to hold elements in the sendbox until all punctuations have arrived from all input channels. In~\cite{Carbone:2017:SMA:3137765.3137777} such behavior is called {\em watermark (punctuation) alignment}. More formally, the sendbox procedure should ensure the following order of elements processing to achieve firm bound:
+To satisfy the firm bound guarantee, one needs to hold elements in the mailbox until all punctuations have arrived from all input channels. In~\cite{Carbone:2017:SMA:3137765.3137777} such behavior is called {\em watermark (punctuation) alignment}. More formally, the mailbox procedure should ensure the following order of elements processing to achieve firm bound:
 
 \begin{align*}
 & \exists q \in I_p, e = \langle recv,m_{qp} \rangle >_p e^{'} = \langle recv,punct_{qp}\rangle \Longrightarrow \\ 
