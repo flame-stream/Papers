@@ -88,7 +88,8 @@ A vital question here is how to implement the assignment of ordered labels $t(m)
 
 \begin{enumerate}
     \item {\bf Cyclic dataflows support.} Because the tracking agent is monitoring for the properties of in-flight elements without direct injection of service items into a dataflow, \tracker\ does not have a problem of throwing them through a cycle.
-    \item {\bf Low network overhead.} As we demonstrate further, processes can send reports once per a fixed time period, so there is a constant time of such reports per a finite substream. The reports require $O(||\Pi||)$ extra messages, while the NEOSS events $O(K||\Pi||)$. The total amount is $O(K||\Pi|| + ||\Pi||) = O(K||\Pi||)$ that is optimal for the substream management problem. 
+    \item {\bf Low network overhead.} Processes can send reports once per a fixed time period, so there is a constant time of such reports per a finite substream. The reports require $O(||\Pi||)$ extra messages, while the NEOSS events $O(K||\Pi||)$. The total amount is $O(K||\Pi|| + ||\Pi||) = O(K||\Pi||)$ that is optimal for the substream management problem. 
+    \item {\bf Low latency and impact on SPE throughput.} In \tracker, service traffic goes through other network channels than data elements. It can reduce latency between substream termination and the corresponding event because NEOSS cannot be blocked by ordinary elements. Together with the low amount of service traffic, this scheme does not significantly reduce the throughput of an SPE, as we show in Section~\ref{fs-experiments}.
 \end{enumerate}
 
 At the same time, \tracker\ can provide both soft and firm bound guarantees along with the consistent order of notifications. A limitation of the \tracker\ framework is a potentially more complex implementation than punctuations. The details of the straightforward implementation of the \tracker\ framework are discussed in the next section.
