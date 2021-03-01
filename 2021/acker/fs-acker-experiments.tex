@@ -112,27 +112,27 @@
     \caption{Service network traffic of marker-based approach and various \tracker\ setups}
     \label{traffic_plots}
 \end{figure*}
-In previous sections of the paper we put several statements out: \tracker\ framework provide low service traffic, it has low notification latency, system throughput does not depend on the substream size. In experimental part of the paper we will demonstrate these properties on synthetic and real-world examples. 
+In previous sections of the paper, we put several statements out: \tracker\ framework provides low service traffic, low latency between the actual substream termination and termination event receiving, and SPE throughput does not depend on the substream size. In the experimental part of the paper, we will demonstrate these properties on synthetic and real-world examples. 
 
 As a baseline approach, we utilize the punctuations-based method employed in many state-of-the-art stream processing systems such as Flink~\cite{Carbone:2017:SMA:3137765.3137777}, Storm~\cite{apache:storm:state}, Heron~\cite{Kulkarni:2015:THS:2723372.2742788}, IBM Streams~\cite{jacques2016consistent}, etc. To the best of our knowledge, the punctuation framework is the only existing general-purpose substreams management technique.
 
-Our goal is to find the difference in the stream processing engine behavior with the change of the tracking mechanism from the baseline to \tracker. We implemented both methods on top of an open-source distributed streaming engine called \FlameStream. This SPE has similar to state-of-the-art stream processing systems (Flink, Storm, etc.) functionality and use-cases. None of system-specific features were exploit during the implementation of substream management methods. All experiments are performed on virtual machines with a dual-core CPU and 4 GB RAM from one of the major cloud providers. 
+Our goal is to find the difference in the stream processing engine behavior with the change of the tracking mechanism from the baseline to \tracker. We implemented both methods on top of an open-source distributed streaming engine called \FlameStream. This SPE has similar to state-of-the-art stream processing systems (Flink, Storm, etc.) functionality and use-cases. None of the system-specific features were exploited during the implementation of substream management methods. All experiments are performed on virtual machines with a dual-core CPU and 4 GB RAM from one of the major cloud providers. 
 
-In the next sections we will explore our system in five experimental setups:
+In the next sections, we will explore our system in five experimental setups:
 % \begin{description}
     
-    \noindent \textbf{General performance:} in this setup we ensure, that our implementation delivers state-of-the-art performance for baseline tracking mechanism to bind our results with those known from the literature.
+    \noindent \textbf{General performance:} in this setup, we ensure that our implementation of punctuations delivers adequate performance. This way, we check that our conclusions are valid for state-of-the-art SPEs that use punctuations. 
     
-    \noindent \textbf{Notification latency:} we explore a notification latency of the \tracker\ and punctuations approaches for both synthetic and real-world workloads in soft- and firm-bound cases.
+    \noindent \textbf{Notification latency:} we explore an interval duration between a moment when a substream ends and the reception of the termination event for this substream. We compare notification latency of the \tracker\ and punctuations approaches for both synthetic and real-world workloads in soft and firm bound cases.
     
-    \noindent \textbf{Maximum throughput:} in this case we study an influence of the notification mechanism to maximum throughput of the system using synthetic workload.
+    \noindent \textbf{Maximum SPE throughput:} we study the influence of the notification mechanism on the maximum throughput of the system using the synthetic workload. This experiment shows an overhead induces by a substream management mechanism on regular data processing.
     
-    \noindent \textbf{Service traffic:} the last setup aims to demonstrate asymptotic behavior of competitive approaches.
+    \noindent \textbf{Substreams management for cyclic graphs:} \tracker\ framework supports substreams management for cyclic dataflows. In this setup, we demonstrate the benefits of this approach for a novel problem setup: state smart caching.
     
-    \noindent \textbf{Substreams management for cyclic graphs:} \tracker\ framework allows to track substreams in cyclic environment, in this setup we demonstrate the benefits of this approach for smart caching.
+    \noindent \textbf{Service traffic:} the last setup aims to demonstrate the asymptotic behavior of competitive approaches. We show that our theoretical estimation meets practical measurements.
 % \end{description}
 
-In our study we use a common synthetic workload shown in Fig.~\ref{fig:physical_graph}. All vertices pass an input element to the next operation. On each step items are re-partitioned (round-robin). This shape of physical execution graph allows to measure properties of the system with the growth of key switches in a workload. This setup does not induce possible overhead by heavy computations while covering many realistic scenarios. Graphs with few vertices (under 30) may fit almost any acyclic streaming pipeline~\cite{akidau2018streaming}. Longer instances of this workload corresponds to flattened iterative dataflows such as PageRank or Connected Components~\cite{Murray:2013:NTD:2517349.2522738, xu2016efficient}. We reference this synthetic workload as RR-$N$, where $N$ is the number of steps.
+In our study, we use a common synthetic workload shown in Fig.~\ref{fig:physical_graph}. All vertices pass an input element to the next operation. On each step, items are re-partitioned (round-robin). This shape of the physical execution graph allows us to measure the properties of the system with the growth of key switches in a workload. This setup does not induce possible overhead by heavy computations while covering many realistic scenarios. Graphs with few vertices (under 30) may fit almost any acyclic streaming pipeline~\cite{akidau2018streaming}. Longer instances of this workload correspond to flattened iterative dataflows such as PageRank or Connected Components~\cite{Murray:2013:NTD:2517349.2522738, xu2016efficient}. We reference this synthetic workload as RR-$N$, where $N$ is the number of steps.
 
 \subsection{General system performance}
 To compare tracking mechanisms we have to implement them on top of a single engine. The difficulty here is that tracking mechanism is usually a core part of SPE and the implementation is often optimized for it. To exclude preference to certain tracking type we use \FlameStream. This is open-source Java-based SPE that allows to customize tracking mechanism by its design. This SPE is not widely used in the literature and we need to give a reader better reference in terms of end2end performance. In our first experiment we compare the latency and throughput of the \FlameStream\ with the baseline tracking mechanism and Apache Flink that uses the same tracking and is known to a broader audience.
