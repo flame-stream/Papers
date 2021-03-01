@@ -114,7 +114,7 @@
 \end{figure*}
 In previous sections of the paper, we put several statements out: \tracker\ framework provides low service traffic, low latency between the actual substream termination and termination event receiving, and SPE throughput does not depend on the substream size. In the experimental part of the paper, we will demonstrate these properties on synthetic and real-world examples. 
 
-As a baseline approach, we utilize the punctuations-based method employed in many state-of-the-art stream processing systems such as Flink~\cite{Carbone:2017:SMA:3137765.3137777}, Storm~\cite{apache:storm:state}, Heron~\cite{Kulkarni:2015:THS:2723372.2742788}, IBM Streams~\cite{jacques2016consistent}, etc. To the best of our knowledge, the punctuation framework is the only existing general-purpose substreams management technique.
+As a baseline approach, we utilize the punctuations-based method employed in many state-of-the-art stream processing systems such as Flink~\cite{Carbone:2017:SMA:3137765.3137777}, Storm~\cite{apache:storm:state}, Heron~\cite{Kulkarni:2015:THS:2723372.2742788}, IBM Streams~\cite{jacques2016consistent}, etc. To the best of our knowledge, the punctuation framework is the only existing general-purpose substream management technique.
 
 Our goal is to find the difference in the stream processing engine behavior with the change of the tracking mechanism from the baseline to \tracker. We implemented both methods on top of an open-source distributed streaming engine called \FlameStream. This SPE has similar to state-of-the-art stream processing systems (Flink, Storm, etc.) functionality and use-cases. None of the system-specific features were exploited during the implementation of substream management methods. All experiments are performed on virtual machines with a dual-core CPU and 4 GB RAM from one of the major cloud providers. 
 
@@ -129,7 +129,7 @@ In the next sections, we will explore our system in five experimental setups:
     
     \noindent \textbf{Maximum SPE throughput:} we study the influence of the notification mechanism on the maximum throughput of the system using the synthetic workload. This experiment shows an overhead induces by a substream management mechanism on regular data processing.
     
-    \noindent \textbf{Substreams management for cyclic graphs:} \tracker\ framework supports substreams management for cyclic dataflows. In this setup, we demonstrate the benefits of this approach for a novel problem setup: state smart caching.
+    \noindent \textbf{Substream management for cyclic graphs:} \tracker\ framework supports substream management for cyclic dataflows. In this setup, we demonstrate the benefits of this approach for a novel problem setup: state smart caching.
 
 % \end{description}
 
@@ -238,7 +238,7 @@ For the windowed join scenario, we apply NEXMark benchmark~\cite{tucker2008nexma
 
 Figure~\ref{fig:nexmark} illustrates the results. The notification latency for \tracker\ is under 50ms for all setups, while the punctuations latency grows up to 300ms on 30 nodes. After that it fluctuates slightly. This behavior can be explained by the fact that process waits for punctuations from all channels to produce termination event. However, with the growth of machines number, the probability that some node delays punctuation increases. After some limit (30 nodes in our case), many nodes start to delay punctuations, so the latency achieves its maximum. 
 
-\subsection{Substreams management for cyclic graphs}
+\subsection{Substream management for cyclic graphs}
 
 \subsubsection{State snapshooting}
 \begin{figure*}[t!]
@@ -294,7 +294,7 @@ Figure~\ref{snapshot_spikes} demonstrates SPE latency spikes during state snapsh
 % Low notification latency leads to a smaller number of elements that need to wait (be buffered), as it is shown in Figure~\ref{snapshot_buffered}. The smaller number of buffered records causes lower buffering duration that implies lower spikes in general. Note that the vast difference in the number of buffered elements does not necessarily imply the vast difference in total buffering duration because most buffered elements wait for a tiny amount of time. This experiment indicates that \tracker\ can provide better results for a common problem that is traditionally solved using punctuations.
 
 \subsection{Maximum throughput}
-In this experiment our goal is to find how the substreams management influence maximum throughput of an SPE. We measure the median latency of RR-30 workload using cluster of 20 nodes, depending on the input rate (input elements per millisecond). The growth of median latency indicates system overloading. Input rate that corresponds to the point where latency starts to grow indicates a {\em sustainable throughput}~\cite{karimov2018benchmarking}.
+In this experiment our goal is to find how the substream management influence maximum throughput of an SPE. We measure the median latency of RR-30 workload using cluster of 20 nodes, depending on the input rate (input elements per millisecond). The growth of median latency indicates system overloading. Input rate that corresponds to the point where latency starts to grow indicates a {\em sustainable throughput}~\cite{karimov2018benchmarking}.
 
 Figure~\ref{throughput_overhead} shows that system without tracking at all starts to be overloaded since $\sim 9K$ requests (items) per second input rate. The system with the finest-grained centralized \tracker\ setup provides $\sim 7K$ RPS sustainable throughput. Overloading with the punctuations-based approach depends on the granularity of tracking: the finest-grained setup does not sustain even $1K$ RPS, while the setup with the granularity of 10 has $\sim 2K$ RPS throughput. Punctuations achieve similar to centralized \tracker\ throughput ($\sim 5K$ RPS) only when they are injected once per 50 input elements.
 
@@ -307,7 +307,7 @@ This experiment shows that punctuations significantly bound throughput of regula
 %   \label{throughput_overhead}
 % \end{figure}
 
-% \subsection{Substreams management for cyclic graphs}
+\subsection{Substream management for cyclic graphs}
 % \begin{figure}[htbp]
 %   \centering
 %   \includegraphics[width=0.40\textwidth]{pics/dgc_lru_depth_search.pdf}
