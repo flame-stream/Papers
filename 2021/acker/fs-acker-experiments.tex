@@ -238,8 +238,6 @@ For the windowed join scenario, we apply NEXMark benchmark~\cite{tucker2008nexma
 
 Figure~\ref{fig:nexmark} illustrates the results. The notification latency for \tracker\ is under 50ms for all setups, while the punctuations latency grows up to 300ms on 30 nodes. After that it fluctuates slightly. This behavior can be explained by the fact that process waits for punctuations from all channels to produce termination event. However, with the growth of machines number, the probability that some node delays punctuation increases. After some limit (30 nodes in our case), many nodes start to delay punctuations, so the latency achieves its maximum. 
 
-\subsection{Substream management for cyclic graphs}
-
 \subsubsection{State snapshooting}
 \begin{figure*}[t!]
     \begin{subfigure}[b]{0.32\textwidth}
