@@ -109,7 +109,7 @@
             \caption{Traffic by tracking frequency}
             \label{traffic_granularity}
     \end{subfigure}
-    \caption{Service network traffic of marker-based approach and various \tracker\ setups}
+    \caption{Service network traffic of punctuations approach and various \tracker\ setups}
     \label{traffic_plots}
 \end{figure*}
 In previous sections of the paper, we put several statements out: \tracker\ framework provides low service traffic, low latency between the actual substream termination and termination event receiving, and SPE throughput does not depend on the substream size. In the experimental part of the paper, we will demonstrate these properties on synthetic and real-world examples. 
@@ -191,9 +191,9 @@ There are four experiments in this setting. We will first measure notification l
 
 In this experiment, we measure the notification latency as an interval duration between a promise from the data source that it will never generate substream elements and the reception of the termination event for this substream. As an experimental workload, we use synthetic workload RR-$N$. We investigate the dependency between the notification latency and cluster sizes, the length $N$ of the workload, and the granularity of tracking (number of elements within a substream). Figure~\ref{notification_latency} shows the results of the experiment. 
 
-The notification latency of a punctuations-based technique depends on the graph and cluster sizes and the granularity of tracking as figures~\ref{notification_graph},\ref{notification_machines}, and~\ref{notification_granularity} indicate. These results are in-line with the overhead induced by markers shown in Section~\ref{fs-acker-punctuations-limitations}. Notification latency of \tracker\ slightly fluctuates but does not directly depend on the investigated parameters. One can also note that local \tracker\ optimization, as well as distributed version, do not induce heavy overhead on the latency.
+The notification latency of a punctuations-based technique depends on the graph and cluster sizes and the granularity of tracking as figures~\ref{notification_graph},\ref{notification_machines}, and~\ref{notification_granularity} indicate. These results are in-line with the overhead induced by punctuations shown in Section~\ref{fs-acker-punctuations-limitations}. Notification latency of \tracker\ slightly fluctuates but does not directly depend on the investigated parameters. One can also note that local \tracker\ optimization, as well as distributed version, do not induce heavy overhead on the latency.
 
-Such a significant difference in latency between the markers and \tracker\ is explained by the fact that each operator in a dataflow must wait for markers from all partitions of the previous operator to send it further. This behavior ensures that markers do not overtake ordinary records that guarantee the correctness of this approach.
+Such a significant difference in latency between the punctuations and \tracker\ is explained by the fact that each operator in a dataflow must wait for punctuations from all partitions of the previous operator to send it further. This behavior ensures that punctuations do not overtake ordinary records that guarantee the correctness of this approach.
 
 \subsubsection{Scalability of \tracker }
 % https://gist.github.com/faucct/546f5617b958349a125449926373b780
@@ -263,9 +263,9 @@ Figure~\ref{snapshot_spikes} demonstrates SPE latency spikes during state snapsh
 \subsection{Maximum throughput}
 In this experiment our goal is to find how the substreams management influence maximum throughput of an SPE. We measure the median latency of RR-30 workload using cluster of 20 nodes, depending on the input rate (input elements per millisecond). The growth of median latency indicates system overloading. Input rate that corresponds to the point where latency starts to grow indicates a {\em sustainable throughput}~\cite{karimov2018benchmarking}.
 
-Figure~\ref{throughput_overhead} shows that system without tracking at all starts to be overloaded since $\sim 9K$ requests (items) per second input rate. The system with the finest-grained centralized \tracker\ setup provides $\sim 7K$ RPS sustainable throughput. Overloading with the marker-based approach depends on the granularity of tracking: the finest-grained setup does not sustain even $1K$ RPS, while the setup with the granularity of 10 has $\sim 2K$ RPS throughput. Markers achieve similar to centralized \tracker\ throughput ($\sim 5K$ RPS) only when they are injected once per 50 input elements.
+Figure~\ref{throughput_overhead} shows that system without tracking at all starts to be overloaded since $\sim 9K$ requests (items) per second input rate. The system with the finest-grained centralized \tracker\ setup provides $\sim 7K$ RPS sustainable throughput. Overloading with the punctuations-based approach depends on the granularity of tracking: the finest-grained setup does not sustain even $1K$ RPS, while the setup with the granularity of 10 has $\sim 2K$ RPS throughput. Punctuations achieve similar to centralized \tracker\ throughput ($\sim 5K$ RPS) only when they are injected once per 50 input elements.
 
-This experiment shows that punctuations significantly bound throughput of regular processing within the fine-grained setups. It is explained by the heavy extra network traffic that we demonstrated in the Section~\ref{exp_network_traffic}. Note that this additional traffic goes through the same network channels as ordinary data items to ensure that markers do not overtake ordinary records. On the other hand, \tracker\ provides less additional system load due to lower extra network usage and the exploiting of additional network channels.
+This experiment shows that punctuations significantly bound throughput of regular processing within the fine-grained setups. It is explained by the heavy extra network traffic that we demonstrated in the Section~\ref{exp_network_traffic}. Note that this additional traffic goes through the same network channels as ordinary data items to ensure that punctuations do not overtake ordinary records. On the other hand, \tracker\ provides less additional system load due to lower extra network usage and the exploiting of additional network channels.
 
 \begin{figure}[htbp]
   \centering
