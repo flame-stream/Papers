@@ -13,7 +13,7 @@ First, in this section, we formalize the notion of a stream processing engine, b
 
 Typically, distributed stream processing engines are shared-nothing runtimes that continuously ingest input elements, transform them according to a logical dataflow graph, and deliver output elements. The logical dataflow graph consists of user-defined operators. Operators can be stateless or stateful: an output element may depend on the current state and the corresponding input element. A logical graph is mapped to a physical, distributed graph upon deployment. Commonly, a single logical operator can be deployed on multiple computational nodes. Further, we denote physical instances of logical operators as {\em processes}.
 
-A deployed physical graph is a distributed system and could be described in terms of Chandy-Lamport model~\cite{lamport}. In this model authors introduce \textit{events} that allows to observe a state of the system. Each event is presented in tuple of 5 elements $e = (p, s, s', c, M)$, where $p$ is one of the deployed processes, $s$ and $s'$ are state of the process before and after processing, $c$ one of network FIFO channels that connect processes with each other, and $M$ is a message generated during processing. The generated event $M$ come to a channel state $C$ until it will be received by destination process. Processes and channels forms a physical graph of the system $G=\{\Pi,\mathcal{E}\}$.
+A deployed physical graph is a distributed system and could be described in terms of Chandy-Lamport model~\cite{Chandy:1985:DSD:214451.214456}. In this model authors introduce \textit{events} that allows to observe a state of the system. Each event is presented in tuple of 5 elements $e = (p, s, s', c, M)$, where $p$ is one of the deployed processes, $s$ and $s'$ are state of the process before and after processing, $c$ one of network FIFO channels that connect processes with each other, and $M$ is a message generated during processing. The generated event $M$ come to a channel state $C$ until it will be received by destination process. Processes and channels forms a physical graph of the system $G=\{\Pi,\mathcal{E}\}$.
 
 In a stream processing engine we need to specify a process $p$ to reflect a specifics of this type of processing. Besides user-defined state each SPE process has a special storage for messages. We call this storage \textit{mailbox} $B_p$. This storage is needed for many reasons as will be discussed later in the paper. Here we justify the existence of \textit{mailbox} by necessity to send multiple events from one user-defined model to multiple recipients which contradicts with the original model. To manage the mailbox SPEs have a special agent. In our model we extend a role of this agent to inject a substream management there. Find a schematic representation of the model in Fig.~\ref{fig:spe_process}.
 
@@ -32,7 +32,7 @@ System events set depends on the system and will be defined latter in the descri
 
 Note that all events within the same process $p$ are totally ordered by a local causal order relation $<_p$: $e^{0}_p,e^{1}_p,...,e^{i}_p,...$. Atomicity of the events and their sequential nature allows a system to build guaranties for processing and state management.
 
-\subsection{Predicates on system events}
+\subsection{Substream management events}
 As stated in the introduction we want to allow a user or a system itself to define predicates for events in the system and track their values for entire system or its part. This will give opportunity to define and track quantifier expressions, that could be basis of guarantee mechanisms.
 
 Formally we define propositional formula $Pred$ for any event. In this paper we are interested in such $Pred$, that has limited lifespan: there is some point in time when the formula may become true at some events in the system and another point when it is guaranteed, that none of elements in the stream will satisfy $Pred$. More formally: $\forall p, \exists t_0^p, t_1^p: \exists e: e_{t_0^p} <_p e <_p e_{t_1^p}, Pred(e) \And \forall e': e_{t_1^p} <_p e', \neg Pred(e')$.
@@ -101,9 +101,21 @@ Let $e^{*}_1$ and $e^{*}_2$ be the last elements of substreams defined by predic
 e^{*}_1 >_p e^{*}_2 \Longrightarrow \langle eoss, pred_1(m)\rangle >_p \langle eoss, pred_2(m)\rangle
 \end{align*}
 
-\subsection{Punctuations framework}
+\subsubsection{Optimal traffic overhead}
 
-\subsubsection{Framework overview}
+A vital performance property of a substream management system is the amount of extra network traffic. Let $|\Pi|$ be a number of processes, and $K$ be a number of substreams. 
+
+\begin{lemma}
+The network overhead induced by a substream management system cannot be lower than $O(K|\Pi|)$. 
+\end{lemma}
+\begin{proof}
+When a substream management system detects the end of a substream, it should inform processes about that. In a general case, e.g., for a state snapshotting problem, it should inform all (stateful) processes. Hence, at least one network message (termination notification) must be sent to each process for each substream.
+\end{proof}
+
+Despite this lemma's simplicity, we will further use it to figure out how far is some substream management system from this bound. We can also claim a solution as {\em optimal} if its extra traffic estimation is equal to the lower bound from the lemma. In the next sections, we demonstrate that it is possible to design a substream management system that achieves optimal network traffic overhead.
+
+\subsection{Punctuations framework}
+\label{fs-acker-punctuations}
 
 The main idea behind the punctuations framework is to divide the stream into substreams by injection of special elements that bear predicate $punct$. Punctuations are injected directly into a system as ordinary data elements by SPE or by external data producers. The injector promises that all further produced records do not satisfy the predicate. Hence, the punctuation itself defines the ``border'' of a substream.
 
@@ -127,32 +139,13 @@ To satisfy the firm bound guarantee, one needs to hold elements in the mailbox u
 
 \begin{align*}
 & \exists q \in I_p, e = \langle recv,m_{qp} \rangle >_p e^{'} = \langle recv,punct_{qp}\rangle \Longrightarrow \\ 
-& <proc, m_{qp}> >_p \langle eoss_{soft}, pred(m)\rangle
+& \langle proc, m_{qp}\rangle >_p \langle eoss_{soft}, pred(m)\rangle
 \end{align*}
 
 If this condition is satisfied, then $\langle eoss_{firm}, pred(m)\rangle$ = $\langle eoss_{soft}, pred(m)\rangle$ for the punctuations. The punctuations framework provides consistent termination events order by design because punctuations are naturally ordered with ordinary data elements within the processes.
 
-\subsection{Discussion}
-
-\subsubsection{Limitations of punctuations}
-
-\label{fs-acker-punctuations-limitations}
-
 While the punctuations approach is robust and easy-to-implement, it has several limitations. In the punctuations framework, the information about the ending of a substream is propagated using ordinary data elements via the data flow network channels. It implies that punctuations are not applicable for cyclic dataflows because a process that receives elements from a cyclic channel will never receive punctuations from this channel~\cite{carbone2018scalable}.
 
-The high network overhead forms another limitation. This method's amount of service traffic is $O(K||\Pi||^2)$, where $||\Pi||$ is the number of processes and $K$ is the number of substreams. As we can see, this estimation is far from the lower bound ($O(||\Pi||)$). It is quadratic in the number of processes, as each process should propagate punctuations to all output channels. 
+The high network overhead forms another limitation. This method's amount of service traffic is $O(K|\Pi|^2)$, where $|\Pi|$ is the number of processes and $K$ is the number of substreams. As we can see, this estimation is far from the lower bound ($O(|\Pi|)$). It is quadratic in the number of processes, as each process should propagate punctuations to all output channels. 
 
-Substreams can be {\em fine-grained}: for example, each processing key can spawn a substream within a state pruning problem. If there are a lot of small substreams, an inefficient substream management system can reduce the throughput of an SPE itself~\cite{Li:2008:OPN:1453856.1453890} or affect the performance of state checkpointing~\cite{zhang2021research}. As we demonstrate further, the punctuation technique adds significant performance overhead on regular processing for small substreams (frequent punctuations injection).
-
-\subsubsection{Optimal traffic overhead}
-
-A vital performance property of a substream management system is the amount of extra network traffic. Let $||\Pi||$ be a number of processes, and $K$ be a number of substreams. 
-
-\begin{lemma}
-The network overhead induced by a substream management system cannot be lower than $O(K||\Pi||)$. 
-\end{lemma}
-\begin{proof}
-When a substream management system detects the end of a substream, it should inform processes about that. In a general case, e.g., for a state snapshotting problem, it should inform all (stateful) processes. Hence, at least one network message (termination notification) must be sent to each process for each substream.
-\end{proof}
-
-Despite this lemma's simplicity, we will further use it to figure out how far is some substream management system from this bound. We can also claim a solution as {\em optimal} if its extra traffic estimation is equal to the lower bound from the lemma. In the next sections, we demonstrate that it is possible to design a substream management system that achieves optimal network traffic overhead.
+Substreams can be {\em fine-grained}: for example, each user session defines a substream. If there are a lot of small substreams, an inefficient substream management system can reduce the throughput of an SPE itself~\cite{Li:2008:OPN:1453856.1453890} or affect the performance of state checkpointing~\cite{zhang2021research}. As we demonstrate further, the punctuation technique adds significant performance overhead on regular processing for small substreams (frequent punctuations injection).

@@ -4,12 +4,7 @@ In the previous section, we introduced a general schema of the \tracker\ framewo
 
 \subsection{Bound guarantees}
 
-As we stated earlier, each process sends to tracking agent the SND and RCV reports about each sending or receiving event $e = <action,m>$:
-\begin{enumerate}
-    \item $action$: send or receive.
-    \item $pred(m)$: the result of applying a substream predicate.
-    \item process (or {\em segment}) identifier.
-\end{enumerate}
+As we stated earlier, each process sends to tracking agent the SND and RCV reports about each sending or receiving event which contain process (or {\em segment}) identifier and if this event satisfies predicate $pred(m)$.
 
 The tracking agent aggregates this information into the table illustrated in Table~\ref{tracker-table-simple}. Tracking agent builds for each predicate an indicator if a {\em graph segment} contains in-flight elements satisfying the predicate. Segments are subgraphs that incapsulate cycles. NEOSS that ensures soft substream end bound can be sent for a subgraph if all upstream subgraphs do not contain the corresponding elements. The substream ends for the whole graph if all segments do not contain elements satisfying the prodicate~\footnote{Data source should also guarantee that it will not spawn any elements from this substream}. Therefore, the soft bound termination events for predicates $h(x)$ and $z(x)$ should be generated.
 
@@ -17,6 +12,7 @@ The tracking agent aggregates this information into the table illustrated in Tab
 \caption{\tracker\ table: a general example}
   \label{tracker-table-simple}
   \centering
+  \small
   \begin{tabular}{|c|c|c|>{\bfseries}c|} 
     \hline
     Notified & Predicate & Segment & Substream elements  \\ \hline \hline
@@ -29,14 +25,14 @@ The tracking agent aggregates this information into the table illustrated in Tab
   \end{tabular}
 \end{table}
 
-A graph shown in Figure~\ref{fig:tracker-acker-comparison} illustrates the notion of segments. This graph has two segments: $A$ and $B$. Note that according to Table~\ref{tracker-table-simple}, the NEOSS for predicate $q(x)$ can be sent for a segment $A$, but not for a segment $B$. This behavior is similar to punctuations: NEOSS can be spawned earlier for the upstream processes.
+% A graph shown in Figure~\ref{fig:tracker-acker-comparison} illustrates the notion of segments. This graph has two segments: $A$ and $B$. Note that according to Table~\ref{tracker-table-simple}, the NEOSS for predicate $q(x)$ can be sent for a segment $A$, but not for a segment $B$. This behavior is similar to punctuations: NEOSS can be spawned earlier for the upstream processes.
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.3\textwidth]{pics/segments-example.pdf}
-  \caption{Graph segmentation example}
-  \label{fig:tracker-acker-comparison}
-\end{figure}
+% \begin{figure}[htbp]
+%   \centering
+%   \includegraphics[width=0.3\textwidth]{pics/segments-example.pdf}
+%   \caption{Graph segmentation example}
+%   \label{fig:tracker-acker-comparison}
+% \end{figure}
 
 There are several possible methods to build the indicator that the segment contains elements from a substream using the reports from processes. Our implementation uses the trick applied in Apache Storm to monitor the completeness of processing~\cite{apache:storm:acker}. 
 
@@ -59,6 +55,7 @@ Table~\ref{tracker-table-xor} illustrates the actual \tracker\ table for the men
 \caption{\tracker\ table: an example with XORing technique}
   \label{tracker-table-xor}
   \centering
+  \small
   \begin{tabular}{|c|c|c|>{\bfseries}c|>{\bfseries}c|} 
     \hline
     Notified & Predicate & Segment & Segment XOR & XOR  \\ \hline \hline
@@ -75,7 +72,7 @@ As we described earlier, to ensure the firm bound guarantee, one needs to hold e
 
 Due to the commutativity of XOR, we can optimize tracking agent incoming traffic by aggregating reports locally within the processes. For each process, we introduce a {\em local tracking agent} component. It serves as a mediator between the process and the global agent, buffering the outgoing reports and flushing them periodically. 
 
-The flushing window is the parameter that allows us to balance between the service traffic and latency between the actual substream termination (the event from data producer) and termination event. Note that substreams last a finite time period by definition, so we assume that each process sends aggregated reports a constant number of times that does not depend on the number of substreams and processes. Therefore, the amount of extra network traffic for the reports is $O(||\Pi||)$, so the total estimation with the overhead on the notifications is $O(K||\Pi||)$.
+The flushing window is the parameter that allows us to balance between the service traffic and latency between the actual substream termination (the event from data producer) and termination event. Note that substreams last a finite time period by definition, so we assume that each process sends aggregated reports a constant number of times that does not depend on the number of substreams and processes. Therefore, the amount of extra network traffic for the reports is $O(|\Pi|)$, so the total estimation with the overhead on the notifications is $O(K|\Pi|)$.
 
 \subsection{Consistent termination events order}
 
@@ -87,6 +84,7 @@ Table~\ref{tracker-table-oder} illustrates the \tracker\ table in case of consis
 \caption{\tracker\ table: an example with consistent NEOSS order}
   \label{tracker-table-oder}
   \centering
+  \small
   \begin{tabular}{|c|c|>{\bfseries}c|c|} 
     \hline
     Notified & Predicate & min t(x) &  XOR  \\ \hline \hline
@@ -116,7 +114,7 @@ This fact allows us to define $t(x)$ such that $t(x) = [s(x) / \delta]$. This wa
 
 The tracking agent accumulates all the service traffic from the entire system. To ensure scalability, we introduce a distributed version of the tracking agent.
 
-A straightforward approach is to partition predicates between the shards of the tracking agent. For example, one shard can handle all reports for the predicate $h(x)$, while the second all reports for the predicate $q(x)$. Note that the network traffic complexity remains the same $O(K||\Pi||)$ because each process sends each report to only a single shard depending on the predicate.
+A straightforward approach is to partition predicates between the shards of the tracking agent. For example, one shard can handle all reports for the predicate $h(x)$, while the second all reports for the predicate $q(x)$. Note that the network traffic complexity remains the same $O(K|\Pi|)$ because each process sends each report to only a single shard depending on the predicate.
 
 The main problem regarding this approach is to enforce the consistent NEOSS order. Centralized agent sends NEOSS through the FIFO network channels, so the NEOSS elements for the same processes cannot be reordered. There can be a race between NEOSS from various shards due to asynchronous network channels in the distributed case.
 

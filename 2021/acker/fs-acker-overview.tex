@@ -1,7 +1,5 @@
 \label{fs-acker-tracker}
 
-\subsection{Overview}
-
 This section introduces a novel substream management framework called \tracker\ that is suitable for the cyclic dataflows and achieves a lower bound of network overhead. We also demonstrate that it provides all lifespan event properties defined in the previous section.
 
 A substream management system should inform all processes that a substream ends, so the amount of extra traffic cannot be lower than $O(||\Pi||)$. To achieve this lower bound, one can apply an additional agent (process) that receives information about substreams from processes and sends back information about terminated substreams. 
@@ -33,45 +31,34 @@ This way of propagation the information about substreams can be more efficient i
   \label{tracker_scheme}
 \end{figure}
 
-\subsection{Discussion}
-
-\subsubsection{Answering Q1: How to organize monitoring of in-flight elements?}
-Assume that each process sends to tracking agent the following reports about each send or receive event $e = <action,m_{qp}>, \forall q,p \in \Pi$:
-\begin{enumerate}
-    \item $action$: send or receive.
-    \item $pred(m)$: the result of applying a substream predicate.
-    \item process identifier.
-\end{enumerate}
+\subsection{Answering Q1: How to organize monitoring of in-flight elements?}
+Assume that each process sends to tracking agent the following reports about each send or receive event which contain process (or {\em segment}) identifier and if this event satisfies predicate $pred(m)$.
 
 Further in this paper, we will denote them as {\em SND report} and {\em RCV report}. Note that the result of applying predicates can be a vector if we are tracking multiple substreams. Process identifier is an optional field that can be used to send notifications independently for various processes or parts of the physical graph.
 
 The tracking agent can monitor the existing substreams: if there are no reports for a specific predicate, the dataflow does not contain elements from the corresponding substream. Using this information along with signals from data producers, the tracking agent can detect when there is a soft guarantee that a substream ends.
 
-A na\"ve implementation of the reports requires an extra network message for each input or output element of a process. However, as we show in the next section, reports can be aggregated and compressed within the process and sent to the tracking agent once per a fixed time period.
+A na\"ive implementation of the reports requires an extra network message for each input or output element of a process. However, as we show in the next section, reports can be aggregated and compressed within the process and sent to the tracking agent once per a fixed time period.
 
-\subsubsection{Answering Q2: How to ensure bound guarantees?}
+\subsection{Answering Q2: How to ensure bound guarantees?}
 
-As we mentioned above, the tracking agent has enough information to detect the soft substream bound. After detection, it can spawn an end-of-substream notification (NEOSS). Therefore, the termination event for the \tracker\ framework is generated iff a process $p$ has received the NEOSS, and there are no substream elements in the sendbox:
+As we mentioned above, the tracking agent has enough information to detect the soft substream bound for each process. After detection, it can spawn end-of-substream notifications (NEOSS). Therefore, the termination event for the \tracker\ framework is generated iff a process $p$ has received the NEOSS, and there are no substream elements in the sendbox:
 
 \begin{align*}
-\langle eoss_{soft}, pred(m)\rangle \Longleftrightarrow \exists neoss \in B, \forall m\in B : \neg pred(m)
+\langle eoss_{soft}, pred(m)\rangle \Longleftrightarrow \exists neoss \in B_p, \forall m\in B_p : \neg pred(m)
 \end{align*}
 
 To satisfy the firm notifications guarantee, one needs to hold elements that do not belong to the substream in the sendbox until NEOSS has arrived. This technique is quite similar to the punctuations alignment, mentioned in the previous section. If this condition is satisfied, then $\langle eoss_{firm}, pred(m)\rangle$ = $\langle eoss_{soft}, pred(m)\rangle$ for the \tracker. More formally, the sendbox procedure should ensure the following order of elements processing to achieve firm bound:
 
 \begin{align*}
 & \exists q \in I_p, e = \langle recv,m_{qp} \rangle : \neg pred(m_{qp}) \Longrightarrow \\ 
-& <proc, m_{qp}> >_p \langle eoss_{soft}, pred(m)\rangle
+& \langle proc, m_{qp}\rangle >_p \langle eoss_{soft}, pred(m)\rangle
 \end{align*} 
 
-\subsubsection{Answering Q3: How to provide the consistent termination events order?}
-To provide a consistent order of notifications, one can define a coincident order between notifications and dataflow items. While in punctuations, such order is provided by design because punctuations and ordinary data items go through the same FIFO network channels, in \tracker\, this order should be artificially defined.
+\subsection{Answering Q3: How to provide the consistent termination events order?}
+In punctuations, such order is provided by design because punctuations and ordinary data items go through the same FIFO network channels, in \tracker\, this order should be enforced. Assume that SPE assigns to input data elements special totally ordered labels $t(m)$ and put this labels in $M$ as a metadata. All messages generated from the input one inherit the same label. 
 
-Assume that SPE assigns to input data elements special totally ordered labels $t(m)$, i.e. $\forall q\in \Pi,a\in A, e=\langle send,m_{aq}\rangle, \exists t(m)$. All data elements which are generated from the input item inherit the label: 
-
-$$\forall q\in \Pi, e=\langle proc,m,M_i\rangle_q, \forall x \in M_i : t(x) = t(m)$$.
-
-In this case, if the order on $t(x)$ coincides with the order of input elements, then \tracker\ can produce the NEOSS events according to this order as well. In other words, \tracker\ can reorder the NEOSS events such that they will be consistent with the substreams order. An example of this concept is shown in Figure~\ref{tracker_ordering}. The substream containing element with $t(m)=1$ ends before the substream containing element with $t(m)=2$. As we can see, the order of NEOSS elements from \tracker\ coincides with $t(m)$.
+In this case, if the order on $t(m)$ coincides with the order of input elements, then \tracker\ can produce the NEOSS events according to this order as well. In other words, \tracker\ can reorder the NEOSS events such that they will be consistent with the substreams order. An example of this concept is shown in Figure~\ref{tracker_ordering}. The substream containing element with $t(m)=1$ ends before the substream containing element with $t(m)=2$. As we can see, the order of NEOSS elements from \tracker\ coincides with $t(m)$.
 
 \begin{figure}[htbp]
   \centering
@@ -82,13 +69,13 @@ In this case, if the order on $t(x)$ coincides with the order of input elements,
 
 A vital question here is how to implement the assignment of ordered labels $t(m)$. One way is to use the {\em time oracle} service~\cite{10.14778/3055330.3055335} which can provide totally ordered labels. A simple alternative implementation is discussed in the next section. 
 
-\subsubsection{Answering Q4: What are the functional and performance properties of \tracker?}
+\subsection{Answering Q4: What are the functional and performance properties of \tracker?}
 
 \tracker\ does not require regular broadcasting of the elements to all computational nodes because all service traffic goes through a single agent. This change of the method of the propagation the fact that the substream ends allows \tracker\ to have the following features by design:
 
 \begin{enumerate}
     \item {\bf Cyclic dataflows support.} Because the tracking agent is monitoring for the properties of in-flight elements without direct injection of service items into a dataflow, \tracker\ does not have a problem of throwing them through a cycle.
-    \item {\bf Low network overhead.} Processes can send reports once per a fixed time period, so there is a constant time of such reports per a finite substream. The reports require $O(||\Pi||)$ extra messages, while the NEOSS events $O(K||\Pi||)$. The total amount is $O(K||\Pi|| + ||\Pi||) = O(K||\Pi||)$ that is optimal for the substream management problem. 
+    \item {\bf Low network overhead.} Processes can send reports once per a fixed time period, so there is a constant time of such reports per a finite substream. The reports require $O(|\Pi|)$ extra messages, while the NEOSS events $O(K|\Pi|)$. The total amount is $O(K|\Pi| + |\Pi|) = O(K|\Pi|)$ that is optimal for the substream management problem. 
     \item {\bf Low latency and impact on SPE throughput.} In \tracker, service traffic goes through other network channels than data elements. It can reduce latency between substream termination and the corresponding event because NEOSS cannot be blocked by ordinary elements. Together with the low amount of service traffic, this scheme does not significantly reduce the throughput of an SPE, as we show in Section~\ref{fs-experiments}.
 \end{enumerate}
 
