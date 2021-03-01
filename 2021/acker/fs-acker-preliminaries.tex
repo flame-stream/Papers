@@ -1,29 +1,39 @@
 \label{fs-acker-preliminaries}
 
-First, in this section, we formalize the properties that should provide a substream management technique. After that, we outline the punctuations framework that is commonly applied in state-of-the-art SPEs. In the last part of this section, we discuss the limitations of the punctuations framework and demonstrate the theoretical lower bound on the overhead induced by a substream management technique.
+First, in this section, we formalize the notion of a stream processing engine, based on Chandy-Lamport definition of a distributed system and build specifics needed for stream processing on top of this model. Then we introduce substream lifespan management, based on events from the proposed model. Fnally we study what properties of the introduced    technique are needed for practical applications.
 
 \subsection{Processing model}
 
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.50\textwidth]{pics/process-scheme.pdf}
+  \caption{Structure of the SPE process}
+  \label{fig:spe_process}
+\end{figure}
+
 Typically, distributed stream processing engines are shared-nothing runtimes that continuously ingest input elements, transform them according to a logical dataflow graph, and deliver output elements. The logical dataflow graph consists of user-defined operators. Operators can be stateless or stateful: an output element may depend on the current state and the corresponding input element. A logical graph is mapped to a physical, distributed graph upon deployment. Commonly, a single logical operator can be deployed on multiple computational nodes. Further, we denote physical instances of logical operators as {\em processes}.
 
-Distributes SPEs can be modeled~\cite{carbone2018scalable} as physical dataflow graph $G=\{\Pi,\mathcal{E}\}$, where $\Pi$ are processes (deployed operators) and $\mathcal{E} \subseteq \Pi \times \Pi$ are FIFO network channels between them, $c_{ij}=(q,p)\in \mathcal{E}; q,p \in \Pi$. Each process has input channels $I_p = \bigcup_{q \in \Pi} \{c_{qp} | (q,p) \in \mathcal{E}\}$.
+A deployed physical graph is a distributed system and could be described in terms of Chandy-Lamport model~\cite{lamport}. In this model authors introduce \textit{events} that allows to observe a state of the system. Each event is presented in tuple of 5 elements $e = (p, s, s', c, M)$, where $p$ is one of the deployed processes, $s$ and $s'$ are state of the process before and after processing, $c$ one of network FIFO channels that connect processes with each other, and $M$ is a message generated during processing. The generated event $M$ come to a channel state $C$ until it will be received by destination process. Processes and channels forms a physical graph of the system $G=\{\Pi,\mathcal{E}\}$.
 
-Network channels state (all in-transit messages) is denoted as $M$. Each process $p$ can handle elements $m\in M$ from its input channels, e.g. an input element $m_{qp}$ arrives from a process $q$ at a process $p$. On element receiving, process puts it to a {\em sendbox} $B_p$. We denote this event as $\langle recv,m_{qp}\rangle$:
+In a stream processing engine we need to specify a process $p$ to reflect a specifics of this type of processing. Besides user-defined state each SPE process has a special storage for messages. We call this storage \textit{sendbox} $B_p$. This storage is needed for many reasons as will be discussed later in the paper. Here we justify the existence of \textit{sendbox} by necessity to send multiple events from one user-defined model to multiple recipients which contradicts with the original model. To manage the sendbox SPEs have a special agent. In our model we extend a role of this agent to inject a substream management there. Find a schematic representation of the model in Fig.~\ref{fig:spe_process}.
 
-$$\langle recv,m_{qp}\rangle, q\in I_p, M:=M\setminus{m_{qp}}, B_p:=B_p\cup\{m_{qp}\}$$
+With the specified process we need to introduce special cases of system events:
+\begin{itemize}
+    \item Communication events: $recv$, $send$, these events are executed by sendbox controller
+    \item Processing events: user-defined procedures are isolated here
+    \item System events: consistency, substreams and other events in the system that provide its properties
+\end{itemize}
 
-The transition between sendbox and processing is managed by a {\em sendbox procedure} $S(B)$. Each input event triggers procedure $S(B)$ that can generate the following events in turn:
+Communication events are straightforward: $<recv, M> = (sendbox\_controller_p, B_p, B_p' = B_p\cup \{M\}, c_qp, M)$, $<send, M> = (sendbox\_controller_p, B_p, B_p' = B_p\setminus\{M\}, c_{p, dst(M)}, M)$. Note that we need to be able to get destination process directly from the message and in general message contains its source and destination, this allows us to abstract away from the physical channels which are unknown to the user-defined procedure that emits the event. As a practical case of this abstraction is a sharding scheme for some key: user-defined procedure emits event for some key and a system is responsible to find a proper physical channel to deliver this message.
 
-\begin{enumerate}
-    \item Processing: $\langle proc,m_{qp}\rangle, m_{qp}\in B_p$
-    \item Substream termination: $\langle eoss,pred(m)\rangle$
-\end{enumerate}
+Processing events are triggered by a process and allows to execute user-defined logic with the events provided by sendbox controller. Please note, that these events does not communicate with other processes and are isolated in the state of the SPE process. $<proc, M> = (func_p, s\setminus M, s \cup \{func_p(M)\}, null, null>$.
 
-Predicate $pred(m)$ defines a substream: it is true if an element $m$ belongs to the substream~\cite{Tucker:2003:EPS:776752.776780}. Each element can belong to multiple substreams at the same time if it satisfies all corresponding predicates. 
+System events set depends on the system and will be defined latter in the description of particular implementation.
 
-A handler of these events is defined by a user or an SPE itself. It can be a user-defined operator, e.g., join, or internal SPE functionality, e.g., state snapshotting procedure. We omit the explicit definition of output elements to simplify the model. Note that all events within the same process $p$ are totally ordered by a local causal order relation $<_p$: $e^{0}_p,e^{1}_p,...,e^{i}_p,...$.
+Note that all events within the same process $p$ are totally ordered by a local causal order relation $<_p$: $e^{0}_p,e^{1}_p,...,e^{i}_p,...$. Atomicity of the events and their sequential nature allows a system to build guaranties for processing and state management.
 
-\subsection{Lifespan events}
+\subsection{Predicates on system events}
+As stated in the introduction we want to allow a user or a system itself to define predicates for events in the system, track their values for all messages in the system ($S = C \cup \cup_p B_P$) . This will give opportunity to define and track quantifier expressions, that could be basis of guarantee mechanisms.
 
 \subsubsection{Soft bound}
 
