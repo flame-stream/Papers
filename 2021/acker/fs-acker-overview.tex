@@ -54,7 +54,7 @@ A na\"ve implementation of the reports requires an extra network message for eac
 As we mentioned above, the tracking agent has enough information to detect the soft substream bound. After detection, it can spawn an {\em end-of-substream notification} (NEOSS). Therefore, the termination event for the \tracker\ framework is generated iff a process $p$ has received the NEOSS, and there are no substream elements in the sendbox:
 
 \begin{align*}
-\exists neoss_{tracker,p} \in B, \forall m\in B : \neg pred(m)
+\langle eoss_{soft}, pred(m)\rangle \Longleftrightarrow \exists neoss \in B, \forall m\in B : \neg pred(m)
 \end{align*}
 
 To satisfy the firm notifications guarantee, one needs to hold elements that do not belong to the substream in the sendbox until NEOSS has arrived. This technique is quite similar to the punctuations alignment, mentioned in the previous section. If this condition is satisfied, then $\langle eoss_{firm}, pred(m)\rangle$ = $\langle eoss_{soft}, pred(m)\rangle$ for the \tracker. More formally, the sendbox procedure should ensure the following order of elements processing to achieve firm bound:
