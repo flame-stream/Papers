@@ -227,7 +227,7 @@ Without the extra load, distributed tracking agent provides similar results as a
 The experiments demonstrate that even the centralized tracking agent can sustain a high input rate within 20 computational nodes. Besides, the distributed version of the agent can make the tracking scalable in larger setups.
 
 \subsubsection{Window join}
-For the windowed join scenario, we apply NEXMark benchmark~\cite{tucker2008nexmark} designed to inspect the performance of streaming queries. This benchmark extends the XMark benchmark~\cite{schmidt2002xmark} online auction model, where users can start auctions for items and bid on items. We accept Query 8 from the NEXMark benchmark, defined as follows: {\em Select people who have entered the system and created auctions in the last period}. This query can be implemented using windowed join of persons and auctions. The original NEXmark Query8 calculate the highest bids in the last 12 hours, but in our experiments, we apply the various window sizes.
+For the windowed join scenario, we apply NEXMark benchmark~\cite{tucker2008nexmark} designed to inspect the performance of streaming queries. This benchmark extends the XMark benchmark~\cite{schmidt2002xmark} online auction model, where users can start auctions for items and bid on items. We accept Query 8 from the NEXMark benchmark, defined as follows: {\em Select people who have entered the system and created auctions in the last period}. This query can be implemented using windowed join of persons and auctions. We apply 10 seconds window and 500 rps per node input rate.
 
 % \begin{figure}[htbp]
 %   \centering
@@ -236,7 +236,7 @@ For the windowed join scenario, we apply NEXMark benchmark~\cite{tucker2008nexma
 %   \label{fig:nexmark}
 % \end{figure}
 
-Figure~\ref{fig:nexmark} illustrates the results. The notification latency for \tracker\ is under 50ms for all setups, while the punctuations latency grows up to 300ms on 30 nodes. After that it fluctuates slightly. This behavior can be explained by the fact that process waits for punctuations from all channels to produce termination event. However, with the growth of machines number, the probability that some node delays punctuation increases. After some limit (30 nodes in our case), many nodes start to delay punctuations, so the latency achieves its maximum. 
+Figure~\ref{fig:nexmark} illustrates the results. The notification latency for \tracker\ is under 20ms for all setups, while the punctuations latency grows up to ~300ms on 30 nodes. After that it fluctuates slightly. This behavior can be explained by the fact that process waits for punctuations from all channels to produce termination event. However, with the growth of machines number, the probability that some node delays punctuation increases. After some limit (30 nodes in our case), many nodes start to delay punctuations, so the latency achieves its maximum. 
 
 \subsubsection{State snapshooting}
 \begin{figure*}[t!]
