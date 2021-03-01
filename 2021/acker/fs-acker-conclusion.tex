@@ -14,9 +14,7 @@
 
 % We conducted a series of experiments and compared the proposed method with a baseline approach based on the markers mechanism used in Apache Flink. We demonstrated that both centralized and decentralized implementations of \tracker\ provide lower notification latency that does not considerably degrade with an increase of a logical graph size or a cluster size. Experiments also showed that \tracker\ has lower throughput overhead in case of fine-grained tracking.
 
-In this work, we formalized the problem of substreams management and demonstrated the main properties of the most common punctuations approach that bases on injecting special elements (punctuations) into the stream. On the one hand, receiving such elements naturally guarantees the end of a substream since that moment, because all elements within the operator are totally ordered. On the other hand, propagating punctuations through a whole dataflow leads to the lack of cyclic dataflows support, poor scalability, and excessive extra traffic.
-
-We designed and implemented a new substreams management technique called \tracker\ that does not require injecting service elements directly into the stream. Instead, we mark all data elements with ordered labels and designed the distributed agent, which notifies operators that a substream ends since receiving an input element with the specified label. Our approach provides the following features:
+In this work, we formalized the problem of substreams management. We designed and implemented a new substreams management technique called \tracker\ that does not require injecting service elements directly into the stream. Instead, we mark all data elements with ordered labels and designed the distributed agent, which notifies operators that a substream ends since receiving an input element with the specified label. Our approach provides the following features:
 
 \begin{itemize}
      \item {\bf Cyclic dataflows support:} the method is suitable for problems that require non-linear executions: graph traversing, iterative algorithms, etc. We evaluated this feature within the real-life problem.
