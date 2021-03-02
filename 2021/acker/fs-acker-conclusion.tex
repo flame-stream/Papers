@@ -18,10 +18,13 @@ In this work, we formalized the problem of substreams management. We designed an
 
 \begin{itemize}
      \item {\bf Cyclic dataflows support:} the method is suitable for problems that require non-linear executions: graph traversing, iterative algorithms, etc. We evaluated this feature within the real-life problem.
-     \item {\bf Low overhead:} we showed that our implementation implies a lower amount of extra network traffic. We demonstrated that it produces low performance penalty, and insignificantly affects the throughput of SPE.
-     \item {\bf Better scalability:} extra network traffic from operators can be distributed between multiple nodes. Experiments on synthetic dataflows indicated the practical feasibility of balancing extra traffic.
+     \item {\bf Low overhead:} we showed that our implementation achieves the lower bound of service traffic overhead. We demonstrated that \tracker\ insignificantly affects the throughput of an SPE in practice.
+     \item {\bf Fine-grained substreams support:} \tracker\ framework is suitable for substreams consisting of a small number of elements. This feature is achieved due to low traffic overhead and another way of notifications propagation.
+     \item {\bf Scalability:} extra network traffic from operators can be distributed between multiple nodes. Experiments on synthetic dataflows indicated the practical feasibility of balancing extra traffic.
 \end{itemize}
 
+
+These properties of the \tracker\ framework open an ability to apply substream management for new setups. We indicated some of them in the experimental section: smart caching of operators state and latency-conscious windowed joins. 
 
 
 % both centralized and decentralized implementations of \tracker\ provide lower notification latency that does not considerably degrade with an increase of a logical graph size or a cluster size. Experiments also showed that \tracker\ has lower throughput overhead in case of fine-grained tracking.
