@@ -7,7 +7,7 @@
   ->, 
   >=stealth,
   shorten >=1pt,
-  node distance=0.7cm,
+  node distance=0.6cm,
   thick,
   every state/.style={%
   fill=white,
@@ -119,7 +119,7 @@ As a baseline approach, we utilize the punctuations-based method employed in man
 
 Our goal is to find the difference in the stream processing engine behavior with the change of the tracking mechanism from the baseline to \tracker. We implemented both methods on top of an open-source distributed streaming engine called \FlameStream. This SPE has similar to state-of-the-art stream processing systems (Flink, Storm, etc.) functionality and use-cases. None of the system-specific features were exploited during the implementation of substream management methods. All experiments are performed on virtual machines with a dual-core CPU and 4 GB RAM from one of the major cloud providers. 
 
-In the next sections, we will explore our system in five experimental setups:
+In the next sections, we will explore our system in four experimental setups:
 % \begin{description}
     
     \noindent \textbf{Service traffic:} the last setup aims to demonstrate the asymptotic behavior of competitive approaches. We show that our theoretical estimation meets practical measurements.
@@ -134,7 +134,9 @@ In the next sections, we will explore our system in five experimental setups:
 
 In our study, we use a common synthetic workload shown in Fig.~\ref{fig:physical_graph}. All vertices pass an input element to the next operation. On each step, items are re-partitioned (round-robin). This shape of the physical execution graph allows us to measure the properties of the system with the growth of key switches in a workload. This setup does not induce possible overhead by heavy computations while covering many realistic scenarios. Graphs with few vertices (under 30) may fit almost any acyclic streaming pipeline~\cite{akidau2018streaming}. Longer instances of this workload correspond to flattened iterative dataflows such as PageRank or Connected Components~\cite{Murray:2013:NTD:2517349.2522738, xu2016efficient}. We reference this synthetic workload as RR-$N$, where $N$ is the number of steps.
 
-To compare tracking mechanisms, we have to implement them on top of a single SPE. Otherwise, the difference in performance can be obtained by inequalities in serialization, network protocols, etc.  The difficulty here is that the tracking mechanism is usually a core part of SPE, and the implementation is often optimized for it. We implemented both punctuations and \tracker\ techniques on top of \FlameStream~\cite{we2018beyondmr}. It is an open-source Java-based SPE that allows tracking mechanism customization by its design. In~\cite{we2018adbis}, authors demonstrated that the performance of the \FlameStream\ is comparable to state-of-the-art SPE Flink.
+To compare tracking mechanisms, we have to implement them on top of a single SPE. Otherwise, the difference in performance can be obtained by inequalities in serialization, network protocols, etc.  The difficulty here is that the tracking mechanism is usually a core part of SPE, and the implementation is often optimized for it. 
+
+We implemented both punctuations and \tracker\ techniques on top of \FlameStream~\cite{we2018beyondmr}. It is an open-source Java-based SPE that allows tracking mechanism customization by its design. In~\cite{we2018adbis}, authors demonstrated that the performance of the \FlameStream\ is comparable to state-of-the-art SPE Flink.
 
 \subsection{Service traffic}
 \label{exp_network_traffic}
