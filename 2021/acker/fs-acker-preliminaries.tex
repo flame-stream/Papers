@@ -1,6 +1,6 @@
 \label{fs-acker-preliminaries}
 
-First, in this section, we formalize the notion of a stream processing engine, based on Chandy-Lamport definition of a distributed system and build specifics needed for stream processing on top of this model. Then we introduce substream lifespan management, based on events from the proposed model. Fnally we study what properties of the introduced    technique are needed for practical applications.
+First, in this section, we formalize a stream processing engine based on Chandy-Lamport definition of a distributed system. Then we formalize the substream management problem based on the notions from the proposed model. Finally, we discuss a state-of-the-art substream management technique called punctuations.
 
 \subsection{Processing model}
 
@@ -13,13 +13,13 @@ First, in this section, we formalize the notion of a stream processing engine, b
 
 Typically, distributed stream processing engines are shared-nothing runtimes that continuously ingest input elements, transform them according to a logical dataflow graph, and deliver output elements. The logical dataflow graph consists of user-defined operators. Operators can be stateless or stateful: an output element may depend on the current state and the corresponding input element. A logical graph is mapped to a physical, distributed graph upon deployment. Commonly, a single logical operator can be deployed on multiple computational nodes. Further, we denote physical instances of logical operators as {\em processes}.
 
-A deployed physical graph is a distributed system and could be described in terms of the Chandy-Lamport model~\cite{Chandy:1985:DSD:214451.214456}. In this model, the authors introduce \textit{events} that allows observing a state of the system. Each event is presented in a tuple of 5 elements $e = (p, s, s', c, M)$, where $p$ is one of the deployed processes, $s$ and $s'$ are state of the process before and after processing, $c$ one of network FIFO channels that connect processes, and $M$ is a message generated during processing. The generated event $M$ comes to a channel state $C$ until the destination process receives it. Processes and channels form a physical graph of the system $G=\{\Pi,\mathcal{E}\}$.
+A deployed physical graph is a distributed system and could be described in terms of the Chandy-Lamport model~\cite{Chandy:1985:DSD:214451.214456, carbone2018scalable}. In this model, the authors introduce \textit{events} that allows observing a state of the system. Each event is presented in a tuple of 5 elements $e = (p, s, s', c, M)$, where $p$ is one of the deployed processes, $s$ and $s'$ are state of the process before and after processing, $c$ one of network FIFO channels that connect processes, and $M$ is a message generated during processing. The generated event $M$ comes to a channel state $C$ until the destination process receives it. Processes and channels form a physical graph of the system $G=\{\Pi,\mathcal{E}\}$.
 
 In a stream processing engine, we need to specify a process $p$ to reflect the specifics of this type of processing. Besides the user-defined state, each SPE process has special storage for messages. We call this storage \textit{mailbox} $B_p$. This storage is needed for many reasons, as will be discussed later in the paper. Here we justify the existence of \textit{mailbox} by necessity to send multiple events from one user-defined model to multiple recipients, which contradicts the original model. 
 
-To manage the mailbox, SPEs have a special agent called {\em mailbox controller}. In our model, we extend the role of this agent to inject substream management there. A schematic representation of the model is shown in Figure~\ref{fig:spe_process}. With the specified process, we need to introduce special cases of system events:
+To manage the mailbox, SPEs have a special agent called {\em mailbox controller}. In our model, we extend the role of this agent to inject substream management there. A schematic representation of the model is shown in Figure~\ref{fig:spe_process}. Mailbox controller is responsible for communication and interaction with a user-defined {\em business logic handler}. There are the following events within a process:
 \begin{itemize}
-    \item Communication events:  $\langle recv, M\rangle$, $\langle send, M \rangle$, these events are executed by mailbox controller
+    \item Communication events:  $\langle recv, M\rangle$, $\langle send, M \rangle$, these events are handled by mailbox controller
     \item Processing events: user-defined procedures are isolated here
     \item System events: consistency or substreams related and other events in the system that provide its properties
 \end{itemize}
