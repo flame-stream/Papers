@@ -36,7 +36,7 @@
 % \acmBooktitle{DEBS '19: The 13th ACM International Conference on Distributed and Event-based Systems (DEBS '19), June 24--28, 2019, Darmstadt, Germany}\acmDOI{10.1145/3328905.3332514}
 % \acmISBN{978-1-4503-6794-3/19/06}
 
-\title {TODO}
+\title {Contracts-based approach to define and optimize computational graphs in Distributed Stream Processing}
 
 % \author{Alexander Chernokoz, Darya Sharkova, Artem Trofimov, Nikita Sokolov, Ekaterina Gorshkova, and Boris Novikov}
 % \affiliation{%
@@ -69,7 +69,16 @@
 
 \begin{abstract}
 
-    TODO
+    Distributed streaming processing is a common way to solve real-time data analysis and management objectives.
+    However, computational graph optimization is the thing that state-of-the-art stream processing engines (SPEs) still do not do well.
+    One of the reasons is the lack of information about the defined graph, and SPE is not able to permute operations to achieve better performance to avoid graph semantics corruption.
+    So graph optimization is generally a programmer concern.
+    But computational graphs in real-world production applications are usually rather big to optimize them manually.
+    Moreover, most of the information that is necessary for the graph cost evaluation is available only in runtime, and the programmer is not able to know it writing the code.
+
+    In this work, we introduce a new approach to define computational graphs.
+    It provides significantly more information for SPE, hence it allows to generate all graphs with the same semantics to be able to choose the most optimal one.
+    We demonstrate convenience for programmers to use this approach and feasibility to generate all graphs that solve a given problem.
 
 \end{abstract}
 
@@ -104,9 +113,6 @@
 \maketitle
 
 \thispagestyle{empty}
-
-\section{Introduction}
-\input{calco-introduction}
 
 \section{Conclusion}
 \input{calco-conclusion}
