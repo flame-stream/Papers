@@ -1,0 +1,50 @@
+\begin{tikzpicture}
+\begin{axis}[
+    ytick={12000, 14000, 16000, 18000, 20000},
+    yticklabels={$12000$, $14000$, $16000$, $18000$, $20000$},
+    xtick={5, 10, 15, 20, 25},
+    xticklabels={$5$, $10$, $15$, $20$, $25$},
+    legend cell align=left,
+    legend pos=north west,
+    scaled ticks=false
+]
+\addplot[smooth, red, dashed] coordinates {
+(2,11421.0)
+(5,13448.3)
+(10,12266.0)
+(15,11981.5)
+(20,11397.3)
+(25,11408.4)
+};
+\addplot[smooth, teal, dashed] coordinates {
+(2,16142.1)
+(5,15059.3)
+(10,14117.7)
+(15,14586.4)
+(20,13918.5)
+(25,13813.9)
+};
+\addplot[smooth, red] coordinates {
+(2,19782.8)
+(5,19500.8)
+(10,18924.7)
+(15,16671.4)
+(20,15989.5)
+(25,15727.7)
+};
+\addplot[smooth, teal] coordinates {
+(2,15532.8)
+(5,14209.6)
+(10,14876.5)
+(15,13336.4)
+(20,11491.7)
+(25,11365.6)
+};
+\legend{
+    $5:90:5$, Plan 1\\
+    $5:90:5$, Plan 2\\
+    $5:5:90$, Plan 1\\
+    $5:5:90$, Plan 2\\
+}
+\end{axis}
+\end{tikzpicture}

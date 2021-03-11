@@ -2098,39 +2098,186 @@ keywords = {Join cardinality estimation, Deep learning, Sampling},
 abstract = {Join cardinality estimation is fundamental to cost-based query optimizers. The state-of-the-art deep learning based join cardinality estimation methods do not fully take the structure of a query plan into account and lack of data information about joins, causing significant performance degradation when the number of joins in a query increases. In this paper, we propose CAPE, a join cardinality estimation method combining operator-level deep neural networks. CAPE introduces two operator-level deep neural networks for selection operators and join operators, as well as an output deep neural network that maps the intermediate representations to join cardinality estimates. Given the query plan rooted at a join operator, CAPE generates a plan-level deep neural network by combining operator-level deep neural networks. In this way, CAPE can handle arbitrary query plans with simple operator-level deep neural networks rather than a single complicated model. In addition, we introduce join-crossing sampling information to detect join-crossing correlations. Experiments are conducted on a dataset constructed from the IMDb dataset, and the experimental results show that CAPE is significantly better than the state-of-the-art methods.}
 }
 
-@article{zhang2021research,
-  title={Research on Optimal Checkpointing-Interval for Flink Stream Processing Applications},
-  author={Zhang, Zhan and Li, Wenhao and Qing, Xiao and Liu, Xian and Liu, Hongwei},
-  journal={Mobile Networks and Applications},
-  pages={1--10},
-  year={2021},
+@article{graefe1995cascades,
+  title={The cascades framework for query optimization},
+  author={Graefe, Goetz},
+  journal={IEEE Data Eng. Bull.},
+  volume={18},
+  number={3},
+  pages={19--29},
+  year={1995}
+}
+
+@incollection{selinger1989access,
+  title={Access path selection in a relational database management system},
+  author={Selinger, P Griffiths and Astrahan, Morton M and Chamberlin, Donald D and Lorie, Raymond A and Price, Thomas G},
+  booktitle={Readings in Artificial Intelligence and Databases},
+  pages={511--522},
+  year={1989},
+  publisher={Elsevier}
+}
+
+@article{poosala1996improved,
+  title={Improved histograms for selectivity estimation of range predicates},
+  author={Poosala, Viswanath and Haas, Peter J and Ioannidis, Yannis E and Shekita, Eugene J},
+  journal={ACM Sigmod Record},
+  volume={25},
+  number={2},
+  pages={294--305},
+  year={1996},
+  publisher={ACM New York, NY, USA}
+}
+
+@article{gunopulos2005selectivity,
+  title={Selectivity estimators for multidimensional range queries over real attributes},
+  author={Gunopulos, Dimitrios and Kollios, George and Tsotras, Vassilis J and Domeniconi, Carlotta},
+  journal={the VLDB Journal},
+  volume={14},
+  number={2},
+  pages={137--154},
+  year={2005},
   publisher={Springer}
 }
 
-Computing aggregates over windows is at the core of virtually every stream processing job. Typical stream processing applications involve overlapping windows and, therefore, cause redundant computations. Several techniques prevent this redundancy by sharing partial aggregates among windows. However, these techniques do not support out-of-order processing and session windows. Out-of-order processing is a key requirement to deal with delayed tuples in case of source failures such as temporary sensor outages. Session windows are widely used to separate different periods of user activity from each other. In this paper, we present Scotty, a high throughput operator for window discretization and aggregation. Scotty splits streams into non-overlapping slices and computes partial aggregates per slice. These partial aggregates are shared among all concurrent queries with arbitrary combinations of tumbling, sliding, and session windows. Scotty introduces the first slicing technique which (1) enables stream slicing for session windows in addition to tumbling and sliding windows and (2) processes out-of-order tuples efficiently. Our technique is generally applicable to a broad group of dataflow systems which use a unified batch and stream processing model. Our experiments show that we achieve a throughput an order of magnitude higher than alternative state-of-the-art solutions.
-@inproceedings{traub2018scotty,
-  title={Scotty: Efficient window aggregation for out-of-order stream processing},
-  author={Traub, Jonas and Grulich, Philipp Marian and Cuellar, Alejandro Rodriguez and Bre{\ss}, Sebastian and Katsifodimos, Asterios and Rabl, Tilmann and Markl, Volker},
-  booktitle={2018 IEEE 34th International Conference on Data Engineering (ICDE)},
-  pages={1300--1303},
-  year={2018},
-  organization={IEEE}
+@inproceedings{muralikrishna1988equidepth,
+author = {Muralikrishna, M. and DeWitt, David J.},
+title = {Equi-Depth Multidimensional Histograms},
+year = {1988},
+isbn = {0897912683},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/50202.50205},
+doi = {10.1145/50202.50205},
+booktitle = {Proceedings of the 1988 ACM SIGMOD International Conference on Management of Data},
+pages = {28–36},
+numpages = {9},
+location = {Chicago, Illinois, USA},
+series = {SIGMOD '88}
 }
 
-Despite the established scientific knowledge on efficient parallel and elastic data stream processing, it is challenging to combine generality and high level of abstraction (targeting ease of use) with fine-grained processing aspects (targeting efficiency) in stream processing frameworks. Towards this goal, we propose STRETCH, a framework that aims at guaranteeing (i) high efficiency in throughput and latency of stateful analysis and (ii) fast elastic reconfigurations (without requiring state transfer) for intra-node streaming applications. To achieve these, we introduce virtual shared-nothing parallelization and propose a scheme to implement it in STRETCH, enabling users to leverage parallelization techniques while also taking advantage of shared-memory synchronization, which has been proven to boost the scaling-up of streaming applications while supporting determinism. We provide a fully-implemented prototype and, together with a thorough evaluation, correctness proofs for its underlying claims supporting determinism and a model (also validated empirically) of virtual shared-nothing and pure shared-nothing scalability behavior. As we show, STRETCH can match the throughput and latency figures of the front of state-of-the-art solutions, while also achieving fast elastic reconfigurations (taking only a few milliseconds).
-@inproceedings{najdataei2019stretch,
-  title={Stretch: Scalable and elastic deterministic streaming analysis with virtual shared-nothing parallelism},
-  author={Najdataei, Hannaneh and Nikolakopoulos, Yiannis and Papatriantafilou, Marina and Tsigas, Philippas and Gulisano, Vincenzo},
-  booktitle={Proceedings of the 13th ACM International Conference on Distributed and Event-based Systems},
-  pages={7--18},
-  year={2019}
+@article{yang2020neurocard,
+  title={NeuroCard: one cardinality estimator for all tables},
+  author={Yang, Zongheng and Kamsetty, Amog and Luan, Sifei and Liang, Eric and Duan, Yan and Chen, Xi and Stoica, Ion},
+  journal={arXiv preprint arXiv:2006.08109},
+  year={2020}
 }
 
-The inherently large and varying volumes of information generated in large scale systems demand near real-time processing of data streams. In this context, data streaming is imperative for data-intensive processing infrastructures. Stream joins, the streaming counterpart of database joins, compare tuples coming from different streams and constitute one of the most important and expensive data streaming operators. Algorithmic implementations of stream joins have to be capable of efficiently processing bursty and rate-varying data streams in a deterministic and skew-resilient fashion. To leverage the design of modern multicore architectures, scalability and parallelism need to be addressed also in the algorithmic design. In this paper we present ScaleJoin, an algorithmic construction for deterministic and parallel stream joins that guarantees all the above properties, thus filling in a gap in the existing state-of-theart. Key to the novelty of ScaleJoin is the ScaleGate data structure and its lock-free implementation. ScaleGate facilitates concurrent data exchange and balances independent actions among processing threads; enabling fine-grain parallelism and deterministic processing. It allows ScaleJoin to run on an arbitrary number of processing threads, evenly sharing the overall comparisons run in parallel and achieving disjoint and skew-resilient high processing throughput and low processing latency.
-@article{gulisano2016scalejoin,
-  title={Scalejoin: A deterministic, disjoint-parallel and skew-resilient stream join},
-  author={Gulisano, Vincenzo and Nikolakopoulos, Yiannis and Papatriantafilou, Marina and Tsigas, Philippas},
-  journal={IEEE Transactions on Big Data},
-  year={2016},
-  publisher={IEEE}
+@article{hirzel2014catalog,
+author = {Hirzel, Martin and Soul\'{e}, Robert and Schneider, Scott and Gedik, Bu\u{g}ra and Grimm, Robert},
+title = {A Catalog of Stream Processing Optimizations},
+year = {2014},
+issue_date = {April 2014},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {46},
+number = {4},
+issn = {0360-0300},
+url = {https://doi.org/10.1145/2528412},
+doi = {10.1145/2528412},
+abstract = {Various research communities have independently arrived at stream processing as a programming model for efficient and parallel computing. These communities include digital signal processing, databases, operating systems, and complex event processing. Since each community faces applications with challenging performance requirements, each of them has developed some of the same optimizations, but often with conflicting terminology and unstated assumptions. This article presents a survey of optimizations for stream processing. It is aimed both at users who need to understand and guide the system’s optimizer and at implementers who need to make engineering tradeoffs. To consolidate terminology, this article is organized as a catalog, in a style similar to catalogs of design patterns or refactorings. To make assumptions explicit and help understand tradeoffs, each optimization is presented with its safety constraints (when does it preserve correctness?) and a profitability experiment (when does it improve performance?). We hope that this survey will help future streaming system builders to stand on the shoulders of giants from not just their own community.},
+journal = {ACM Comput. Surv.},
+month = mar,
+articleno = {46},
+numpages = {34},
+keywords = {optimizations, Stream processing}
+}
+
+@inproceedings{babu2004adaptive,
+  title={Adaptive ordering of pipelined stream filters},
+  author={Babu, Shivnath and Motwani, Rajeev and Munagala, Kamesh and Nishizawa, Itaru and Widom, Jennifer},
+  booktitle={Proceedings of the 2004 ACM SIGMOD international conference on Management of data},
+  pages={407--418},
+  year={2004}
+}
+
+@inproceedings{selinger1979access,
+author = {Selinger, P. Griffiths and Astrahan, M. M. and Chamberlin, D. D. and Lorie, R. A. and Price, T. G.},
+title = {Access Path Selection in a Relational Database Management System},
+year = {1979},
+isbn = {089791001X},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/582095.582099},
+doi = {10.1145/582095.582099},
+abstract = {In a high level query and data manipulation language such as SQL, requests are stated non-procedurally, without reference to access paths. This paper describes how System R chooses access paths for both simple (single relation) and complex queries (such as joins), given a user specification of desired data as a boolean expression of predicates. System R is an experimental database management system developed to carry out research on the relational model of data. System R was designed and built by members of the IBM San Jose Research Laboratory.},
+booktitle = {Proceedings of the 1979 ACM SIGMOD International Conference on Management of Data},
+pages = {23–34},
+numpages = {12},
+location = {Boston, Massachusetts},
+series = {SIGMOD '79}
+}
+
+
+
+@article{krishnan2018learning,
+  author    = {Sanjay Krishnan and
+               Zongheng Yang and
+               Ken Goldberg and
+               Joseph M. Hellerstein and
+               Ion Stoica},
+  title     = {Learning to Optimize Join Queries With Deep Reinforcement Learning},
+  journal   = {CoRR},
+  volume    = {abs/1808.03196},
+  year      = {2018},
+  url       = {http://arxiv.org/abs/1808.03196},
+  archivePrefix = {arXiv},
+  eprint    = {1808.03196},
+  timestamp = {Sun, 02 Sep 2018 15:01:54 +0200},
+  biburl    = {https://dblp.org/rec/journals/corr/abs-1808-03196.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{marcus2019neo,
+author = {Marcus, Ryan and Negi, Parimarjan and Mao, Hongzi and Zhang, Chi and Alizadeh, Mohammad and Kraska, Tim and Papaemmanouil, Olga and Tatbul, Nesime},
+title = {Neo: A Learned Query Optimizer},
+year = {2019},
+issue_date = {July 2019},
+publisher = {VLDB Endowment},
+volume = {12},
+number = {11},
+issn = {2150-8097},
+url = {https://doi.org/10.14778/3342263.3342644},
+doi = {10.14778/3342263.3342644},
+abstract = {Query optimization is one of the most challenging problems in database systems. Despite the progress made over the past decades, query optimizers remain extremely complex components that require a great deal of hand-tuning for specific workloads and datasets. Motivated by this shortcoming and inspired by recent advances in applying machine learning to data management challenges, we introduce Neo (Neural Optimizer), a novel learning-based query optimizer that relies on deep neural networks to generate query executions plans. Neo bootstraps its query optimization model from existing optimizers and continues to learn from incoming queries, building upon its successes and learning from its failures. Furthermore, Neo naturally adapts to underlying data patterns and is robust to estimation errors. Experimental results demonstrate that Neo, even when bootstrapped from a simple optimizer like PostgreSQL, can learn a model that offers similar performance to state-of-the-art commercial optimizers, and in some cases even surpass them.},
+journal = {Proc. VLDB Endow.},
+month = jul,
+pages = {1705–1718},
+numpages = {14}
+}
+@inproceedings{street2001ensemble,
+  author    = {W. Nick Street and
+               YongSeog Kim},
+  editor    = {Doheon Lee and
+               Mario Schkolnick and
+               Foster J. Provost and
+               Ramakrishnan Srikant},
+  title     = {A streaming ensemble algorithm {(SEA)} for large-scale classification},
+  booktitle = {Proceedings of the seventh {ACM} {SIGKDD} international conference
+               on Knowledge discovery and data mining, San Francisco, CA, USA, August
+               26-29, 2001},
+  pages     = {377--382},
+  publisher = {{ACM}},
+  year      = {2001},
+  url       = {http://portal.acm.org/citation.cfm?id=502512.502568},
+  timestamp = {Wed, 12 Dec 2012 15:08:19 +0100},
+  biburl    = {https://dblp.org/rec/conf/kdd/StreetK01.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{hilprecht2020deepdb,
+author = {Hilprecht, Benjamin and Schmidt, Andreas and Kulessa, Moritz and Molina, Alejandro and Kersting, Kristian and Binnig, Carsten},
+title = {DeepDB: Learn from Data, Not from Queries!},
+year = {2020},
+issue_date = {March 2020},
+publisher = {VLDB Endowment},
+volume = {13},
+number = {7},
+issn = {2150-8097},
+url = {https://doi.org/10.14778/3384345.3384349},
+doi = {10.14778/3384345.3384349},
+abstract = {The typical approach for learned DBMS components is to capture the behavior by running a representative set of queries and use the observations to train a machine learning model. This workload-driven approach, however, has two major downsides. First, collecting the training data can be very expensive, since all queries need to be executed on potentially large databases. Second, training data has to be recollected when the workload or the database changes. To overcome these limitations, we take a different route and propose a new data-driven approach for learned DBMS components which directly supports changes of the workload and data without the need of retraining. Indeed, one may now expect that this comes at a price of lower accuracy since workload-driven approaches can make use of more information. However, this is not the case. The results of our empirical evaluation demonstrate that our data-driven approach not only provides better accuracy than state-ofthe- art learned components but also generalizes better to unseen queries.},
+journal = {Proc. VLDB Endow.},
+month = mar,
+pages = {992–1005},
+numpages = {14}
 }
