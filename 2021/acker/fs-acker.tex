@@ -28,7 +28,7 @@
 
 \newcommand{\PicScale}{0.5}
 \newcommand {\FlameStream} {FlameStream}
-\newcommand {\tracker} {Tracker}
+\newcommand {\tracker} {trAcker}
 \newcommand {\acker} {Acker}
 
 \newtheorem{lemma}{Lemma}
@@ -79,7 +79,7 @@ Boris Novikov\\
 \maketitle
 
 \begin{abstract}
-Stream Processing Engines (SPEs) handle a potentially infinite sequence of data elements. This sequence often can be viewed as a mixture of finite substreams with distinct properties: event times ranges, payload values, etc. Some operators ought to know since then there will be no longer elements with specified properties, i.e., when the substream ends. For instance, stateful streaming operators should clear outdated state to avoid running out of memory. Time window operators should release output after all elements within the specified time range arrived. Most state-of-the-art SPEs use {\em punctuations} to manage substreams. The punctuations approach is powerful but has limitations: it does not support cyclic dataflows, poorly scalable due to frequent broadcasts, and is inefficient for small substreams because of high network traffic overhead. In this work, we present a new substream management framework called \tracker\ that supports cyclic dataflows and tiny substreams (even substreams containing a single element). This method bases on the idea that a special agent within an SPE monitors for substreams and notifies SPE nodes about substreams lifespan events. We demonstrate that our implementation can provide the same semantics of notifications as punctuations but implies lower network traffic overhead. Experiments show that our technique is scalable, efficiently handles real-world cyclic dataflows, and outperforms punctuations for small substreams.
+Stream Processing Engines (SPEs) handle potentially infinite sequences of data elements. These sequences often can be split into finite substreams of messages: epochs, windows, etc. Some operators ought to know the boundaries of the substreams. For instance, stateful streaming operators should clear outdated state, time window operators should release output after all elements within the specified time range have arrived. Most state-of-the-art SPEs use {\em punctuations} to manage substreams. The punctuations approach is powerful but has limitations: it does not support cyclic dataflows, is poorly scalable due to intensive use of broadcasts, and is inefficient for small substreams because of high network traffic overhead. In this work, we present a new framework called \tracker\ that fills the gap when these limitations become relevant. This method is based on an agent that monitors substreams and notifies SPE nodes about substreams lifespan events. We demonstrate that our implementation can provide the same semantics of notifications as punctuations but implies lower network traffic overhead and has lower notification latency. Experiments show that our technique is scalable, efficiently handles real-world cyclic dataflows, and outperforms punctuations for small substreams.
 \end{abstract}
 
 % \keywords{Data streams, exactly-once, drifting state, optimistic OOP}
@@ -89,7 +89,7 @@ Stream Processing Engines (SPEs) handle a potentially infinite sequence of data 
 \section {Introduction}
 \input {fs-acker-intro}
 
-\section{Substreams management}
+\section{Substream management}
 \input {fs-acker-preliminaries}
 
 \section{Tracker framework}
@@ -107,9 +107,9 @@ Stream Processing Engines (SPEs) handle a potentially infinite sequence of data 
 \section {Conclusion}
 \input {fs-acker-conclusion.tex}
 
-\appendix 
-\section {Punctuations} \label{appendix:punctuations-proof}
-\section {\tracker} \label{appendix:tracker-proof}
+% \appendix 
+% \section {Punctuations} \label{appendix:punctuations-proof}
+% \section {\tracker} \label{appendix:tracker-proof}
 
 \bibliographystyle{abbrvurl}
 % \bibliography{bibliography/flame-stream}

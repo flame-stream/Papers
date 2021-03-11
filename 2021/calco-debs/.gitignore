@@ -1,0 +1,5 @@
+calco.pdf
+sample-sigconf.pdf
+*.aux
+*.log
+*.out
