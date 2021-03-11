@@ -1,3 +1,5 @@
-In this paper, we considered the problem of computational graphs optimization in distributed stream processing engines.
-We proposed a new approach of defining computational graphs (c-graph) based on a set of operations, annotated with contracts, that allows to generate all graphs with the needed semantics.
-Also, we discussed generating algorithm and took a view on the c-graphs usage example that gave us a new way to think about stream processing tasks and their solutions.
+In this paper, we considered the problem of computational graphs optimization in distributed stream processing engines for ETL use cases.
+It was noticed that the main problem is lack of the information about the goal provided by the current ways of computational graph defining.
+To solve this issue we proposed a new contract-based approach of graph defining that embodies the possibility to generate all graphs with the needed semantics to be able to choose the most optimal one automatically.
+Thus, we implemented a proof-of-concept prototype in Haskell and Python interface blueprint to plug it into Apache Beam.
+At last, we demonstrated the proposed concept on the real-world ELT task.
