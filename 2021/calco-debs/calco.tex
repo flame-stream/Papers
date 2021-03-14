@@ -36,7 +36,7 @@
 % \acmBooktitle{DEBS '19: The 13th ACM International Conference on Distributed and Event-based Systems (DEBS '19), June 24--28, 2019, Darmstadt, Germany}\acmDOI{10.1145/3328905.3332514}
 % \acmISBN{978-1-4503-6794-3/19/06}
 
-\title{Calco: a contract-based approach to specify distributed dataflows}
+\title{Calco: a contract-based approach to specify distributed dataflows} % TODO dataflows: is space needed
 
 % \author{Alexander Chernokoz, Darya Sharkova, Artem Trofimov, Nikita Sokolov, Ekaterina Gorshkova, and Boris Novikov}
 % \affiliation{%
@@ -70,20 +70,21 @@
 \begin{abstract}
 
     There are two general ways to define computations: imperative and declarative.
-    The first one is more transparent for programmers, the second one has more optimization potential.
-    Indeed, one declarative definition can have multiple concrete implementations, that allow to automatically choose the most optimal one if it is possible to evaluate them.
+    The first one is more transparent for programmers, while the second one is more suitable for complex optimizations.
+    One declarative definition can have multiple implementations so that a system automatically chooses the most optimal one.
+    Accordingly, distributed dataflow can be specified in two ways: defining concrete execution graph and SQL.
+    A concrete graph does not capture high-level information about the problem it solves, so a distributed processing system cannot permute operations for performance purposes.
+    Hence, graph optimization is generally a programmer concern, but real-world graphs can consist of many nodes that make it hard to optimize them manually.
+    Moreover, most of the necessary information for the graph cost evaluation is available only in runtime.
+    SQL is popular for data analytics, and its optimization is well-researched.
+    However, it is inconvenient or sometimes impossible to use SQL for general data management tasks, such as ETL, machine learning pipelines, etc.
 
-    Nowadays, there are two general ways to specify distributed dataflows: defining concrete graphs and streaming SQL.
-    The concrete graph does not provide high-level information about the problem it solves to the stream processing engine (SPE), so SPE is not able to permute operations for performance purposes to avoid graph semantics corruption.
-    Hence, graph optimization is generally a programmer concern.
-    But graphs in real-world production applications can be rather big to optimize them manually.
-    Moreover, most of the information that is necessary for the graph cost evaluation is available only in runtime, and the programmer is not able to know it writing the code.
-    SQL is suitable for data analysis purposes and its optimization is very well researched.
-    But it is inconvenient to use SQL for general data management tasks, for example, ETL.
-
-    In this work, we introduce a new approach to define computations in distributed stream processing.
-    It uses contracts to be able to safely permute user-defined operations and generate all concrete graphs with the needed semantics to choose the most optimal one.
-    Also, we demonstrate convenience for data engineers to use this approach in common data management tasks and present a prototype implementation.
+    In this work, we introduce a novel approach to specify distributed dataflows.
+    Our method is based on declarative specifications of user-defined operations that we call contracts.
+    Such specifications allow us to automatically generate execution graphs and safely permute operations to choose the most optimal graph.
+    A contract can describe an arbitrary operation or a dataflow part, so this approach combines the transparency of imperative approach and optimization possibilities of declarative one.
+    We implement a prototype and demonstrate automatic graphs generation on a real-world dataflow.
+    We also outline the challenges that we face regarding the optimization problem.
 
 \end{abstract}
 
