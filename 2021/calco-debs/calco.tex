@@ -69,17 +69,15 @@
 
 \begin{abstract}
 
-    Threre are two general ways to define computations: imperative and declarative. 
-    The first one is more transparent for programmers, the second one have more optimization potential.
-    Indeed, one declarative definition can have multiple concrete implementations, that allows to automatically choose the most optimal one if it is possible to evaluate them.
+    There are two general ways to define computations: imperative and declarative.
+    The first one is more transparent for programmers, the second one has more optimization potential.
+    Indeed, one declarative definition can have multiple concrete implementations, that allow to automatically choose the most optimal one if it is possible to evaluate them.
 
-    Nowadays, there are two general ways to define computations in distributed stream processing: defining concrete graphs and streaming SQL.
-
+    Nowadays, there are two general ways to specify distributed dataflows: defining concrete graphs and streaming SQL.
     The concrete graph does not provide high-level information about the problem it solves to the stream processing engine (SPE), so SPE is not able to permute operations for performance purposes to avoid graph semantics corruption.
     Hence, graph optimization is generally a programmer concern.
     But graphs in real-world production applications can be rather big to optimize them manually.
     Moreover, most of the information that is necessary for the graph cost evaluation is available only in runtime, and the programmer is not able to know it writing the code.
-
     SQL is suitable for data analysis purposes and its optimization is very well researched.
     But it is inconvenient to use SQL for general data management tasks, for example, ETL.
 
