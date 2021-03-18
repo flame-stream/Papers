@@ -1,15 +1,27 @@
-TODO
-
 We presented a novel approach to specify distributed dataflows.
 It is based on the contracts, preconditions and postconditions of the graph operations.
-We considered a small machine leaning streaming pipeline example, way of thinking that allows to specify dataflows in the presented way, and showed generated concrete graphs with different cost.
-Also we discussed optimization challenges and pointed out contract interface enhancements that should make specification more convenient to use.
+We considered a small machine leaning streaming pipeline example, discussed ways of its optimization and saw that our approach defines the most optimal execution graph too.
+% TODO We demonstrated the prototype?
+Also we outlined optimization challenges that we faced.
 Finally, we showed ideas for the future work enhancements.
 
-We propose to specify dataflow as CGraph (contracted graph).
-CGraph is a pair of environment and semantics, where environment maps nodes to their contracts, and semantics is the set of nodes that produce dataflow target side-effects.
-Lots of concrete graphs can be generated from the CGraph.
-In the future work we plan to develop cost function that will allow to choose the most optimal concrete graphs from generated.
+We proposed to specify dataflow as CGraph (contracted graph).
+CGraph is a pair of environment and semantics, where environment maps nodes to their contracts, and semantics is a set of nodes that produce dataflow target side-effects.
+We provide an algorithm that generates all concrete execution graphs that satisfy contracts and semantics.
 
-However, it was said that using of the raw contracts is not convenient.
-And it is important to develop tools and methods to simplify it.
+We discussed the example that SQL implementation seems to be unnatural.
+And the only possible way to specify it is execution graph, that represents rather imperative approach then declarative, hence do not provide enough space for optimizations.
+We specified the example problem by CGraph and pointed out that the most optimal graph exists in the set of concrete execution graphs, generated from CGraph.
+% TODO Way of reasoning about problems by contracts in declarative way
+
+We pointed out the optimization problems that we face.
+% TODO Preliminary cost evaluation
+% TODO Runtime statistics gathering
+% TODO Cost evaluation by statistics analysis
+% TODO Actor entity that decides, whether to restructure execution graph
+% TODO How to restructure execution graph in runtime
+
+In future TODO
+% TODO General implementation
+% TODO Better contracts interface (trello)
+% TODO Smart advices
