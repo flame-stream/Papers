@@ -1,1 +1,15 @@
 TODO
+
+We presented a novel approach to specify distributed dataflows.
+It is based on the contracts, preconditions and postconditions of the graph operations.
+We considered a small machine leaning streaming pipeline example, way of thinking that allows to specify dataflows in the presented way, and showed generated concrete graphs with different cost.
+Also we discussed optimization challenges and pointed out contract interface enhancements that should make specification more convenient to use.
+Finally, we showed ideas for the future work enhancements.
+
+We propose to specify dataflow as CGraph (contracted graph).
+CGraph is a pair of environment and semantics, where environment maps nodes to their contracts, and semantics is the set of nodes that produce dataflow target side-effects.
+Lots of concrete graphs can be generated from the CGraph.
+In the future work we plan to develop cost function that will allow to choose the most optimal concrete graphs from generated.
+
+However, it was said that using of the raw contracts is not convenient.
+And it is important to develop tools and methods to simplify it.
