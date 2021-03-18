@@ -3,9 +3,9 @@
     scale only axis=true,
     width=0.8\textwidth,
     height=0.6\textwidth,
-    ymin = 0,
-    ymax = 10000,
-    ytick={2000, 4000, 6000, 8000},
+    ymin = 8000,
+    ymax = 21000,
+    ytick={8000, 12000, 16000, 20000},
     %yticklabels={2, 4, 6, 8},
     xtick={2, 5, 10, 15, 20, 25},
     xticklabels={$2$, $5$, $10$, $15$, $20$, $25$},
@@ -17,24 +17,24 @@
     y label style={at={(axis description cs:0.125,0.5)},anchor=center},
 ]
 \addplot[red, mark=square*, mark options={scale=1,solid}] coordinates {
-(2,2863.74)
-(5,1876.12)
-(10,2711.66)
-(15,2443.98)
-(20,2591.34)
-(25,2845.98)
+(2,12144.02)
+(5,12892.16)
+(10,11292.62)
+(15,10566.26)
+(20,9352.6)
+(25,8416.64)
 };
 \addplot[teal, mark=square*, mark options={scale=1,solid}] coordinates {
-(2,4250.0)
-(5,5291.2)
-(10,4048.2)
-(15,3335.0)
-(20,4497.8)
-(25,4362.1)
+(2,15007.76)
+(5,14768.28)
+(10,14004.28)
+(15,13010.24)
+(20,11943.94)
+(25,11262.62)
 };
 \legend{
-    5:90:5\\
-    5:5:90\\
+    Plan 1\\
+    Plan 2\\
 }
 \end{axis}
 \end{tikzpicture}
