@@ -1,14 +1,19 @@
 \begin{tikzpicture}
 \begin{axis}[
+    scale only axis=true,
+    width=0.8\textwidth,
+    height=0.6\textwidth,
     ytick={3000, 4000, 5000, 6000},
     yticklabels={3000, 4000, 5000, 6000},
     xmin=5, xmax=90,
-    %xtick={5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90},
-    %xticklabels={5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90},
     legend cell align=left,
-    legend pos=north west
+    legend pos=north west,
+    xlabel={Percentage of \textit{Auction} events},
+    ylabel={Latency, sec},
+    % x label style={at={(axis description cs:0.5,0.05)},anchor=north},
+    % y label style={at={(axis description cs:0.125,0.5)},anchor=center},
 ]
-\addplot[smooth, red] coordinates {
+\addplot[red,mark=square*,mark options={scale=1,solid}] coordinates {
     (5, 2294.73)
     (10, 2905.51)
     (15, 3550.93)
@@ -28,7 +33,7 @@
     (85, 4520.84)
     (90, 4338.02)
 };
-\addplot[smooth, teal] coordinates {
+\addplot[teal,mark=square*,mark options={scale=1,solid}] coordinates {
     (5, 3541.78)
     (10, 3931.32)
     (15, 4409.38)

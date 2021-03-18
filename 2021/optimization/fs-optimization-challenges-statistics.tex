@@ -2,9 +2,9 @@ Cost-based optimization requires statistical information on data in order to cal
 
 \begin{itemize}
     \item \textbf{Technical}:
-    Statistical information on stream elements, such as their arrival rate, needs to be collected during execution at runtime.
+    Statistical information on stream elements, such as their arrival rate, needs to be collected during execution at runtime without seriously affecting the performance of a distributed SPE. % which can present certain challenges since there is no centralized point at which to collect statistics so we'd need to aggregate it somehow which can affect the performance of the system itself
     \item \textbf{Research}
-    Next window statistics should be predicted using statistics collected for previous windows. We assume that previous window statistics would present a decent baseline; however, this assumption needs to be tested. 
+    Next window statistics should be predicted using statistics collected for previous windows. We assume that previous window statistics would present a decent baseline; however, this assumption needs to be tested. it is a expected that a simple baseline wil be good enough in most simple cases but in general prediction is not an easy task.
 \end{itemize}
 
 Popular SPEs do not offer any statistics fetching or predicting. For example, Apache Beam, which utilizes Apache Calcite, a dynamic data management framework, for its SQL processing functionality, passes constant values to the query planner instead of any actual data statistics.

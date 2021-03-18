@@ -1,6 +1,7 @@
 \label {sec:fs-optimization-problem-statement}
 
-In this section, we present a running example of a SQL query executed on a stream processing engine, and use it to state the problem of streaming SQL query optimization.
+% в этой секции мы иллюстрируем нашу задачу с помощью sql-запроса на примере
+In this section, we illustrate the problem of streaming SQL query optimization using a running example of a query for a streaming system.
 
 We are using the NEXMark benchmark \cite{tucker2008nexmark} for our query. The NEXMark benchmark suite, designed for queries over continuous data streams, is an extension of the XMark benchmark \cite{schmidt2002xmark} adopted for use with streaming data. The NEXMark scenario simulates an on-line auction system with three kinds of entities: people selling items or bidding on items, items submitted for auction, and bids on items. These kinds of entities will be referred to as \texttt{Person}, \texttt{Auction}, and \texttt{Bid} respectively. The original NEXMark benchmark includes eight queries which utilize the full spectrum of SQL features, but none of them contain more than one join operator. We add the following query based on the NEXMark model: \\
 
@@ -64,8 +65,7 @@ BeamCalcRel(name, city, state, price, itemName)
       BeamIOSourceRel(table=Auction)
 \end{lstlisting}
 
-
-However, it is also possible to use the following physical plan for this query, with the two join operators in a different order: \\
+However, it is also possible for the query planner to generate the following physical plan for this query, with the two join operators in a different order:
 
 \begin{lstlisting}[
            showspaces=false,
@@ -85,10 +85,15 @@ BeamCalcRel(name, city, state, price, itemName)
 \end{lstlisting}
 
 
-In unbounded data streams, elements are grouped into windows, based on event time or the number of tuples in each window, and each window can be processed similarly to a SQL table. Cost-based optimization requires statistical knowledge about the data, such as cardinality for each window, which for streaming data can be inferred from element arrival rate. In our example, the first plan, where \texttt{Person} and \texttt{Bid} are joined first, and then the result is joined with \texttt{Auction}, would be preferable if the arrival rate of auctions significantly exceeded the arrival rate of bids, meaning that while many items have been getting put up for auction, not many sellers have been making bids. If, however, after some time sellers started making a lot of bids, the second execution plan would have a lesser cost value. Thus, as data statistics change over the course of the query execution, a previously optimal plan might become inefficient. 
+In unbounded data streams, elements can be grouped into windows, based on event time or the number of tuples in each window, and each window can be processed similarly to a SQL table. Cost-based optimization requires statistical knowledge about the data, such as the cardinality of each window, which can be inferred from element arrival rate in case of streaming data. In our example, the first plan, where \texttt{Person} and \texttt{Bid} are joined first, and then the result is joined with \texttt{Auction}, would be preferable if the arrival rate of auctions significantly exceeded the arrival rate of bids, meaning that while many items have been getting put up for auction, not many sellers have been making bids. If, however, after some time sellers started making a lot of bids, the second execution plan would have a lesser cost value. Thus, as data statistics change over the course of the query execution, a previously optimal plan might become inefficient. 
 
-Various DBMS have adapted a technique knows as adaptive optimization. This technique utilizes a so-called adaptivity loop, during which an adaptive systems measures and evaluates data characteristics and then uses these evaluations to select a new query plan better suited to the current data \cite{deshpande2007adaptive}. 
+Various DBMS have adapted a technique known as adaptive optimization. This technique utilizes a so-called adaptivity loop, during which an adaptive systems measures and evaluates data characteristics and then uses these evaluations to select a new query plan better suited to the current data \cite{deshpande2007adaptive}. 
+
 
 It stands to reason that a similar technique could be useful in streaming queries optimization, seeing as streaming data statistics tend to change over time, rendering the previous query execution plan non-optimal. Thereby, in this paper we consider the problem of adaptive optimization of streaming SQL queries in distributed stream processing systems. 
 
-However, adaptive database optimization is not applicable to streaming SQL queries as is due to certain differences between data streams and databases, as well as other challenges, which we explore in the following section.
+
+However, adaptive database optimization is not applicable to streaming SQL queries as is: in databases, such optimization is applied during the execution of a long-running query, with the queried data remaining the same, while in streaming systems the data is continuously updated, and the same query is executed on each subsequent window; therefore, it would make sense for streaming systems to optimize the execution graph between the windows. This, as well as other specifics of SPEs, presents certain challenges in implementing logical level streaming query optimization, which we explore in the following section.
+
+%However, adaptive database optimization is not applicable to streaming SQL queries as is due to certain differences between data streams and databases, as well as other challenges, which we explore in the following section.
+% в БД оптимизация происходит во время выполнения того же самого запроса, а у нас многократно выполняется один и тот же запрос, причём в БД оптимизация именно во время исполения, а в потоках не так
