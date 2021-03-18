@@ -83,7 +83,7 @@
     In this work, we introduce a novel approach to specify distributed dataflows.
     Our method is based on declarative specifications of user-defined operations that we call contracts.
     Such specifications allow us to automatically generate execution graphs to choose the most optimal one.
-    A contract can describe an arbitrary operation or a dataflow part, so this approach combines the transparency of imperative approach and optimization possibilities of declarative one.
+    A contract can describe an arbitrary operation or a dataflow part, so this approach combines the transparency of the imperative approach and optimization possibilities of the declarative one.
     We implement a prototype and demonstrate automatic graphs generation on a real-world dataflow.
     We also outline the challenges that we face regarding the optimization problem.
 
@@ -122,12 +122,14 @@
 \thispagestyle{empty}
 
 \section{Introduction}
+\input{calco-intro}
 TODO
 
 \section{Running example}
 \input{calco-example}
 
 \section{Calco overview}
+% TODO Calco haskell
 TODO
 
 \section{Example evaluation}
@@ -142,6 +144,12 @@ TODO
 % TODO General implementation
 % TODO Better contracts interface (trello)
 % TODO Smart advices
+
+% TODO Preliminary cost evaluation
+% TODO Runtime statistics gathering
+% TODO Cost evaluation by statistics analysis
+% TODO Actor entity that decides, whether to restructure execution graph
+% TODO How to restructure execution graph in runtime
 TODO
 
 \section{Related work}
