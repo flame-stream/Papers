@@ -1,3 +1,26 @@
+In this section we discuss advantages and concerns of the proposed contract-based approach.
+
+\subsection{Eto horosho}
+
+We see that CGraph specification duplicates constraints and impact of operations that we decided to use to solve the problem.
+As the programmer anyway should take this information into consideration, so it is not hard to write contracts and they describe available operations naturally.
+
+Also we see that as we can generate all possible graphs using provided CGraph, we can choose the most optimal one if we can evaluate cost.
+
+TODO
+
+\subsection{Contract specification interface}
+
+It is not convenient to write all contracts manually.
+For example if some operations need incoming streams not to be filtered, adding new filter property make programmer to add it to this operations manually.
+
+
+TODO
+
+\subsection{Optimization}
+
+
+
 TODO General implementation \\
 TODO Better contracts interface (trello) \\
 TODO Smart advices \\
