@@ -1,0 +1,14 @@
+We have presented a novel approach to specify distributed dataflows.
+It is based on the contracts, preconditions, and postconditions of the graph operations.
+Such specification has been called CGraph (contract-graph).
+CGraph is a pair of environment and semantics, where the environment maps nodes to their contracts, and semantics is a set of nodes that produce dataflow target side-effects.
+We have provided an algorithm that generates all concrete execution graphs that satisfy contracts and semantics.
+So having a cost evaluation function we can choose the most optimal graph.
+
+We have considered a machine learning streaming problem, which cannot be solved using SQL. % TODO SQL proof
+And the only possible way to specify it is an execution graph, that represents rather an imperative approach then declarative, hence it does not provide enough space for optimizations.
+We have specified the example problem by CGraph using Haskell prototype DSL and pointed out that the most optimal graph exists in the set of concrete execution graphs, generated from CGraph.
+
+% TODO outlined similarity with Hoare logic
+
+Finally, we have studied problems that we will encounter in future work regarding the optimization: preliminary cost evaluation and the adaptivity loop implementation.

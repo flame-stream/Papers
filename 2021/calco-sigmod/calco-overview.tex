@@ -1,0 +1,152 @@
+To be able to automatically generate execution graphs we need to have information about operation's requirements and semantics.
+It can be achieved by defining a concrete set of operations to be used in graph construction.
+SQL goes this way and as we saw earlier it is not flexible enough.
+So we propose to provide needed information by annotating user-defined operations with declarative specifications that we call contracts.
+Hence, execution graph can be defined as a set of annotated operations
+
+We present operation semantics annotations that we call contracts to be able to provide such specifications for user-defined operations.
+Such graph definition based on contracts we call CGraph.
+
+TODO
+
+\subsection{CGraph}
+
+Let us define an environment as a set of nodes, annotated with contracts (that we will define later).
+Contracts have two types: input contracts (InCont) and output contracts (OutCont).
+The first one define requirements that input data elements should satisfy.
+The second one define guaranties that operation sets for the output.
+Set consists of the data sources, annotated with OutCont, one arity transformations (with one InCont and OutCont) and two arity transformations (with two InCont and OutCont).
+
+\begin{lstlisting}[language=Haskell]
+type CSource = OutCont
+type CTfm1 = (InCont, OutCont)
+type CTfm2 = (InCont, InCont, OutCont)
+
+data Env = Env
+  { sources :: Map NodeName CSource
+  , tfms1   :: Map NodeName CTfm1
+  , tfms2   :: Map NodeName CTfm2
+  }
+\end{lstlisting}
+
+Graph gets data from the data sources, transforms it in transformation nodes.
+But some of the transformation nodes do particular side effects that form result of the graph execution (writes data to the some storage, display on the dashboard, etc.).
+Let's call the set of the nodes with the such side effects as graph semantics.
+It will let us to have useless nodes in environment and reduce the total number of graphs to enumerate.
+
+\begin{lstlisting}[language=Haskell]
+type Semantics = Set NodeNames
+\end{lstlisting}
+
+And now we are ready to define CGraph.
+It is the pair of environment and semantics.
+
+\begin{lstlisting}[language=Haskell]
+type CGraph = (Env, Semantics)
+\end{lstlisting}
+
+CTInfo --- information available before runtime time (construct time) (filters and joins).
+RTInfo --- information extracted from runtime statistics.
+So the work pipeline can be the following:
+
+\begin{lstlisting}[language=Haskell]
+cgraph :: CGraph
+ctinfo :: CTInfo
+
+type Info = (CTInfo, Maybe RTInfo, Maybe ChInfo)
+
+genGraphs :: CGraph -> [Graph]
+
+graphs :: [Graph]
+graphs = genGraphs cgraph
+
+cost :: CTInfo -> Maybe RTInfo
+     -> Graph -> Integer
+
+chooseGraph :: (Graph -> Integer)
+            -> [Graph] -> Graph
+
+eval :: Graph -> Runtime Graph
+
+run :: [Graphs] -> Runtime Graphs
+run = eval $ chooseGraph (cost)
+
+\end{lstlisting}
+TODO
+
+\subsection{Contracts}
+
+Let's suppose that every element is a mapping from attributes to data.
+Dataflow can be described with two sorts of information: attributes that every element has and properties of the data.
+We can define dataflow state as follows:
+
+\begin{lstlisting}[language=Haskell]
+type Attr = String
+type Prop = String
+
+data State = State
+  { attrs :: Set Attr
+  , props :: Set Prop
+  }
+\end{lstlisting}
+
+Input contract:
+
+\begin{lstlisting}[language=Haskell]
+data InCont = InCont
+  { attrsI  :: Set Attr
+  , propsI  :: Set Prop
+  , propsI' :: Set Prop
+  }
+
+match :: State -> InCont -> Bool
+match s c = attrsI c `Set.isSubsetOf` attrs s
+         && propsI c `Set.isSubsetOf` props s
+         && propsI' c `Set.disjoint`  props s
+\end{lstlisting}
+
+Output contract:
+
+\begin{lstlisting}[language=Haskell]
+data OutAttrs =
+  AddAttrs (Set Attr)
+  NewAttrs (Set Attr)
+
+data OutCont = OutCont
+  { attrsO  :: OutAttrs
+  , propsO  :: Set Prop
+  , propsO' :: Set Prop
+  }
+
+update :: State -> OutCont -> State
+update s c = State
+  { attrs = updateAttrs s $ attrsO c
+  , props = Set.union
+      (propsO c)
+      (props s `Set.difference` propsO' c)
+  }
+\end{lstlisting}
+
+TODO verification: Hoare logic \\
+TODO
+
+\subsection{Graphs}
+
+\begin{lstlisting}[language=Haskell]
+type NodeId = Integer
+
+data Node =
+    Source NodeName
+  | Tfm1 NodeName NodeId
+  | Tfm2 NodeName NodeId NodeId
+
+type Graph = Map NodeId Node
+\end{lstlisting}
+
+TODO
+
+\subsection{Prototype implementation}
+
+TODO
+
+TODO migrate prototype to the its own repo
