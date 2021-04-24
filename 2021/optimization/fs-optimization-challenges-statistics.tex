@@ -3,7 +3,7 @@ Cost-based optimization requires statistical information on data in order to cal
 \begin{itemize}
     \item \textbf{Technical}:
     Statistical information on stream elements, such as their arrival rate, needs to be collected during execution at runtime without seriously affecting the performance of a distributed SPE. % which can present certain challenges since there is no centralized point at which to collect statistics, so we would need to aggregate it somehow, which can affect the performance of the system itself
-    \item \textbf{Research}
+    \item \textbf{Research}:
     Next window statistics should be predicted using statistics collected for previous windows. We assume that previous window statistics would present a decent baseline; however, this assumption needs to be tested. It is expected that a simple baseline will be good enough in most simple cases, but in general, statistics prediction is not an easy task.
 \end{itemize}
 
