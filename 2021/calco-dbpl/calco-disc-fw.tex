@@ -1,36 +1,28 @@
 In this section we discuss advantages and concerns of the proposed contract-based approach.
 
-\subsection{Eto horosho}
+\subsection{Contracts}
 
-We see that CGraph specification duplicates constraints and impact of operations that we decided to use to solve the problem.
-As the programmer anyway should take this information into consideration, so it is not hard to write contracts and they describe available operations naturally.
+As we saw, semantics of the custom operations can be naturally described by contracts.
+However it may be inconvenient to write all contracts as is.
+For example, if some operations need incoming streams not to be filtered, adding new filter property make programmer to add it to this operations manually.
+There are some ideas that should make defining CGraph more handy, here are some of them:
+\begin{itemize}
+    \item properties should be able to be grouped to use them together (prohibit all filter properties as one, for example),
+    \item some kind of properties may be prohibited by default,
+    \item interactive environment that hints, which attributes and properties are not yet satisfied for the semantics nodes.
+\end{itemize}
 
-Also we see that as we can generate all possible graphs using provided CGraph, we can choose the most optimal one if we can evaluate cost.
+\subsection{Work scheme and optimization}
 
-TODO
+Before having runtime statistics reasonable concrete graph should be chosen.
+To do that information is needed, how nodes change dataflow cardinality.
+Seems like this information should be manually provided by the programmer.
 
-\subsection{Contract specification interface}
+There are no production-ready frameworks for distributed data processing that gather needed statistics for accurate concrete graph cost evaluation.
+Also none of them can dynamically reconfigure graph.
 
-It is not convenient to write all contracts manually.
-For example if some operations need incoming streams not to be filtered, adding new filter property make programmer to add it to this operations manually.
+Finally, it is needed to precisely compute cost function using the runtime statistics and also estimate the cost of the graph dynamic reconfiguration.
 
+\subsection{General implemenation}
 
-TODO
-
-\subsection{Optimization}
-
-TODO gathering statistics \\
-TODO dynamic graph reconfiguration \\
-
-TODO General implementation \\
-TODO Better contracts interface (trello) \\
-TODO Smart advices \\
- \\
-TODO Preliminary cost evaluation \\
-TODO Runtime statistics gathering \\
-TODO Cost evaluation by statistics analysis \\
-TODO Actor entity that decides, whether to restructure execution graph \\
-TODO How to restructure execution graph in runtime \\
- \\
-TODO Only map-like elements in the stream \\
-TODO
+We plan to develop some libraries to be able to specify computations using CGraph on Python and Java.
