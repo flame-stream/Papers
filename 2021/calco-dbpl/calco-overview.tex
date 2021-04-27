@@ -1,21 +1,21 @@
-To be able to automatically generate execution graphs we need to have information about operation's requirements and semantics.
-It can be achieved by defining a concrete set of operations to be used in graph construction.
-SQL goes this way and as we saw earlier it is not flexible enough.
-So we propose to provide needed information by annotating user-defined operations with declarative specifications that we call contracts.
-Hence, execution graph can be defined as a set of annotated operations
+As we discussed earlier, we need information about semantics of each operation to be able to permute them safely.
+Also we want to use custom operations in the graph, because defining concrete set of operations with known permutation rules is not enough flexible approach.
 
-We present operation semantics annotations that we call contracts to be able to provide such specifications for user-defined operations.
-Such graph definition based on contracts we call CGraph.
+Thus we propose to specify semantics of custom operations manually.
+It is similar idea to the axiomatic semantics of the programming languages (TODO ref), based on the Hoare triples.
+Hoare triple consists of predicate that should be satisfied for the program context before the statement execution, of statement, which semantics we describe, and of the second predicate that should be satisfied for the program context after the statement execution.
+We propose to annotate each custom operation with the input contract, that the input data stream should satisfy, and with the output contract that describes, how this operation changes the input stream.
 
-TODO
+Such novel graphs specification we call CGraph. Let's consider CGraph and contracts in details.
+
 
 \subsection{CGraph}
 
-Let us define an environment as a set of nodes, annotated with contracts (that we will define later).
-Contracts have two types: input contracts (InCont) and output contracts (OutCont).
-The first one define requirements that input data elements should satisfy.
-The second one define guaranties that operation sets for the output.
+Let us define an environment as a set of nodes (operations), annotated with input and output contracts (InCont and OutCont).
+The first one defines requirements that input data elements should satisfy.
+The second one defines guaranties that operation sets for the output.
 Set consists of the data sources, annotated with OutCont, one arity transformations (with one InCont and OutCont) and two arity transformations (with two InCont and OutCont).
+Here we need to limit possible arity of operations.
 
 \begin{lstlisting}[language=Haskell]
 type CSource = OutCont
@@ -25,12 +25,12 @@ type CTfm2 = (InCont, InCont, OutCont)
 data Env = Env
   { sources :: Map NodeName CSource
   , tfms1   :: Map NodeName CTfm1
-  , tfms2   :: Map NodeName CTfm2
-  }
+  , tfms2   :: Map NodeName CTfm2 }
 \end{lstlisting}
 
 Graph gets data from the data sources, transforms it in transformation nodes.
 But some of the transformation nodes do particular side effects that form result of the graph execution (writes data to the some storage, display on the dashboard, etc.).
+Such nodes should exist in TODO.
 Let's call the set of the nodes with the such side effects as graph semantics.
 It will let us to have useless nodes in environment and reduce the total number of graphs to enumerate.
 
@@ -45,39 +45,12 @@ It is the pair of environment and semantics.
 type CGraph = (Env, Semantics)
 \end{lstlisting}
 
-CTInfo --- information available before runtime time (construct time) (filters and joins).
-RTInfo --- information extracted from runtime statistics.
-So the work pipeline can be the following:
 
-\begin{lstlisting}[language=Haskell]
-cgraph :: CGraph
-ctinfo :: CTInfo
+\subsection{Input contracts}
 
-type Info = (CTInfo, Maybe RTInfo, Maybe ChInfo)
-
-genGraphs :: CGraph -> [Graph]
-
-graphs :: [Graph]
-graphs = genGraphs cgraph
-
-cost :: CTInfo -> Maybe RTInfo
-     -> Graph -> Integer
-
-chooseGraph :: (Graph -> Integer)
-            -> [Graph] -> Graph
-
-eval :: Graph -> Runtime Graph
-
-run :: [Graphs] -> Runtime Graphs
-run = eval $ chooseGraph (cost)
-
-\end{lstlisting}
-TODO
-
-\subsection{Contracts}
-
-Let's suppose that every element is a mapping from attributes to data.
-Dataflow can be described with two sorts of information: attributes that every element has and properties of the data.
+Let's suppose that dataflow is a stream of elements.
+Each element is a mapping from attributes names to data (as a row in relational database).
+So the dataflow can be described with two sorts of information: attributes that every element has and the properties of the data.
 We can define dataflow state as follows:
 
 \begin{lstlisting}[language=Haskell]
@@ -86,67 +59,80 @@ type Prop = String
 
 data State = State
   { attrs :: Set Attr
-  , props :: Set Prop
-  }
+  , props :: Set Prop }
 \end{lstlisting}
 
-Input contract:
+Input contract can be defined as tuple of three sets:
+set of attributes that are required in the input stream,
+set of properties that are required in the input stream,
+and a set of properties that are prohibited in the input stream (TODO).
 
 \begin{lstlisting}[language=Haskell]
 data InCont = InCont
   { attrsI  :: Set Attr
   , propsI  :: Set Prop
-  , propsI' :: Set Prop
-  }
-
-match :: State -> InCont -> Bool
-match s c = attrsI c `Set.isSubsetOf` attrs s
-         && propsI c `Set.isSubsetOf` props s
-         && propsI' c `Set.disjoint`  props s
+  , propsI' :: Set Prop }
 \end{lstlisting}
 
-Output contract:
+Input stream can be matched with the input contract to check if it satisfies that contract.
 
 \begin{lstlisting}[language=Haskell]
-data OutAttrs =
-  AddAttrs (Set Attr)
-  NewAttrs (Set Attr)
+match :: State -> InCont -> Bool
+match s c =
+     attrsI c `Set.isSubsetOf` attrs s
+  && propsI c `Set.isSubsetOf` props s
+  && propsI' c `Set.disjoint`  props s
+\end{lstlisting}
 
+
+\subsection{Output contracts}
+
+Output contracts can be defined as a tuple of three sets and one boolean:
+set of attributes that are added,
+set of properties to be added,
+set of properties to be deleted,
+boolean that true if operation is projection (it removes all old attributes).
+
+\begin{lstlisting}[language=Haskell]
 data OutCont = OutCont
-  { attrsO  :: OutAttrs
+  { attrsO  :: Set Attr
+  , isProj  :: Bool
   , propsO  :: Set Prop
-  , propsO' :: Set Prop
-  }
+  , propsO' :: Set Prop }
+\end{lstlisting}
 
+To get the output dataflow state of the operation, input dataflow state should be updated with output contract.
+
+\begin{lstlisting}[language=Haskell]
 update :: State -> OutCont -> State
 update s c = State
-  { attrs = updateAttrs s $ attrsO c
+  { attrs = Set.union
+      (attrsO c)
+      (if isProj c then Set.empty
+                   else attrs s)
   , props = Set.union
       (propsO c)
-      (props s `Set.difference` propsO' c)
-  }
+      (props s `Set.difference` propsO' c) }
 \end{lstlisting}
 
-TODO verification: Hoare logic \\
-TODO
+\subsection{Work scheme}
 
-\subsection{Graphs}
+All concrete graphs that satisfies to the CGraph can be generated.
+So having the cost function we can choose the most optimal one and run it.
+But having the execution statistics from the runtime, cost function can be much more precise.
+Thus we should continuously recompute the concrete graphs costs using the updating statistics.
+When the running graph becomes suboptimal, it should be dynamically reconfigured, if the new running graph is rather more optimal to compensate the reconfiguration cost.
 
-\begin{lstlisting}[language=Haskell]
-type NodeId = Integer
+\subsection{Prototype}
 
-data Node =
-    Source NodeName
-  | Tfm1 NodeName NodeId
-  | Tfm2 NodeName NodeId NodeId
+We have implemented a prototype in Haskell.
+It consists of:
+\begin{enumerate}
+    \item contracts definition and CGraph definition,
+    \item function that checks if a concrete graph satisfies to the given CGraph,
+    \item function that generates all concrete graph that satisfy to the given CGraph (runs rather fast because of early enumeration branch truncation),
+    \item set of basic operations that emulate such set of the Apache Beam (TODO ref),
+    \item evaluation function that runs the concrete graph.
+\end{enumerate}
 
-type Graph = Map NodeId Node
-\end{lstlisting}
-
-TODO
-
-\subsection{Prototype implementation}
-
-TODO
-
-TODO migrate prototype to the its own repo
+TODO ref https://github.com/flame-stream/halco
