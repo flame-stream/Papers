@@ -1,13 +1,15 @@
+TODO Distributed computations, types, MapReduce (batches) / streams.
+
 Nowadays different applications widely use computations over unbounded and bounded data streams, provided by frameworks such as Apache Flink, Apache Spark, etc.
-All of them represent computations similarly, as a execution graph, that is formally a directed acyclic graph, which nodes and edges represent operations and data streams accordingly.
-Programmers are able to define graphs as is or to use SQL (which automatically translates to the execution graphs).
+All of them represent computations similarly, as an execution graphs, that are formally a directed acyclic graphs, which nodes and edges represent operations and data streams accordingly.
+Programmers are able to define graphs as is or to use SQL (which translates to the execution graphs).
 
 SQL is based on the relation algebra that has concrete number of operations and defines rules which describe permutation possibilities that can be used in optimization purposes.
-However, this approach is not flexible enough in real-world dataflows specification, because it is needed to specify custom operations (maybe stateful) that accord to the problem domain.
+However, this approach is not flexible enough in real-world dataflows specification, because it is needed to specify custom operations (maybe stateful) that accord to the problem domain. (TODO proof).
 
 Computations can be also specified directly by defining a concrete graphs.
 Nodes of the such graphs are custom operations, which semantics cannot be automatically deduced (because of the halting problem) as well as theirs permutation rules.
-So operations cannot be automatically permuted to achieve a better performance.
+So operations cannot be automatically permuted to achieve a better performance, because we cannot proof that permutation does not make the graph incorrect.
 Thus, optimization is a programmer concern, but it is sometimes too complex to do it manually for big graphs.
 Moreover, having the runtime information can make graphs cost evaluation much more precise.
 
@@ -18,4 +20,19 @@ So cross-query optimization is needed, but it does not supported now.
 
 Let's suppose that we have some number of binary modules, written in different programming languages.
 And we want to integrate them in a complex cross-domain dataflow.
-Today we have no means to automatically optimize it.
+Nowadays we have no means to automatically optimize it.
+
+As we discussed earlier, we need information about semantics of the each operation to be able to permute them safely.
+Also we want to use custom operations in the graph, because defining concrete set of operations with known permutation rules is not enough flexible approach.
+Thus we propose to specify semantics of custom operations manually.
+We use similar idea to the axiomatic semantics of the programming languages, based on the Hoare triples.
+Hoare triple consists of the first predicate that should be satisfied for the program context before the statement execution, of statement, which semantics we describe, and of the second predicate that should be satisfied for the program context after the statement execution.
+We propose to annotate each graph operation with the input contract, that the input data stream should satisfy, and with the output contract that describes, how this operation changes the input data stream.
+So we can specify the computation as a set of annotated nodes, using this representation we can generate all concrete graphs with such nodes, which contracts are satisfied (hence, all operations work properly).
+Such novel specification approach we call CGraph.
+
+Our work has two general parts.
+Firstly, we investigate how to define and generate a set of the equivalent concrete execution graphs using the CGraph specification.
+Secondly, we need to build a concrete graphs cost evaluation function and develop instruments to gather runtime statistics and dynamically reconfigure execution graphs. In this peper we consider only the first part of the work and briefly outline challenges of the second.
+
+Let's consider CGraph and contracts in details.

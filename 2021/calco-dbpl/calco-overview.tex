@@ -1,15 +1,3 @@
-As we discussed earlier, we need information about semantics of the each operation to be able to permute them safely.
-Also we want to use custom operations in the graph, because defining concrete set of operations with known permutation rules is not enough flexible approach.
-
-Thus we propose to specify semantics of custom operations manually.
-It is similar idea to the axiomatic semantics of the programming languages (TODO ref), based on the Hoare triples.
-Hoare triple consists of the first predicate that should be satisfied for the program context before the statement execution, of statement, which semantics we describe, and of the second predicate that should be satisfied for the program context after the statement execution.
-We propose to annotate each custom operation with the input contract, that the input data stream should satisfy, and with the output contract that describes, how this operation changes the input data stream.
-So we can specify the computation as a set of annotated nodes, using this representation we can generate all concrete graphs with such nodes, which contracts are satisfied (hence, all operations work properly).
-Such novel specification approach we call CGraph.
-
-Let's consider CGraph and contracts in details.
-
 \subsection{CGraph}
 
 Let us define an environment as a set of nodes, annotated with input and output contracts (InCont and OutCont).
