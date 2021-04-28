@@ -1,23 +1,21 @@
-Nowadays different applications widely use frameworks for computations over unbounded and bounded data streams, such as Apache Flink, Apache Spark, etc.
-All of them represent computations similarly, as a execution graph (directed acyclic graph).
-Programmers are able to define graphs as is or to use SQL (that automatically translates to the execution graphs).
+Nowadays different applications widely use computations over unbounded and bounded data streams, provided by frameworks such as Apache Flink, Apache Spark, etc.
+All of them represent computations similarly, as a execution graph, that is formally a directed acyclic graph, which nodes and edges represent operations and data streams accordingly.
+Programmers are able to define graphs as is or to use SQL (which automatically translates to the execution graphs).
 
 SQL is based on the relation algebra that has concrete number of operations and defines rules which describe permutation possibilities that can be used in optimization purposes.
-However, this approach is not flexible enough in real-world dataflows specification.
-It is needed to specify custom operations (maybe stateful) that accord to the problem domain.
+However, this approach is not flexible enough in real-world dataflows specification, because it is needed to specify custom operations (maybe stateful) that accord to the problem domain.
 
-Computations can be also specified directly by defining a concrete graph.
-Nodes of the such graph are custom operations, which requirements and semantics cannot be automatically deduced (because of the halting problem) as well as theirs permutation rules.
+Computations can be also specified directly by defining a concrete graphs.
+Nodes of the such graphs are custom operations, which semantics cannot be automatically deduced (because of the halting problem) as well as theirs permutation rules.
 So operations cannot be automatically permuted to achieve a better performance.
-Thus, optimization of the concrete graphs is a programmer concern.
-However, real-world graphs can be big enough that makes manual optimization to be a complex task.
-And finally, most of the necessary information for the graph cost evaluation is available only in runtime (TODO duplicates abstract).
+Thus, optimization is a programmer concern, but it is sometimes too complex to do it manually for big graphs.
+Moreover, having the runtime information can make graphs cost evaluation much more precise.
 
 Many business tasks are computationally expensive, but have large common parts.
-That makes programmers to write very big graphs that solve many tasks at once to maximally reuse computational results.
-And it makes analytics to write complex multi-purpose SQL queries.
+That makes programmers to write very big graphs that solve many problems at once to maximally reuse computational results.
+Also it makes analytics to write complex multi-purpose SQL queries.
 So cross-query optimization is needed, but it does not supported now.
 
 Let's suppose that we have some number of binary modules, written in different programming languages.
 And we want to integrate them in a complex cross-domain dataflow.
-Today we have no means to optimize it.
+Today we have no means to automatically optimize it.
