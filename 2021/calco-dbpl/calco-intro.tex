@@ -45,7 +45,7 @@ Nowadays we have no means to automatically optimize it.
 
 As we discussed earlier, we need information about semantics of the each operation to be able to permute them safely.
 Also we want to use custom operations in the graph, because defining concrete set of operations with known permutation rules is not enough flexible approach.
-Thus we propose to specify permutation rules of custom operations manually.
+Thus we propose to specify permutation constraints of custom operations manually.
 We use similar idea to the axiomatic semantics of the programming languages, based on the Hoare triples.
 Hoare triple consists of the first predicate that should be satisfied for the program context before the statement execution, of statement, which semantics we describe, and of the second predicate that should be satisfied for the program context after the statement execution.
 We propose to annotate each graph operation with the input contract, that the input data stream should satisfy, and with the output contract that describes, how this operation changes the input data stream.

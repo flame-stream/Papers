@@ -32,11 +32,11 @@ It is simply a pair of environment and semantics.
 type CGraph = (Env, Semantics)
 \end{lstlisting}
 
-\subsection{Input contracts}
+\subsection{Data stream state}
 
 Let's suppose that each element in the data stream is a mapping from attribute names to data (like a row in relational database).
 So the data stream can be described by two sorts of information: attributes that every element has and the properties of the data.
-We can define stream state as follows:
+We can define data stream state as follows:
 
 \begin{lstlisting}[language=Haskell]
 type Attr = String
@@ -55,6 +55,8 @@ union s1 s2 = State
   { attrs s1 `Set.union` attrs s2
   , props s1 `Set.union` props s2 }
 \end{lstlisting}
+
+\subsection{Input contracts}
 
 Input contract can be defined as tuple of three sets:
 \begin{enumerate}
@@ -85,7 +87,7 @@ match s c =
 Output contracts can be defined as a tuple of the three sets and one boolean:
 \begin{enumerate}
     \item set of attributes to be added,
-    \item boolean that is true if an operation is a projection (it removes all attributes that exist in the incoming stream),
+    \item boolean that is true if an operation is a projection (it removes all attributes that exist in the incoming stream), (TODO can we call this as projection?)
     \item set of properties to be added,
     \item set of properties to be deleted.
 \end{enumerate}
