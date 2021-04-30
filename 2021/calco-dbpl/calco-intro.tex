@@ -1,17 +1,38 @@
-TODO Distributed computations, types, MapReduce (batches) / streams.
+%  a Распределенная обработка и ее виды.
+%    Есть MapReduce и батчи, есть потоки.
+%  b Исторически, пайплайны распределенной обработки задавали графами исполнения (переход от Hadoop к Spark).
+%    Графы исполнения популярны, т.к. их можно задать кодом и версионировать как код, у них есть переиспользуемые единицы (вершины), их можно визуализировать.
+%    Однако, графы состоят из произвольных пользовательских операций, над которыми нет никакой заданной алгебры. Следовательно, графы можно оптимизировать очень ограниченно - если мы перестроим граф, то у нас нет возможности понять, остался ли он корректным.
+%  c Еще один способ задания вычислений SQL - подход, основанный на реляционной алгебре, в котором через запрос задается результат, который необходимо получить. Пользуясь правилами реляционной алгебры можно получать гарантированно эквиваллентные графы исполнения из одного запроса и из них выбирать оптимальный. Однако, у SQL есть проблемы - через него нельзя выразить произвольное MapReduce преобразование, а user-defined функции не поддаются оптимизации, т.к. на них не распространяются правила реляционной алгебры.
+%  d Наш подход - основан на задании алгебры над пользовательскими операциями через контракты. Таким образом, мы можем переставлять произвольные операции в соответсвии с правилами, которые задали пользователи. В частности, через наш подход выражается SQL - с соответствующими правилами в контрактах (пример?).
+%  e Большое отличие распределенных от баз данных - обычно запросы выполняются долго и меняются редко, а данные меняются часто. Наш подход позволяет делать совместную оптимизацию запросов, заданных SQL и произвольными пользовательскими операциями через сведение к контрактам. Таким образом, открывается возможность переиспользовать уже запущенные операции, используя их в различных задачах.
 
-Nowadays different applications widely use computations over unbounded and bounded data streams, provided by frameworks such as Apache Flink, Apache Spark, etc.
-All of them represent computations similarly, as an execution graphs, that are formally a directed acyclic graphs, which nodes and edges represent operations and data streams accordingly.
+Initially distributed dataflows were specified using MapReduce programming model.
+MapReduce computations are represented as computational graphs that consist of operations of three kinds: map, shuffle and reduce.
+Open source implementation of MapReduce is Apache Hadoop.
+There are some projects that implement evolution of the MapReduce, such as Apache Spark and others.
+There is also an Apache Beam project that provides unified model to define execution graphs and runs them on a different backend frameworks.
+
+Distributed dataflows can be intended to process streaming data sources with unknown number of elements or to process batch data sources.
+Batch processing can be considered as a special case of stream processing.
+We can define some time window for example and work with elements in this window as with batch.
+
+Nowadays frameworks represent distributed computations similarly: as an execution graphs, that are formally a directed acyclic graphs, which nodes and edges represent operations and data streams accordingly.
 Programmers are able to define graphs as is or to use SQL (which translates to the execution graphs).
 
 SQL is based on the relation algebra that has concrete number of operations and defines rules which describe permutation possibilities that can be used in optimization purposes.
 However, this approach is not flexible enough in real-world dataflows specification, because it is needed to specify custom operations (maybe stateful) that accord to the problem domain. (TODO proof).
+Also SQL is not a native way to define distributed computations, so its implementations can be not powerful enough.
 
 Computations can be also specified directly by defining a concrete graphs.
-Nodes of the such graphs are custom operations, which semantics cannot be automatically deduced (because of the halting problem) as well as theirs permutation rules.
+Nodes of the such graphs are custom operations, which permutation rules cannot be automatically deduced.
 So operations cannot be automatically permuted to achieve a better performance, because we cannot proof that permutation does not make the graph incorrect.
-Thus, optimization is a programmer concern, but it is sometimes too complex to do it manually for big graphs.
-Moreover, having the runtime information can make graphs cost evaluation much more precise.
+Thus, optimization is a programmer concern.
+
+It should be possible to do automatic optimization.
+Real-world graphs can be rather complex to optimize them manually.
+Having the runtime information can make graphs cost evaluation much more precise, and this information is not available for programmer during development.
+One graph can work for a long time on a changing data streams (as opposite to database queries), so dynamic optimization is a good idea (TODO).
 
 Many business tasks are computationally expensive, but have large common parts.
 That makes programmers to write very big graphs that solve many problems at once to maximally reuse computational results.
@@ -24,15 +45,16 @@ Nowadays we have no means to automatically optimize it.
 
 As we discussed earlier, we need information about semantics of the each operation to be able to permute them safely.
 Also we want to use custom operations in the graph, because defining concrete set of operations with known permutation rules is not enough flexible approach.
-Thus we propose to specify semantics of custom operations manually.
+Thus we propose to specify permutation rules of custom operations manually.
 We use similar idea to the axiomatic semantics of the programming languages, based on the Hoare triples.
 Hoare triple consists of the first predicate that should be satisfied for the program context before the statement execution, of statement, which semantics we describe, and of the second predicate that should be satisfied for the program context after the statement execution.
 We propose to annotate each graph operation with the input contract, that the input data stream should satisfy, and with the output contract that describes, how this operation changes the input data stream.
-So we can specify the computation as a set of annotated nodes, using this representation we can generate all concrete graphs with such nodes, which contracts are satisfied (hence, all operations work properly).
+So we can specify a computation as a set of annotated nodes, using this representation we can generate all concrete graphs with such nodes, which contracts are satisfied (hence, all operations work properly).
 Such novel specification approach we call CGraph.
 
 Our work has two general parts.
 Firstly, we investigate how to define and generate a set of the equivalent concrete execution graphs using the CGraph specification.
-Secondly, we need to build a concrete graphs cost evaluation function and develop instruments to gather runtime statistics and dynamically reconfigure execution graphs. In this peper we consider only the first part of the work and briefly outline challenges of the second.
+Secondly, we need to build a concrete graphs cost evaluation function and develop instruments to gather runtime statistics and dynamically reconfigure execution graphs.
+In this paper we consider only the first part of the work and briefly outline challenges of the second.
 
 Let's consider CGraph and contracts in details.
