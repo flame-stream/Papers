@@ -7,32 +7,35 @@
 %  d Наш подход - основан на задании алгебры над пользовательскими операциями через контракты. Таким образом, мы можем переставлять произвольные операции в соответсвии с правилами, которые задали пользователи. В частности, через наш подход выражается SQL - с соответствующими правилами в контрактах (пример?).
 %  e Большое отличие распределенных от баз данных - обычно запросы выполняются долго и меняются редко, а данные меняются часто. Наш подход позволяет делать совместную оптимизацию запросов, заданных SQL и произвольными пользовательскими операциями через сведение к контрактам. Таким образом, открывается возможность переиспользовать уже запущенные операции, используя их в различных задачах.
 
-Initially distributed dataflows were specified using MapReduce programming model.
-MapReduce computations are represented as computational graphs that consist of operations of three kinds: map, shuffle and reduce.
-Open source implementation of MapReduce is Apache Hadoop.
-There are some projects that implement evolution of the MapReduce, such as Apache Spark and others.
-There is also an Apache Beam project that provides unified model to define execution graphs and runs them on a different backend frameworks.
+Distributed data processing has been extensively evolved in the past decades. There are two approaches in distributed processing: batch and streaming. Batch processing systems aim to handle large static datasets and maximize throughput while streaming frameworks deal with unbounded sequences of data and mostly optimize the latency of processing. One of the first batch processing models that have been widely adopted is MapReduce~\cite{Dean:2008:MSD:1327452.1327492}. It has a wide range of implementations, including Hadoop~\cite{hadoop2009hadoop}, Spark~\cite{Zaharia:2016:ASU:3013530.2934664}, Dryad~\cite{Isard:2007:DDD:1272996.1273005}. Popular streaming frameworks are Flink~\cite{carbone2015apache}, Storm~\cite{Toshniwal:2014:STO:2588555.2595641}, Spark Streaming~\cite{Zaharia:2012:DSE:2342763.2342773}, etc.
 
-Distributed dataflows can be intended to process streaming data sources with unknown number of elements or to process batch data sources.
-Batch processing can be considered as a special case of stream processing.
-We can define some time window for example and work with elements in this window as with batch.
+Modern batch and streaming frameworks have much in common, including the ways computations can be defined. A historically first option is defining an {\em execution graph}. An execution graph is a directed graph, such that nodes and edges represent operations and their order accordingly. Another way is the SQL: in this case, the concrete execution graph is generated automatically by the processing system.  
 
-Nowadays frameworks represent distributed computations similarly: as an execution graphs, that are formally a directed acyclic graphs, which nodes and edges represent operations and data streams accordingly.
-Programmers are able to define graphs as is or to use SQL (which translates to the execution graphs).
+% Initially distributed dataflows were specified using MapReduce programming model.
+% MapReduce computations are represented as computational graphs that consist of operations of three kinds: map, shuffle and reduce.
+% Open source implementation of MapReduce is Apache Hadoop.
+% There are some projects that implement evolution of the MapReduce, such as Apache Spark and others.
+% There is also an Apache Beam project that provides unified model to define execution graphs and runs them on a different backend frameworks.
 
-SQL is based on the relation algebra that has concrete number of operations and defines rules which describe permutation possibilities that can be used in optimization purposes.
-However, this approach is not flexible enough in real-world dataflows specification, because it is needed to specify custom operations (maybe stateful) that accord to the problem domain. (TODO proof).
-Also SQL is not a native way to define distributed computations, so its implementations can be not powerful enough.
+% Distributed dataflows can be intended to process streaming data sources with unknown number of elements or to process batch data sources.
+% Batch processing can be considered as a special case of stream processing.
+% We can define some time window for example and work with elements in this window as with batch.
 
-Computations can be also specified directly by defining a concrete graphs.
-Nodes of the such graphs are custom operations, which permutation rules cannot be automatically deduced.
-So operations cannot be automatically permuted to achieve a better performance, because we cannot proof that permutation does not make the graph incorrect.
-Thus, optimization is a programmer concern.
+% Nowadays frameworks represent distributed computations similarly: as an execution graphs, that are formally a directed acyclic graphs, which nodes and edges represent operations and data streams accordingly.
+% Programmers are able to define graphs as is or to use SQL (which translates to the execution graphs).
 
-It should be possible to do automatic optimization.
-Real-world graphs can be rather complex to optimize them manually.
-Having the runtime information can make graphs cost evaluation much more precise, and this information is not available for programmer during development.
-One graph can work for a long time on a changing data streams (as opposite to database queries), so dynamic optimization is a good idea (TODO).
+SQL is based on relational algebra with a concrete number of operations and defines rules that describe permutation possibilities that can be used in query optimization. However, this approach is not flexible enough in real-world dataflows specifications, e.g., some map-reduce computations cannot be translated into SQL~\cite{PROOF}. Some frameworks for SQL over distributed systems, such as Beam~\cite{Begoli:2019:OSR:3299869.3314040}, allow registering user-defined operators in SQL to mitigate this problem. However, this approach significantly reduces the optimization feasibilities because relational algebra is not aware of such operators.
+
+% because it is needed to specify custom operations (maybe stateful) that accord to the problem domain. (TODO proof). Also SQL is not a native way to define distributed computations, so its implementations can be not powerful enough.
+
+% Computations can be also specified directly by defining a concrete graphs.
+% Nodes of the such graphs are custom operations, which permutation rules cannot be automatically deduced.
+Similarly, operations in user-defined execution graphs cannot be automatically permuted to achieve a better performance because we cannot prove that permutation does not make the graph incorrect. Thus, while physical optimizations such as operators fusion can be applied for an execution graph~\cite{grulich2020grizzly}, only manual optimization is possible on the logical level. Real-world graphs can be rather complex to optimize them manually. Moreover, the runtime statistics can make graphs cost evaluation much more precise, and this information is not available during development.
+
+% It should be possible to do automatic optimization.
+
+% Having the runtime information can make graphs cost evaluation much more precise, and this information is not available for programmer during development.
+% One graph can work for a long time on a changing data streams (as opposite to database queries), so dynamic optimization is a good idea (TODO).
 
 Many business tasks are computationally expensive, but have large common parts.
 That makes programmers to write very big graphs that solve many problems at once to maximally reuse computational results.
