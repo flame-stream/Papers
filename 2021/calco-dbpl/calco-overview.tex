@@ -95,7 +95,7 @@ Output contracts can be defined as a tuple of the three sets and one boolean:
 \begin{lstlisting}[language=Haskell]
 data OutCont = OutCont
   { attrsO  :: Set Attr
-  , isProj  :: Bool
+  , delete  :: Bool
   , propsO  :: Set Prop
   , propsO' :: Set Prop }
 \end{lstlisting}
