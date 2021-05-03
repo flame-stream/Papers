@@ -1,0 +1,169 @@
+As we discussed earlier, we need information about semantics of the each operation to be able to permute them safely.
+Also we want to use custom operations in the graph, because defining concrete set of operations with known permutation rules is not enough flexible approach.
+
+Thus we propose to specify semantics of custom operations manually.
+It is similar idea to the axiomatic semantics of the programming languages (TODO ref), based on the Hoare triples.
+Hoare triple consists of the first predicate that should be satisfied for the program context before the statement execution, of statement, which semantics we describe, and of the second predicate that should be satisfied for the program context after the statement execution.
+We propose to annotate each custom operation with the input contract, that the input data stream should satisfy, and with the output contract that describes, how this operation changes the input data stream.
+So we can specify the computation as a set of annotated nodes, using this representation we can generate all concrete graphs with such nodes, which contracts are satisfied (hence, all operations work properly).
+Such novel specification approach we call CGraph.
+
+Let's consider CGraph and contracts in details.
+
+\subsection{CGraph}
+
+Let us define an environment as a set of nodes, annotated with input and output contracts (InCont and OutCont).
+This set consists of the data sources, annotated with OutCont, one arity transformations (with one InCont and OutCont) and two arity transformations (with two InCont and OutCont).
+Here we limit possible arity of operations for simplicity.
+
+\begin{lstlisting}[language=Haskell]
+type CSource = OutCont
+type CTfm1 = (InCont, OutCont)
+type CTfm2 = (InCont, InCont, OutCont)
+
+data Env = Env
+  { sources :: Map NodeName CSource
+  , tfms1   :: Map NodeName CTfm1
+  , tfms2   :: Map NodeName CTfm2 }
+\end{lstlisting}
+
+Graph gets data from the data sources, transforms it in transformation nodes.
+But some of the transformation nodes do particular side effects that form result of the graph execution (writes data to the some storage, displays some statistics on the dashboard, etc.).
+Such nodes should exist in all concrete execution graphs that correspond to the given CGraph.
+Let's call the set of the nodes with the such side effects as a graph semantics.
+It will let us to have useless nodes in environment (that are not necessary for graph to have the needed semantics) and reduce the total number of concrete graphs to enumerate.
+
+\begin{lstlisting}[language=Haskell]
+type Semantics = Set NodeNames
+\end{lstlisting}
+
+And now we are ready to define CGraph.
+It is simply a pair of environment and semantics.
+
+\begin{lstlisting}[language=Haskell]
+type CGraph = (Env, Semantics)
+\end{lstlisting}
+
+\subsection{Input contracts}
+
+Let's suppose that each element in the data stream is a mapping from attribute names to data (like a row in relational database).
+So the data stream can be described by two sorts of information: attributes that every element has and the properties of the data.
+We can define stream state as follows:
+
+\begin{lstlisting}[language=Haskell]
+type Attr = String
+type Prop = String
+
+data State = State
+  { attrs :: Set Attr
+  , props :: Set Prop }
+
+empty :: State
+empty = State { attrs = Set.empty
+              , props = Set.empty }
+
+union :: State -> State -> State
+union s1 s2 = State
+  { attrs s1 `Set.union` attrs s2
+  , props s1 `Set.union` props s2 }
+\end{lstlisting}
+
+Input contract can be defined as tuple of three sets:
+\begin{enumerate}
+    \item set of attributes that are required in the input stream,
+    \item set of properties that are required in the input stream,
+    \item set of properties that are prohibited in the input stream.
+\end{enumerate}
+
+\begin{lstlisting}[language=Haskell]
+data InCont = InCont
+  { attrsI  :: Set Attr
+  , propsI  :: Set Prop
+  , propsI' :: Set Prop }
+\end{lstlisting}
+
+Operation's input stream state can be matched with the input contract to check if it satisfies that contract.
+
+\begin{lstlisting}[language=Haskell]
+match :: State -> InCont -> Bool
+match s c =
+     attrsI c `Set.isSubsetOf` attrs s
+  && propsI c `Set.isSubsetOf` props s
+  && propsI' c `Set.disjoint`  props s
+\end{lstlisting}
+
+\subsection{Output contracts}
+
+Output contracts can be defined as a tuple of the three sets and one boolean:
+\begin{enumerate}
+    \item set of attributes to be added,
+    \item boolean that is true if an operation is a projection (it removes all attributes that exist in the incoming stream),
+    \item set of properties to be added,
+    \item set of properties to be deleted.
+\end{enumerate}
+
+\begin{lstlisting}[language=Haskell]
+data OutCont = OutCont
+  { attrsO  :: Set Attr
+  , isProj  :: Bool
+  , propsO  :: Set Prop
+  , propsO' :: Set Prop }
+\end{lstlisting}
+
+To get the output data stream state of the node, input data stream state should be updated with the output contract of the operation.
+
+\begin{lstlisting}[language=Haskell]
+update :: State -> OutCont -> State
+update s c = State
+  { attrs = Set.union
+      (attrsO c)
+      (if isProj c then Set.empty
+                   else attrs s)
+  , props = Set.union
+      (propsO c)
+      (props s `Set.difference` propsO' c) }
+\end{lstlisting}
+
+To get the output data stream state of the data source, empty state should be updated with the source's output contract.
+
+\begin{lstlisting}[language=Haskell]
+sourceOut :: OutCont -> State
+sourceOut = update State.empty
+\end{lstlisting}
+
+To get the output data stream state of the one-arity transformation, incoming data stream state should be updated with the transformation's output contract.
+
+\begin{lstlisting}[language=Haskell]
+tfm1Out :: State -> OutCont -> State
+tfm1Out = update
+\end{lstlisting}
+
+To get the output data stream state of the two-arity transformation, union of the incoming data streams states should be updated with the transformation's output contract.
+
+\begin{lstlisting}[language=Haskell]
+tfm2Out :: State -> State
+        -> OutCont -> State
+tfm2Out s1 s2 = update (s1 `State.union` s2)
+\end{lstlisting}
+
+\subsection{Work scheme}
+
+All concrete graphs that correspond to the given CGraph can be generated.
+So having the cost function we can choose the most optimal one and run it.
+But having the execution statistics from the runtime, cost function can be much more precise.
+Thus we should continuously recompute the concrete graphs costs using the updating statistics.
+When the running graph becomes enough less optimal then another graph to compensate the reconfiguration cost, running graph should be dynamically reconfigured.
+
+\subsection{Prototype}
+
+We have implemented a prototype in Haskell.
+It consists of:
+\begin{enumerate}
+    \item contracts definition and CGraph definition,
+    \item function that checks if a concrete graph corresponds to the given CGraph,
+    \item function that generates all concrete graph that correspond to the given CGraph (runs rather fast because of early enumeration branch truncation),
+    \item set of basic operations that emulate such set of the Apache Beam framework,
+    \item evaluation function that runs the concrete graph.
+\end{enumerate}
+
+TODO ref https://github.com/flame-stream/halco
