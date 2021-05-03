@@ -1,0 +1,40 @@
+\begin{tikzpicture}
+\begin{axis}[
+    scale only axis=true,
+    width=0.8\textwidth,
+    height=0.6\textwidth,
+    ymin = 8000,
+    ymax = 21000,
+    ytick={8000, 12000, 16000, 20000},
+    %yticklabels={2, 4, 6, 8},
+    xtick={2, 5, 10, 15, 20, 25},
+    xticklabels={$2$, $5$, $10$, $15$, $20$, $25$},
+    legend cell align=left,
+    legend pos=north east,
+    xlabel={Window size, sec},
+    ylabel={Throughput, tuples/sec},
+    x label style={at={(axis description cs:0.5,0.05)},anchor=north},
+    y label style={at={(axis description cs:0.125,0.5)},anchor=center},
+]
+\addplot[red, mark=square*, mark options={scale=1,solid}] coordinates {
+(2,12144.02)
+(5,12892.16)
+(10,11292.62)
+(15,10566.26)
+(20,9352.6)
+(25,8416.64)
+};
+\addplot[teal, mark=square*, mark options={scale=1,solid}] coordinates {
+(2,15007.76)
+(5,14768.28)
+(10,14004.28)
+(15,13010.24)
+(20,11943.94)
+(25,11262.62)
+};
+\legend{
+    Plan 1\\
+    Plan 2\\
+}
+\end{axis}
+\end{tikzpicture}

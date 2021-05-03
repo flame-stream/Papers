@@ -1,0 +1,28 @@
+\label {sec:fs-optimization-problem-statement}
+
+To illustrate the problem of streaming SQL query optimization, let us consider an example query, written using the NEXMark \cite{tucker2008nexmark} benchmark model simulating an online auction:
+
+    \begin{lstlisting}[
+           language=SQL,
+           showspaces=false,
+           basicstyle=\ttfamily,
+           numbers=left,
+           numberstyle=\tiny,
+           commentstyle=\color{gray},
+           caption={The proposed NEXMark-based query}, 
+           captionpos=b
+        ]
+SELECT P.name, B.price, A.itemName 
+  FROM Person P 
+    INNER JOIN Bid B 
+      ON B.bidder = P.id 
+    INNER JOIN Auction A 
+      ON A.seller = P.id
+\end{lstlisting}
+
+This query contains two join operators, so there are at least two ways to execute this query: e.g. first performing the join between \texttt{Person} and \texttt{Auction}, then joining the result with \texttt{Bid}, or vice-versa. Which join order is more optimal depends on the statistical properties of the data, such as the arrival rate for each of the \texttt{Person}, \texttt{Auction}, \texttt{Bidder} streams, and such statistical properties have a tendency to change over time. Therefore, an execution graph that was once optimal might become inefficient after some time.
+
+Various DBMS have employed a technique known as adaptive optimization. This technique utilizes an \textit{adaptivity loop}, during which the system measures and evaluates data characteristics and uses these evaluations to select a new query plan better suited to the current data \cite{deshpande2007adaptive}. A similar technique could be useful in streaming queries optimization. Thereby, in this paper we consider the problem of adaptive optimization of streaming SQL queries in distributed stream processing systems. 
+
+Adaptive database optimization is not applicable to streaming SQL queries as is: in databases, such optimization is applied during the execution of a long-running query, with the queried data remaining the same, while in streaming systems the data is continuously updated, and the same query is executed on each subsequent window; therefore, it would make sense for streaming systems to optimize the execution graph between the windows. This presents certain challenges in implementing logical level streaming query optimization.
+
