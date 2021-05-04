@@ -75,23 +75,7 @@
 %  5 Ссылки, вывод и related work + discussion & fw - 1.5 колонки
 
 \begin{abstract}
-
-    Declarative approach to define computations provides possibilities of complex optimizations, because one declarative definition can have multiple concrete implementations, so the most optimal one can be chosen.
-    However, it can be not flexible enough for the some problem domain, also it is often not transparent for programmers.
-    Distributed dataflow can be specified in two ways: defining concrete execution graph and SQL.
-    Operations of concrete execution graph are arbitrary and cannot be automatically permuted by a distributed data processing system for performance purposes.
-    Hence, graph optimization is generally a programmer concern, but real-world graphs can be big enough, that makes it hard to optimize them manually.
-    Moreover, most of the necessary information for the graph cost evaluation is available only in runtime.
-    SQL is popular for data analytics, and its optimization is well-researched.
-    However, it is inconvenient or sometimes impossible to use SQL for general data management tasks, such as ETL, machine learning pipelines, etc.
-
-    In this work, we introduce a novel approach to specify distributed dataflows.
-    Our method is based on declarative specifications of user-defined operations that we call contracts.
-    Such specifications allow us to safely permute operations of the execution graph, hence we can generate a set of equivalent graphs to choose the most optimal one automatically.
-    An arbitrary operation or a dataflow part can be described by contracts, so this approach is maximally flexible being declarative.
-    We implement a prototype and demonstrate automatic graphs generation on a real-world dataflow (TODO).
-    We also outline the challenges that we face regarding the optimization problem.
-
+    Distributed dataflows can be specified in two ways: defining concrete execution graph and SQL. Operations of concrete execution graphs are arbitrary and cannot be automatically permuted by a distributed data processing system for performance purposes. SQL is popular for data analytics, and its optimization is well-researched. However, it is inconvenient or sometimes impossible to use SQL for general data management tasks, such as ETL, machine learning pipelines, etc. In this work, we introduce a novel approach to specify distributed dataflows. Our method is based on declarative specifications of user-defined operations that we call contracts. Such specifications allow us to permute annotated user-defined operations within the execution graph safely. Hence we can generate a set of equivalent graphs to choose the most optimal one automatically. We implement a prototype and demonstrate automatic graphs generation on a real-world dataflow. We also outline the challenges that we face regarding the optimization problem.
 \end{abstract}
 
 % \begin{CCSXML}

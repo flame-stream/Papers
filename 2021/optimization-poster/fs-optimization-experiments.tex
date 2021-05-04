@@ -1,0 +1,69 @@
+\label {sec:fs-optimization-experiments}
+
+For our experiments, we used the query described in Section \ref{sec:fs-optimization-problem-statement} and the Apache Beam implementation of the NEXMark benchmark model. First, we execute this query using the graph in which \texttt{Auction} and \texttt{Person} are joined first, and the result is joined with \texttt{Bid} (referred to as \textit{Plan 1} in further text); then, we use the graph in which \texttt{Person} and \texttt{Bid} are joined first (\textit{Plan 2}). For each run, we use a different $|Person|:|Auction|:|Bid|$ ratio. To evaluate performance, we measure latency and throughput for each window. We have conducted our experiments on a local machine equipped with a 1.4 GHz Intel Core i5-8257U CPU (4 cores) and 8 GB of memory using the Apache Flink runner. 
+
+Figures \ref{fig:latency_ratio} demonstrates how the latency changes as the $|Person|:|Auction|:|Bid|$ ratio changes. As expected, the plan in which \texttt{Person} and \texttt{Auction} are joined first delivers better results when the arrival rate of \texttt{Bid} records significantly overwhelms the rates of \texttt{Person} and \texttt{Auction}, while the plan in which \texttt{Person} and \texttt{Bid} are joined first works best for cases where the rate of \texttt{Auction} records far exceeds those of \texttt{Person} and \texttt{Bid}. 
+
+Throughput estimation reports similar results, with Plan 1 delivering higher throughput in case of the arrival rate of \texttt{Auction} significantly exceeding that of \texttt{Person} and \texttt{Bid} and Plan 2 performing better in case of the arrival rate of \texttt{Bid} being significantly higher.
+
+\begin{figure}[htbp]
+  \centering
+  \input{plots/fs-optimization-latency-ratio}
+  \captionsetup{justification=justified}
+  \caption{Latency for different ratios: out of 100 events, $|Person| = 5$, $|Auction|$ is the value on the $x$-axis, $|Bid| = 100 - |Person| - |Auction|$}
+  \label {fig:latency_ratio}
+\end{figure}
+
+% \begin{figure}[t!]
+%     \begin{subfigure}[b]{0.32\textwidth}
+%             \include{plots/fs-optimization-latency-window-5590}
+%             \captionsetup{justification=justified}
+%             \caption{$|Person|:|Auction|:|Bid|$ = 5:5:90}
+%             \label{fig:latency_window_5590}
+%     \end{subfigure}
+%     % \hspace{2mm}
+%     \begin{subfigure}[b]{0.32\textwidth}
+%             \include{plots/fs-optimization-latency-window-5905}
+%             \captionsetup{justification=justified}
+%             \caption{$|Person|:|Auction|:|Bid|$ = 5:90:5}
+%             \label{fig:latency_window_5905}
+%     \end{subfigure}
+%     \hspace{2mm}
+%     \begin{subfigure}[b]{0.32\textwidth}
+%             \include{plots/fs-optimization-latency-difference-window}
+%             \captionsetup{justification=justified}
+%             \caption{Latency difference for Plans 1 and 2}
+%             \label{fig:latency_diff_against_window_size}
+%     \end{subfigure}
+%     \caption{Latency for different window sizes and $|Person|:|Auction|:|Bid|$ ratios}
+%     \label{fig:latency_plots}
+% \end{figure}
+
+% \begin{figure*}[t!]
+%     \begin{subfigure}[b]{0.32\textwidth}
+%             \include{plots/fs-optimization-throughput-window-5590}
+%             \captionsetup{justification=justified}
+%             \caption{$|Person|:|Auction|:|Bid|$ = 5:5:90}
+%             \label{fig:throughput_window_5590}
+%     \end{subfigure}
+%     \hspace{2mm}
+%     \begin{subfigure}[b]{0.32\textwidth}
+%             \include{plots/fs-optimization-throughput-window-5905}
+%             \captionsetup{justification=justified}
+%             \caption{$|Person|:|Auction|:|Bid|$ = 5:90:5}
+%             \label{fig:throughput_window_5905}
+%     \end{subfigure}
+%     \hspace{2mm}
+%     \begin{subfigure}[b]{0.32\textwidth}
+%             \include{plots/fs-optimization-throughput-difference-window}
+%             \captionsetup{justification=justified}
+%             \caption{Throughput difference for Plans 1 and 2}
+%             \label{fig:throughput_diff_against_window_size}
+%     \end{subfigure}
+%     \caption{Throughput for different window sizes and $|Person|:|Auction|:|Bid|$ ratios}
+%     \label{fig:throughput_plots}
+% \end{figure*}
+
+
+The results of our experiments demonstrate that streaming query execution performance depends on the plan used for the execution, and the optimality of the plan depends on the data characteristics, which proves the necessity of adaptive optimization of streaming queries. The first steps towards adaptive optimization should be predicting statistics for each window and performing runtime graph migration, since the results of the experiments show that even the current planners could use those statistics to produce a better execution plan. These two challenges will be the focus of our future work.
+
