@@ -1,0 +1,14 @@
+We have observed existing ways to specify computations in distributed data processing frameworks: concrete graph definition and SQL.
+Also we have outlined disadvantages and limitations of these approaches with explanations.
+
+We have presented a novel approach to specify distributed dataflows.
+It is based on the contracts, preconditions, and postconditions of the custom graph operations (their semantics).
+Such specification has been called CGraph.
+CGraph is a pair of environment and semantics, where the environment maps nodes to their contracts, and semantics is a set of nodes that produce dataflow target side-effects.
+This representation allows us to generate all possible graphs with the needed semantics using defined operations.
+So having a cost evaluation function we can choose the most optimal graph.
+
+TODO example
+
+We have discussed challenges about making CGraph specification API comfortable enough to solve real-world tasks and maintain these solutions.
+Finally, we have studied problems that we will encounter in future work regarding the optimization: cost evaluation and the adaptivity loop implementation.
