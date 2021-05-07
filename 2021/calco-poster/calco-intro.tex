@@ -1,17 +1,20 @@
 There are two common options to define computations in state-of-the-art distributed processing systems.
 The first option is defining a logical {\em execution graph}.
 An execution graph is a directed graph, where nodes represent operations and edges denote data flows.
-This mechanism is robust and suitable for complex pipelines but has limited optimization abilities. 
+This mechanism is robust and suitable for complex dataflows but has limited optimization abilities.
 A processing system can apply only local physical optimizations because it cannot ensure that the restructured graph is equivalent to the original one.
 
 Another way is declarative: the user defines the result that she aims to obtain, and the execution graph is generated automatically by the processing system.
-The declarative approach is commonly implemented using SQL. 
-SQL is based on relational algebra that captures a set of operations and query transformation rules.
-This way, a system can obtain multiple equivalent execution graphs and choose the most optimal one based on a {\em cost model}. 
+The declarative approach is commonly implemented using SQL.
+SQL is based on relational algebra that includes a set of operations and query transformation rules.
+This way, a system can obtain multiple equivalent execution graphs and choose optimal one using a {\em cost model}.
 Unfortunately, SQL is not rich enough to express some user-defined operations, e.g., complex machine learning pipelines~\cite{PROOF}.
 
-In this work, we present a declarative framework called {\em Calco} to specify distributed dataflows. Our framework bases on the ideas from the programming languages axiomatic semantics and aim to solve the following problems:
+In this work, we present a declarative framework called {\em Calco} to specify distributed dataflows.
+Our framework is bases on the ideas from the contract programming~\cite{REF} and aim to solve the following problems:
 
-{\bf Optimization of custom operations}: user can annotate a custom operation by a {\em contract} which captures operation properties and allows the system to apply global optimization, e.g., to permute such operations.
+{\bf Custom dataflows optimization}: user can annotate a custom operation by a {\em contract} which captures operation properties and allows the system to apply global optimization, e.g., to permute such operations.
 
 {\bf Cross-domain optimization}: SQL can be automatically translated into Calco contracts and optimized together with custom user-defined operations.
+
+TODO
