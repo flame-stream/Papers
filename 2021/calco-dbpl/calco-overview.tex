@@ -1,7 +1,7 @@
 \subsection{CGraph}
 
 Let us define an environment as a set of nodes, annotated with input and output contracts (InCont and OutCont).
-This set consists of the data sources, annotated with OutCont, one arity transformations (with one InCont and OutCont) and two arity transformations (with two InCont and OutCont).
+This set consists of the data sources, annotated with OutCont, one arity operations (with one InCont and OutCont) and two arity operations (with two InCont and OutCont).
 Here we limit possible arity of operations for simplicity.
 
 \begin{lstlisting}[language=Haskell]
@@ -11,12 +11,12 @@ type CTfm2 = (InCont, InCont, OutCont)
 
 data Env = Env
   { sources :: Map NodeName CSource
-  , tfms1   :: Map NodeName CTfm1
-  , tfms2   :: Map NodeName CTfm2 }
+  , ops1    :: Map NodeName COp1
+  , ops2    :: Map NodeName COp2 }
 \end{lstlisting}
 
-Graph gets data from the data sources, transforms it in transformation nodes.
-But some of the transformation nodes do particular side effects that form result of the graph execution (writes data to the some storage, displays some statistics on the dashboard, etc.).
+Graph gets data from the data sources, transforms it by operations.
+But some of the operation nodes do particular side effects that form result of the graph execution (writes data to the some storage, displays some statistics on the dashboard, etc.).
 Such nodes should exist in all concrete execution graphs that correspond to the given CGraph.
 Let's call the set of the nodes with the such side effects as a graph semantics.
 It will let us to have useless nodes in environment (that are not necessary for graph to have the needed semantics) and reduce the total number of concrete graphs to enumerate.
@@ -33,6 +33,8 @@ type CGraph = (Env, Semantics)
 \end{lstlisting}
 
 \subsection{Data stream state}
+
+We define here a trivial model of contracts, because the pragmatic model is a bit more complex. (TODO)
 
 Let's suppose that each element in the data stream is a mapping from attribute names to data (like a row in relational database).
 So the data stream can be described by two sorts of information: attributes that every element has and the properties of the data.
@@ -95,7 +97,7 @@ Output contracts can be defined as a tuple of the three sets and one boolean:
 \begin{lstlisting}[language=Haskell]
 data OutCont = OutCont
   { attrsO  :: Set Attr
-  , isProj  :: Bool
+  , delete  :: Bool
   , propsO  :: Set Prop
   , propsO' :: Set Prop }
 \end{lstlisting}

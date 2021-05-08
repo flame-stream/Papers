@@ -36,7 +36,7 @@
 % \acmBooktitle{DEBS '19: The 13th ACM International Conference on Distributed and Event-based Systems (DEBS '19), June 24--28, 2019, Darmstadt, Germany}\acmDOI{10.1145/3328905.3332514}
 % \acmISBN{978-1-4503-6794-3/19/06}
 
-\title{Calco: a contract-based approach to \\declaratively specify distributed dataflows}
+\title{Poster: contract-based approach to \\declaratively specify distributed dataflows}
 
 % \author{Alexander Chernokoz, Darya Sharkova, Artem Trofimov, Nikita Sokolov, Ekaterina Gorshkova, and Boris Novikov}
 % \affiliation{%
@@ -75,16 +75,14 @@
 %  5 Ссылки, вывод и related work + discussion & fw - 1.5 колонки
 
 \begin{abstract}
-    Distributed dataflows can be specified in two ways: by defining an execution graph or by specifying a desired result (we will consider an SQL notation as an example).
-    Execution graph consists of the arbitrary operations, so it cannot be automatically transformed in performance purposes.
-    % by a distributed data processing system
+    Distributed dataflows can be specified in two ways: by defining an execution graph or specifying the desired result, e.g., using SQL.
+    An execution graph consists of arbitrary operations, so it cannot be automatically transformed for optimization.
     SQL is popular for data analytics, and its optimization is well-researched.
     However, it is sometimes inconvenient or impossible to use SQL for general data management tasks, such as ETL, machine learning pipelines, etc.
     In this work, we introduce a novel approach to specify distributed dataflows.
-    Our method is based on declarative specifications of user-defined operations that we call contracts.
-    Such specifications allow us to automatically generate a set of the equivalent execution graphs to choose optimal one.
-    We implement a prototype and demonstrate automatic graphs generation on a real-world dataflow.
-    We also outline the challenges that we face regarding the optimization problem.
+    Our method is based on declarative specifications of user-defined operations called contracts.
+    Such specifications allow us to build a set of equivalent graphs, which form a space for optimization.
+    We implement a graphs generation prototype and outline the challenges regarding the optimization problem.
 \end{abstract}
 
 % \begin{CCSXML}
@@ -120,25 +118,19 @@
 \thispagestyle{empty}
 
 \section{Introduction}
-\input{calco-intro}
+\input{calco-intro.tex}
 
 \section{Running example}
-\input{calco-example}
+\input{calco-example.tex}
 
 \section{Calco overview}
-\input{calco-overview}
+\input{calco-overview.tex}
 
-\section{Example evaluation}
-\input{calco-eval}
-
-\section{Discussion and future work}
-\input{calco-disc-fw}
-
-\section{Related work}
-\input{calco-related}
+\section{Challenges and evaluation}
+\input{calco-eval.tex}
 
 \section{Conclusion}
-\input{calco-conclusion}
+\input{calco-conclusion.tex}
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{../../bibliography/flame-stream}

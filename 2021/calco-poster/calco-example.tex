@@ -1,0 +1,18 @@
+To illustrate the problem of the cross-domain optimization, let us consider an example that consists of the SQL query based on the NEXMark~\cite{TODO} benchmark model and the execution graph.
+
+The SQL query joins all tables and calculates the number of participants for each auction:
+\begin{lstlisting}[language=SQL]
+SELECT auction.id, COUNT(person)
+FROM bid
+INNER JOIN person ON bidder = person.id
+INNER JOIN auction ON auction = auction.id
+GROUP BY auction.id
+\end{lstlisting}
+
+An execution graph computes metric that helps to detect frauds.
+This metric can be computed only using the bids with the less accuracy or using also an information about the bidder and auction with better accuracy and lower latency.
+So in the first case the graph consists of two nodes: bids source and frauds metric computation.
+In the second case: graph joins all three tables and computes the fraud metric.
+
+To get optimal execution plan joins can be permuted.
+Also result of joins can be reused if business needs the fraud metric to be computed accurately.
