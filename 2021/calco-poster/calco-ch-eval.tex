@@ -1,0 +1,57 @@
+\textbf{Definition of pragmatic contracts.}
+Trivial contracts are not convenient enough to use them in practice.
+For example, if some operations need incoming data flows not to be filtered, adding new filter property makes programmer to add it to prohibited properties set of input contracts of all such operations manually.
+So more pragmatic contracts definition is in development.
+
+\textbf{Fetching and predicting statistics.}
+To accurately choose optimal graph runtime execution statistics is required.
+Before having the runtime information it should be predicted to choose reasonable execution graph to run.
+
+
+
+
+TODO
+
+\textbf{Developing cost-model based on the statistics.}
+TODO
+
+\textbf{Runtime execution graph reconfiguration.}
+TODO
+
+
+
+% Before having runtime statistics, a reasonable execution graph should be chosen.
+% To do that we need an information about the output data flow cardinalities of nodes.
+% Seems like this information should be manually provided by the programmer.
+
+
+
+
+% In this section we discuss successes and concerns of the proposed contract-based approach.
+
+% \subsection{Contracts}
+
+% As we saw, semantics of the custom operations can be naturally described by contracts.
+% However it may be inconvenient to write all contracts as is.
+% For example, if some operations need incoming streams not to be filtered, adding new filter property makes programmer to add it to all this operations manually.
+% There are some ideas that should make defining CGraph more handy, here are some of them:
+% \begin{itemize}
+%     \item properties should be able to be grouped to use them together (prohibit all filter properties as one, for example),
+%     \item some kind of properties may be prohibited by default,
+%     \item interactive environment that hints, which attributes and properties are not yet satisfied for the nodes that form the graph semantics.
+% \end{itemize}
+
+% \subsection{Work scheme and optimization}
+
+% Before having runtime statistics, a reasonable concrete graph should be chosen.
+% To do that we need an information about the output stream cardinalities of nodes.
+% Seems like this information should be manually provided by the programmer.
+
+% There are no production-ready frameworks for distributed data processing that gather needed statistics for accurate concrete graph cost evaluation.
+% Also none of them can dynamically reconfigure graph.
+
+% Finally, it is needed to precisely compute cost function using the runtime statistics and also estimate the cost of the graph dynamic reconfiguration.
+
+% \subsection{General implementation}
+
+% We plan to develop libraries to be able to specify computations using CGraph on Python and Java.

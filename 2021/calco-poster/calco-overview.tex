@@ -38,16 +38,17 @@ Dafa flow can be described using two sorts of information: attributes that every
 Such description we call {\em data flow state}.
 
 Input contract consists of three sets: of the required attributes, of the required properties and of the prohibited properties.
-
 Output contract consists of two sets: of the attributes and properties to be added.
 
+All execution graphs that correspond to the given CGraph can be generated.
+So using the cost-model we can choose optimal one and run it.
+But having the runtime execution statistics, cost-model can be much more precise.
+Thus we should continuously recompute the execution graphs costs using the updating statistics.
+When the running graph becomes enough less optimal then another graph to compensate the reconfiguration cost, running graph should be dynamically reconfigured.
 
-% All concrete graphs that correspond to the given CGraph can be generated.
-% So having the cost function we can choose the most optimal one and run it.
-% But having the execution statistics from the runtime, cost function can be much more precise.
-% Thus we should continuously recompute the concrete graphs costs using the updating statistics.
-% When the running graph becomes enough less optimal then another graph to compensate the reconfiguration cost, running graph should be dynamically reconfigured.
-
+We implemented a prototype in Haskell with trivial contracts and execution graphs generation.
+Our prototype generates 32 execution graphs corresponding to the CGraph of the running example.
+There are all potentially optimal among them.
 
 % \subsection{CGraph}
 
