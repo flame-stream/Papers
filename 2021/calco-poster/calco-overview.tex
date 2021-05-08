@@ -1,24 +1,25 @@
-Let us define an environment as a set of nodes, annotated with input and output contracts (InCont and OutCont).
+We propose to define a distributed dataflow by specifying a set of equivalent execution graphs using a representation called {\em CGraph}.
+An optimal graph can be chosen from this set using a cost-model.
+
+Let us define an {\em environment} as a set of nodes, annotated with {\em input} and {\em output contracts} (InCont and OutCont).
+Input contract specifies requirements that input data flow show satisfy, output contract defines how node changes the input data flow.
+Nodes can be data sources, one-arity operations and two-arity operations.
 
 \begin{lstlisting}[language=Haskell]
-type CSource = OutCont
-type COp1 = (InCont, OutCont)
-type COp2 = (InCont, InCont, OutCont)
-
 data Env = Env
-  { sources :: Map NodeName CSource
-  , ops1    :: Map NodeName COp1
-  , ops2    :: Map NodeName COp2 }
+  { sources :: Map NodeName OutCont
+  , ops1 :: Map NodeName (InCont, OutCont)
+  , ops2 :: Map NodeName
+                (InCont, InCont, OutCont) }
 \end{lstlisting}
 
-Graph gets data from the data sources, transforms it by operations.
-But some of the operation nodes do particular side effects that form result of the graph execution (writes data to the some storage, displays some statistics on the dashboard, etc.).
-Such nodes should exist in all concrete execution graphs that correspond to the given CGraph.
-Let's call the set of the nodes with the such side effects as a graph semantics.
-It will let us to have useless nodes in environment (that are not necessary for graph to have the needed semantics) and reduce the total number of concrete graphs to enumerate.
+Execution graph gets data from the data sources and processes it by operations.
+But some of the operation nodes produce particular side effects that form result of the running graph (writes data to the storage, displays some statistics on the dashboard, etc.).
+Such nodes should exist in all generated execution graphs.
+Let's call the set of the nodes that produce such side effects as a {\em graph semantics}.
 
 \begin{lstlisting}[language=Haskell]
-type Semantics = Set NodeNames
+type Semantics = Set NodeName
 \end{lstlisting}
 
 And now we are ready to define CGraph.
@@ -28,15 +29,25 @@ It is simply a pair of environment and semantics.
 type CGraph = (Env, Semantics)
 \end{lstlisting}
 
-TODO trivial contracts
+Let us call graphs that have all semantics nodes and all contracts are satisfied as graphs that correspond to the given CGraph.
 
-All concrete graphs that correspond to the given CGraph can be generated.
-So having the cost function we can choose the most optimal one and run it.
-But having the execution statistics from the runtime, cost function can be much more precise.
-Thus we should continuously recompute the concrete graphs costs using the updating statistics.
-When the running graph becomes enough less optimal then another graph to compensate the reconfiguration cost, running graph should be dynamically reconfigured.
+Contracts can be defined in different ways.
+Here we describe the trivial one, because pragmatic version is a bit more complex.
 
-TODO
+Dafa flow can be described using two sorts of information: attributes that every data flow element has and properties of this attributes.
+Such description we call {\em data flow state}.
+
+Input contract consists of three sets: of the required attributes, of the required properties and of the prohibited properties.
+
+Output contract consists of two sets: of the attributes and properties to be added.
+
+
+% All concrete graphs that correspond to the given CGraph can be generated.
+% So having the cost function we can choose the most optimal one and run it.
+% But having the execution statistics from the runtime, cost function can be much more precise.
+% Thus we should continuously recompute the concrete graphs costs using the updating statistics.
+% When the running graph becomes enough less optimal then another graph to compensate the reconfiguration cost, running graph should be dynamically reconfigured.
+
 
 % \subsection{CGraph}
 
