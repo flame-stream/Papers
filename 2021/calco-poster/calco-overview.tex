@@ -49,10 +49,6 @@ But having the runtime execution statistics, cost-model can be much more precise
 Thus we should continuously recompute the execution graphs costs using the updating statistics.
 When the running graph becomes enough less optimal then another graph to compensate the reconfiguration cost, running graph should be dynamically reconfigured.
 
-We implemented a prototype in Haskell with trivial contracts and execution graphs generation.
-Our prototype generates 32 execution graphs corresponding to the CGraph of the running example.
-There are all potentially optimal among them.
-
 % \subsection{CGraph}
 
 % Let us define an environment as a set of nodes, annotated with input and output contracts (InCont and OutCont).
