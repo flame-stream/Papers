@@ -2,6 +2,7 @@ We implemented a prototype in Haskell with trivial contracts and execution graph
 Our prototype generates 6 execution graphs corresponding to the CGraph of the running example.
 There are all potentially optimal among them.
 
+Semantics for the running example consists of the "fraudMetric" and "participants".
 For example let us consider contracts of the fraud metric and of the bid-auction join.
 Join requires "bid.auction" and "auction.id" attributes and sets "joinBA" property.
-Fraud metric has one input contract with four alternatives: no join properties required, one or another join property, or two join Properties required.
+Fraud metric has one input contract with four alternatives: no join properties required, one or another join property, or two join properties required.
