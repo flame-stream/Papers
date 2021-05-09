@@ -30,11 +30,12 @@ data Env = Env
 Some nodes produce particular side effects that form the result of the running graph (writes data to the storage, displays some statistics on the dashboard, etc.).
 Such nodes should exist in all generated execution graphs.
 We call the nodes that produce such side effects as a {\em graph semantics}.
-CGraph is simply a pair of environment and semantics.
 
 \begin{lstlisting}[language=Haskell]
 type Semantics = Set NodeName
 \end{lstlisting}
+
+CGraph is simply a pair of environment and semantics.
 
 \begin{lstlisting}[language=Haskell]
 type CGraph = (Env, Semantics)
