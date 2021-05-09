@@ -1,9 +1,19 @@
-We have observed existing ways to specify computations in distributed data processing frameworks: concrete graph definition and SQL.
-Also we have outlined disadvantages and limitations of these approaches.
-We have considered an example of cross-domain optimization.
+% We have observed existing ways to specify computations in distributed data processing frameworks: concrete graph definition and SQL.
+% Also we have outlined disadvantages and limitations of these approaches.
+% We have considered an example of cross-domain optimization.
+% We have presented a novel framework called Calco to specify distributed dataflows.
+% It is based on the contracts, declarative specifications of the graph nodes properties.
+% We have proposed to define a whole set of equivalent execution graphs using the CGraph representation.
+% So using a cost evaluation function we can choose optimal graph from this set.
+% TODO evaluated example.
+% TODO Discussed challenges.
+
+In this work, we have outlined two issues regarding the state-of-the-art ways to specify computations in distributed data processing frameworks:
+\begin{itemize}
+    \item Lack of custom dataflows optimization: modern data processing frameworks consider user-defined operations as black boxes and do not optimize execution graphs consisting of such operations.
+    \item Lack of cross-domain optimization: if dataflows are defined using various methods, e.g., SQL and graphs, they do not share results and are not optimized together.
+\end{itemize}
+
 We have presented a novel framework called Calco to specify distributed dataflows.
-It is based on the contracts, declarative specifications of the graph nodes properties.
-We have proposed to define a whole set of equivalent execution graphs using the CGraph representation.
-So using a cost evaluation function we can choose optimal graph from this set.
-TODO evaluated example.
-TODO Discussed challenges.
+It is based on the declarative specifications of the graph node properties, which allow us to generate various equivalent graphs for the same task.
+We have implemented the prototype of our approach and discussed the challenges we face regarding the selection of the optimal graph, changing the graph in runtime, and the evolution of Calco expressiveness.
