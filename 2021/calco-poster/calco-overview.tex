@@ -4,7 +4,7 @@ An optimal graph can be chosen from this set using a cost-model.
 Since graph operations are user-defined, we need specify their properties manually to define what is the graph equivalency.
 Such specifications we call contracts.
 Input contract specifies requirements that input data flow should satisfy, output contract defines how graph node changes the input data flow.
-Contracts can be defined in different ways, in this paper we describe the trivial ones, because pragmatic version is a bit more complex.
+Contracts can be defined in different ways, in this paper we describe the trivial definition because of its simplicity.
 
 Dafa flow can be described using two sorts of information: attributes that every data flow element has and properties of this attributes.
 Such description we call {\em data flow state}.
@@ -40,6 +40,8 @@ type CGraph = (Env, Semantics)
 \end{lstlisting}
 
 Let us call graphs that have all semantics nodes and all contracts are satisfied as graphs that correspond to the given CGraph.
+Such graphs form a desired set of equivalent graphs.
+Semantics allows to write simple definition of corresponding graphs and reduces their set to accelerate generation.
 
 All execution graphs that correspond to the given CGraph can be generated.
 So using the cost-model we can choose optimal one and run it.
