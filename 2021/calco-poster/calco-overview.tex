@@ -1,19 +1,23 @@
-We propose to define a distributed dataflow by specifying a set of equivalent execution graphs using a representation called {\em CGraph}.
-An optimal graph can be chosen from this set using a cost-model.
+% We propose to define a distributed dataflow by specifying a set of equivalent execution graphs using a representation called {\em CGraph}.
+% An optimal graph can be chosen from this set using a cost-model.
 
-Since graph operations are user-defined, we need specify their properties manually to define what is the graph equivalency.
+% Since graph operations are user-defined, we need specify their properties manually to define what is the graph equivalency.
+% Such specifications we call contracts.
+% Input contract specifies requirements that input data flow should satisfy, output contract defines how graph node changes the input data flow.
+% Contracts can be defined in different ways, in this paper we describe the trivial definition because of its simplicity.
+
+Graph operations can be user-defined, so we need to add more information about an operation to be aware of the graph equivalency.
 Such specifications we call contracts.
-Input contract specifies requirements that input data flow should satisfy, output contract defines how graph node changes the input data flow.
-Contracts can be defined in different ways, in this paper we describe the trivial definition because of its simplicity.
+Input contract specifies requirements that input data should satisfy, output contract defines how node changes the input data.
 
-Dafa flow can be described using two sorts of information: attributes that every data flow element has and properties of this attributes.
-Such description we call {\em data flow state}.
-Input contract consists of three sets: of the required attributes, of the required properties and of the prohibited properties.
-Output contract consists of two sets: of the attributes and properties to be added.
-Properties are just strings, like {\em "filteredDate"}.
+An operation can be described using two sorts of information: attributes that every data element has and properties of such attributes.
+Input contract consists of three sets: the required attributes, the required properties, and the prohibited properties.
+Output contract consists of two sets: the attributes and the new properties.
+Properties are denoted just as strings, like {\em "reliablePerson"} or {\em "popularItem"}.
+We say that contracts are satisfied if output contracts match the input contracts within all connected operations in the execution graph.
 
-Let us define an {\em environment} as a set of nodes, annotated with {\em input} and {\em output contracts} (InCont and OutCont).
-Nodes can be data sources, one-arity operations and two-arity operations.
+{\em Environment} is a set of {\em nodes}, annotated with {\em input} and {\em output contracts} (InCont and OutCont).
+Nodes can be data sources, one-arity operations, and two-arity operations.
 
 \begin{lstlisting}[language=Haskell]
 data Env = Env
@@ -23,31 +27,29 @@ data Env = Env
                 (InCont, InCont, OutCont) }
 \end{lstlisting}
 
-Execution graph gets data from the data sources and processes it by operations.
-But some of the operation nodes produce particular side effects that form result of the running graph (writes data to the storage, displays some statistics on the dashboard, etc.).
+Some nodes produce particular side effects that form the result of the running graph (writes data to the storage, displays some statistics on the dashboard, etc.).
 Such nodes should exist in all generated execution graphs.
-Let's call the set of the nodes that produce such side effects as a {\em graph semantics}.
+We call the nodes that produce such side effects as a {\em graph semantics}.
+CGraph is simply a pair of environment and semantics.
 
 \begin{lstlisting}[language=Haskell]
 type Semantics = Set NodeName
 \end{lstlisting}
 
-And now we are ready to define CGraph.
-It is simply a pair of environment and semantics.
-
 \begin{lstlisting}[language=Haskell]
 type CGraph = (Env, Semantics)
 \end{lstlisting}
 
-Let us call graphs that have all semantics nodes and all contracts are satisfied as graphs that correspond to the given CGraph.
-Such graphs form a desired set of equivalent graphs.
-Semantics allows to write simple definition of corresponding graphs and reduces their set to accelerate generation.
+Graphs with satisfied contracts that include all semantics nodes form the desired set of equivalent graphs.
+Semantics allows to write a simple definition of corresponding graphs and reduces their set to accelerate generation.
 
 All execution graphs that correspond to the given CGraph can be generated.
-So using the cost-model we can choose optimal one and run it.
-But having the runtime execution statistics, cost-model can be much more precise.
-Thus we should continuously recompute the execution graphs costs using the updating statistics.
-When the running graph becomes enough less optimal then another graph to compensate the reconfiguration cost, running graph should be dynamically reconfigured.
+TODO: KAK???
+
+% So using the cost-model we can choose optimal one and run it.
+% But having the runtime execution statistics, cost-model can be much more precise.
+% Thus we should continuously recompute the execution graphs costs using the updating statistics.
+% When the running graph becomes enough less optimal then another graph to compensate the reconfiguration cost, running graph should be dynamically reconfigured.
 
 % \subsection{CGraph}
 
