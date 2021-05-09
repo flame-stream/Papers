@@ -2,7 +2,7 @@ We propose to define a distributed dataflow by specifying a set of equivalent ex
 An optimal graph can be chosen from this set using a cost-model.
 
 Let us define an {\em environment} as a set of nodes, annotated with {\em input} and {\em output contracts} (InCont and OutCont).
-Input contract specifies requirements that input data flow show satisfy, output contract defines how node changes the input data flow.
+Input contract specifies requirements that input data flow should satisfy, output contract defines how node changes the input data flow.
 Nodes can be data sources, one-arity operations and two-arity operations.
 
 \begin{lstlisting}[language=Haskell]
@@ -45,6 +45,8 @@ So using the cost-model we can choose optimal one and run it.
 But having the runtime execution statistics, cost-model can be much more precise.
 Thus we should continuously recompute the execution graphs costs using the updating statistics.
 When the running graph becomes enough less optimal then another graph to compensate the reconfiguration cost, running graph should be dynamically reconfigured.
+
+TODO example contract example
 
 We implemented a prototype in Haskell with trivial contracts and execution graphs generation.
 Our prototype generates 32 execution graphs corresponding to the CGraph of the running example.

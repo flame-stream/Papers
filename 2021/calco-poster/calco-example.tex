@@ -1,18 +1,24 @@
-To illustrate the problem of the cross-domain optimization, let us consider an example that consists of the SQL query based on the NEXMark~\cite{TODO} benchmark model and the execution graph.
+To illustrate the problem of the cross-domain optimization, let us consider an example, created using the NEXMark~\cite{TODO} benchmark model simulating an online auction.
 
-The SQL query joins all tables and calculates the number of participants for each auction:
+The first query is analytics written on SQL.
+It calculates the number of participants for each auction.
 \begin{lstlisting}[language=SQL]
-SELECT auction.id, COUNT(person)
-FROM bid
+SELECT auction.id, COUNT(person) FROM bid
 INNER JOIN person ON bidder = person.id
 INNER JOIN auction ON auction = auction.id
 GROUP BY auction.id
 \end{lstlisting}
 
-An execution graph computes metric that helps to detect frauds.
-This metric can be computed only using the bids with the less accuracy or using also an information about the bidder and auction with better accuracy and bigger latency.
-So in the first case the graph consists of two nodes: bids source and frauds metric computation.
-In the second case: graph joins all three tables and computes the fraud metric.
+It is important to detect frauds on online auctions.
+So we have an execution graph that computes metric of  probability that the particular bid is fraud.
+This metric can be computed in different ways:
+only using bids with low latency and low precision
+or
+also using an information about bidder and auction with bigger latency and better precision.
+Thus, an optimal execution graph shape depends on the business requirements of latency that can be placed into the cost-model.
 
-To get optimal execution plan joins can be permuted.
-Also result of joins can be reused if business needs the fraud metric to be computed accurately.
+\begin{figure}[h!]
+    \includegraphics[width=\linewidth]{images/poster.pdf}
+    \caption{General execution graph for running example. Purple nodes can be permuted to get an optimal graph.}
+    \label{fig}
+\end{figure}
