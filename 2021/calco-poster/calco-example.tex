@@ -1,7 +1,6 @@
-To illustrate the problem of the cross-domain optimization, let us consider an example, created using the NEXMark~\cite{TODO} benchmark model simulating an online auction.
+To illustrate the problem of cross-domain optimization, we examine two streaming dataflows that share common parts and can be optimized simultaneously. Our example is based on the NEXMark~\cite{tucker2008nexmark} benchmark, which models an online auction platform where users can start auctions for items and bid on them.
 
-The first query is analytics written on SQL.
-It calculates the number of participants for each auction.
+The first dataflow is analytical. It calculates the number of participants for each auction and can be defined by an SQL query:
 \begin{lstlisting}[language=SQL]
 SELECT auction.id, COUNT(person) FROM bid
 INNER JOIN person ON bidder = person.id
@@ -9,16 +8,12 @@ INNER JOIN auction ON auction = auction.id
 GROUP BY auction.id
 \end{lstlisting}
 
-It is important to detect frauds on online auctions.
-So we have an execution graph that computes metric of  probability that the particular bid is fraud.
-This metric can be computed in different ways:
-only using bids with low latency and low precision
-or
-also using an information about bidder and auction with bigger latency and better precision.
-Thus, an optimal execution graph shape depends on the business requirements of latency that can be placed into the cost-model.
+The second dataflow is fraud detection. Online auctions often face the fraud problem and need to monitor corresponding metrics, e.g., the ratio of correlated bids. Within our model, the metric can be computed using only bids data. However, metric values can be more precise if we use information about personal ratings or item popularity. 
+
+Therefore, we have a shared execution graph shown in Figure~\ref{running_example}. Note that painted nodes can be permuted depending on the runtime statistics to achieve better performance. Joins can be permuted based on the rates of the input streams. Computation of the fraud detection metric can be placed after joins for better precision if the latency satisfies the business requirements.
 
 \begin{figure}[h!]
     \includegraphics[width=\linewidth]{images/poster.pdf}
-    \caption{General execution graph for running example. Purple nodes can be permuted to get an optimal graph.}
-    \label{fig}
+    \caption{A possible execution graph for running example.}
+    \label{running_example}
 \end{figure}
