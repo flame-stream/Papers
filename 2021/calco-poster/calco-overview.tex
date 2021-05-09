@@ -10,7 +10,7 @@ Graph operations can be user-defined, so we need to add more information about a
 Such specifications we call contracts.
 Input contract specifies requirements that input data should satisfy, output contract defines how node changes the input data.
 
-An operation can be described using two sorts of information: attributes that every data element has and properties of such attributes.
+A data stream can be described using two sorts of information: attributes that every data element has and properties of such attributes.
 Input contract consists of three sets: the required attributes, the required properties, and the prohibited properties.
 Output contract consists of two sets: the attributes and the new properties.
 Properties are denoted just as strings, like {\em "reliablePerson"} or {\em "popularItem"}.
@@ -41,7 +41,7 @@ type CGraph = (Env, Semantics)
 \end{lstlisting}
 
 Graphs with satisfied contracts that include all semantics nodes form the desired set of equivalent graphs.
-Semantics allows to write a simple definition of corresponding graphs and reduces their set to accelerate generation.
+Semantics allows us to reduce such set and to accelerate generation.
 
 All execution graphs that correspond to the given CGraph can be generated.
 TODO: KAK???
