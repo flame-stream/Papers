@@ -1,8 +1,17 @@
 We propose to define a distributed dataflow by specifying a set of equivalent execution graphs using a representation called {\em CGraph}.
 An optimal graph can be chosen from this set using a cost-model.
 
+Since graph operations are user-defined, we need specify their properties manually to define what is the graph equivalency.
+Such specifications we call contracts.
+Input contract specifies requirements that input data flow should satisfy, output contract defines how graph node changes the input data flow.
+Contracts can be defined in different ways, in this paper we describe the trivial ones, because pragmatic version is a bit more complex.
+
+Dafa flow can be described using two sorts of information: attributes that every data flow element has and properties of this attributes.
+Such description we call {\em data flow state}.
+Input contract consists of three sets: of the required attributes, of the required properties and of the prohibited properties.
+Output contract consists of two sets: of the attributes and properties to be added.
+
 Let us define an {\em environment} as a set of nodes, annotated with {\em input} and {\em output contracts} (InCont and OutCont).
-Input contract specifies requirements that input data flow should satisfy, output contract defines how node changes the input data flow.
 Nodes can be data sources, one-arity operations and two-arity operations.
 
 \begin{lstlisting}[language=Haskell]
@@ -30,15 +39,6 @@ type CGraph = (Env, Semantics)
 \end{lstlisting}
 
 Let us call graphs that have all semantics nodes and all contracts are satisfied as graphs that correspond to the given CGraph.
-
-Contracts can be defined in different ways.
-Here we describe the trivial one, because pragmatic version is a bit more complex.
-
-Dafa flow can be described using two sorts of information: attributes that every data flow element has and properties of this attributes.
-Such description we call {\em data flow state}.
-
-Input contract consists of three sets: of the required attributes, of the required properties and of the prohibited properties.
-Output contract consists of two sets: of the attributes and properties to be added.
 
 All execution graphs that correspond to the given CGraph can be generated.
 So using the cost-model we can choose optimal one and run it.
