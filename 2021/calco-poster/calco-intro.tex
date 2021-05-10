@@ -8,10 +8,10 @@ Another way is declarative: the user defines the result that he aims to obtain, 
 The declarative approach is commonly implemented using SQL.
 SQL is based on relational algebra that includes a set of operations and query transformation rules.
 This way, a system can obtain multiple equivalent execution graphs and choose the optimal one using a {\em cost model}.
-Unfortunately, SQL is not rich enough to express some user-defined operations, e.g., complex machine learning pipelines~\cite{PROOF} (TODO).
+Unfortunately, SQL is not rich enough to express some user-defined operations, e.g., complex machine learning pipelines~\cite{schule2019mlearn}.
 
 In this work, we present a declarative framework called {\em Calco} to specify distributed dataflows.
-Our framework is based on the ideas of the contract programming~\cite{REF} (TODO) and aims to solve the following problems:
+Our framework is based on the ideas of the contract programming~\cite{meyer2002design} and aims to solve the following problems:
 
 {\bf Custom dataflows optimization}: user can annotate a custom operation with {\em contracts} which captures operation properties and allows the system to apply global optimization, e.g., to permute such operations.
 
