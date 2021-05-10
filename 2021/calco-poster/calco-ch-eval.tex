@@ -1,16 +1,14 @@
-As we mentioned earlier, this work focuses on the problem of equivalent graphs generation. To  
+As we mentioned earlier, this work focuses on the problem of equivalent graph generation. The following challenges remain in the adaptation of our technique for end-to-end distributed dataflows optimization:
 
-\textbf{Definition of pragmatic contracts.}
-Trivial contracts are not convenient enough to use them in practice.
-For example, if some operations need incoming data flows not to be filtered, adding new filter property makes programmer to add it to prohibited properties set of input contracts of all such operations manually.
-So more pragmatic contracts definition is in development.
+\textbf{Cost-model evolution.}
+Our framework requires a complex cost model because a user may desire to include some business metrics in the optimization process, e.g., the quality of results or acceptable performance, as we demonstrated in the running example. Therefore, we need to provide rich tools for cost model customization and support them in a planner. 
 
-\textbf{Developing cost-model based on the statistics.}
-TODO
+\textbf{Runtime reconfiguration.}
 
-\textbf{Runtime execution graph reconfiguration.}
-TODO
 
+\textbf{Improving contracts expressiveness and interoperability}
+Trivial contracts are not convenient enough to use in practice.
+For example, if some operations need incoming data flows not to be filtered, adding new filter property makes a user add it to the prohibited properties set of input contracts of all such operations manually. We also aim to build an automatic contracts generation from popular declarative languages such as SQL.
 
 
 % Before having runtime statistics, a reasonable execution graph should be chosen.
