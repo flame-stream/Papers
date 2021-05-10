@@ -44,8 +44,7 @@ type CGraph = (Env, Semantics)
 Graphs with satisfied contracts that include all semantics nodes form the desired set of equivalent graphs.
 Semantics allows us to reduce such set and to accelerate generation.
 
-All execution graphs that correspond to the given CGraph can be generated.
-TODO: KAK???
+Execution graphs generation algorithm implementation is rather effective despite brute force approach, because graphs that does not satisfy contracts can be ejected and exponential complexity depends only on the size of the semantics set that is always small enough.
 
 % So using the cost-model we can choose optimal one and run it.
 % But having the runtime execution statistics, cost-model can be much more precise.
