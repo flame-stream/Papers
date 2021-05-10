@@ -4,12 +4,12 @@ Environment has three sources, two one-arity operations and two two-arity operat
 For example let us consider contracts of the bid-auction join and the fraud metric.
 Join requires "bid.auction" and "auction.id" attributes and sets "joinBA" property:
 \begin{lstlisting}[language=Haskell]
-em = Set.empty
-s = Set.fromList
-joinBA =
-  ( InCont (s ["bid.auction"]) em em
-  , InCont (s ["auction.id"]) em em
-  , OutCont em (s ["joinBA"]) )
+( InCont (Set.singleton "bid.auction")
+         Set.empty Set.empty
+, InCont (Set.singleton "auction.id")
+         Set.empty Set.empty
+, OutCont Set.empty
+          (Set.singleton "joinBA") )
 \end{lstlisting}
 
 Fraud metric has one input contract with four alternatives: no join properties required, one or another join property, or two join properties required, and required attributes.
