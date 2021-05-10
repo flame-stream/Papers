@@ -1,7 +1,7 @@
 There are two common options to define dataflows in state-of-the-art distributed processing systems.
 The first option is defining a logical {\em execution graph}.
 An execution graph is a directed graph, where nodes represent operations and edges denote data flows.
-This mechanism is robust and suitable for complex dataflows (TODO synonym) but has limited optimization abilities.
+This mechanism is robust and suitable for complex dataflows but has limited optimization abilities.
 A processing system can apply only local physical optimizations because it cannot ensure that the restructured graph is equivalent to the original one.
 
 Another way is declarative: the user defines the result that he aims to obtain, and the execution graph is generated automatically by the processing system.
