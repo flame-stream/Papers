@@ -41,7 +41,7 @@ CGraph is simply a pair of environment and semantics.
 type CGraph = (Env, Semantics)
 \end{lstlisting}
 
-Graphs with satisfied contracts that include all semantics nodes form the desired set of equivalent graphs. The implementation of the execution graphs generation algorithm is rather effective despite the brute force approach because graphs that do not satisfy contracts can be ejected. Hence, the complexity is exponential but depends only on the size of the semantics set, which is often small enough.
+Graphs with satisfied contracts that include all semantics nodes form the desired set of equivalent graphs. The implementation of the execution graphs generation algorithm is rather effective despite the brute force approach because graphs that do not satisfy contracts can be ejected. The algorithm is exponential in the size of the semantics set, which is often small enough.
 
 % So using the cost-model we can choose optimal one and run it.
 % But having the runtime execution statistics, cost-model can be much more precise.
