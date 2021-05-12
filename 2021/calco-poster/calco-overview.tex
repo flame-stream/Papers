@@ -8,7 +8,7 @@
 
 Graph operations can be user-defined, so we need to add more information about an operation to be aware of the graph equivalency.
 Such specifications we call contracts.
-Input contract specifies requirements that input data should satisfy, output contract defines how node changes the input data.
+Input contract specifies requirements that input data should satisfy, output contract defines how an operation changes the input data.
 
 Input and output data can be described using two sorts of information: attributes that every data element has and properties of such attributes.
 Input contract consists of three sets: the required attributes, the required properties, and the prohibited properties.
@@ -29,7 +29,7 @@ data Env = Env
 
 Some nodes produce particular side effects that form the result of the running graph (writes data to the storage, displays some statistics on the dashboard, etc.).
 Such nodes should exist in all generated execution graphs.
-We call the nodes that produce such side effects as a {\em graph semantics}.
+We call the nodes that produce such side effects a {\em graph semantics}.
 
 \begin{lstlisting}[language=Haskell]
 type Semantics = Set NodeName
@@ -41,7 +41,7 @@ CGraph is simply a pair of environment and semantics.
 type CGraph = (Env, Semantics)
 \end{lstlisting}
 
-Graphs with satisfied contracts that include all semantics nodes form the desired set of equivalent graphs. Execution graphs generation algorithm implementation is rather effective despite brute force approach, because graphs that does not satisfy contracts can be ejected and exponential complexity depends only on the size of the semantics set that is always small enough.
+Graphs with satisfied contracts that include all semantics nodes form the desired set of equivalent graphs. The implementation of the execution graphs generation algorithm is rather effective despite the brute force approach because graphs that do not satisfy contracts can be ejected. Hence, the complexity is exponential but depends only on the size of the semantics set, which is often small enough.
 
 % So using the cost-model we can choose optimal one and run it.
 % But having the runtime execution statistics, cost-model can be much more precise.
