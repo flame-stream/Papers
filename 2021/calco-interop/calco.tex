@@ -36,7 +36,7 @@
 % \acmBooktitle{DEBS '19: The 13th ACM International Conference on Distributed and Event-based Systems (DEBS '19), June 24--28, 2019, Darmstadt, Germany}\acmDOI{10.1145/3328905.3332514}
 % \acmISBN{978-1-4503-6794-3/19/06}
 
-\title{Poster: Contract-based Approach to Specify Dataflows}
+\title{Calco: Contract-based Approach to Specify Dataflows}
 
 % \author{Alexander Chernokoz, Darya Sharkova, Artem Trofimov, Nikita Sokolov, Ekaterina Gorshkova, and Boris Novikov}
 % \affiliation{%
@@ -82,7 +82,7 @@
     In this work, we introduce a novel approach to specify distributed dataflows.
     Our method is based on declarative specifications of user-defined operations called contracts.
     Such specifications allow us to build a set of equivalent graphs, which form a space for optimization.
-    We implement a graphs generation prototype and outline the challenges regarding the optimization problem.
+    We implement a graphs generation prototype and outline the challenges regarding the optimization problem. TODO(rewrite)
 \end{abstract}
 
 % \begin{CCSXML}
@@ -126,8 +126,14 @@
 \section{Calco overview}
 \input{calco-overview.tex}
 
-\section{Implementation and challenges}
+\section{Evaluation}
 \input{calco-eval.tex}
+
+\section{Challenges}
+\input{calco-ch.tex}
+
+\section{Related work}
+\input{calco-related.tex}
 
 \section{Conclusion}
 \input{calco-conclusion.tex}
