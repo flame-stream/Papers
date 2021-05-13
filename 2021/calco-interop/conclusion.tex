@@ -1,0 +1,9 @@
+In this work, we have outlined two issues regarding the state-of-the-art ways to specify computations in distributed data processing frameworks:
+\begin{itemize}
+    \item Lack of custom dataflows optimization: modern data processing frameworks consider user-defined operations as black boxes and have limited abilities to optimize execution graphs consisting of such operations.
+    \item Lack of cross-domain optimization: if dataflows are defined using various methods, e.g., SQL and graphs, they do not share results and are not optimized together.
+\end{itemize}
+
+We have presented a novel framework to specify distributed dataflows.
+It is based on the declarative specifications of the graph node properties, which allow us to generate various equivalent graphs for the same task.
+We have implemented the prototype of our approach and discussed the challenges we face regarding the selection of the optimal graph, changing the graph in runtime, and the evolution of Calco expressiveness.

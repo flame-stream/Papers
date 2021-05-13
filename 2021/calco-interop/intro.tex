@@ -1,0 +1,21 @@
+There are two common options to define dataflows in state-of-the-art distributed processing systems.
+The first option is defining a logical {\em execution graph}.
+An execution graph is a directed graph, where nodes represent operations and edges denote data connections.
+This mechanism is robust but is not suitable for the global optimization of complex dataflows.
+A processing system can apply only local physical optimizations because it cannot ensure that the restructured graph is equivalent to the original one.
+
+Another way is declarative: the user defines the result that he aims to obtain, and the execution graph is generated automatically by the processing system.
+The declarative approach is commonly implemented using SQL-like languages.
+SQL is based on relational algebra that includes a set of operations and query transformation rules.
+This way, a system can obtain multiple equivalent execution graphs and choose the optimal one using a {\em cost model}.
+Unfortunately, SQL is not rich enough to express some user-defined operations, e.g., complex machine learning pipelines~\cite{schule2019mlearn}.
+
+In this work, we present a declarative framework called {\em Calco} to specify distributed dataflows.
+Our framework is based on the ideas of the contract programming~\cite{meyer2002design} and aims to solve the following problems:
+
+{\bf Custom dataflows optimization}: user can annotate a custom operation with {\em contracts} which captures operation properties and allows the system to apply global optimization, e.g., to permute such operations.
+
+{\bf Cross-domain optimization}: SQL can be automatically translated into Calco contracts and optimized together with the custom user-defined operations.
+
+The optimization problem can be decomposed into two tasks: equivalent graphs generation and developing a cost model.
+In this work, we focus on the first one.
