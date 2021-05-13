@@ -1,0 +1,140 @@
+\documentclass[sigconf]{acmart}
+
+\usepackage{graphicx}
+\usepackage{algorithm} % for algorithms
+\usepackage{algpseudocode}
+\usepackage{booktabs} % For formal tables
+\usepackage{amsthm} % For claims
+\usepackage{bbm} % indicator function
+\usepackage{acmcopyright}
+
+% listings
+\usepackage{xcolor,listings}
+\usepackage{textcomp}
+\lstset{upquote=true}
+
+% plots
+\usepackage{pgfplots}
+
+% table
+\usepackage[flushleft]{threeparttable} % http://ctan.org/pkg/threeparttable
+\usepackage{booktabs,caption}
+
+\theoremstyle{remark}
+
+\settopmatter{printacmref=false, printccs=true, printfolios=true}
+\pagestyle{empty} % removes running headers
+
+\newcommand{\PicScale}{0.5}
+\newcommand {\FlameStream} {FlameStream}
+\begin{document}
+
+% \copyrightyear{2019}
+% \acmYear{2019}
+% \setcopyright{rightsretained}
+% \acmConference[DEBS '19]{DEBS '19: The 13th ACM International Conference on Distributed and Event-based Systems}{June 24--28, 2019}{Darmstadt, Germany}
+% \acmBooktitle{DEBS '19: The 13th ACM International Conference on Distributed and Event-based Systems (DEBS '19), June 24--28, 2019, Darmstadt, Germany}\acmDOI{10.1145/3328905.3332514}
+% \acmISBN{978-1-4503-6794-3/19/06}
+
+\title{Poster: Contract-based Approach to Specify Dataflows}
+
+% \author{Alexander Chernokoz, Darya Sharkova, Artem Trofimov, Nikita Sokolov, Ekaterina Gorshkova, and Boris Novikov}
+% \affiliation{%
+% \institution{$^5$ ITMO University}
+%   \city{St. Petersburg}
+%   \country{Russia}
+% }
+% \affiliation{%
+% \institution{$^1$Higher School of Economics}
+% }
+% \author{Artem Trofimov,$^ {1,2}$    Mikhail Shavkunov,$^3$    Sergey Reznick,$^4$     Nikita Sokolov,$^{5}$   Mikhail Yutman,$^3$ \\   Igor E. Kuralenok,$^1$    and  Boris Novikov$^ {3}$ }
+% \affiliation{%
+% \institution{$^1$JetBrains Research}
+% }
+% \affiliation{%
+% \institution{$^2$Saint Petersburg State University}
+% }
+% \affiliation{%
+% \institution{$^3$National Research University Higher School of Economics}
+% }
+% \affiliation{%
+% \institution{$^4$ Kofax}
+% }
+% \affiliation{%
+% \institution{$^5$ ITMO University}
+%   \city{St. Petersburg}
+%   \country{Russia}
+% }
+% \email{\string{trofimov9artem, mv.shavkunov, sergey.reznick, faucct, myutman, ikuralenok\string}@gmail.com, borisnov@acm.org}
+
+% План статьи:
+%  1 Аннотация + Интро - 2 колонки
+%  2 Пример совместной оптимизации - 1 колонка
+%  3 Описание контрактов - 1.5 колонки
+%  4 Пример совместной оптимизации на контрактах - 1.5 колонки
+%  5 Ссылки, вывод и related work + discussion & fw - 1.5 колонки
+
+\begin{abstract}
+    Distributed dataflows can be specified in two ways: by defining an execution graph or specifying the desired result, e.g., using SQL.
+    An execution graph consists of arbitrary operations, so it cannot be automatically transformed for optimization.
+    SQL is popular for data analytics, and its optimization is well-researched.
+    However, it is sometimes inconvenient or impossible to use SQL for general data management tasks, such as ETL, machine learning pipelines, etc.
+    In this work, we introduce a novel approach to specify distributed dataflows.
+    Our method is based on declarative specifications of user-defined operations called contracts.
+    Such specifications allow us to build a set of equivalent graphs, which form a space for optimization.
+    We implement a graphs generation prototype and outline the challenges regarding the optimization problem.
+\end{abstract}
+
+% \begin{CCSXML}
+% \begin{CCSXML}
+% \begin{CCSXML}
+% <ccs2012>
+% <concept>
+% <concept_id>10002951.10002952.10002953.10010820.10003208</concept_id>
+% <concept_desc>Information systems~Data streams</concept_desc>
+% <concept_significance>500</concept_significance>
+% </concept>
+% <concept>
+% <concept_id>10002951.10003317.10003347.10003356</concept_id>
+% <concept_desc>Information systems~Clustering and classification</concept_desc>
+% <concept_significance>500</concept_significance>
+% </concept>
+% <concept>
+% <concept_id>10002951.10003227.10003351.10003446</concept_id>
+% <concept_desc>Information systems~Data stream mining</concept_desc>
+% <concept_significance>300</concept_significance>
+% </concept>
+% </ccs2012>
+% \end{CCSXML}
+
+% \ccsdesc[500]{Information systems~Data streams}
+% \ccsdesc[500]{Information systems~Clustering and classification}
+% \ccsdesc[300]{Information systems~Data stream mining}
+
+% \keywords{Data streams, text classification, reproducibility, exactly once}
+
+\maketitle
+
+\thispagestyle{empty}
+
+\section{Introduction}
+\input{calco-intro.tex}
+
+\section{Running example}
+\input{calco-example.tex}
+
+\section{Calco overview}
+\input{calco-overview.tex}
+
+\section{Implementation and challenges}
+\input{calco-eval.tex}
+
+\section{Conclusion}
+\input{calco-conclusion.tex}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{bibliography/flame-stream}
+
+\end{document}
+
+\endinput
