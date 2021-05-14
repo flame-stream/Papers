@@ -122,10 +122,10 @@ instance OutCont1 State OutContImpl where
     }
 
 instance OutCont2 State OutContImpl where
-  update2 :: (State, State)
-          -> OutContImpl -> State
-  update2 (s1, s2) o =
-    update1 (s1 `Set.union` s2)
+  update2 :: 
+    (State, State) -> OutContImpl -> State
+  update2 (s1, s2) o = 
+    update1 (s1 `union` s2)
 \end{lstlisting}
 
 TODO
