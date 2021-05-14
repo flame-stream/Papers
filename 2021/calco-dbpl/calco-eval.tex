@@ -4,25 +4,25 @@ The environment has three sources, two one-arity operations, and two two-arity o
 We discussed earlier an abstract definition of the contracts using the type classes and a particular implementation of them. 
 However, using this implementation we are not able to describe the required input data state of the fraud metric, which works on the different alternatives of the input data.
 So we need to create a new implementation of input contract.
-We just write an instance of the InCont for the list of InContImpl with the needed match function:
+We just write an instance of the InCont for the list of the InContImpl with the needed match function:
 
 \begin{lstlisting}[language=Haskell]
-newtype InContsImpl = InContsImpl [InContImpl]
+newtype ListImpl = ListImpl [InContImpl]
 
-instance InCont State InContsImpl where
-  match :: State -> InContsImpl -> Bool
-  match s (InContsImpl is) = any (match s) is
+instance InCont State ListImpl where
+  match :: State -> ListImpl -> Bool
+  match s (ListImpl is) = any (match s) is
 \end{lstlisting}
 
 For example let us consider contracts of the bid-auction join and the fraud metric.
-Join requires "bid.auction" and "auction.id" attributes and sets "joinBA" property:
+Join requires "bid.auction" and "auction.id" attributes and sets "joinedBA" property:
 \begin{lstlisting}[language=Haskell]
-( InCont (Set.singleton "bid.auction")
-         Set.empty Set.empty
-, InCont (Set.singleton "auction.id")
-         Set.empty Set.empty
-, OutCont Set.empty
-          (Set.singleton "joinedBA") )
+( InContImpl (Set.singleton "bid.auction")
+             Set.empty Set.empty
+, InContImpl (Set.singleton "auction.id")
+             Set.empty Set.empty
+, OutContImpl Set.empty
+              (Set.singleton "joinedBA") )
 \end{lstlisting}
 
 Fraud metric has one input contract with four alternatives (list of four InContImpl):
@@ -33,5 +33,7 @@ or all attributes.
 
 We implemented a graphs generation prototype in Haskell.
 Our prototype generates all possible 6 execution graphs corresponding to the CGraph of the running example.
+
+
 
 TODO SQL comparison
