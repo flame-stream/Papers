@@ -2312,3 +2312,31 @@ numpages = {14}
   pages={69--88},
   year={2014}
 }
+
+@inproceedings{kroll2019arc,
+  title={Arc: an ir for batch and stream programming},
+  author={Kroll, Lars and Segeljakt, Klas and Carbone, Paris and Schulte, Christian and Haridi, Seif},
+  booktitle={Proceedings of the 17th ACM SIGPLAN International Symposium on Database Programming Languages},
+  pages={53--58},
+  year={2019}
+}
+
+@article{10.1145/335191.335420, author = {Avnur, Ron and Hellerstein, Joseph M.}, title = {Eddies: Continuously Adaptive Query Processing}, year = {2000}, issue_date = {June 2000}, publisher = {Association for Computing Machinery}, address = {New York, NY, USA}, volume = {29}, number = {2}, issn = {0163-5808}, url = {https://doi.org/10.1145/335191.335420}, doi = {10.1145/335191.335420}, abstract = {In large federated and shared-nothing databases, resources can exhibit widely fluctuating characteristics. Assumptions made at the time a query is submitted will rarely hold throughout the duration of query processing. As a result, traditional static query optimization and execution techniques are ineffective in these environments.In this paper we introduce a query processing mechanism called an eddy, which continuously reorders operators in a query plan as it runs. We characterize the moments of symmetry during which pipelined joins can be easily reordered, and the synchronization barriers that require inputs from different sources to be coordinated. By combining eddies with appropriate join algorithms, we merge the optimization and execution phases of query processing, allowing each tuple to have a flexible ordering of the query operators. This flexibility is controlled by a combination of fluid dynamics and a simple learning algorithm. Our initial implementation demonstrates promising results, with eddies performing nearly as well as a static optimizer/executor in static scenarios, and providing dramatic improvements in dynamic execution environments.}, journal = {SIGMOD Rec.}, month = may, pages = {261–272}, numpages = {12} }
+
+@inproceedings{10.1145/1007568.1007702, author = {Babu, Shivnath and Widom, Jennifer}, title = {StreaMon: An Adaptive Engine for Stream Query Processing}, year = {2004}, isbn = {1581138598}, publisher = {Association for Computing Machinery}, address = {New York, NY, USA}, url = {https://doi.org/10.1145/1007568.1007702}, doi = {10.1145/1007568.1007702}, abstract = {StreaMon is the adaptive query processing engine of the STREAM prototype Data Stream Management System (DSMS) [4]. A fundamental challenge in many DSMS applications (e.g., network monitoring, financial monitoring over stock tickers, sensor processing) is that conditions may vary significantly over time. Since queries in these systems are usually long-running, or continuous [4], it is important to consider adaptive approaches to query processing. Without adaptivity, performance may drop drastically as stream data and arrival characteristics, query loads, and system conditions change over time.StreaMon uses several techniques to support adaptive query processing [1, 2, 3]; we demonstrate three of them:•Reducing run-time memory requirements for continuous queries by exploiting stream data and arrival patterns.•Adaptive join ordering for pipelined multiway stream joins, with strong quality guarantees.•Placing subresult caches adaptively in pipelined multiway stream joins to avoid recomputation of intermediate results.}, booktitle = {Proceedings of the 2004 ACM SIGMOD International Conference on Management of Data}, pages = {931–932}, numpages = {2}, location = {Paris, France}, series = {SIGMOD '04} }
+
+@inproceedings{schneider2012auto,
+  title={Auto-parallelizing stateful distributed streaming applications},
+  author={Schneider, Scott and Hirzel, Martin and Gedik, Bugra and Wu, Kun-Lung},
+  booktitle={Proceedings of the 21st international conference on Parallel architectures and compilation techniques},
+  pages={53--64},
+  year={2012}
+}
+
+@inproceedings{gedik2008spade,
+  title={SPADE: The System S declarative stream processing engine},
+  author={Gedik, Bugra and Andrade, Henrique and Wu, Kun-Lung and Yu, Philip S and Doo, Myungcheol},
+  booktitle={Proceedings of the 2008 ACM SIGMOD international conference on Management of data},
+  pages={1123--1134},
+  year={2008}
+}

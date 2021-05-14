@@ -7,6 +7,6 @@ Cost-based optimization requires statistical information on data in order to cal
     Next window statistics should be predicted using statistics collected for previous windows. We assume that previous window statistics would present a decent baseline; however, this assumption needs to be tested. it is a expected that a simple baseline wil be good enough in most simple cases but in general prediction is not an easy task.
 \end{itemize}
 
-Popular SPEs do not offer any statistics fetching or predicting. For example, Apache Beam, which utilizes Apache Calcite, a dynamic data management framework, for its SQL processing functionality, passes constant values to the query planner instead of any actual data statistics.
+Popular SPEs and frameworks for defining streaming workflows do not offer any statistics fetching or predicting. For example, Apache Beam, which utilizes Apache Calcite, a dynamic data management framework, for its SQL processing functionality, passes constant values to the query planner instead of any actual data statistics.
 
 % idk how to describe it. is selecting a good regressor a research challenge? should it be general or detailed? should we include other components of typical ML research?
