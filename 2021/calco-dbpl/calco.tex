@@ -36,43 +36,42 @@
 % \acmBooktitle{DEBS '19: The 13th ACM International Conference on Distributed and Event-based Systems (DEBS '19), June 24--28, 2019, Darmstadt, Germany}\acmDOI{10.1145/3328905.3332514}
 % \acmISBN{978-1-4503-6794-3/19/06}
 
-\title{Calco: Contract-based Approach to Specify Dataflows}
+\title{Calco: Contract-based Approach to Specify Distributed Dataflows}
 
-% \author{Alexander Chernokoz, Darya Sharkova, Artem Trofimov, Nikita Sokolov, Ekaterina Gorshkova, and Boris Novikov}
-% \affiliation{%
-% \institution{$^5$ ITMO University}
-%   \city{St. Petersburg}
-%   \country{Russia}
-% }
-% \affiliation{%
-% \institution{$^1$Higher School of Economics}
-% }
-% \author{Artem Trofimov,$^ {1,2}$    Mikhail Shavkunov,$^3$    Sergey Reznick,$^4$     Nikita Sokolov,$^{5}$   Mikhail Yutman,$^3$ \\   Igor E. Kuralenok,$^1$    and  Boris Novikov$^ {3}$ }
-% \affiliation{%
-% \institution{$^1$JetBrains Research}
-% }
-% \affiliation{%
-% \institution{$^2$Saint Petersburg State University}
-% }
-% \affiliation{%
-% \institution{$^3$National Research University Higher School of Economics}
-% }
-% \affiliation{%
-% \institution{$^4$ Kofax}
-% }
-% \affiliation{%
-% \institution{$^5$ ITMO University}
-%   \city{St. Petersburg}
-%   \country{Russia}
-% }
-% \email{\string{trofimov9artem, mv.shavkunov, sergey.reznick, faucct, myutman, ikuralenok\string}@gmail.com, borisnov@acm.org}
+\author{Andrey Stoyan}
+\affiliation{%
+  \institution{Yandex}
+  \city{Saint Petersburg}
+  \country{Russia}}
+\email{andrey.stoyan.csam@gmail.com}
 
-% План статьи:
-%  1 Аннотация + Интро - 2 колонки
-%  2 Пример совместной оптимизации - 1 колонка
-%  3 Описание контрактов - 1.5 колонки
-%  4 Пример совместной оптимизации на контрактах - 1.5 колонки
-%  5 Ссылки, вывод и related work + discussion & fw - 1.5 колонки
+\author{Artem Trofimov}
+\affiliation{%
+  \institution{Yandex}
+  \city{Saint Petersburg}
+  \country{Russia}}
+\email{tomato@yandex-team.ru}
+
+\author{Nikita Sokolov}
+\affiliation{%
+  \institution{Yandex}
+  \city{Saint Petersburg}
+  \country{Russia}}
+\email{faucct@yandex-team.com}
+
+\author{Boris Novikov}
+\affiliation{%
+  \institution{HSE University}
+  \city{Saint Petersburg}
+  \country{Russia}}
+\email{borisnov@acm.org}
+
+\author{Igor Kuralenok}
+\affiliation{%
+  \institution{Yandex}
+  \city{Saint Petersburg}
+  \country{Russia}}
+\email{solar@yandex-team.ru}
 
 \begin{abstract}
     Distributed dataflows can be specified in two ways: by defining an execution graph or specifying the desired result, e.g., using SQL.
@@ -126,7 +125,10 @@
 \section{Calco overview}
 \input{calco-overview.tex}
 
-\section{Evaluation}
+\section{Graphs generation}
+\input{calco-impl.tex}
+
+\section{Example Evaluation}
 \input{calco-eval.tex}
 
 \section{Challenges}

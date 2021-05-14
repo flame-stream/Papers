@@ -1,7 +1,7 @@
 % We propose to define a distributed dataflow by specifying a set of equivalent execution graphs using a representation called {\em CGraph}.
 % An optimal graph can be chosen from this set using a cost-model.
 
-\subsection{Abstract contracts}
+\subsection{Contracts interface}
 
 % Graph operations can be user-defined, so we need to add more information about an operation to be aware of the graph equivalency.
 % Such specifications we call contracts.
@@ -15,9 +15,9 @@ We define them abstractly to be able to vary their implementations.
 There are two kinds of contracts: input and output.
 Input contract specifies requirements that input data should satisfy, output contract defines how an operation changes the input data.
 We call an information about the data as a {\em data state}.
-
 Input contract is a data type with the {\em match} function defined: it takes an input data state, input contract and returns boolean true if an input data state satisfies an input contract.
-So the type class for input contract is defined as follows:
+
+In this paper, we demonstrate all notions and examples in Haskell for visibility and compactness. The type class for input contract is defined as follows:
 
 \begin{lstlisting}[language=Haskell]
 class InCont s i where
@@ -47,9 +47,7 @@ class OutCont2 s o where
   update2 :: (s, s) -> o -> s
 \end{lstlisting}
 
-TODO
-
-\subsection{Contracts implementation example}
+\subsection{Contracts implementation}
 
 % Input and output data can be described using two sorts of information: attributes that every data element has and properties of such attributes.
 % Input contract consists of three sets: the required attributes, the required properties, and the prohibited properties.
@@ -128,8 +126,6 @@ instance OutCont2 State OutContImpl where
     update1 (s1 `union` s2)
 \end{lstlisting}
 
-TODO
-
 \subsection{CGraph}
 
 {\em Environment} is a set of {\em nodes}, annotated with {\em input} and {\em output contracts}.
@@ -156,32 +152,30 @@ CGraph is simply a pair of environment and semantics.
 type CGraph = (Env, Semantics)
 \end{lstlisting}
 
-Graphs with satisfied contracts that include all semantics nodes form the desired set of equivalent graphs. The implementation of the execution graphs generation algorithm is rather effective despite the brute force approach because graphs that do not satisfy contracts can be ejected. The algorithm is exponential in the size of the semantics set, which is often small enough.
+Graphs with satisfied contracts that include all semantics nodes form the desired set of equivalent graphs. The implementation of the execution graphs generation algorithm is rather effective despite the brute force approach because graphs that do not satisfy contracts can be ejected. The algorithm is exponential in the size of the semantics set, which is often small enough. The algorithm implementation details is discussed in the next section.
 
-TODO
+% \subsection{Work scheme}
 
-\subsection{Work scheme}
+% All concrete graphs that correspond to the given CGraph can be generated.
+% So having the cost function we can choose the most optimal one and run it.
+% But having the execution statistics from the runtime, cost function can be much more precise.
+% Thus we should continuously recompute the concrete graphs costs using the updating statistics.
+% When the running graph becomes enough less optimal then another graph to compensate the reconfiguration cost, running graph should be dynamically reconfigured.
 
-All concrete graphs that correspond to the given CGraph can be generated.
-So having the cost function we can choose the most optimal one and run it.
-But having the execution statistics from the runtime, cost function can be much more precise.
-Thus we should continuously recompute the concrete graphs costs using the updating statistics.
-When the running graph becomes enough less optimal then another graph to compensate the reconfiguration cost, running graph should be dynamically reconfigured.
+% \subsection{Prototype}
 
-\subsection{Prototype}
+% We have implemented a prototype in Haskell.
+% It consists of:
+% \begin{enumerate}
+%     \item contracts definition and CGraph definition,
+%     \item function that checks if a concrete graph corresponds to the given CGraph,
+%     \item function that generates all concrete graph that correspond to the given CGraph (runs rather fast because of early enumeration branch truncation),
+%     \item set of basic operations that emulate such set of the Apache Beam framework,
+%     \item evaluation function that runs the concrete graph.
+% \end{enumerate}
 
-We have implemented a prototype in Haskell.
-It consists of:
-\begin{enumerate}
-    \item contracts definition and CGraph definition,
-    \item function that checks if a concrete graph corresponds to the given CGraph,
-    \item function that generates all concrete graph that correspond to the given CGraph (runs rather fast because of early enumeration branch truncation),
-    \item set of basic operations that emulate such set of the Apache Beam framework,
-    \item evaluation function that runs the concrete graph.
-\end{enumerate}
+% TODO ref https://github.com/flame-stream/halco
 
-TODO ref https://github.com/flame-stream/halco
+% TODO(add, rewrite)
 
-TODO(add, rewrite)
-
-TODO
+% TODO
