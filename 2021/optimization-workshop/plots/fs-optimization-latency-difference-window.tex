@@ -1,0 +1,40 @@
+\begin{tikzpicture}
+\begin{axis}[
+    scale only axis=true,
+    width=0.8\textwidth,
+    height=0.6\textwidth,
+    ymin = 0,
+    ymax = 5000,
+    ytick={1000, 2000, 3000, 4000},
+    yticklabels={1, 2, 3, 4},
+    xtick={2, 5, 10, 15, 20, 25},
+    xticklabels={$2$, $5$, $10$, $15$, $20$, $25$},
+    legend cell align=left,
+    legend pos=north west,
+    xlabel={Window size, sec},
+    ylabel={Latency difference, sec},
+    x label style={at={(axis description cs:0.5,0.05)},anchor=north},
+    y label style={at={(axis description cs:0.125,0.5)},anchor=center},
+]
+\addplot[red,mark=square*,mark options={scale=1,solid}] coordinates {
+(2,251.49)
+(5,1022.13)
+(10,1729.58)
+(15,2538.23)
+(20,3551.79)
+(25,4414.84)
+};
+\addplot[teal,mark=square*,mark options={scale=1,solid}] coordinates {
+(2,263.85)
+(5,117.58)
+(10,1409.64)
+(15,2041.09)
+(20,2133.5)
+(25,2722.84)
+};
+\legend{
+    $5:90:5$\\
+    $5:5:90$\\
+}
+\end{axis}
+\end{tikzpicture}
