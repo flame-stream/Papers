@@ -1,0 +1,113 @@
+% This is samplepaper.tex, a sample chapter demonstrating the
+% LLNCS macro package for Springer Computer Science proceedings;
+% Version 2.20 of 2017/10/04
+%
+\documentclass[runningheads]{llncs}
+%
+\usepackage{graphicx}
+\usepackage{algorithm} % for algorithms
+\usepackage{algpseudocode}
+\usepackage{booktabs} % For formal tables
+%\usepackage{amsthm} % For claims
+\usepackage{bbm} % indicator function
+
+\usepackage{cite}
+
+% \usepackage{subfig}
+\usepackage{subcaption}
+
+% listings
+\usepackage{xcolor,listings}
+\usepackage{textcomp}
+\lstset{upquote=true}
+
+% plots
+\usepackage{pgfplots}
+
+% table
+\usepackage[flushleft]{threeparttable} % http://ctan.org/pkg/threeparttable
+\usepackage{booktabs,caption}
+
+%\theoremstyle{remark}
+%
+% If you use the hyperref package, please uncomment the following line
+% to display URLs in blue roman font according to Springer's eBook style:
+% \renewcommand\UrlFont{\color{blue}\rmfamily}
+
+\begin{document}
+%
+\title{Towards Adaptive SQL Query Optimization in Distributed Stream Processing}
+%
+\titlerunning{Distributed Streaming SQL Optimization}
+% If the paper title is too long for the running head, you can set
+% an abbreviated paper title here
+%
+\author{Darya Sharkova\inst{1} \and
+Alexander Chernokoz\inst{2} \and
+Artem Trofimov\inst{3} \and
+Nikita Sokolov\inst{3} \and
+Ekaterina Gorshkova\inst{4} \and
+Igor Kuralenok\inst{3}\and
+Boris Novikov\inst{1}}
+%
+\authorrunning{D. Sharkova, A. Chernokoz et al.}
+% % First names are abbreviated in the running head.
+% % If there are more than two authors, 'et al.' is used.
+% %
+\institute{HSE University, Saint Petersburg, Russia \\ % \\ 
+\and
+IFMO University, Saint Petersburg, Russia
+%\\ 
+\and
+Yandex, Saint Petersburg, Russia\\
+\and
+JResearch Software, Prague, Czech Republic \\ \email{sharkovadarya@gmail.com}, \email{chernokoz@hotmail.com},
+\email{\{tomato,faucct\}@yandex-team.ru},  \email{cathy@jresearch.org}, \email{solar@yandex-team.ru},
+\email{borisnov@acm.org}
+}
+%
+\maketitle              % typeset the header of the contribution
+%
+\begin{abstract}
+Distributed stream processing is widely adopted for real-time data analysis and management. SQL is becoming a common language for robust streaming analysis due to the introduction of time-varying relations and event time semantics. However, query optimization in state-of-the-art stream processing engines (SPEs) remains limited: runtime adjustments to execution plans are not applied. This fact restricts the optimization capabilities because SPEs lack the statistical data properties before query execution begins. Moreover, streaming queries are often long-lived, and these properties can be changed over time. 
+
+Adaptive optimization, used in databases for queries with insufficient existing data statistics, can fit the streaming scenario. In this work, we explore the main challenges that SPEs face during the adjustment of adaptive optimization: retrieving and predicting statistical data properties, execution graph migration, misfit of SPEs programming interfaces, etc. We demonstrate the feasibility of the proposed approach within an extension of the Nexmark streaming benchmark and outline our further work on this topic.
+
+% \keywords{First keyword  \and Second keyword \and Another keyword.}
+\end{abstract}
+
+
+
+\section{Introduction}
+\input{fs-optimization-introduction}
+
+\section{Problem statement}
+\input{fs-optimization-problem-statement}
+
+\section{Challenges}
+\input{fs-optimization-challenges}
+
+\subsection{Fetching and predicting data statistics}
+\input{fs-optimization-challenges-statistics}
+
+\subsection{Using statistics for streaming query optimization}
+\input{fs-optimization-challenges-using-statistics}
+
+\subsection{Execution graph migration in runtime}
+\input{fs-optimization-challenges-graph-migration}
+
+\section {Preliminary experiments}
+\input{fs-optimization-experiments}
+
+\section{Related work}
+\input{fs-optimization-related-work}
+
+\section{Conclusion}
+\input{fs-optimization-conclusion}
+
+\bibliographystyle{splncs04}
+\bibliography{bibliography/flame-stream.bib}
+
+\end{document}
+
+\endinput

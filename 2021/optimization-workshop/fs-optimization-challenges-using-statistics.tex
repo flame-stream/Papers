@@ -1,0 +1,15 @@
+% is it plural. is it APIs??
+The API of the current state-of-the-art systems typically utilizes a top-down approach to building a graph for query execution: first a logical graph is created, then it is transformed into a physical graph, which is later used for execution, leaving no opportunity to pass any data from the physical level to the logical level and use it to adapt the graph to the new data and therefore making any runtime adjustments to execution plans impossible. While progress has been made in applying various optimizations to the execution graphs at the physical level (see \cite{grulich2020grizzly} or Google Cloud Dataflow optimizer), there are no significant results in logical level optimization yet, and the logical level allows to use more complex optimizations than the physical level. Moreover, in this paper we discuss distributed stream processing engines, which require additional consideration when it comes to query execution. To this end, we identify the following challenges:
+
+\begin{itemize}
+    \item \textbf{Technical}: it is necessary to adapt the API of current SPEs to pass statistics collected or predicted during the query execution at the physical level to the query planner at the logical level.
+    \item \textbf{Research}: the relational algebra and the planner cost model should be extended with new operators specific to distributed systems. For example, a join operation performed upon a stream with a low arrival rate of new elements would be broadcasted to all the nodes in the system, while a high arrival rate suggests distributing different keys across different nodes. Therefore, a new \textit{distribution} operator should be included into the relational algebra, and the cost model should include the estimate of its cost. The cost model should consider the latency due to communication between nodes as well. Such cost models have been well-researched in distributed databases \cite{kossmann2000thestate} but not in distributed streaming systems.
+\end{itemize}
+
+
+% original notes
+% state of the art systems API is top-down approach we create logical graph its transformed into physical and there's no way to pass info from execution to building graph level and we need that to migrate graph in runtime
+
+% had it not been for idea to optimize logical graph and more complicated optimizations we do need to pass that info
+
+% my only citation for dataflow is https://doi.org/10.1145/3328905.3338223 and idk if keynotes count as actual citations!
