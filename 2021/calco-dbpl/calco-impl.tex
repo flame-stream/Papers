@@ -1,0 +1,31 @@
+We need to generate all execution graphs that correspond to the given CGraph.
+To do it we build one big directed acyclic graph that includes all needed execution graphs and then extract them.
+
+We represent graph as adjacency list, implemented as a map:
+
+\begin{lstlisting}[language=Haskell]
+data Node =
+    Source NodeName
+  | Op1 NodeName NodeId
+  | Op2 NodeName NodeId NodeId
+
+newtype Graph = Graph (Map NodeId Node)
+\end{lstlisting}
+
+Big graph we will build layer by layer.
+The first one consists of the all environment sources.
+To get next we consider all available sources and operations and if some sources satisfy input contracts of the some operation, we add this operation to the big graph and to the sources list.
+It is enough to generate number of layers one more than number of operations.
+
+During generation we use some tricks to make it faster.
+Firstly, for each source we keep a set of its predecessor operations to filter the following operations (each execution graph cannot have node copies).
+Secondly, we keep a set of the generated nodes to not to add the same nodes later with different id.
+
+For each node from the Semantics set we find its ids in the big graph.
+Then we calculate a cartesian product of the such sets of ids.
+Each element of the cartesian product is a set of ids that correspond to the each node of the Semantics set.
+For each element we extract corresponding execution graph from the big graph.
+And finally we filter graphs that does not have repeating nodes.
+
+TODO link 
+% https://github.com/flame-stream/halco/blob/c7bba22e6ca4e9b8d28d14dcc76e261673d19d09/src/Halco/GraphGen/Fast.hs

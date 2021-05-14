@@ -7,7 +7,7 @@ So we need to create a new implementation of input contract.
 We just write an instance of the InCont for the list of InContImpl with the needed match function:
 
 \begin{lstlisting}[language=Haskell]
-data InContsImpl = InContsImpl [InContImpl]
+newtype InContsImpl = InContsImpl [InContImpl]
 
 instance InCont State InContsImpl where
   match :: State -> InContsImpl -> Bool
