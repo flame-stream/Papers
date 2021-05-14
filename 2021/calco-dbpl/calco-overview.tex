@@ -98,9 +98,9 @@ data InContImpl = InContImpl
 instance InCont State InContImpl where
   match :: State -> InContImpl -> Bool
   match s i =
-       attrsI c `Set.isSubsetOf` attrs s
-    && propsI c `Set.isSubsetOf` props s
-    && propsI' c `Set.disjoint`  props s
+       attrsI i `Set.isSubsetOf` attrs s
+    && propsI i `Set.isSubsetOf` props s
+    && propsI' i `Set.disjoint`  props s
 \end{lstlisting}
 
 Output contract consists of two sets: the new attributes and properties.
@@ -112,19 +112,19 @@ data OutContImpl = OutContImpl
 
 instance OutCont State OutContImpl where
   toState :: OutContImpl -> State
-  toState o = update1 State.empty
+  toState = update1 State.empty
 
 instance OutCont1 State OutContImpl where
   update1 :: State -> OutContImpl -> State
   update1 s o = State
     { attrs = attrs s `Set.union` attrsO o
-    , props = props s `Set.union` propsO c }
+    , props = props s `Set.union` propsO o }
 
 instance OutCont2 State OutContImpl where
   update2 :: 
     (State, State) -> OutContImpl -> State
-  update2 (s1, s2) o = 
-    update1 (s1 `union` s2)
+  update2 (s1, s2) = 
+    update1 (s1 `State.union` s2)
 \end{lstlisting}
 
 \subsection{CGraph}
