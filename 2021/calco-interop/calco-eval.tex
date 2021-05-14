@@ -1,0 +1,22 @@
+Semantics for the running example consists of the "fraudMetric" and "participants" nodes.
+The environment has three sources, two one-arity operations, and two two-arity operations.
+
+For example let us consider contracts of the bid-auction join and the fraud metric.
+Join requires "bid.auction" and "auction.id" attributes and sets "joinBA" property:
+\begin{lstlisting}[language=Haskell]
+( InCont (Set.singleton "bid.auction")
+         Set.empty Set.empty
+, InCont (Set.singleton "auction.id")
+         Set.empty Set.empty
+, OutCont Set.empty
+          (Set.singleton "joinBA") )
+\end{lstlisting}
+
+Fraud metric has one input contract with four alternatives:
+only bid attributes
+or joined bid and auction attributes
+or joined bid and person attributes
+or all attributes.
+
+We implemented a graphs generation prototype in Haskell.
+Our prototype generates all possible 6 execution graphs corresponding to the CGraph of the running example.

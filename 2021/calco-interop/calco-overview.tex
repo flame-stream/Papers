@@ -6,9 +6,31 @@
 % Input contract specifies requirements that input data flow should satisfy, output contract defines how graph node changes the input data flow.
 % Contracts can be defined in different ways, in this paper we describe the trivial definition because of its simplicity.
 
-Graph operations can be user-defined, so we need to add more information about an operation to be aware of the graph equivalency.
+\subsection{Contracts}
+
+% Graph operations can be user-defined, so we need to add more information about an operation to be aware of the graph equivalency.
+% Such specifications we call contracts.
+% Input contract specifies requirements that input data should satisfy, output contract defines how an operation changes the input data.
+
+Graph operations can be user-defined, hence we cannot deduce their properties automatically to be able transform the graph preserving its equivalency.
+So we need to ask the user to specify them manually.
 Such specifications we call contracts.
-Input contract specifies requirements that input data should satisfy, output contract defines how an operation changes the input data.
+There are two kinds of contracts: input and output.
+We define them abstractly to be able to vary their implementation.
+
+
+
+TODO
+
+\subsection{CGraph}
+
+TODO
+
+\subsection{Implementation}
+
+TODO
+
+
 
 Input and output data can be described using two sorts of information: attributes that every data element has and properties of such attributes.
 Input contract consists of three sets: the required attributes, the required properties, and the prohibited properties.
@@ -208,4 +230,6 @@ Graphs with satisfied contracts that include all semantics nodes form the desire
 %     \item evaluation function that runs the concrete graph.
 % \end{enumerate}
 
-% TODO ref https://github.com/flame-stream/halco
+TODO ref https://github.com/flame-stream/halco
+
+TODO(add, rewrite)

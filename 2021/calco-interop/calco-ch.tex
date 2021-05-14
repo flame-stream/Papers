@@ -1,0 +1,12 @@
+As we mentioned earlier, this work focuses on the problem of equivalent graph generation. The following challenges remain in the adaptation of our technique for end-to-end distributed dataflows optimization:
+
+\textbf{Multicriteria optimization.}
+Our framework requires a complex cost model because a user may desire to include some business metrics in the optimization process, e.g., the quality of results or acceptable performance, as we demonstrated in the running example. The planner based on such cost model should use multicriteria optimization that is limitedly studied~\cite{yarygina2014optimizing}.
+
+\textbf{Runtime reconfiguration.}
+In batch processing, some systems support dynamic reconfiguration to a new execution graph, e.g., Spark Catalyst~\cite{armbrust2015spark}. Although of efforts on the topic~\cite{grulich2020grizzly}, stream processing systems have a lack of such mechanism for global optimization, e.g., it is unclear how to estimate the cost of reconfiguration in comparison with the potential outcome from the more optimal graph.
+
+\textbf{Improving contracts expressiveness and interoperability.}
+Currently, contracts are not convenient enough to use in practice, e.g., if some operations need incoming data not to be filtered, adding new filter property makes a user add it to the prohibited properties set of input contracts of all such operations manually. We also aim to build an automatic contracts generation from popular declarative languages such as SQL.
+
+TODO(add, rewrite)
