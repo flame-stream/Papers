@@ -325,7 +325,7 @@ Fidge, C.J., 1987. Timestamps in message-passing systems that preserve the parti
   journal = {Proceedings of the 11th Australian Computer Science Conference},
   keywords = {clock vector},
   number = 1,
-  pages = {56–66},
+  pages = {56--66},
   timestamp = {2012-01-14T13:04:26.000+0100},
   title = {Timestamps in message-passing systems that preserve the partial ordering},
   url = {http://sky.scitech.qut.edu.au/~fidgec/Publications/fidge88a.pdf},
@@ -411,7 +411,7 @@ Amazon Kinesis makes it easy to collect, process, and analyze real-time, streami
 
 @online{hadoop2009hadoop,
   month = oct,
-  year = {2017},
+  year = {2020},
   title={Apache Hadoop},
   key={Apache Hadoop},
   url = {http://hadoop.apache.org/}
@@ -1824,7 +1824,7 @@ url = {https://doi.org/10.14778/3055330.3055335},
 doi = {10.14778/3055330.3055335},
 journal = {Proc. VLDB Endow.},
 month = feb,
-pages = {685–696},
+pages = {685--696},
 numpages = {12}
 }
 
@@ -1909,11 +1909,9 @@ year = {2020},
 isbn = {9781450367356},
 publisher = {Association for Computing Machinery},
 address = {New York, NY, USA},
-url = {https://doi.org/10.1145/3318464.3389739},
-doi = {10.1145/3318464.3389739},
 abstract = {Stream Processing Engines (SPEs) execute long-running queries on unbounded data streams. They follow an interpretation-based processing model and do not perform runtime optimizations. This limits the utilization of modern hardware and neglects changing data characteristics at runtime. In this paper, we present Grizzly, a novel adaptive query compilation-based SPE, to enable highly efficient query execution. We extend query compilation and task-based parallelization for the unique requirements of stream processing and apply adaptive compilation to enable runtime re-optimizations. The combination of light-weight statistic gathering with just-in-time compilation enables Grizzly to adjust to changing data-characteristics dynamically at runtime. Our experiments show that Grizzly outperforms state-of-the-art SPEs by up to an order of magnitude in throughput.},
 booktitle = {Proceedings of the 2020 ACM SIGMOD International Conference on Management of Data},
-pages = {2487–2503},
+pages = {2487--2503},
 numpages = {17},
 keywords = {adaptive query processing, stream processing, mutli-core, code generation, query compilation, hardware},
 location = {Portland, OR, USA},
@@ -2014,7 +2012,7 @@ issn = {1931-7883},
 abstract = {As the data management field has diversified to consider settings in which queries are increasingly complex, statistics are less available, or data is stored remotely, there has been an acknowledgment that the traditional optimize-then-execute paradigm is insufficient. This has led to a plethora of new techniques, generally placed under the common banner of adaptive query processing, that focus on using runtime feed-back to modify query processing in a way that provides better response time or more efficient CPU utilization.In this survey paper, we identify many of the common issues, themes, and approaches that pervade this work, and the settings in which each piece of work is most appropriate. Our goal with this paper is to be a "value-add" over the existing papers on the material, providing not only a brief overview of each technique, but also a basic framework for understanding the field of adaptive query processing in general. We focus primarily on intra-query adaptivity of long-running, but not full-fledged streaming, queries. We conclude with a discussion of open research problems that are of high importance.},
 journal = {Found. Trends Databases},
 month = jan,
-pages = {1–140},
+pages = {1--140},
 numpages = {140}
 }
 
@@ -2025,11 +2023,9 @@ year = {2004},
 isbn = {1581138598},
 publisher = {Association for Computing Machinery},
 address = {New York, NY, USA},
-url = {https://doi.org/10.1145/1007568.1007617},
-doi = {10.1145/1007568.1007617},
 abstract = {Dynamic plan migration is concerned with the on-the-fly transition from one continuous query plan to a semantically equivalent yet more efficient plan. Migration is important for stream monitoring systems where long-running queries may have to withstand fluctuations in stream workloads and data characteristics. Existing migration methods generally adopt a pause-drain-resume strategy that pauses the processing of new data, purges all old data in the existing plan, until finally the new plan can be plugged into the system. However, these existing strategies do not address the problem of migrating query plans that contain stateful operators, such as joins. We now develop solutions for online plan migration for continuous stateful plans. In particular, in this paper, we propose two alternative strategies, called the moving state strategy and the parallel track strategy, one exploiting reusability and the second employs parallelism to seamlessly migrate between continuous join plans without affecting the results of the query. We develop cost models for both migration strategies to analytically compare them. We embed these migration strategies into the CAPE [7], a prototype system of a stream query engine, and conduct a comparative experimental study to evaluate these two strategies for window-based join plans. Our experimental results illustrate that the two strategies can vary significantly in terms of output rates and intermediate storage spaces given distinct system configurations and stream workloads.},
 booktitle = {Proceedings of the 2004 ACM SIGMOD International Conference on Management of Data},
-pages = {431–442},
+pages = {431--442},
 numpages = {12},
 location = {Paris, France},
 series = {SIGMOD '04}
@@ -2050,7 +2046,7 @@ doi = {10.1145/371578.371598},
 abstract = {Distributed data processing is becoming a reality. Businesses want to do it for many reasons, and they often must do it in order to stay competitive. While much of the infrastructure for distributed data processing is already there (e.g., modern network technology), a number of issues make distributed data processing still a complex undertaking: (1) distributed systems can become very large, involving thousands of heterogeneous sites including PCs and mainframe server machines; (2) the state of a distributed system changes rapidly because the load of sites varies over time and new sites are added to the system; (3) legacy systems need to be integrated—such legacy systems usually have not been designed for distributed data processing and now need to interact with other (modern) systems in a distributed environment. This paper presents the state of the art of query processing for distributed database and information systems.  The paper presents the “textbook” architecture for distributed query processing and a series of techniques that are particularly useful for distributed database systems. These techniques include special join techniques, techniques to exploit intraquery paralleli sm, techniques to reduce communication costs, and techniques to exploit caching and replication of data. Furthermore, the paper discusses different kinds of distributed systems such as client-server, middleware (multitier), and heterogeneous database systems, and shows how query processing works in these systems.},
 journal = {ACM Comput. Surv.},
 month = dec,
-pages = {422–469},
+pages = {422--469},
 numpages = {48},
 keywords = {dissemination-based information systems, query optimization, economic models for query processing, replication, client-server databases, query execution, multitier architectures, database application systems, wrappers, middleware, caching}
 }
@@ -2063,7 +2059,7 @@ publisher = {IBM Corp.},
 address = {USA},
 abstract = {Database query optimizers benefit greatly from accurate cardinality estimation; however, this is hard to achieve on tables with correlated and/or skewed columns. We present a novel approach using neural networks to learn and approximate selectivity functions that take a bounded range on each column as input, effectively estimating selectivities for all relational operators. Experimental results with a simplified prototype show a significant improvement over state-of-the-art cardinality estimators on constructed datasets in terms of accuracy, efficiency, and amount of user input required.},
 booktitle = {Proceedings of the 25th Annual International Conference on Computer Science and Software Engineering},
-pages = {53–59},
+pages = {53--59},
 numpages = {7},
 keywords = {cardinality estimation, neural network, relational database, machine learning},
 location = {Markham, Canada},
@@ -2149,7 +2145,7 @@ address = {New York, NY, USA},
 url = {https://doi.org/10.1145/50202.50205},
 doi = {10.1145/50202.50205},
 booktitle = {Proceedings of the 1988 ACM SIGMOD International Conference on Management of Data},
-pages = {28–36},
+pages = {28--36},
 numpages = {9},
 location = {Chicago, Illinois, USA},
 series = {SIGMOD '88}
@@ -2201,7 +2197,7 @@ url = {https://doi.org/10.1145/582095.582099},
 doi = {10.1145/582095.582099},
 abstract = {In a high level query and data manipulation language such as SQL, requests are stated non-procedurally, without reference to access paths. This paper describes how System R chooses access paths for both simple (single relation) and complex queries (such as joins), given a user specification of desired data as a boolean expression of predicates. System R is an experimental database management system developed to carry out research on the relational model of data. System R was designed and built by members of the IBM San Jose Research Laboratory.},
 booktitle = {Proceedings of the 1979 ACM SIGMOD International Conference on Management of Data},
-pages = {23–34},
+pages = {23--34},
 numpages = {12},
 location = {Boston, Massachusetts},
 series = {SIGMOD '79}
@@ -2241,7 +2237,7 @@ doi = {10.14778/3342263.3342644},
 abstract = {Query optimization is one of the most challenging problems in database systems. Despite the progress made over the past decades, query optimizers remain extremely complex components that require a great deal of hand-tuning for specific workloads and datasets. Motivated by this shortcoming and inspired by recent advances in applying machine learning to data management challenges, we introduce Neo (Neural Optimizer), a novel learning-based query optimizer that relies on deep neural networks to generate query executions plans. Neo bootstraps its query optimization model from existing optimizers and continues to learn from incoming queries, building upon its successes and learning from its failures. Furthermore, Neo naturally adapts to underlying data patterns and is robust to estimation errors. Experimental results demonstrate that Neo, even when bootstrapped from a simple optimizer like PostgreSQL, can learn a model that offers similar performance to state-of-the-art commercial optimizers, and in some cases even surpass them.},
 journal = {Proc. VLDB Endow.},
 month = jul,
-pages = {1705–1718},
+pages = {1705--1718},
 numpages = {14}
 }
 @inproceedings{street2001ensemble,
@@ -2278,7 +2274,7 @@ doi = {10.14778/3384345.3384349},
 abstract = {The typical approach for learned DBMS components is to capture the behavior by running a representative set of queries and use the observations to train a machine learning model. This workload-driven approach, however, has two major downsides. First, collecting the training data can be very expensive, since all queries need to be executed on potentially large databases. Second, training data has to be recollected when the workload or the database changes. To overcome these limitations, we take a different route and propose a new data-driven approach for learned DBMS components which directly supports changes of the workload and data without the need of retraining. Indeed, one may now expect that this comes at a price of lower accuracy since workload-driven approaches can make use of more information. However, this is not the case. The results of our empirical evaluation demonstrate that our data-driven approach not only provides better accuracy than state-ofthe- art learned components but also generalizes better to unseen queries.},
 journal = {Proc. VLDB Endow.},
 month = mar,
-pages = {992–1005},
+pages = {992--1005},
 numpages = {14}
 }
 
@@ -2290,7 +2286,7 @@ numpages = {14}
   year={2015}
 }
 
-@article{10.14778/3329772.3329777, author = {Hoffmann, Moritz and Lattuada, Andrea and McSherry, Frank}, title = {Megaphone: Latency-Conscious State Migration for Distributed Streaming Dataflows}, year = {2019}, issue_date = {May 2019}, publisher = {VLDB Endowment}, volume = {12}, number = {9}, issn = {2150-8097}, url = {https://doi.org/10.14778/3329772.3329777}, doi = {10.14778/3329772.3329777}, abstract = {We design and implement Megaphone, a data migration mechanism for stateful distributed dataflow engines with latency objectives. When compared to existing migration mechanisms, Megaphone has the following differentiating characteristics: (i) migrations can be subdivided to a configurable granularity to avoid latency spikes, and (ii) migrations can be prepared ahead of time to avoid runtime coordination. Megaphone is implemented as a library on an unmodified timely dataflow implementation, and provides an operator interface compatible with its existing APIs. We evaluate Megaphone on established benchmarks with varying amounts of state and observe that compared to na\"{\i}ve approaches Megaphone reduces service latencies during reconfiguration by orders of magnitude without significantly increasing steady-state overhead.}, journal = {Proc. VLDB Endow.}, month = may, pages = {1002–1015}, numpages = {14} }
+@article{10.14778/3329772.3329777, author = {Hoffmann, Moritz and Lattuada, Andrea and McSherry, Frank}, title = {Megaphone: Latency-Conscious State Migration for Distributed Streaming Dataflows}, year = {2019}, issue_date = {May 2019}, publisher = {VLDB Endowment}, volume = {12}, number = {9}, issn = {2150-8097}, url = {https://doi.org/10.14778/3329772.3329777}, doi = {10.14778/3329772.3329777}, abstract = {We design and implement Megaphone, a data migration mechanism for stateful distributed dataflow engines with latency objectives. When compared to existing migration mechanisms, Megaphone has the following differentiating characteristics: (i) migrations can be subdivided to a configurable granularity to avoid latency spikes, and (ii) migrations can be prepared ahead of time to avoid runtime coordination. Megaphone is implemented as a library on an unmodified timely dataflow implementation, and provides an operator interface compatible with its existing APIs. We evaluate Megaphone on established benchmarks with varying amounts of state and observe that compared to na\"{\i}ve approaches Megaphone reduces service latencies during reconfiguration by orders of magnitude without significantly increasing steady-state overhead.}, journal = {Proc. VLDB Endow.}, month = may, pages = {1002--1015}, numpages = {14} }
 
 @book{meyer2002design,
   title={Design by contract},
