@@ -10,7 +10,7 @@
 Graph operations can be user-defined, hence we cannot deduce their properties automatically to be able transform the graph preserving its equivalency.
 So we need to ask the user to specify such properties manually.
 Such specifications we call contracts.
-We define them abstractly to be able to vary their implementation.
+We define them abstractly to be able to vary their implementations.
 
 There are two kinds of contracts: input and output.
 Input contract specifies requirements that input data should satisfy, output contract defines how an operation changes the input data.
@@ -26,14 +26,14 @@ class InCont s i where
 
 Graph nodes can be of three types: data sources, one-arity operations and two-arity operations.
 So there are three definitions of output contracts.
-Output contract of the data source should have operation to get an data state from it.
+Output contract of the data source should have function to get a data state from it.
 
 \begin{lstlisting}[language=Haskell]
 class OutCont s o where
   toState :: o -> s
 \end{lstlisting}
 
-Output contract of the one-arity operation defines, how the operation changes the input data, hence there should be an operation that takes an input data state, an output contract and returns an output data state:
+Output contract of the one-arity operation defines, how the operation changes the input data, hence there should be a function {\em update1} that takes an input data state, an output contract and returns an output data state:
 
 \begin{lstlisting}[language=Haskell]
 class OutCont1 s o where
@@ -132,15 +132,14 @@ TODO
 
 \subsection{CGraph}
 
-{\em Environment} is a set of {\em nodes}, annotated with {\em input} and {\em output contracts} (InCont and OutCont).
+{\em Environment} is a set of {\em nodes}, annotated with {\em input} and {\em output contracts}.
 Nodes can be data sources, one-arity operations, and two-arity operations.
 
 \begin{lstlisting}[language=Haskell]
-data Env = Env
-  { sources :: Map NodeName OutCont
-  , ops1 :: Map NodeName (InCont, OutCont)
-  , ops2 :: Map NodeName
-                (InCont, InCont, OutCont) }
+data Env i o o1 o2 = Env
+  { sources :: Map NodeName o
+  , ops1 :: Map NodeName (i, o1)
+  , ops2 :: Map NodeName (i, i, o2) }
 \end{lstlisting}
 
 Some nodes produce particular side effects that form the result of the running graph (writes data to the storage, displays some statistics on the dashboard, etc.).
