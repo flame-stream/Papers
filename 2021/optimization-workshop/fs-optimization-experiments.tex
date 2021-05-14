@@ -16,20 +16,6 @@ We have conducted our experiments on a local machine equipped with a 1.4 GHz Int
 \subsection{Results}
 
 In the subsequent text the plan which joins \texttt{Auction} and \texttt{Person} first is referred to as \textit{Plan 1}; the plan which joins \texttt{Person} and \texttt{Bid} first is \textit{Plan 2}.
-\subsubsection{Latency}
-
-We generated 1000000 events with the arrival rate of 10000 events per second and time-based windows of varying sizes.
-
-Figure \ref{fig:latency_ratio} 
-demonstrates how latency changes depending on data characteristics. The $|Person|:|Auction|:|Bid|$ ratio impacts arrival rate for each kind of entities, thereby influencing latency. As expected, the plan in which \texttt{Person} and \texttt{Auction} are joined first delivers better results when the arrival rate of \texttt{Bid} records significantly overwhelms the rates of \texttt{Person} and \texttt{Auction} (the 5:5:90 ratio is an example of such a case), while the plan in which \texttt{Person} and \texttt{Bid} are joined first works best for cases where the rate of \texttt{Auction} records far exceeds those of \texttt{Person} and \texttt{Bid}. 
-
-As Figures \ref{fig:latency_window_5590} and \ref{fig:latency_window_5905} demonstrate, the latency does not grow linearly as the window size increases. This is due to the fact that the join operator processes the records as they arrive instead of starting to process them only after the last record in the window has arrived, thus the results are ready to emerge shortly thereafter the arrival of the last record in the window.
-
-Figure \ref{fig:latency_diff_against_window_size} demonstrates how the difference in latency for the two execution plans changes with the window size. Since the difference grows as the window size increases, statistics-based optimization should provide an even bigger performance gain for larger windows.
-
-\subsubsection{Throughput}
-
-The parameters for throughput estimation were the same as for the latency estimation. As Figure \ref{fig:throughput_ratio} shows, Plan 2 delivers higher throughput in case of the arrival rate of \texttt{Auction} significantly exceeding that of \texttt{Person} and \texttt{Bid}, while Plan 2 performs better in case of the arrival rate of \texttt{Bid} being significantly higher. This corresponds with the latency measurements. Throughput decreases with the increase of window size, as shown in Figures \ref{fig:throughput_window_5590} and \ref{fig:throughput_window_5905}. Throughput difference remains constant and does not depend on the window size, Figure \ref{fig:throughput_diff_against_window_size} demonstrates.
 
 \begin{figure}[!ht]
     \begin{subfigure}[b]{0.45\textwidth}
@@ -68,6 +54,17 @@ The parameters for throughput estimation were the same as for the latency estima
     \label{fig:latency_plots}
 \end{figure}
 
+\subsubsection{Latency}
+
+We generated 1000000 events with the arrival rate of 10000 events per second and time-based windows of varying sizes.
+
+Figure \ref{fig:latency_ratio} 
+demonstrates how latency changes depending on data characteristics. The $|Person|:|Auction|:|Bid|$ ratio impacts arrival rate for each kind of entities, thereby influencing latency. As expected, the plan in which \texttt{Person} and \texttt{Auction} are joined first delivers better results when the arrival rate of \texttt{Bid} records significantly overwhelms the rates of \texttt{Person} and \texttt{Auction} (the 5:5:90 ratio is an example of such a case), while the plan in which \texttt{Person} and \texttt{Bid} are joined first works best for cases where the rate of \texttt{Auction} records far exceeds those of \texttt{Person} and \texttt{Bid}. 
+
+As Figures \ref{fig:latency_window_5590} and \ref{fig:latency_window_5905} demonstrate, the latency does not grow linearly as the window size increases. This is due to the fact that the join operator processes the records as they arrive instead of starting to process them only after the last record in the window has arrived, thus the results are ready to emerge shortly thereafter the arrival of the last record in the window.
+
+Figure \ref{fig:latency_diff_against_window_size} demonstrates how the difference in latency for the two execution plans changes with the window size. Since the difference grows as the window size increases, statistics-based optimization should provide an even bigger performance gain for larger windows.
+
 \begin{figure}[!ht]
     \centering
     \begin{subfigure}[b]{0.45\textwidth}
@@ -105,6 +102,10 @@ The parameters for throughput estimation were the same as for the latency estima
     \caption{Difference in latency and throughput for Plans 1 and 2}
     \label{fig:latency_and_throughput_difference}
 \end{figure}
+
+\subsubsection{Throughput}
+
+The parameters for throughput estimation were the same as for the latency estimation. As Figure \ref{fig:throughput_ratio} shows, Plan 2 delivers higher throughput in case of the arrival rate of \texttt{Auction} significantly exceeding that of \texttt{Person} and \texttt{Bid}, while Plan 2 performs better in case of the arrival rate of \texttt{Bid} being significantly higher. This corresponds with the latency measurements. Throughput decreases with the increase of window size, as shown in Figures \ref{fig:throughput_window_5590} and \ref{fig:throughput_window_5905}. Throughput difference remains constant and does not depend on the window size, Figure \ref{fig:throughput_diff_against_window_size} demonstrates.
 
 % \begin{figure*}[t!]
 %     \begin{subfigure}[b]{0.32\textwidth}
