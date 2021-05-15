@@ -5,10 +5,10 @@ In the first step, we add all environment sources to the universal graph and the
 In the next one, we consider all available sources and operations, and if some sources satisfy input contracts of some operation, we add this operation to the universal graph and to the sources list.
 The number of steps should be one more than the number of operations to ensure that the universal graph includes all graphs that correspond to the CGraph because, in this case, the longest possible path in the graph includes all available operations.
 
-To extract all graphs corresponding to the CGraph, firstly for each node of semantics we find all its occurrences in the universal graph.
-Then we calculate a cartesian product of all this lists of occurrences.
-Each element of the cartesian product includes occurrences of the all semantics nodes.
-For each such element, we extract an execution graph from the universal graph, which leafs are semantics nodes occurrences.
+To extract all graphs corresponding to the CGraph, firstly, for each semantics node, we find all its occurrences in the universal graph.
+Then we calculate a cartesian product of all these lists of occurrences.
+Each element of the cartesian product includes occurrences of all semantics nodes.
+For each such element, we extract an execution graph from the universal graph, which leaves are semantics nodes occurrences.
 Finally, we filter graphs that do not have duplicated nodes.
 These extracted graphs form a set of all equivalent graphs for the given task.
 
