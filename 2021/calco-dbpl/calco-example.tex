@@ -11,11 +11,10 @@ GROUP BY auction.id
 The second dataflow is fraud detection. Online auctions often face the fraud problem and need to monitor corresponding metrics, e.g., the ratio of correlated bids. Within our model, the metric can be computed using only bids data.
 However, metric values can be more precise if we use information about personal ratings or item popularity.
 
-Therefore, we have a shared execution graph shown in Figure~\ref{running_example}. Note that painted nodes can be permuted depending on the runtime statistics to achieve better performance. Joins can be permuted based on the rates of the input streams. Computation of the fraud detection metric can be placed after joins for better precision if the latency satisfies the business requirements.
-TODO(rewrite)
+Therefore, we have a shared execution graph shown in Figure~\ref{fig:example}. Note that painted nodes can be permuted depending on the runtime statistics to achieve better performance. Joins can be permuted based on the rates of the input streams. Computation of the fraud detection metric can be placed after joins for better precision if the latency satisfies the business requirements.
 
 \begin{figure}[h!]
-    \includegraphics[width=0.4\textwidth]{images/poster.pdf}
+    \includegraphics[width=0.4\textwidth]{images/example.pdf}
     \caption{A possible execution graph for running example.}
-    \label{running_example}
+    \label{fig:example}
 \end{figure}
