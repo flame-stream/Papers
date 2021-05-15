@@ -6,7 +6,7 @@ Such specifications we call contracts.
 
 There are two kinds of contracts: input and output.
 Input contract specifies requirements that input data should satisfy, output contract defines how an operation changes the input data.
-We call information about the data, attributes and properties of the elements, a {\em data scheme}.
+We call information about the attributes and properties of data elements a {\em data scheme}.
 Input contract is a data type with the {\em match} function defined: it takes an input data scheme, input contract, and returns boolean if an input data scheme satisfies an input contract~\footnote{All notions and examples are demonstrated in Haskell}:
 
 \begin{lstlisting}[language=Haskell]
@@ -39,7 +39,7 @@ class OutCont2 s o where
 
 \subsection{Contracts implementation}
 
-Input and output data can be described using two sorts of information: attributes that every data element has and properties of this attributes.
+Input and output data can be described using two sorts of information: attributes that every data element has and properties of these attributes.
 Properties are denoted just as strings, like {\em "reliablePerson"} or {\em "popularItem"}.
 
 \begin{lstlisting}[language=Haskell]
@@ -61,8 +61,8 @@ union s1 s2 = Scheme
 \end{lstlisting}
 
 Input contract consists of three sets: 
-attributes and properties that should exist in the input data scheme
-and properties that should not exist in the input data scheme.
+attributes and properties that should exist in the input data scheme,
+and the properties that should not exist in the input data scheme.
 
 \begin{lstlisting}[language=Haskell]
 data InContImpl = InContImpl
@@ -78,15 +78,12 @@ instance InCont Scheme InContImpl where
     && propsI' i `Set.disjoint`  props s
 \end{lstlisting}
 
-Output contract consists of two sets and a boolean: 
-the attributes that operation adds to the each data element,
-the new properties of the data elements (e.g., filter operation adds property "filteredByCategory")
-and a boolean that is true when an operation creates new elements instead of modifying incoming. (TODO)
+Output contract consists of two sets: 
+the attributes that operation adds to each data element and the new properties of the data elements (e.g., filter operation adds property "filteredByCategory").
 
 \begin{lstlisting}[language=Haskell]
 data OutContImpl = OutContImpl
   { attrsO :: Set Attr
-  , delete :: Bool
   , propsO :: Set Prop }
 
 instance OutCont Scheme OutContImpl where
