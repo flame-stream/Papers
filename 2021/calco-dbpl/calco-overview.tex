@@ -1,15 +1,13 @@
 \subsection{Contracts interface}
 
-Graph operations can be user-defined, so we cannot deduce their properties automatically to transform the graph safely.
-So we need to ask the user to specify such properties manually.
+Graph operations can be user-defined, so we cannot deduce their characteristics (e.g., commutativity) automatically to transform the graph safely.
+So we need to ask the user to specify the characteristics manually.
 Such specifications we call contracts.
 
 There are two kinds of contracts: input and output.
 Input contract specifies requirements that input data should satisfy, output contract defines how an operation changes the input data.
-We call information about the data attributes and properties a {\em data scheme}.
-Input contract is a data type with the {\em match} function defined: it takes an input data scheme, input contract, and returns boolean if an input data scheme satisfies an input contract.
-
-In this paper, we demonstrate all notions and examples in Haskell, the prototype~\footnote{https://github.com/flame-stream/halco} is also implemented in Haskell. The type class for input contract is defined as follows:
+We call information about the data attributed and properties a {\em data scheme}.
+Input contract is a data type with the {\em match} function defined: it takes an input data scheme, input contract, and returns boolean if an input data scheme satisfies an input contract~\footnote{All notions and examples are demonstrated in Haskell}:
 
 \begin{lstlisting}[language=Haskell]
 class InCont s i where

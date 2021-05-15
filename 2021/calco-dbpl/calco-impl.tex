@@ -1,51 +1,53 @@
-We need to generate all execution graphs that correspond to the given CGraph.
-To do it we build one big directed acyclic graph that includes all needed execution graphs and then extract them.
+To generate all execution graphs that correspond to the given CGraph, we build one universal directed acyclic graph that includes all equivalent execution graphs and then extracts them.
 
-We represent graph as adjacency list, implemented as a map:
+% We represent graph as adjacency list, implemented as a map:
 
-\begin{lstlisting}[language=Haskell]
-data Node =
-    Source NodeName
-  | Op1 NodeName NodeId
-  | Op2 NodeName NodeId NodeId
+% \begin{lstlisting}[language=Haskell]
+% data Node =
+%     Source NodeName
+%   | Op1 NodeName NodeId
+%   | Op2 NodeName NodeId NodeId
 
-newtype Graph = Graph (Map NodeId Node)
-\end{lstlisting}
+% newtype Graph = Graph (Map NodeId Node)
+% \end{lstlisting}
 
-Big graph we will build layer by layer.
-The first one consists of the all environment sources.
-To get next we consider all available sources and operations and if some sources satisfy input contracts of the some operation, we add this operation to the big graph and to the sources list.
-It is enough to generate number of layers one more than number of operations.
+% We represent the graph as an adjacency list of nodes. Each node includes 
 
-During generation we use some tricks to make it faster.
-Firstly, for each source we keep a set of its predecessor operations to filter the following operations (each execution graph cannot have node copies).
-Secondly, we keep a set of the generated nodes to not to add the same nodes later with different id.
+We build a universal graph iteratively.
+In the first step, we add all environment sources.
+In the next one, we consider all available sources and operations, and if some sources satisfy input contracts of some operation, we add this operation to the universal graph and the sources list.
+The number of steps should be one more than the number of operations to ensure that the universal graph consists of all equivalent graphs because, in this case, the longest path in the graph includes all possible operations.
 
-For each node from the Semantics set we find its ids in the big graph.
-Then we calculate a cartesian product of the such sets of ids.
-Each element of the cartesian product is a set of ids that correspond to the each node of the Semantics set.
-For each element we extract corresponding execution graph from the big graph.
-And finally we filter graphs that does not have repeating nodes.
-TODO link 
+To extract all equivalent graphs, we firstly calculate a cartesian product of the nodes from the Semantics set.
+Each element of the cartesian product includes all nodes from the Semantics set.
+For each such element, we extract an execution graph from the universal graph, which contains the corresponding nodes.
+These extracted graphs form a set of all equivalent graphs for the given task.
+Finally, we filter graphs that do not have duplicated nodes.
 
-\begin{lstlisting}[language=Haskell]
-extract :: Graph -> Set NodeId -> Graph
-findIds :: Graph -> NodeName -> [NodeId]
-cartesianProduct :: [[a]] -> [[a]]
+TODO: example here
 
-semanticNids 
-  :: Graph -> Semantics -> [Set NodeId]
-semanticNids g = 
-    map Set.fromList . cartesianProduct 
-  . map (findIds g) . Set.toList
+We use some tricks to make graphs generation faster.
+Firstly, we keep a set of its predecessor operations for each source to filter the following operations (each execution graph cannot have node copies).
+Secondly, we keep a set of the generated nodes to avoid adding the same nodes later.
 
-genGraphs :: ( InCont s i, OutCont s o
-             , OutCont1 s o1, OutCont2 s o2) 
-          => CGraph i o o1 o2 -> [Graph]
-genGraphs (e, semantics) = 
-  let bigGraph = ... in
-  let graphs = 
-          map (bigGraph `extract`) 
-        $ semanticNids bigGraph semantics in
-  filter Graph.noSameNodes graphs
-\end{lstlisting}
+% \begin{lstlisting}[language=Haskell]
+% extract :: Graph -> Set NodeId -> Graph
+% findIds :: Graph -> NodeName -> [NodeId]
+% cartesianProduct :: [[a]] -> [[a]]
+
+% semanticNids 
+%   :: Graph -> Semantics -> [Set NodeId]
+% semanticNids g = 
+%     map Set.fromList . cartesianProduct 
+%   . map (findIds g) . Set.toList
+
+% genGraphs :: ( InCont s i, OutCont s o
+%              , OutCont1 s o1, OutCont2 s o2) 
+%           => CGraph i o o1 o2 -> [Graph]
+% genGraphs (e, semantics) = 
+%   let bigGraph = ... in
+%   let graphs = 
+%           map (bigGraph `extract`) 
+%         $ semanticNids bigGraph semantics in
+%   filter Graph.noSameNodes graphs
+% \end{lstlisting}
