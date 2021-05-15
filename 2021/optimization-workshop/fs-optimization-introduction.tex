@@ -11,7 +11,7 @@ The two common approaches to query optimization are rule-based and cost-based. R
 
 % гриззли оптимизируют на уровне отображения логического графа в исполнителя, а мы хотим оптимизировать сам логический граф 
 % это не добавить а заменить
-Efforts to optimize streaming queries execution in a distributed environment focus on finding a suitable mapping from a logical graph to a physical graph executed on a machine \cite{grulich2020grizzly, gedik2009code, kroll2019arc, schneider2012auto, gedik2008spade}; we are more interested in optimizing the logical graph itself before it is mapped to a physical graph. The problem of logical level declarative query optimization is currently relevant and presents a challenge.
+Efforts to optimize streaming queries execution in a distributed environment focus on finding a suitable mapping from a logical graph to a physical graph executed on a machine \cite{grulich2020grizzly, gedik2009code, kroll2019arc, schneider2012auto, gedik2008spade}, but such optimizations are local; a global optimization would require finding the most suitable logical graph as well as physical, which is possible with a declarative approach but not with using a user-defined execution graph. The problem of logical level declarative query optimization is currently relevant and presents a challenge.
 
 
 In this paper we:
@@ -21,4 +21,4 @@ In this paper we:
     \item Describe preliminary experiments that we have conducted in order to demonstrate feasibility of streaming SQL optimization.
 \end{itemize}
 
-The remainder of this paper is structured as follows. First, we state the problem as illustrated by a running example (Section \ref{sec:fs-optimization-problem-statement}). Second, we list the challenges in adaptive optimization of streaming SQL queries (Section \ref{sec:fs-optimization-challenges}). Then, we present the preliminary experiments we executed on our running example to demonstrate the feasibility of the proposed approach to query optimization and discuss the results (Section \ref{sec:fs-optimization-experiments}). Finally, we discuss related work including effort on database and streaming query optimization (Section \ref{sec:fs-optimization-related-work}).     
+The remainder of this paper is structured as follows. First, we state the problem as illustrated by a running example (Section \ref{sec:fs-optimization-problem-statement}). Second, we list the challenges in adaptive optimization of streaming SQL queries (Section \ref{sec:fs-optimization-challenges}). Then, we present the preliminary experiments we executed on our running example to demonstrate the feasibility of the proposed approach to query optimization and discuss the results (Section \ref{sec:fs-optimization-experiments}). Finally, we discuss related work including efforts on database and streaming query optimization (Section \ref{sec:fs-optimization-related-work}).     

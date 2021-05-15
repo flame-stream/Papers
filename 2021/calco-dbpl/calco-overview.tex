@@ -17,7 +17,8 @@ Input contract specifies requirements that input data should satisfy, output con
 We call an information about the data as a {\em data state}.
 Input contract is a data type with the {\em match} function defined: it takes an input data state, input contract and returns boolean true if an input data state satisfies an input contract.
 
-In this paper, we demonstrate all notions and examples in Haskell for visibility and compactness. The type class for input contract is defined as follows:
+In this paper, we demonstrate all notions and examples in Haskell. 
+The type class for input contract is defined as follows:
 
 \begin{lstlisting}[language=Haskell]
 class InCont s i where
@@ -26,7 +27,7 @@ class InCont s i where
 
 Graph nodes can be of three types: data sources, one-arity operations and two-arity operations.
 So there are three definitions of output contracts.
-Output contract of the data source should have function to get a data state from it.
+Output contract of the data source should have a function to get an output data state from it.
 
 \begin{lstlisting}[language=Haskell]
 class OutCont s o where
@@ -72,8 +73,8 @@ empty = State { attrs = Set.empty
 
 union :: State -> State -> State
 union s1 s2 = State
-  { attrs s1 `Set.union` attrs s2
-  , props s1 `Set.union` props s2 }
+  { attrs = attrs s1 `Set.union` attrs s2
+  , props = props s1 `Set.union` props s2 }
 \end{lstlisting}
 
 % Input contract can be defined as tuple of three sets:
@@ -84,6 +85,9 @@ union s1 s2 = State
 % \end{enumerate}
 
 Input contract consists of three sets: the required attributes, the required properties, and the prohibited properties:
+% Set of the required attributes should be a subset of the input data state attributes.
+% Set of the required properties should be a subset of the input data state properties.
+% Set of the prohibited properties should be disjoint with the set of input data state properties.
 
 \begin{lstlisting}[language=Haskell]
 data InContImpl = InContImpl
@@ -94,12 +98,12 @@ data InContImpl = InContImpl
 instance InCont State InContImpl where
   match :: State -> InContImpl -> Bool
   match s i =
-       attrsI c `Set.isSubsetOf` attrs s
-    && propsI c `Set.isSubsetOf` props s
-    && propsI' c `Set.disjoint`  props s
+       attrsI i `Set.isSubsetOf` attrs s
+    && propsI i `Set.isSubsetOf` props s
+    && propsI' i `Set.disjoint`  props s
 \end{lstlisting}
 
-Output contract consists of two sets: the new attributes and the new properties.
+Output contract consists of two sets: the new attributes and properties.
 
 \begin{lstlisting}[language=Haskell]
 data OutContImpl = OutContImpl
@@ -108,22 +112,19 @@ data OutContImpl = OutContImpl
 
 instance OutCont State OutContImpl where
   toState :: OutContImpl -> State
-  toState o = update1 empty
+  toState = update1 State.empty
 
 instance OutCont1 State OutContImpl where
   update1 :: State -> OutContImpl -> State
   update1 s o = State
     { attrs = attrs s `Set.union` attrsO o
-    , props = Set.union
-        (propsO c)
-        (props s `Set.difference` propsO' c)
-    }
+    , props = props s `Set.union` propsO o }
 
 instance OutCont2 State OutContImpl where
   update2 :: 
     (State, State) -> OutContImpl -> State
-  update2 (s1, s2) o = 
-    update1 (s1 `union` s2)
+  update2 (s1, s2) = 
+    update1 (s1 `State.union` s2)
 \end{lstlisting}
 
 \subsection{CGraph}
@@ -152,7 +153,10 @@ CGraph is simply a pair of environment and semantics.
 type CGraph = (Env, Semantics)
 \end{lstlisting}
 
-Graphs with satisfied contracts that include all semantics nodes form the desired set of equivalent graphs. The implementation of the execution graphs generation algorithm is rather effective despite the brute force approach because graphs that do not satisfy contracts can be ejected. The algorithm is exponential in the size of the semantics set, which is often small enough. The algorithm implementation details is discussed in the next section.
+Graphs with satisfied contracts that include all semantics nodes form the desired set of equivalent graphs. 
+The implementation of the execution graphs generation algorithm is rather effective despite the brute force approach because graphs that do not satisfy contracts can be ejected. 
+The algorithm is exponential in the size of the semantics set, which is often small enough.
+The algorithm implementation details is discussed in the next section.
 
 % \subsection{Work scheme}
 
@@ -174,7 +178,7 @@ Graphs with satisfied contracts that include all semantics nodes form the desire
 %     \item evaluation function that runs the concrete graph.
 % \end{enumerate}
 
-% TODO ref https://github.com/flame-stream/halco
+TODO ref % https://github.com/flame-stream/halco
 
 % TODO(add, rewrite)
 
