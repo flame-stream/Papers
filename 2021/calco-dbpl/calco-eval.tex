@@ -1,6 +1,3 @@
-Semantics for the running example consists of the "fraudMetric" and "participants" nodes.
-The environment has three sources, two one-arity operations, and two two-arity operations.
-
 We discussed earlier an abstract definition of the contracts using the type classes and the particular implementation. 
 However, using this implementation, we cannot describe the required input data state of the fraud metric, which works on the different alternatives of the input data.
 So we need to create a new implementation of the input contract.
@@ -30,9 +27,14 @@ only bid attributes
 or joined bid and auction attributes
 or joined bid and person attributes
 or all attributes.
+Semantics for the running example consists of the "fraudMetric" and "participants" nodes.
+The environment has three sources, two one-arity operations, and two two-arity operations.
 
 We implemented a graphs generation prototype in Haskell~\footnote{https://github.com/flame-stream/halco}.
-Our prototype generates all possible 6 execution graphs corresponding to the CGraph of the running example.
+Our prototype generates all possible 6 execution graphs corresponding to the CGraph of the running example. Figure~\ref{fig:gen} demonstrates a graph generation process.
+Purple nodes correspond to the fraud metric node, orange~--- to the semantics node, nodes with red frames represent an extracted graph.
+In the first step, the algorithm adds all sources to the universal graph.
+In the next steps, it adds all possible nodes such that their input contracts are satisfied by the nodes from the previous step. 
 
-Note that a semantics operations set with their input contracts looks pretty similar to the declarative dataflows specification approach, e.g., SQL, because we indicate only the desired result.
+Note that a semantics operation set with their input contracts looks pretty similar to the declarative dataflows specification approach, e.g., SQL, because we indicate only the desired result.
 However, as opposed to the SQL, other user-defined operations annotated with contracts can also be used in equivalent graphs generation process, e.g., can be safely reordered.
