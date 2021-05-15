@@ -1,39 +1,29 @@
-% We propose to define a distributed dataflow by specifying a set of equivalent execution graphs using a representation called {\em CGraph}.
-% An optimal graph can be chosen from this set using a cost-model.
-
 \subsection{Contracts interface}
 
-% Graph operations can be user-defined, so we need to add more information about an operation to be aware of the graph equivalency.
-% Such specifications we call contracts.
-% Input contract specifies requirements that input data should satisfy, output contract defines how an operation changes the input data.
-
-Graph operations can be user-defined, hence we cannot deduce their properties automatically to be able transform the graph preserving its equivalency.
-So we need to ask the user to specify such properties manually.
+Graph operations can be user-defined, so we cannot deduce their characteristics (e.g., commutativity) automatically to transform the graph safely.
+So we need to ask the user to specify the characteristics manually.
 Such specifications we call contracts.
-We define them abstractly to be able to vary their implementations.
 
 There are two kinds of contracts: input and output.
 Input contract specifies requirements that input data should satisfy, output contract defines how an operation changes the input data.
-We call an information about the data as a {\em data state}.
-Input contract is a data type with the {\em match} function defined: it takes an input data state, input contract and returns boolean true if an input data state satisfies an input contract.
-
-In this paper, we demonstrate all notions and examples in Haskell for visibility and compactness. The type class for input contract is defined as follows:
+We call information about the data, attributes and properties of the elements, a {\em data scheme}.
+Input contract is a data type with the {\em match} function defined: it takes an input data scheme, input contract, and returns boolean if an input data scheme satisfies an input contract~\footnote{All notions and examples are demonstrated in Haskell}:
 
 \begin{lstlisting}[language=Haskell]
 class InCont s i where
   match :: s -> i -> Bool
 \end{lstlisting}
 
-Graph nodes can be of three types: data sources, one-arity operations and two-arity operations.
+Graph nodes can be of three types: data sources, one-arity operations, and two-arity operations.
 So there are three definitions of output contracts.
-Output contract of the data source should have function to get a data state from it.
+The output contract of the data source should have a function to get an output data scheme from it:
 
 \begin{lstlisting}[language=Haskell]
 class OutCont s o where
-  toState :: o -> s
+  toScheme :: o -> s
 \end{lstlisting}
 
-Output contract of the one-arity operation defines, how the operation changes the input data, hence there should be a function {\em update1} that takes an input data state, an output contract and returns an output data state:
+Output contract of the one-arity operation defines, how the operation changes the input data, hence there should be a function {\em update1} that takes an input data scheme, an output contract and returns an output data scheme:
 
 \begin{lstlisting}[language=Haskell]
 class OutCont1 s o where
@@ -49,41 +39,31 @@ class OutCont2 s o where
 
 \subsection{Contracts implementation}
 
-% Input and output data can be described using two sorts of information: attributes that every data element has and properties of such attributes.
-% Input contract consists of three sets: the required attributes, the required properties, and the prohibited properties.
-% Output contract consists of two sets: the attributes and the new properties.
-% Properties are denoted just as strings, like {\em "reliablePerson"} or {\em "popularItem"}.
-% We say that contracts are satisfied if output contracts match the input contracts within all connected operations in the execution graph.
-
-Input and output data can be described using two sorts of information: attributes that every data element has and properties of such attributes.
+Input and output data can be described using two sorts of information: attributes that every data element has and properties of this attributes.
 Properties are denoted just as strings, like {\em "reliablePerson"} or {\em "popularItem"}.
 
 \begin{lstlisting}[language=Haskell]
 type Attr = String
 type Prop = String
 
-data State = State
+data Scheme = Scheme
   { attrs :: Set Attr
   , props :: Set Prop }
 
-empty :: State
-empty = State { attrs = Set.empty
-              , props = Set.empty }
+empty :: Scheme
+empty = Scheme { attrs = Set.empty
+               , props = Set.empty }
 
-union :: State -> State -> State
-union s1 s2 = State
-  { attrs s1 `Set.union` attrs s2
-  , props s1 `Set.union` props s2 }
+union :: Scheme -> Scheme -> Scheme
+union s1 s2 = Scheme
+  { attrs = attrs s1 `Set.union` attrs s2
+  , props = props s1 `Set.union` props s2 }
 \end{lstlisting}
 
-% Input contract can be defined as tuple of three sets:
-% \begin{enumerate}
-%     \item set of attributes that are required in the input stream,
-%     \item set of properties that are required in the input stream,
-%     \item set of properties that are prohibited in the input stream.
-% \end{enumerate}
-
-Input contract consists of three sets: the required attributes, the required properties, and the prohibited properties:
+Input contract consists of three sets: 
+attributes that should exist in the input data scheme,
+properties that should exist in the input data scheme
+and properties that should not exist in the input data scheme.
 
 \begin{lstlisting}[language=Haskell]
 data InContImpl = InContImpl
@@ -91,39 +71,39 @@ data InContImpl = InContImpl
   , propsI  :: Set Prop
   , propsI' :: Set Prop }
 
-instance InCont State InContImpl where
-  match :: State -> InContImpl -> Bool
+instance InCont Scheme InContImpl where
+  match :: Scheme -> InContImpl -> Bool
   match s i =
-       attrsI c `Set.isSubsetOf` attrs s
-    && propsI c `Set.isSubsetOf` props s
-    && propsI' c `Set.disjoint`  props s
+       attrsI i `Set.isSubsetOf` attrs s
+    && propsI i `Set.isSubsetOf` props s
+    && propsI' i `Set.disjoint`  props s
 \end{lstlisting}
 
-Output contract consists of two sets: the new attributes and the new properties.
+Output contract consists of two sets: 
+the attributes that operation adds to the each data element
+and 
+the new properties of the data elements (e.g., filter operation adds property "filteredByCategory").
 
 \begin{lstlisting}[language=Haskell]
 data OutContImpl = OutContImpl
   { attrsO :: Set Attr
   , propsO :: Set Prop }
 
-instance OutCont State OutContImpl where
-  toState :: OutContImpl -> State
-  toState o = update1 empty
+instance OutCont Scheme OutContImpl where
+  toScheme :: OutContImpl -> Scheme
+  toScheme = update1 Scheme.empty
 
-instance OutCont1 State OutContImpl where
-  update1 :: State -> OutContImpl -> State
-  update1 s o = State
+instance OutCont1 Scheme OutContImpl where
+  update1 :: Scheme -> OutContImpl -> Scheme
+  update1 s o = Scheme
     { attrs = attrs s `Set.union` attrsO o
-    , props = Set.union
-        (propsO c)
-        (props s `Set.difference` propsO' c)
-    }
+    , props = props s `Set.union` propsO o }
 
-instance OutCont2 State OutContImpl where
+instance OutCont2 Scheme OutContImpl where
   update2 :: 
-    (State, State) -> OutContImpl -> State
-  update2 (s1, s2) o = 
-    update1 (s1 `union` s2)
+    (Scheme, Scheme) -> OutContImpl -> Scheme
+  update2 (s1, s2) = 
+    update1 (s1 `Scheme.union` s2)
 \end{lstlisting}
 
 \subsection{CGraph}
@@ -138,44 +118,22 @@ data Env i o o1 o2 = Env
   , ops2 :: Map NodeName (i, i, o2) }
 \end{lstlisting}
 
-Some nodes produce particular side effects that form the result of the running graph (writes data to the storage, displays some statistics on the dashboard, etc.).
-Such nodes should exist in all generated execution graphs.
-We call the nodes that produce such side effects a {\em graph semantics}.
+Some operations produce particular side effects that form the result of the running graph (writes data to the storage, displays some statistics on the dashboard, etc.).
+Such operations should exist in all generated execution graphs.
+We call a set of operations that produce such side effects a {\em graph semantics}.
 
 \begin{lstlisting}[language=Haskell]
 type Semantics = Set NodeName
 \end{lstlisting}
 
-CGraph is simply a pair of environment and semantics.
+CGraph is simply a pair of environment and semantics:
 
 \begin{lstlisting}[language=Haskell]
-type CGraph = (Env, Semantics)
+type CGraph i o o1 o2 = 
+  (Env i o o1 o2, Semantics)
 \end{lstlisting}
 
-Graphs with satisfied contracts that include all semantics nodes form the desired set of equivalent graphs. The implementation of the execution graphs generation algorithm is rather effective despite the brute force approach because graphs that do not satisfy contracts can be ejected. The algorithm is exponential in the size of the semantics set, which is often small enough. The algorithm implementation details is discussed in the next section.
-
-% \subsection{Work scheme}
-
-% All concrete graphs that correspond to the given CGraph can be generated.
-% So having the cost function we can choose the most optimal one and run it.
-% But having the execution statistics from the runtime, cost function can be much more precise.
-% Thus we should continuously recompute the concrete graphs costs using the updating statistics.
-% When the running graph becomes enough less optimal then another graph to compensate the reconfiguration cost, running graph should be dynamically reconfigured.
-
-% \subsection{Prototype}
-
-% We have implemented a prototype in Haskell.
-% It consists of:
-% \begin{enumerate}
-%     \item contracts definition and CGraph definition,
-%     \item function that checks if a concrete graph corresponds to the given CGraph,
-%     \item function that generates all concrete graph that correspond to the given CGraph (runs rather fast because of early enumeration branch truncation),
-%     \item set of basic operations that emulate such set of the Apache Beam framework,
-%     \item evaluation function that runs the concrete graph.
-% \end{enumerate}
-
-% TODO ref https://github.com/flame-stream/halco
-
-% TODO(add, rewrite)
-
-% TODO
+Graphs with satisfied contracts that include all semantics nodes form the desired set of equivalent graphs. 
+The implementation of the execution graphs generation algorithm is rather effective despite the brute force approach because graphs that do not satisfy contracts can be ejected. 
+The algorithm is exponential in the size of the semantics set, which is often small enough.
+The algorithm implementation details are discussed in the next section.

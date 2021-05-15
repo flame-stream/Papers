@@ -1,5 +1,4 @@
-We need to generate all execution graphs that correspond to the given CGraph.
-To do it we build one big directed acyclic graph that includes all needed execution graphs and then extract them.
+To generate all execution graphs that correspond to the given CGraph, we build one universal directed acyclic graph that includes all equivalent execution graphs and then extract them.
 
 We represent graph as adjacency list, implemented as a map:
 
@@ -12,20 +11,44 @@ data Node =
 newtype Graph = Graph (Map NodeId Node)
 \end{lstlisting}
 
-Big graph we will build layer by layer.
-The first one consists of the all environment sources.
-To get next we consider all available sources and operations and if some sources satisfy input contracts of the some operation, we add this operation to the big graph and to the sources list.
-It is enough to generate number of layers one more than number of operations.
+% We represent the graph as an adjacency list of nodes. Each node includes 
 
-During generation we use some tricks to make it faster.
-Firstly, for each source we keep a set of its predecessor operations to filter the following operations (each execution graph cannot have node copies).
-Secondly, we keep a set of the generated nodes to not to add the same nodes later with different id.
+We build a universal graph iteratively.
+In the first step, we add all environment sources to the universal graph and the sources list.
+In the next one, we consider all available sources and operations, and if some sources satisfy input contracts of some operation, we add this operation to the universal graph with unique id and to the sources list.
+The number of steps should be one more than the number of operations to ensure that the universal graph includes all graphs that correspond to the CGraph because, in this case, the longest possible path in the graph includes all available operations.
 
-For each node from the Semantics set we find its ids in the big graph.
-Then we calculate a cartesian product of the such sets of ids.
-Each element of the cartesian product is a set of ids that correspond to the each node of the Semantics set.
-For each element we extract corresponding execution graph from the big graph.
-And finally we filter graphs that does not have repeating nodes.
+To extract all graphs corresponding to the CGraph, firstly for each operation of semantics we find corresponding ids in the universal graph.
+Then we calculate a cartesian product of all this id sets.
+Each element of the cartesian product includes ids that correspond to all of the semantics operations.
+For each such element, we extract an execution graph from the universal graph, which leafs have elements' ids.
+Finally, we filter graphs that do not have duplicated nodes.
+These extracted graphs form a set of all equivalent graphs for the given task.
 
-TODO link 
-% https://github.com/flame-stream/halco/blob/c7bba22e6ca4e9b8d28d14dcc76e261673d19d09/src/Halco/GraphGen/Fast.hs
+%TODO: example here
+
+We use some tricks to make graphs generation faster.
+Firstly, we keep a set of its predecessor operations for each source to filter the following operations (each execution graph cannot have node copies).
+Secondly, we keep a set of the generated nodes to avoid adding the same nodes with different ids later.
+
+% \begin{lstlisting}[language=Haskell]
+% extract :: Graph -> Set NodeId -> Graph
+% findIds :: Graph -> NodeName -> [NodeId]
+% cartesianProduct :: [[a]] -> [[a]]
+
+% semanticNids 
+%   :: Graph -> Semantics -> [Set NodeId]
+% semanticNids g = 
+%     map Set.fromList . cartesianProduct 
+%   . map (findIds g) . Set.toList
+
+% genGraphs :: ( InCont s i, OutCont s o
+%              , OutCont1 s o1, OutCont2 s o2) 
+%           => CGraph i o o1 o2 -> [Graph]
+% genGraphs (e, semantics) = 
+%   let bigGraph = ... in
+%   let graphs = 
+%           map (bigGraph `extract`) 
+%         $ semanticNids bigGraph semantics in
+%   filter Graph.noSameNodes graphs
+% \end{lstlisting}
