@@ -1,14 +1,13 @@
 \subsection{Contracts interface}
 
-Graph operations can be user-defined, hence we cannot deduce their properties automatically to be able transform the graph preserving its equivalency.
+Graph operations can be user-defined, so we cannot deduce their properties automatically to transform the graph safely.
 So we need to ask the user to specify such properties manually.
 Such specifications we call contracts.
-We define them abstractly to be able to vary their implementations.
 
 There are two kinds of contracts: input and output.
 Input contract specifies requirements that input data should satisfy, output contract defines how an operation changes the input data.
-We call an information about the data as a {\em data state}.
-Input contract is a data type with the {\em match} function defined: it takes an input data state, input contract and returns boolean true if an input data state satisfies an input contract.
+We call information about the data attributed and properties a {\em data scheme}.
+Input contract is a data type with the {\em match} function defined: it takes an input data scheme, input contract, and returns boolean if an input data scheme satisfies an input contract.
 
 In this paper, we demonstrate all notions and examples in Haskell, the prototype~\footnote{https://github.com/flame-stream/halco} is also implemented in Haskell. The type class for input contract is defined as follows:
 
@@ -17,16 +16,16 @@ class InCont s i where
   match :: s -> i -> Bool
 \end{lstlisting}
 
-Graph nodes can be of three types: data sources, one-arity operations and two-arity operations.
+Graph nodes can be of three types: data sources, one-arity operations, and two-arity operations.
 So there are three definitions of output contracts.
-Output contract of the data source should have a function to get an output data state from it.
+The output contract of the data source should have a function to get an output data scheme from it.
 
 \begin{lstlisting}[language=Haskell]
 class OutCont s o where
-  toState :: o -> s
+  toScheme :: o -> s
 \end{lstlisting}
 
-Output contract of the one-arity operation defines, how the operation changes the input data, hence there should be a function {\em update1} that takes an input data state, an output contract and returns an output data state:
+Output contract of the one-arity operation defines, how the operation changes the input data, hence there should be a function {\em update1} that takes an input data scheme, an output contract and returns an output data scheme:
 
 \begin{lstlisting}[language=Haskell]
 class OutCont1 s o where
@@ -49,31 +48,21 @@ Properties are denoted just as strings, like {\em "reliablePerson"} or {\em "pop
 type Attr = String
 type Prop = String
 
-data State = State
+data Scheme = Scheme
   { attrs :: Set Attr
   , props :: Set Prop }
 
-empty :: State
-empty = State { attrs = Set.empty
+empty :: Scheme
+empty = Scheme { attrs = Set.empty
               , props = Set.empty }
 
-union :: State -> State -> State
-union s1 s2 = State
+union :: Scheme -> Scheme -> Scheme
+union s1 s2 = Scheme
   { attrs = attrs s1 `Set.union` attrs s2
   , props = props s1 `Set.union` props s2 }
 \end{lstlisting}
 
-% Input contract can be defined as tuple of three sets:
-% \begin{enumerate}
-%     \item set of attributes that are required in the input stream,
-%     \item set of properties that are required in the input stream,
-%     \item set of properties that are prohibited in the input stream.
-% \end{enumerate}
-
 Input contract consists of three sets: the required attributes, the required properties, and the prohibited properties:
-% Set of the required attributes should be a subset of the input data state attributes.
-% Set of the required properties should be a subset of the input data state properties.
-% Set of the prohibited properties should be disjoint with the set of input data state properties.
 
 \begin{lstlisting}[language=Haskell]
 data InContImpl = InContImpl
@@ -81,8 +70,8 @@ data InContImpl = InContImpl
   , propsI  :: Set Prop
   , propsI' :: Set Prop }
 
-instance InCont State InContImpl where
-  match :: State -> InContImpl -> Bool
+instance InCont Scheme InContImpl where
+  match :: Scheme -> InContImpl -> Bool
   match s i =
        attrsI i `Set.isSubsetOf` attrs s
     && propsI i `Set.isSubsetOf` props s
@@ -96,21 +85,21 @@ data OutContImpl = OutContImpl
   { attrsO :: Set Attr
   , propsO :: Set Prop }
 
-instance OutCont State OutContImpl where
-  toState :: OutContImpl -> State
-  toState = update1 State.empty
+instance OutCont Scheme OutContImpl where
+  toScheme :: OutContImpl -> Scheme
+  toScheme = update1 Scheme.empty
 
-instance OutCont1 State OutContImpl where
-  update1 :: State -> OutContImpl -> State
-  update1 s o = State
+instance OutCont1 Scheme OutContImpl where
+  update1 :: Scheme -> OutContImpl -> Scheme
+  update1 s o = Scheme
     { attrs = attrs s `Set.union` attrsO o
     , props = props s `Set.union` propsO o }
 
-instance OutCont2 State OutContImpl where
+instance OutCont2 Scheme OutContImpl where
   update2 :: 
-    (State, State) -> OutContImpl -> State
+    (Scheme, Scheme) -> OutContImpl -> Scheme
   update2 (s1, s2) = 
-    update1 (s1 `State.union` s2)
+    update1 (s1 `Scheme.union` s2)
 \end{lstlisting}
 
 \subsection{CGraph}
@@ -143,4 +132,4 @@ type CGraph i o o1 o2 =
 Graphs with satisfied contracts that include all semantics nodes form the desired set of equivalent graphs. 
 The implementation of the execution graphs generation algorithm is rather effective despite the brute force approach because graphs that do not satisfy contracts can be ejected. 
 The algorithm is exponential in the size of the semantics set, which is often small enough.
-The algorithm implementation details is discussed in the next section.
+The algorithm implementation details are discussed in the next section.
