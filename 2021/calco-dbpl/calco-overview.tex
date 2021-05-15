@@ -150,7 +150,8 @@ type Semantics = Set NodeName
 CGraph is simply a pair of environment and semantics.
 
 \begin{lstlisting}[language=Haskell]
-type CGraph i o o1 o2 = (Env i o o1 o2, Semantics)
+type CGraph i o o1 o2 = 
+  (Env i o o1 o2, Semantics)
 \end{lstlisting}
 
 Graphs with satisfied contracts that include all semantics nodes form the desired set of equivalent graphs. 

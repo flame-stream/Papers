@@ -42,10 +42,10 @@ semanticNids g =
 genGraphs :: ( InCont s i, OutCont s o
              , OutCont1 s o1, OutCont2 s o2) 
           => CGraph i o o1 o2 -> [Graph]
-genGraphs (e, s) = 
+genGraphs (e, semantics) = 
   let bigGraph = ... in
   let graphs = 
-        map (bigGraph `Graph.extract`) 
-      $ Graph.semanticNids bigGraph s in
+          map (bigGraph `extract`) 
+        $ semanticNids bigGraph semantics in
   filter Graph.noSameNodes graphs
 \end{lstlisting}
