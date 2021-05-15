@@ -117,9 +117,9 @@ data Env i o o1 o2 = Env
   , ops2 :: Map NodeName (i, i, o2) }
 \end{lstlisting}
 
-Some operations produce particular side effects that form the result of the running graph (writes data to the storage, displays some statistics on the dashboard, etc.).
-Such operations should exist in all generated execution graphs.
-We call a set of operations that produce such side effects a {\em graph semantics}.
+Some nodes produce particular side effects that form the result of the running graph (writes data to the storage, displays some statistics on the dashboard, etc.).
+Such nodes should exist in all generated execution graphs.
+We call a set of nodes that produce such side effects a {\em graph semantics}.
 
 \begin{lstlisting}[language=Haskell]
 type Semantics = Set NodeName
