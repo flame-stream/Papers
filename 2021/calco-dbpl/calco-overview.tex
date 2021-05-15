@@ -78,14 +78,15 @@ instance InCont Scheme InContImpl where
     && propsI' i `Set.disjoint`  props s
 \end{lstlisting}
 
-Output contract consists of two sets: 
-the attributes that operation adds to the each data element
-and 
-the new properties of the data elements (e.g., filter operation adds property "filteredByCategory").
+Output contract consists of two sets and a boolean: 
+the attributes that operation adds to the each data element,
+the new properties of the data elements (e.g., filter operation adds property "filteredByCategory")
+and a boolean that is true when an operation creates new elements instead of modifying incoming. (TODO)
 
 \begin{lstlisting}[language=Haskell]
 data OutContImpl = OutContImpl
   { attrsO :: Set Attr
+  , delete :: Bool
   , propsO :: Set Prop }
 
 instance OutCont Scheme OutContImpl where
@@ -95,7 +96,8 @@ instance OutCont Scheme OutContImpl where
 instance OutCont1 Scheme OutContImpl where
   update1 :: Scheme -> OutContImpl -> Scheme
   update1 s o = Scheme
-    { attrs = attrs s `Set.union` attrsO o
+    { attrs = if delete o then attrsO o
+              else attrs s `Set.union` attrsO o
     , props = props s `Set.union` propsO o }
 
 instance OutCont2 Scheme OutContImpl where
