@@ -6,7 +6,7 @@ Such specifications we call contracts.
 
 There are two kinds of contracts: input and output.
 Input contract specifies requirements that input data should satisfy, output contract defines how an operation changes the input data.
-We call information about the data attributed and properties a {\em data scheme}.
+We call information about the data attributes and properties a {\em data scheme}.
 Input contract is a data type with the {\em match} function defined: it takes an input data scheme, input contract, and returns boolean if an input data scheme satisfies an input contract.
 
 In this paper, we demonstrate all notions and examples in Haskell, the prototype~\footnote{https://github.com/flame-stream/halco} is also implemented in Haskell. The type class for input contract is defined as follows:
@@ -41,7 +41,7 @@ class OutCont2 s o where
 
 \subsection{Contracts implementation}
 
-Input and output data can be described using two sorts of information: attributes that every data element has and properties of such attributes.
+Input and output data can be described using two sorts of information: attributes that every data element has and properties of this attributes.
 Properties are denoted just as strings, like {\em "reliablePerson"} or {\em "popularItem"}.
 
 \begin{lstlisting}[language=Haskell]
@@ -54,7 +54,7 @@ data Scheme = Scheme
 
 empty :: Scheme
 empty = Scheme { attrs = Set.empty
-              , props = Set.empty }
+               , props = Set.empty }
 
 union :: Scheme -> Scheme -> Scheme
 union s1 s2 = Scheme
@@ -62,7 +62,10 @@ union s1 s2 = Scheme
   , props = props s1 `Set.union` props s2 }
 \end{lstlisting}
 
-Input contract consists of three sets: the required attributes, the required properties, and the prohibited properties:
+Input contract consists of three sets: 
+attributes that should exist in the input data scheme,
+properties that should exist in the input data scheme
+and properties that should not exist in the input data scheme.
 
 \begin{lstlisting}[language=Haskell]
 data InContImpl = InContImpl
@@ -78,7 +81,10 @@ instance InCont Scheme InContImpl where
     && propsI' i `Set.disjoint`  props s
 \end{lstlisting}
 
-Output contract consists of two sets: the new attributes and properties.
+Output contract consists of two sets: 
+the attributes that operation adds to the each data element
+and 
+the new properties of the data elements (e.g., filter operation adds property "filteredByCategory").
 
 \begin{lstlisting}[language=Haskell]
 data OutContImpl = OutContImpl
