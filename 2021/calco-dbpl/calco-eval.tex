@@ -24,7 +24,7 @@ Join requires "bid.auction" and "auction.id" attributes and sets "joinedBA" prop
              Set.empty Set.empty
 , InContImpl (Set.singleton "auction.id")
              Set.empty Set.empty
-, OutContImpl Set.empty False
+, OutContImpl Set.empty
               (Set.singleton "joinedBA") )
 \end{lstlisting}
 
@@ -35,9 +35,8 @@ We implemented a graphs generation prototype in Haskell~\footnote{https://github
 Our prototype generates all possible 6 execution graphs corresponding to the CGraph of the running example. Figure~\ref{fig:gen} demonstrates a graph generation process.
 Purple graph nodes correspond to the fraud metric semantics node, orange~--- to the participants semantics node.
 Graph nodes with red frames represent an extracted graph.
-
 In the first step, the algorithm adds all sources to the universal graph.
-In the next steps, it adds all possible nodes such that their input contracts are satisfied by the nodes from the previous step. (TODO)
+In the next steps, it adds all possible nodes such that their input contracts are satisfied by the nodes from the previous step.
 
 Note that a semantics operation set with their input contracts looks pretty similar to the declarative dataflows specification approach, e.g., SQL, because we indicate only the desired result.
 However, as opposed to the SQL, other user-defined operations annotated with contracts can also be used in equivalent graphs generation process, e.g., can be safely reordered.
