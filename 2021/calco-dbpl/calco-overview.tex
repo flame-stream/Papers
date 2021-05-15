@@ -6,7 +6,7 @@ Such specifications we call contracts.
 
 There are two kinds of contracts: input and output.
 Input contract specifies requirements that input data should satisfy, output contract defines how an operation changes the input data.
-We call information about the data attributed and properties a {\em data scheme}.
+We call information about the data, attributes and properties of the elements, a {\em data scheme}.
 Input contract is a data type with the {\em match} function defined: it takes an input data scheme, input contract, and returns boolean if an input data scheme satisfies an input contract~\footnote{All notions and examples are demonstrated in Haskell}:
 
 \begin{lstlisting}[language=Haskell]
@@ -16,7 +16,7 @@ class InCont s i where
 
 Graph nodes can be of three types: data sources, one-arity operations, and two-arity operations.
 So there are three definitions of output contracts.
-The output contract of the data source should have a function to get an output data scheme from it.
+The output contract of the data source should have a function to get an output data scheme from it:
 
 \begin{lstlisting}[language=Haskell]
 class OutCont s o where
