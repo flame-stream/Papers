@@ -60,7 +60,7 @@ union s1 s2 = Scheme
   , props = props s1 `Set.union` props s2 }
 \end{lstlisting}
 
-Input contract consists of three sets: 
+Input contract consists of three sets:
 attributes and properties that should exist in the input data scheme,
 and the properties that should not exist in the input data scheme.
 
@@ -78,7 +78,7 @@ instance InCont Scheme InContImpl where
     && propsI' i `Set.disjoint`  props s
 \end{lstlisting}
 
-Output contract consists of two sets: 
+Output contract consists of two sets:
 the attributes that operation adds to each data element and the new properties of the data elements (e.g., filter operation adds property "filteredByCategory").
 
 \begin{lstlisting}[language=Haskell]
@@ -93,14 +93,13 @@ instance OutCont Scheme OutContImpl where
 instance OutCont1 Scheme OutContImpl where
   update1 :: Scheme -> OutContImpl -> Scheme
   update1 s o = Scheme
-    { attrs = if delete o then attrsO o
-              else attrs s `Set.union` attrsO o
+    { attrs = attrs s `Set.union` attrsO o
     , props = props s `Set.union` propsO o }
 
 instance OutCont2 Scheme OutContImpl where
-  update2 :: 
+  update2 ::
     (Scheme, Scheme) -> OutContImpl -> Scheme
-  update2 (s1, s2) = 
+  update2 (s1, s2) =
     update1 (s1 `Scheme.union` s2)
 \end{lstlisting}
 
@@ -127,11 +126,11 @@ type Semantics = Set NodeName
 CGraph is simply a pair of environment and semantics:
 
 \begin{lstlisting}[language=Haskell]
-type CGraph i o o1 o2 = 
+type CGraph i o o1 o2 =
   (Env i o o1 o2, Semantics)
 \end{lstlisting}
 
-Graphs with satisfied contracts that include all semantics nodes form the desired set of equivalent graphs. 
-The implementation of the execution graphs generation algorithm is rather effective despite the brute force approach because graphs that do not satisfy contracts can be ejected. 
+Graphs with satisfied contracts that include all semantics nodes form the desired set of equivalent graphs.
+The implementation of the execution graphs generation algorithm is rather effective despite the brute force approach because graphs that do not satisfy contracts can be ejected.
 The algorithm is exponential in the size of the semantics set, which is often small enough.
 The algorithm implementation details are discussed in the next section.
