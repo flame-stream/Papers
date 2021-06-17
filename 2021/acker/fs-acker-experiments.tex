@@ -152,7 +152,7 @@ Figure~\ref{traffic_granularity} indicates that the number of sent service messa
 
 In the case of \tracker, service traffic depends on the logical graph size and the number of machines because their product forms the number of processes. The growth has a linear trend but can be significantly reduced with the local \tracker\ optimization. Distributed \tracker\ without optimizations provides ~10x less service than punctuations traffic for a graph with 10 vertices and ~30x decrease for a graph with 100 vertices. Regarding the number of machines, the difference is ~10x for 10 nodes and ~30x for 20 nodes. Besides, local \tracker\ optimization allows the system to reduce traffic up to 5 times compared to the straightforward implementation of the distributed \tracker.
 
-\subsection{Notification latency}
+\subsection{Microbenchmarks: notification latency}
 % https://gist.github.com/faucct/032aaf6240db361d30a184b1d7bf3c8e
 \begin{figure*}[t!]
     \begin{subfigure}[b]{0.30\textwidth}
@@ -176,9 +176,9 @@ In the case of \tracker, service traffic depends on the logical graph size and t
     \label{notification_latency}
 \end{figure*}
 
-One of the key performance metrics is the latency of notifications: a delay between a moment when a substream ends and the reception of the termination event. This time is added to any operation triggered by termination events~\cite{Carbone:2017:SMA:3137765.3137777, we2018adbis}. For example, Flink finishes its state snapshotting protocol for the epoch (set of input elements) and delivers corresponding output elements to data consumers only after receiving a notification that the whole epoch is completed.
+One of the key performance metrics is the latency of notifications: a delay between a moment when a substream ends and the reception of the termination event. This time is added to any operation triggered by termination events~\cite{Carbone:2017:SMA:3137765.3137777, we2018adbis}. For example, Flink finishes its state snapshotting protocol for the epoch (set of input elements) and delivers corresponding output elements to data consumers only after receiving a notification that the whole epoch is completed. We examine end-to-end latency in the next section.
 
-There are four experiments in this setting. We will first measure notification latency in lightweight synthetic workload to compare the absolute cost of different substream management algorithms. The main risk that comes from the introduction of a centralized agent is the lack of scalability of this agent, and in the second experiment, we will study the performance of the distributed tracking agent. The third and fourth experiments change the synthetic setting to real-world workloads: a window join and a state snapshot. These experiments allow us to get the whole picture of system behavior change when we switch from one substream management to another.
+There are two experiments in this setting. We will first measure notification latency in lightweight synthetic workload to compare the absolute cost of different substream management algorithms. The main risk that comes from the introduction of a centralized agent is the lack of scalability of this agent, and in the second experiment, we will study the performance of the distributed tracking agent.
 
 \subsubsection{Absolute notification latency}
 \label{absolute-latency}
@@ -220,6 +220,10 @@ Without the extra load, distributed tracking agent provides results similar to a
 
 The experiments demonstrate that even the centralized tracking agent can sustain a high input rate within 20 computational nodes. Besides, the distributed version of the agent can make the tracking scalable in larger setups.
 
+\subsection{End-to-end latency}
+
+In the previous section we demonstrated that \tracker\ framework provides lower notification latency than the baseline. In this part, we show how this difference influence the end-to-end latency. We use real-world workloads: a window join and a state snapshot. We measure the latency of window join as a time between the last element of the window enters the system and the output of window aggregation. We also examine how substream management technique can affect the duration of taking a state snapshot. In both scenarios, end-to-end latency is directly affected by the notification latency. These experiments allow us to get the whole picture of system behavior change when we switch from one substream management to another.
+
 \subsubsection{Window join}
 For the windowed join scenario, we apply NEXMark benchmark~\cite{tucker2008nexmark} designed to inspect the performance of streaming queries. This benchmark extends the XMark benchmark~\cite{schmidt2002xmark} online auction model, where users can start auctions for items and bid on items. We accept Query 8 from the NEXMark benchmark, defined as follows: {\em Select people who have entered the system and created auctions in the last period}. This query can be implemented using windowed join of persons and auctions. We apply 10 seconds window and 500 RPS per node input rate.
 
@@ -230,7 +234,7 @@ For the windowed join scenario, we apply NEXMark benchmark~\cite{tucker2008nexma
 %   \label{fig:nexmark}
 % \end{figure}
 
-Figure~\ref{fig:nexmark} illustrates the results. The notification latency of \tracker\ is under 20ms for all setups, while the punctuations latency grows up to ~300ms on 30 nodes. After that it fluctuates slightly. This behavior can be explained by the fact that process waits for punctuations from all channels to produce termination event. However, with the growth of machines number, the probability that some node delays punctuation increases. After some limit (30 nodes in our case), many nodes start to delay punctuations, so the latency achieves its maximum. 
+Figure~\ref{fig:nexmark} illustrates the results. The end-to-end latency (a time between the last element of the window enters the system and the output of window aggregation) within \tracker\ is under 20ms for all setups, while within punctuations latency grows up to ~300ms on 30 nodes. After that it fluctuates slightly. This behavior can be explained by the fact that process waits for punctuations from all channels to produce query result. However, with the growth of machines number, the probability that some node delays punctuation increases. After some limit (30 nodes in our case), many nodes start to delay punctuations, so the latency achieves its maximum. 
 
 \subsubsection{State snapshooting}
 \begin{figure*}[t!]
@@ -285,7 +289,7 @@ Figure~\ref{snapshot_spikes} demonstrates SPE latency spikes during state snapsh
 
 % Low notification latency leads to a smaller number of elements that need to wait (be buffered), as it is shown in Figure~\ref{snapshot_buffered}. The smaller number of buffered records causes lower buffering duration that implies lower spikes in general. Note that the vast difference in the number of buffered elements does not necessarily imply the vast difference in total buffering duration because most buffered elements wait for a tiny amount of time. This experiment indicates that \tracker\ can provide better results for a common problem that is traditionally solved using punctuations.
 
-\subsection{Maximum throughput}
+\subsection{End-to-end throughput}
 In this experiment our goal is to find how the substream management influence maximum throughput of an SPE. We measure the median latency of RR-30 workload using cluster of 20 nodes, depending on the input rate (input elements per millisecond). The growth of median latency indicates system overloading. Input rate that corresponds to the point where latency starts to grow indicates a {\em sustainable throughput}~\cite{karimov2018benchmarking}.
 
 Figure~\ref{throughput_overhead} shows that system without tracking at all starts to be overloaded at $\sim 9K$ requests (items) per second input rate. The system with the finest-grained centralized \tracker\ setup sustains $\sim 7K$ RPS throughput. Overloading with the punctuations-based approach depends on the granularity of tracking: the finest-grained setup does not sustain even $1K$ RPS, while the setup with the granularity of 10 has $\sim 2K$ RPS throughput. Punctuations achieve similar to centralized \tracker\ throughput ($\sim 5K$ RPS) only when they are injected once per 50 input elements.
