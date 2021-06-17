@@ -24,9 +24,7 @@ First, in this section, we formalize a stream processing engine based on Chandy-
         \hline
         $Pred(e)$ & Propositional formula defined on events \\
         \hline
-        $pred(m)$ & Propositional formula defined on data elements \\
-        \hline
-        $eoss_{soft}$ & Propositional formula defined on data elements \\
+        $pred(M)$ & Propositional formula defined on messages\\
     \end{tabular}
     \label{notations}
 \end{table}
@@ -46,9 +44,9 @@ A deployed physical graph is a distributed system and could be described in term
 
 Following notation from~\cite{Chandy:1985:DSD:214451.214456, carbone2018scalable}, each event is a tuple of 5 elements $e = (p, s, s', c, M)$, where $p$ is one of the deployed processes, $s$ and $s'$ are state of the process before and after processing, $c$ one of network FIFO channels that connect processes, and $M$ is a message generated during processing. The generated event $M$ comes to a channel state $C$ until the destination process receives it. Processes and channels form a physical graph of the system $G=\{\Pi,\mathcal{E}\}$.
 
-In a stream processing engine, we need to specify a process $p$ to reflect the specifics of this type of processing. In our model we split a process into two separate blocks: {\em business logic handler} (BLH), and {\em mailbox controller} (MBC). The first block encapsulates user-defined operator. In this scheme user-defined operator does not directly communicate with other processes in the system. Instead of this it receives and generates {\em messages} -- data elements that are tagged by their source and destination. Delivery of these messages along the communication channels is then proceed by mailbox controller. This way of system layout is not new and it is widely used in practise (Akka, YDB, Millwheel, etc.).
+In a stream processing engine, we need to specify a process $p$ to reflect the specifics of this type of processing. In our model we split a process into two separate blocks: {\em business logic handler} (BLH), and {\em mailbox controller} (MBC). The first block encapsulates user-defined operator. In this scheme user-defined operator does not directly communicate with other processes in the system. Instead of this it receives and generates {\em messages} -- data elements that are tagged by their source and destination. Delivery of these messages along the communication channels is then proceed by mailbox controller. This system layout is not new and it is widely used in practise (Akka, YDB, Millwheel, etc.).
 
-More formally, when a process receives a message it is handled by mailbox controller, that stores this message into a special segment of the process state ({\em mailbox} $B_p$). Business logic handler gets a message from the mailbox and triggers a user-defined operator. User-defined operator process the data element the message contains and generates arbitrary number of outgoing messages. BLH stores generated messages back to a mailbox. MBC iterate outgoing messages in the mailbox and send them along communication channels to destination processes. If user-defined operator have a state $U_p$, the joined process state will consist of the mailbox and this state $s=U_p \cup B_p$   In Chandy-Lamport paradigm this algorithm produce a following list of custom events within a process:
+More formally, when a process receives a message it is handled by mailbox controller, that stores this message into a special segment of the process state ({\em mailbox} $B_p$). Business logic handler gets a message from the mailbox and triggers a user-defined operator. User-defined operator process the data element the message contains and generates arbitrary number of outgoing messages. BLH stores generated messages back to a mailbox. MBC iterate outgoing messages in the mailbox and send them along communication channels to destination processes. If user-defined operator have a state $U_p$, the joined process state will consist of the mailbox and this state $s=U_p \cup B_p$. In Chandy-Lamport paradigm this algorithm produce the following events within a process:
 \begin{itemize}
     \item Communication events: $\langle recv, M\rangle$, $\langle send, M \rangle$ -- these events are handled by mailbox controller
     \item Processing of an incoming message $\langle proc, M\rangle$
@@ -60,8 +58,7 @@ Lets translate these events into 5-tuple language. Communication events moves a 
 \langle send, M \rangle = (p, s_p, s'_p = U_p \cup \left(B_p\setminus\{M\}\right), c_{p, dst(M)}, M)
 \end{eqnarray}
 
-Note that we need to be able to get a destination process directly from the message $dst(M)$. This function translates destination element from logical dataflow graph edges, that are used in used-defined code, to physical communication channels between processes. A practical case of this abstraction is a sharding scheme for some key: user-defined procedure emits event for some key, and a system is responsible for finding a proper physical channel to deliver this message.
-
+Note that we need to be able to get a destination process directly from the message $dst(M)$. This function translates destination element from logical dataflow graph nodes, that are used in used-defined code, to physical communication channels between processes. A practical case of this abstraction is a sharding scheme for some key: user-defined procedure emits event for some key, and a system is responsible for finding a proper physical channel to deliver this message.
 
 Incoming message processing does not influence the communication channels and only ingest results of a message processing $(U', M') = func_p(U, M)$:
 \begin{equation}
@@ -75,23 +72,20 @@ We assume that within the same process $p$ all events are totally ordered by a l
 % Atomicity of the events and their sequential nature allows a system to build guarantees for processing and state management.
 
 \subsection{Substream management events}
-The processing of unbounded data sequences sometimes is difficult and it is easier to solve an unlimited stream of small tasks than a single task for unlimited stream of events. We use a condition on a data item to limit the scope of a task. The messages that satisfy a condition form a {\em substream}.
+The processing of unbounded data sequences sometimes is difficult, and it is easier to solve an unlimited stream of small tasks than a single task for an unlimited stream of data. We use a condition on a data elements to limit the scope of a task. The data elements that satisfy a condition form a {\em substream}. The practical examples of substreams are: ``clicks received in time window $w$'', or ``requests from user 0x0321da83'', etc.
 
-Practical example of conditions or predicates are: ``the message received in time window $w$'', or ``user session-id equals 0x0321da83'', etc..
+For each process we want to get the first and the last element of a substream. The first one could be found naturally when it emerges, but get ensure that the will be no more events of a substream could be problematic. To obtain the strict substream termination guarantee source must promise that no more messages from substream emerge, and the system must ensure that there are no substream messages inside the system. The first task requires contract with particular data sources and is out of scope of this paper, while discussed in the literature~\cite{awad2019adaptive}. Instead, we focus on the second task that is challenging due to distributed nature of the system and the lack of some common message lifetime limit. This problem becomes even more difficult with the introduction of cycles into dataflow. The problem here is that processes are not isolated from each other and substream message could move from one process to another. That is why we need to observe all in-flight messages in the system.
 
-The definition of the substream consists of two parts: source must guarantee that no more messages from substream emerge, and system must track down all substream messages inside the system. The first task is out of scope of this paper, but discussed in the literature [???]. The second task is challenging due to distributed nature of the system and lack of some common message lifetime limit. This problem become even more difficult with introduction of cycles into dataflow.
+Formally, a substream can be defined via propositional formula $Pred(e)$ for any system event. We have to use system events as they are ordered inside each process and can define a border of a substream. Sometimes it is more practical to induce this predicate to messages ($pred(M)$) involved in the event generation: $Pred(e=(p, s, s', M, c)) = pred(M)$. Note, that only communication events can turn formula values to true, that is why mailbox controller, that generates these events, is responsible for the substream management. 
 
-We want to track the value of these predicates throughout the system. Using the notations from the previous section, we want to know the value of a predicate for all mailboxes in the system. The problem here is that every mailbox lives in the time of its own process, and it is challenging task to track them all.
+In this paper we are interested in such $Pred(e)$, that has limited lifespan within a process and want to know when substream starts and terminates: $\forall p, \exists t_0^p, t_1^p: \exists e: e_{t_0^p} <_p e <_p e_{t_1^p}, Pred(e) \And \forall e': e_{t_1^p} <_p e', \neg Pred(e')$. Lets boil this formula down: for each process $p$ in the system there must be two event indices $t_0^p$ for substream start and $t_1^p$ for its termination, such that events satisfying $Pred$ must be between these indices. 
 
-We want to allow a user or a system to define predicates for events in the system and track their values for the entire system or its part. This property with the guarantees from the source stream It allows defining and tracking quantifier expressions that form substreams.
+A substream management problem is to define a special mechanism that estimates substream bound for each process. In our system model, we need to define a system event that indicates the bound of a substream for a process. We call this termination event or end-of-substream event, this appropriate :
+\begin{equation}
+  \langle eoss, pred(M)\rangle = (p, B_p, B_p\cup eoss(pred), \emptyset, \emptyset)  
+\end{equation}
 
-Formally we define propositional formula $Pred$ for any system event. In this paper we are interested in such $Pred$, that has limited lifespan within a process and want to know when substream starts and terminates: $\forall p, \exists t_0^p, t_1^p: \exists e: e_{t_0^p} <_p e <_p e_{t_1^p}, Pred(e) \And \forall e': e_{t_1^p} <_p e', \neg Pred(e')$. Lets boil this formula down: for each process $p$ in the system there must be two event indices $t_0^p$ for substream start and $t_1^p$ for its termination, such that events satisfying $Pred$ must be between these indices. 
-
-We defined substream bounds for each process, but they depend on input from the other processes, and getting them so getting the exact bound is challenging. A substream management problem is to define a special mechanism that estimates substream bound for each process. In our system model, we need to define a system event that indicates the bound of a substream for a process. We call this termination event or end-of-substream event:
-
-$$\langle eoss, pred(m)\rangle = (mb\_controller_p, B_p, B_p\cup eoss(pred), null, null)$$ 
-
-As we mentioned before, different problems require various properties of the termination events. For example, the state pruning problem does not require any special properties, while for the state snapshotting problem, the substream management system should detect the exact substream bound. In the following sections, we formalize these properties. 
+As we mentioned before, some problems require certain properties of the termination events. For example, the state pruning problem does not require any special properties, while for the state snapshotting problem, the substream management system should detect the exact substream bound. In the following sections, we formalize these properties. 
 
 \subsubsection{Soft bound}
 
