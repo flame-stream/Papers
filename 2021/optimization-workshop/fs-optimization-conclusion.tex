@@ -1,2 +1,8 @@
 \label {sec:fs-optimization-conclusion}
-In this paper, we considered the problem of adaptive optimization of streaming SQL queries in distributed stream processing engines. We argued the necessity of adaptive query optimization at the logical level and highlighted the differences between query optimization in database tables and data streams, which allowed us to identify the following challenges in adapting database optimization techniques for streaming queries: fetching and predicting data statistics, using predicted statistics for the query optimization, and migrating the execution graph in runtime once the statistics have changed enough that the previous execution plan becomes suboptimal. We presented a running example of a streaming SQL query and performed experiments on this query and its different possible execution graphs to demonstrate the possibility of a gain in performance should the graph be adapted to the data statistics. 
+In this paper, we introduced  the concept  of adaptive optimization of streaming SQL queries in distributed stream processing engines and highlighted the differences between adaptive optimization 	for database and stream queries. 
+We argued the necessity of adaptive query optimization at both  logical and the physical levels.
+We identify the following challenges in realization of  optimization techniques for streaming queries: 
+fetching and predicting data statistics, 
+using predicted statistics for the query optimization, and migrating the execution graph in runtime once the statistics have changed enough that the previous execution plan becomes suboptimal. 
+
+We presented a running example of a streaming SQL query and performed experiments on this query and its different possible execution graphs to demonstrate the possibility of a gain in performance should the graph be adapted to the data statistics. 

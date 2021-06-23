@@ -58,12 +58,12 @@ In the subsequent text the plan which joins \texttt{Auction} and \texttt{Person}
 
 We generated 1000000 events with the arrival rate of 10000 events per second and time-based windows of varying sizes.
 
-Figure \ref{fig:latency_ratio} 
+Figure˜\ref{fig:latency_ratio} 
 demonstrates how latency changes depending on data characteristics. The $|Person|:|Auction|:|Bid|$ ratio impacts arrival rate for each kind of entities, thereby influencing latency. As expected, the plan in which \texttt{Person} and \texttt{Auction} are joined first delivers better results when the arrival rate of \texttt{Bid} records significantly overwhelms the rates of \texttt{Person} and \texttt{Auction} (the 5:5:90 ratio is an example of such a case), while the plan in which \texttt{Person} and \texttt{Bid} are joined first works best for cases where the rate of \texttt{Auction} records far exceeds those of \texttt{Person} and \texttt{Bid}. 
 
-As Figures \ref{fig:latency_window_5590} and \ref{fig:latency_window_5905} demonstrate, the latency does not grow linearly as the window size increases. This is due to the fact that the join operator processes the records as they arrive instead of starting to process them only after the last record in the window has arrived, thus the results are ready to emerge shortly thereafter the arrival of the last record in the window.
+As Figures˜\ref{fig:latency_window_5590} and˜\ref{fig:latency_window_5905} demonstrate, the latency does not grow linearly as the window size increases. This is due to the fact that the join operator processes the records as they arrive instead of starting to process them only after the last record in the window has arrived, thus the results are ready to emerge shortly thereafter the arrival of the last record in the window.
 
-Figure \ref{fig:latency_diff_against_window_size} demonstrates how the difference in latency for the two execution plans changes with the window size. Since the difference grows as the window size increases, statistics-based optimization should provide an even bigger performance gain for larger windows.
+Figure˜\ref{fig:latency_diff_against_window_size} demonstrates how the difference in latency for the two execution plans changes with the window size. Since the difference grows as the window size increases, statistics-based optimization should provide an even bigger performance gain for larger windows.
 
 \begin{figure}[!ht]
     \centering
@@ -138,5 +138,3 @@ The parameters for throughput estimation were the same as for the latency estima
 The results of our experiments demonstrate that streaming query execution performance depends on the plan used for the execution, and the optimality of the plan depends on the data characteristics, which proves the necessity of adaptive optimization of streaming queries. Particularly, the first steps towards adaptive optimization should be predicting statistics for each window and performing runtime graph migration, since the results of the experiments show that even the current planners, such as the Volcano query planner \cite{graefe1993volcano} used in Apache Calcite, which are unaware of whether the data comes from a stream or a table, could use those statistics to produce a better execution plan. These two challenges will be the focus of our future work. After that, the planner can be enhanced by introducing distributed streaming systems-specific operators and their costs.
 
 
-
-% запрос выполняется многократно на каждом окне заново и поэтому легче собирать статистику и по ней учиться
