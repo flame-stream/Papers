@@ -5,17 +5,20 @@ In this section, we illustrate the problem of streaming SQL query optimization u
 We are using the NEXMark benchmark˜\cite{tucker2008nexmark} for our query. The NEXMark benchmark suite, designed for queries over continuous data streams, is an extension of the XMark benchmark˜\cite{schmidt2002xmark} adopted for use with streaming data. 
 The NEXMark scenario simulates an on-line auction system with three kinds of entities: people selling items or bidding on items, items submitted for auction, and bids on items. 
 These kinds of entities will be referred to as \texttt{Person}, \texttt{Auction}, and \texttt{Bid} respectively. 
-The original NEXMark benchmark includes eight queries which utilize the full spectrum of SQL features, but none of them contain more than one join operator. We add the following query based on the NEXMark model: 
+The original NEXMark benchmark includes eight queries which utilize the full spectrum of SQL features, but none of them contain more than one join operator.  Unfortunately, the system used in our experiments can optimize join order only. 
+We extended the benchmark woth  the following query based on the NEXMark model:  
+
+
 
 \begin{lstlisting}[
            language=SQL,
            showspaces=false,
            basicstyle=\ttfamily,
            numbers=left,
-           numberstyle=\tiny,
-           commentstyle=\color{gray},
-           caption={The proposed NEXMark-based query in the Apache Calcite SQL dialect}, 
-           captionpos=b
+           numberstyle=\tiny  %,
+   %        commentstyle=\color{gray},
+%        caption={The proposed NEXMark-based query in the Apache Calcite SQL dialect}, 
+   %        captionpos=b
         ]
 SELECT P.name, P.city, P.state, 
        B.price, A.itemName 
@@ -29,18 +32,18 @@ SELECT P.name, P.city, P.state,
 This query selects all the people who have joined the auction as both bidders and sellers. 
 For each such person their name, city and state of residence are selected, as well as the price of each of their bids and the name of each item they are selling at the auction. 
 
-This query contains two join operators, which means that there are at least two ways to execute this query: for example, first performing the join between \texttt{Person} and \texttt{Auction}, then joining the result with \texttt{Bid}, or vice-versa. 
+This query contains two join operators, which means that there are at least two ways to execute this query.
 
-The logical and physical plans (with substituted variable names omitted; using Apache Beam transforms as operators) for our example query are as follows: 
+One of  logical   plans (with substituted variable names omitted; using Apache Beam transforms as operators) for our example query looks like  follows: 
 
 \begin{lstlisting}[
            showspaces=false,
            basicstyle=\ttfamily,
            numbers=left,
-           numberstyle=\tiny,
-           commentstyle=\color{gray},
-           caption={Logical plan}, 
-           captionpos=b
+           numberstyle=\tiny %,
+ %          commentstyle=\color{gray},
+ %          caption={Logical plan}, 
+ %          captionpos=b
         ]
 LogicalProject(name, city, state, 
                price, itemName)
@@ -51,14 +54,16 @@ LogicalProject(name, city, state,
     BeamIOSourceRel(table=Auction)
 \end{lstlisting}
 
+A physical plan derived from this logical plan produced for Flink executor is as follows:
+
 \begin{lstlisting}[
            showspaces=false,
            basicstyle=\ttfamily,
            numbers=left,
-           numberstyle=\tiny,
-           commentstyle=\color{gray},
-           caption={Physical plan}, 
-           captionpos=b
+           numberstyle=\tiny %,
+   %        commentstyle=\color{gray},
+     %      caption={Physical plan}, 
+   %        captionpos=b
         ]
 BeamCalcRel(name, city, state, price, itemName)
   BeamCoGBKJoinRel(condition, joinType=inner)
@@ -68,16 +73,16 @@ BeamCalcRel(name, city, state, price, itemName)
       BeamIOSourceRel(table=Auction)
 \end{lstlisting}
 
-However, it is also possible for the query planner to generate the following physical plan for this query, with the two join operators in a different order:
+An alternative is  the following physical plan for this query, with the two join operators in a different order:
 
 \begin{lstlisting}[
            showspaces=false,
            basicstyle=\ttfamily,
            numbers=left,
-           numberstyle=\tiny,
-           commentstyle=\color{gray},
-           caption={Alternative physical plan}, 
-           captionpos=b
+           numberstyle=\tiny  %,
+    %       commentstyle=\color{gray},
+    %       caption={Alternative physical plan}, 
+   %        captionpos=b
         ]
 BeamCalcRel(name, city, state, price, itemName)
   BeamCoGBKJoinRel(condition, joinType=inner)
@@ -88,13 +93,13 @@ BeamCalcRel(name, city, state, price, itemName)
 \end{lstlisting}
 
 
-In unbounded data streams, elements can be grouped into windows, based on event time or the number of tuples in each window, and each window can be processed similarly to a SQL table. Cost-based optimization requires statistical knowledge about the data, such as the cardinality of each window, which can be inferred from element arrival rate in case of streaming data. In our example, the first plan, where \texttt{Person} and \texttt{Bid} are joined first, and then the result is joined with \texttt{Auction}, would be preferable if the arrival rate of auctions significantly exceeded the arrival rate of bids, meaning that while many items have been getting put up for auction, not many sellers have been making bids. If, however, after some time sellers started making a lot of bids, the second execution plan would have a lesser cost value. Thus, as data statistics change over the course of the query execution, a previously optimal plan might become inefficient. 
+In unbounded data streams, elements can be grouped into windows based on event time or the number of tuples in each window, and each window can be processed similarly to a SQL table. 
+Cost-based optimization requires statistical knowledge about the data, such as the cardinality of each window, which can be inferred from the element arrival rate in the case of streaming data. In our example, the first plan, where \texttt{Person} and \texttt{Bid} are joined first, and then the result is joined with \texttt{Auction}, would be preferable if the arrival rate of auctions significantly exceeded the arrival rate of bids, meaning that while many items have been getting put up for Auction, not many sellers have been making bids. 
+If, however, after some time, sellers started making many bids, the second execution plan would have a lesser cost value. Thus, as data statistics change for the query execution, a previously optimal plan might become inefficient. 
 
-Various DBMS have adopted a technique known as adaptive optimization. This technique utilizes a so-called adaptivity loop, during which an adaptive systems measures and evaluates data characteristics and then uses these evaluations to select a new query plan better suited to the current data˜\cite{deshpande2007adaptive}. 
+Due to the imprecision of data statistics, it is well known that optimal in terms of cost function plan is not necessarily optimal in actual resource consumption. To address this issue, several techniques known as adaptive query processing were developed˜\cite{deshpande2007adaptive}. Under these techniques, the execution is paused, and the query is re-optimized with more precise statistics, and then execution is resumed with the new plan. As the repeated optimization consumes a certain amount of resources itself, the adaptive optimization makes sense for relatively long-running queries and is hardly applicable in data streams. 
 
-It stands to reason that a similar technique could be useful in streaming queries optimization, seeing as streaming data statistics tend to change over time, rendering the previous query execution plan non-optimal. Thereby, in this paper we consider the problem of adaptive optimization of streaming SQL queries in distributed stream processing systems. 
+We use a different kind of adaptivity in our approach: the statistics collected during previous query executions are used to re-optimize the query for subsequent executions. As soon as the new plan changes, the query execution on subsequent windows is switched to the new plan. 
 
+This, as well as other specifics of SPEs, presents certain challenges in implementing global optimization of streaming queries, which we explore in the following section.
 
-However, adaptive database optimization is not applicable to streaming SQL queries as is: in databases, such optimization is applied during the execution of a long-running query, with the queried data remaining the same, while in streaming systems the data is continuously updated, and the same query is executed on each subsequent window; therefore, it would make sense for streaming systems to optimize the execution graph between the windows. This, as well as other specifics of SPEs, presents certain challenges in implementing logical level streaming query optimization, which we explore in the following section.
-
-%However, adaptive database optimization is not applicable to streaming SQL queries as is due to certain differences between data streams and databases, as well as other challenges, which we explore in the following section.
