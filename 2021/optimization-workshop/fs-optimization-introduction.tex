@@ -2,38 +2,46 @@
 
 Modern data analytics commonly requires near real-time online processing of continuously changing data arriving from unbounded streams. 
 A standard way of defining a stream processing pipeline is an execution graph. Each node represents an operation performed over stream elements. 
-Although a declarative approach to defining computations is widely preferred in data analytics,  it has not gained wide use in streaming systems. 
+Although a declarative approach to defining computations dominates analytical processing (e.g., OPAP),  it has not gained wide use in streaming systems. 
 The SQL language, typically used for database queries, is a dominating means for declarative specification of data processing. 
 The advantages of SQL include its popularity and ease of adoption and its support of windowed aggregations and joins, among other highly expressive features. 
 
-Applications of SQL in stream processing have been an area of active research for the last two decades. 
+Implementations of different variations of SQL language for stream processing have been an area of active development for the last two decades. 
 However, there have not been many productive attempts at proposing a standard for robust streaming SQL. 
-One such attempt˜\cite{Begoli:2019:OSR:3299869.3314040} is fairly recent (2019); its predecessors, such as CQL˜\cite{Arasu:2006:CCQ:1146461.1146463}, have not found much popularity.
- Modern stream processing engines (SPEs) typically implement only a subset of SQL features. We hope that with the recent efforts in providing a standard for streaming SQL, the declarative approach to stream processing gains popularity, which would mean that declarative streaming query optimization is a task of great current interest.
+One such attempt˜\cite{Begoli:2019:OSR:3299869.3314040} is pretty recent (2019); its predecessors, such as CQL˜\cite{Arasu:2006:CCQ:1146461.1146463}, have not found much popularity.
+ Modern stream processing engines (SPEs) typically implement only a subset of SQL features. 
+ We expect that with the recent efforts in providing a standard for streaming SQL, the declarative approach to stream processing gains popularity. 
 
 Optimization is one of the stages of executing a declarative query. 
-First, a query is \textit{parsed} into an abstract syntax tree, each node of which represents a relational algebra operator; second, the query is simplified during the˜\textit{rewriting} phase into a logical plan (or graph; we will be using these two terms interchangeably in the following text); third, the logical plan is transformed into a physical plan during \textit{optimization}; finally, the query is \textit{executed}, and the result is delivered to the user˜\cite{Pitoura2018processing}. 
-The correspondence between queries and plans is not one-to-one: for each query, there can be multiple execution plans. 
-The purpose of query rewriting is to reduce the space of execution plans and to standardize and simplify the query for further processing˜\cite{Pitoura2018rewriting}; as for optimization, the query planner transforms each logical operator into its physical implementation: for example, a join operation can be implemented using the hash join algorithm or the merge join algorithm˜\cite{Neumann2018optimization}, or a join operation in a distributed system might be preceded by sharding.  
+First, a query is \textit{parsed} into an abstract syntax tree, each node of which represents a relational algebra operator. 
+Second, the query is simplified during the˜\textit{rewriting} phase into a logical plan (or graph (we will be using these two terms interchangeably in the paper).
+ Third, the optimizer builds a physical plan equivalent to the logical plan. Finally, an executor interprets the query and delivers the result to the user˜\cite{Pitoura2018processing}. 
+The correspondence between queries and plans is not one-to-one. Several execution plans can exist for any query.
+The purpose of query rewriting is to reduce the space of execution plans and to standardize and simplify the query for further processing˜\cite{Pitoura2018rewriting}.
+ As for optimization, the query planner transforms each logical operator into its physical implementation. For example, the optimizer can implement a join operation using the hash join algorithm or the merge join algorithm˜\cite{Neumann2018optimization}. A join operation in a distributed system might require re-sharding.  
 Database query optimization is a well-studied topic˜\cite{astrahan1976system, haas1989extensible, graefe1993volcano}. 
 
-Modern state-of-the-art optimizers are cost-based: an optimizer builds a (physical) plan that minimizes the cost function, which encapsulates the complexity of processing  the query. 
+Modern state-of-the-art optimizers are cost-based: an optimizer builds a physical plan that minimizes the cost function, which encapsulates the complexity of processing the query. 
 The cost function is typically a linear combination of expected I/O and CPU costs, with CPU costs of each operation estimated based on relation cardinality and operator selectivity. 
 
 The cost estimation produced by a cost function depends on statistical properties of data (such as cardinalities and frequencies of attribute values). 
 
-Therefore, cost-based optimization requires knowledge of statistical information˜\cite{Neumann2018optimization}.  Typically data statistics are collected periodically and used for optimization of incoming queries until next scheduled update of statistics. This practice is justified by an assumption that data are relatively stable and statistics are not changing rapidly. In contrast, queries are optimized independently from each other. 
+Therefore, cost-based optimization requires knowledge of statistical information˜\cite{Neumann2018optimization}.  
+Typically database systems collect statistics periodically and use them during the optimization of incoming queries until the next scheduled update of statistics. 
+This practice works because data are relatively stable, and statistics are not changing rapidly. In contrast, queries are optimized independently from each other. 
 
-This asumption is not valid for streams, thus obtaining such statistics  in streaming systems presents certain difficulties. However, queries are executed repeatedly for a series of stream windoes. In other words, queries are relatively stable while data are volatile.
+This assumption is not valid for streams, thus obtaining such statistics in streaming systems presents specific difficulties. However, queries are executed repeatedly for a series of stream windows. In other words, queries are relatively stable while data are volatile.
 
-Efforts to optimize streaming queries execution in a distributed environment focus on finding a suitable mapping from a logical graph to a physical graph executed on a machine˜\cite{grulich2020grizzly, gedik2009code, kroll2019arc, schneider2012auto, gedik2008spade}.
-These optimizations are local in the sense that all candidate physical plans are derived from the same logical plan.  
+Efforts to optimize streaming query execution in a distributed environment focus on finding a suitable mapping from a logical graph to a physical graph executed on a machine˜\cite{grulich2020grizzly, gedik2009code, kroll2019arc, schneider2012auto, gedik2008spade}.
+These optimizations are local because the system derives all candidate physical plans from the same logical plan.  
 
 % A global optimization would require finding the most suitable logical graph as well as physical, which is possible with a declarative approach but not with using a user-defined execution graph. 
 %The problem of logical level declarative query optimization is currently relevant and presents a challenge.
-In this paper we introduce new techniques for global optimization of declarative queries over data streams. To obtain statistics needed for optimization we use predictions based on data collected during previos executions of the same query. Further, our techniques are adaptive in the sense that they are robust with respect to a drift of stream properties. 
+In this paper, we introduce new techniques for the global optimization of declarative queries over data streams. 
+In order to obtain the statistics needed for optimization, we use predictions based on data collected during previous executions of the same query. 
+Further, our techniques are adaptive because they are robust to a drift of stream properties. 
 
-In this paper we:
+The  contributions of this paper are the following:
 \begin{itemize}
     \item Present a detailed analysis of the problem of SQL queries optimization in distributed stream processing and discuss challenges that arise within this problem;
     \item Describe preliminary experiments that we have conducted in order to demonstrate feasibility of streaming SQL optimization.
