@@ -4,10 +4,10 @@ Even if the optimal query execution plan was selected based upon statistics accu
 
 We identify the following challenges in migrating the execution graph in runtime:
 \begin{itemize}
- \item \textbf{Research}: identifying the point in time at which it is feasible and beneficial to perform the graph migration is an open problem. First of all, it is necessary to estimate the costs of graph migration at the current point in time. Secondly, we need to establish what qualifies as substantial enough change in statistics to warrant graph migration. 
+ \item \textbf{Research}: Identifying the point in time at which it is feasible and beneficial to perform the graph migration is an open problem. First of all, it is necessary to estimate the costs of graph migration at the current point in time. Secondly, we need to establish what qualifies as substantial enough change in statistics to warrant graph migration. 
 
  \item \textbf{Engineering}: 
-    the mechanics of graph migration, particularly for stateful operations such as joins and aggregations, in runtime have been researched~\cite{zhu2004dynamic}.
+    The mechanics of graph migration, particularly for stateful operations such as joins and aggregations, in runtime have been researched~\cite{zhu2004dynamic}.
  However, most current popular SPEs do not provide such functionality. 
    \end{itemize}
 One such strategy is the parallel track strategy described in~\cite{zhu2004dynamic}. 
