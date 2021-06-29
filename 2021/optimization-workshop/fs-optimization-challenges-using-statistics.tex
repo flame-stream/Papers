@@ -1,7 +1,7 @@
 The API of the current state-of-the-art systems typically utilizes a consecutive approach to building a graph for query execution. First, a planner builds a logical graph. Then another component converts it to a physical graph, makes local optimizations, and finally passes it to an executor.
 Such separation leaves no opportunity to pass any data from the physical level to the logical level and adapt the graph to the new data. Therefore, making any runtime adjustments to execution plans impossible. 
 
-The progress in applying various local optimizations to the execution graphs at the physical level (see˜\cite{grulich2020grizzly} or Google Cloud Dataflow optimizer), there are no significant results in the logical level optimization yet, and the logical level allows to use of more complex optimizations than the physical level. 
+The progress in applying various local optimizations to the execution graphs at the physical level (see~\cite{grulich2020grizzly} or Google Cloud Dataflow optimizer), there are no significant results in the logical level optimization yet, and the logical level allows to use of more complex optimizations than the physical level. 
 Moreover, in this paper, we discuss distributed stream processing engines, which require additional consideration for query execution. To this end, we identify the following challenges:
 
 \begin{itemize}
@@ -14,6 +14,6 @@ Moreover, in this paper, we discuss distributed stream processing engines, which
 
 For example, a join operation should broadcast a stream with a low arrival rate of new elements to all the nodes in the system. 
 In contrast, a high arrival rate suggests distributing different keys across different nodes. 
-Therefore, the algebra should include a new \textit{distribution} operator, and the cost model should include the estimate of its cost. The cost model should consider the latency due to communication between nodes as well. Such cost models have been well-researched in distributed databases˜\cite{kossmann2000thestate} but not in distributed streaming systems.
+Therefore, the algebra should include a new \textit{distribution} operator, and the cost model should include the estimate of its cost. The cost model should consider the latency due to communication between nodes as well. Such cost models have been well-researched in distributed databases~\cite{kossmann2000thestate} but not in distributed streaming systems.
 
 

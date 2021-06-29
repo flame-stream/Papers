@@ -7,9 +7,9 @@ We identify the following challenges in migrating the execution graph in runtime
  \item \textbf{Research}: identifying the point in time at which it is feasible and beneficial to perform the graph migration is an open problem. First of all, it is necessary to estimate the costs of graph migration at the current point in time. Secondly, we need to establish what qualifies as substantial enough change in statistics to warrant graph migration. 
 
  \item \textbf{Engineering}: 
-    the mechanics of graph migration, particularly for stateful operations such as joins and aggregations, in runtime have been researched˜\cite{zhu2004dynamic}.
+    the mechanics of graph migration, particularly for stateful operations such as joins and aggregations, in runtime have been researched~\cite{zhu2004dynamic}.
  However, most current popular SPEs do not provide such functionality. 
    \end{itemize}
-One such strategy is the parallel track strategy described in˜\cite{zhu2004dynamic}. 
+One such strategy is the parallel track strategy described in~\cite{zhu2004dynamic}. 
 The second graph can start the query execution and the first one, while the first one stops execution when the current window terminates. So all the subsequent windows are only processed by the new execution graph.
 
