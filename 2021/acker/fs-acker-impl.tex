@@ -4,9 +4,9 @@ In the previous section, we introduced a general schema of the \tracker\ framewo
 
 \subsection{Bound guarantees}
 
-As we stated earlier, each process sends to tracking agent the SND and RCV reports about each sending or receiving event which contain process (or {\em segment}) identifier and if this event satisfies predicate $pred(m)$.
+The tracking agent splits the workflow graph into partially ordered segments and track them separately. For each process $p$ we can generate a list of preceding segments that include a set of incoming messages generators $W_p$ for the process. As soon as all these segments contain no elements of a substream the agent sends to a process {\em NEOSS}.
 
-The tracking agent aggregates this information into the table illustrated in Table~\ref{tracker-table-simple}. Tracking agent builds for each predicate an indicator if a {\em graph segment} contains in-flight elements satisfying the predicate. Segments are subgraphs that incapsulate cycles. NEOSS that ensures soft substream end bound can be sent for a subgraph if all upstream subgraphs do not contain the corresponding elements. The substream ends for the whole graph if all segments do not contain elements satisfying the prodicate~\footnote{Data source should also guarantee that it will not spawn any elements from this substream}. Therefore, the soft bound termination events for predicates $h(x)$ and $z(x)$ should be generated.
+To track the messages path through segments the agent receives SND/RCV reports, that contain a segment identifier and a list of predicates the message satisfies to. The agent aggregates this information into the table illustrated in Table~\ref{tracker-table-simple}.
 
 \begin{table}[htbp]
 \caption{\tracker\ table: a general example}
@@ -36,9 +36,7 @@ The tracking agent aggregates this information into the table illustrated in Tab
 
 There are several possible methods to build the indicator that the segment contains elements from a substream using the reports from processes. Our implementation uses the trick applied in Apache Storm to monitor the completeness of processing~\cite{apache:storm:acker}. 
 
-Each report is labeled by a random number $X$, and this number is the same for the send action and the corresponding receive action. This trick makes a ``link'' in the reports chain and guarantees that there are no in-flight elements satisfying predicate $h(x)$ if and only if each report with $h(x)=1$ and a corresponding value $X$ is forwarded to the tracking agent exactly twice.
-
-The latter condition can be easily checked by the tracking agent using XOR operation for all numbers received from the chain, which will turn into 0. The result of the XOR operation can accidentally become zero, but the probability of this event is controlled by the length of the random number $X$ so that it can be neglected in practice~\cite{apache:storm:acker}.
+Each report is labeled by a random number $X$, and this number is the same for the send action and the corresponding receive action. This trick makes it easy to check if the segment contains a full set of $SND$/$RCV$ pairs for a message: XOR operation for all numbers received from the chain will turn into 0. The result of the XOR operation can accidentally become zero, but the probability of this event is controlled by the length of the random number $X$ so that it can be neglected in practice~\cite{apache:storm:acker}.
 
 Figure~\ref{fig:tracker-reports} illustrates the reports with random numbers. The elements satisfying a predicate $h(x)$ flow through a dataflow. The first process generates an output and sends the SND report with $X=5$. The corresponding RCV report by the second process also has $X=5$ because this process receives the element from the first one. The second process sends a new element that satisfies $h(x)$ further, and the new SND report with $X=12$ is produced. The third operator receives this element and also produces an RCV report with $X=12$. If there are no more elements such that $h(x)=1$, then we can send NEOSS for the substream defined by $h(x)$ ends because {\em 5 XOR 5 XOR 12 XOR 12 = 0}. 
 
@@ -49,7 +47,9 @@ Figure~\ref{fig:tracker-reports} illustrates the reports with random numbers. Th
   \label{fig:tracker-reports}
 \end{figure}
 
-Table~\ref{tracker-table-xor} illustrates the actual \tracker\ table for the mentioned technique. All reports from processes are grouped by the satisfying predicate and the segment. Random numbers from these reports are XORed into the result shown in columns {\em Segment XOR} and {\em XOR}. If the XOR value is equal to 0, then the tracking agent can send the NEOSS, providing the soft bound guarantee for the corresponding predicate.
+Table~\ref{tracker-table-xor} illustrates the actual \tracker\ table for the mentioned technique.
+
+% All reports from processes are grouped by the satisfying predicate and the segment. Random numbers from these reports are XORed into the result shown in columns {\em Segment XOR} and {\em XOR}. If the XOR value is equal to 0, then the tracking agent can send the NEOSS, providing the soft bound guarantee for the corresponding predicate.
 
 \begin{table}[htbp]
 \caption{\tracker\ table: an example with XORing technique}
@@ -68,15 +68,13 @@ Table~\ref{tracker-table-xor} illustrates the actual \tracker\ table for the men
   \end{tabular}
 \end{table}
 
-As we described earlier, to ensure the firm bound guarantee, one needs to hold elements that do not belong to the substream in the sendbox until NEOSS has arrived. After the NEOSS from the tracking agent arrives, these elements are allowed to be processed.
-
-Due to the commutativity of XOR, we can optimize tracking agent incoming traffic by aggregating reports locally within the processes. For each process, we introduce a {\em local tracking agent} component. It serves as a mediator between the process and the global agent, buffering the outgoing reports and flushing them periodically. 
+Due to the associativity of XOR, we can optimize tracking agent incoming traffic by aggregating reports locally within the processes. For each process, we introduce a {\em local tracking agent} component. It serves as a mediator between the process and the global agent, buffering the outgoing reports and flushing them periodically. 
 
 The flushing window is the parameter that allows us to balance between the service traffic and latency between the actual substream termination (the event from data producer) and termination event. Note that substreams last a finite time period by definition, so we assume that each process sends aggregated reports a constant number of times that does not depend on the number of substreams and processes. Therefore, the amount of extra network traffic for the reports is $O(|\Pi|)$, so the total estimation with the overhead on the notifications is $O(K|\Pi|)$.
 
 \subsection{Consistent termination events order}
 
-If the order of NEOSS is consistent, the order of termination events will be consistent because these events are synchronized by design. To achieve consistent order of NEOSS, we need to define $t(x), x\in M$ such that the order on $t(x)$ coincides with the order of input elements. All reports that processes send to the tracking agent should be labeled by the $t(x)$. In turn, the tracking agent sends the NEOSS elements according to the order on $t(x)$.
+If the order of NEOSS is consistent, the order of termination events will be consistent as well. To achieve consistent order of NEOSS, we need to define $t(M)$ such that the order on $t(M)$ respects the order of input elements. All reports that processes send to the tracking agent should be labeled with $t(M)$. In turn, the tracking agent sends the NEOSS elements according to the order on $t(<)$.
 
 Table~\ref{tracker-table-oder} illustrates the \tracker\ table in case of consistent NEOSS order. Column {\em min t(x)} indicates the minimal $t(x)$ among the elements that satisfy the corresponding predicate. The tracking agent sends notifications for the substream if the $XOR$ value is 0 and all substreams that contain elements with less {\em min t(x)} have finished (notifications have been produced). Therefore, NEOSS for the substream defined by the predicate $h(x)$ is not sent until the NEOSS for the predicate $q(x)$ is generated. 
 
@@ -99,9 +97,9 @@ Table~\ref{tracker-table-oder} illustrates the \tracker\ table in case of consis
 
 If input elements arrive through a single node, $t(x)$ can denote the monotonic system time of the element $x$ arrival. If there are multiple source processes, one can use time oracle agent~\cite{10.14778/3055330.3055335} as a service for generation a monotonic sequence of unique timestamps. However, in this case, there is a need to manage one more subsystem.
 
-A simple technique to build $t(x)$ without extra agents bases on systematic synchronization of the system clocks. Assume that clock differences are no more than some fixed $\delta$, which we reference as synchronization slack. Let $\tau(x)$ be precise physical time of input data item $x$ arrival, and $s(x)$ be local system time of the source node where $x$ arrived. The true order of events $\tau(d_1) > \tau(d_2)$ coming from different sources can be sometimes restored by their system timestamps $s(d_1)$ and $s(d_2)$. If these timestamps differ more than time synchronization slack, then the order is clear: $s(d_1) > s(d_2) + \delta \Rightarrow \tau(d_1) > \tau(d_2)$.
+A simple technique to build $t(x)$ without extra agents bases on systematic synchronization of the system clocks. We call this method and associated labels {\em coarse time}. Assume that clock differences are no more than some fixed $\delta$, which we reference as synchronization slack. Let $\tau(x)$ be precise physical time of input data item $x$ arrival, and $s(x)$ be local system time of the source node where $x$ arrived. The true order of events $\tau(d_1) > \tau(d_2)$ coming from different sources can be sometimes restored by their system timestamps $s(d_1)$ and $s(d_2)$. If these timestamps differ more than time synchronization slack, then the order is clear: $s(d_1) > s(d_2) + \delta \Rightarrow \tau(d_1) > \tau(d_2)$.
 
-This fact allows us to define $t(x)$ such that $t(x) = [s(x) / \delta]$. This way we make $t(x)$ less precise, but this trick gives us an ability to compare global time associated by different source nodes. If $t(x_1)$ is greater by one than the $t(x_2)$ then their order is defined even if they arrived from different source nodes:  $t(x_1) > t(x_2) + 1 \Rightarrow \tau(x_1) > \tau(x_2)$. Therefore, the order on $t(x)$ coincides with the order of input elements, so it is suitable for the defined problem. Here is the summary of the mechanism that ensures consitent termination events order:
+This fact allows us to define $t(x)$ such that $t(x) = [s(x) / \delta]$. This way we make $t(x)$ less precise, but this trick gives us an ability to compare global time associated by different source nodes. If $t(x_1)$ is greater than the $(t(x_2) + 1)$ then their order is defined even if they arrived from different source nodes:  $t(x_1) > t(x_2) + 1 \Rightarrow \tau(x_1) > \tau(x_2)$. Therefore, the order on $t(x)$ coincides with the order of input elements, so it is suitable for the defined problem. Here is a summary of the mechanism that ensures consitent termination events order:
 \begin{enumerate}
     \item On input item arrival, source node gets the system timestamp
     \item The system timestamp is shrunk up to synchronization slack (practically we achieve 10ms slack)

@@ -6,7 +6,7 @@ First, in this section, we formalize a stream processing engine based on Chandy-
     \caption{Notations used throughout the paper}
     \begin{tabular}{l|p{5cm}}
         \hline
-        $p$ & Process (node in a physical graph) \\ 
+        $p$ & Process (node in a physical execution graph) \\ 
         \hline
         $I_p$, $O_p$ & input and output channels of a process $p$ \\ 
         \hline
@@ -27,6 +27,8 @@ First, in this section, we formalize a stream processing engine based on Chandy-
         $Pred(e)$ & Propositional formula defined on events \\
         \hline
         $pred(M)$ & Propositional formula defined on messages\\
+        \hline
+        $t(M)$ & Coarse time label \\
     \end{tabular}
     \label{notations}
 \end{table}
@@ -40,15 +42,15 @@ First, in this section, we formalize a stream processing engine based on Chandy-
   \label{fig:spe_process}
 \end{figure}
 
-Typically, distributed stream processing engines are shared-nothing runtimes that continuously ingest input elements, transform them according to a logical dataflow graph, and deliver output elements. The logical dataflow graph consists of user-defined operators. Operators can be stateless or stateful: an output element may depend on the current state and the corresponding input element. A logical graph is mapped to a physical, distributed graph on deployment. Commonly, a single logical operator can be deployed on multiple computational nodes. Further, we denote physical instances of logical operators as {\em processes}.
+Typically, distributed stream processing engines are shared-nothing runtimes that continuously ingest input elements, transform them according to a logical dataflow graph, and deliver output elements. The logical dataflow graph consists of user-defined operators. Operators are functions of a single input data element that produce a number of output data elements. Operators can be stateless or stateful: output elements may depend on the current state. A logical graph is mapped to a physical, distributed graph on deployment. Commonly, a single logical operator can be deployed on multiple computational nodes. Further, we denote physical instances of logical operators as {\em processes}.
 
 A deployed physical graph is a distributed system and could be described in terms of the Chandy-Lamport model~\cite{Chandy:1985:DSD:214451.214456, carbone2018scalable}. In this model, the authors introduce \textit{events} that allow observing a state of the entire system. This approach allows defining system-wide guaranties: in the original paper it is used to introduce notion of {\em consistent state}, we use this approach for definition of substream management problem.
 
-Following notation from~\cite{Chandy:1985:DSD:214451.214456, carbone2018scalable}, each event is a tuple of 5 elements $e = (p, s, s', c, M)$, where $p$ is one of the deployed processes, $s$ and $s'$ are state of the process before and after processing, $c$ one of network FIFO channels that connect processes, and $M$ is a message generated during processing. The generated event $M$ comes to a channel state $C$ until the destination process receives it. Processes and channels form a physical graph of the system $G=\{\Pi,\mathcal{E}\}$. All incoming channels we denote as $I_p$ and output channels as $O_p$.
+Following the notation from~\cite{Chandy:1985:DSD:214451.214456, carbone2018scalable}, the distributed system is observed with events. Each event is a tuple of 5 elements $e = (p, s, s', c, M)$, where $p$ is one of the deployed processes, $s$ and $s'$ are state of the process before and after processing, $c$ one of network FIFO channels that connect processes, and $M$ is a message generated during processing. The generated event $M$ comes to a channel state $C$ until the destination process receives it. Processes and channels form a physical graph of the system $G=\{\Pi,\mathcal{E}\}$. We denote all input channels as $I_p$ and output channels as $O_p$.
 
-In a stream processing engine, we need to specify a process $p$ to reflect the specifics of this type of processing. In our model we split a process into two separate blocks: {\em business logic handler} (BLH), and {\em mailbox controller} (MBC). The first block encapsulates user-defined operator. In this scheme user-defined operator does not directly communicate with other processes in the system. Instead of this it receives and generates {\em messages} -- data elements that are tagged by their source and destination. Delivery of these messages along the communication channels is then proceed by mailbox controller, that preserves the order of messages generation. This system layout is not new and it is widely used in practise (Akka, YDB, Millwheel, etc.).
+In a stream processing engine, we need to specify a process $p$ to reflect the nature of SPE. In our model we split a process into two separate blocks: {\em business logic handler} (BLH), and {\em mailbox controller} (MBC). The first block encapsulates user-defined operator. In this model user-defined operator does not directly communicate with other processes in the system. Instead of this it receives and generates {\em messages} -- data elements that are tagged by their source and destination. Further delivery of these messages along the communication channels is then handled by mailbox controller, that preserves the order of messages generation. This system layout is not new and it is widely used in practice (Akka, YDB, Millwheel, etc.).
 
-More formally, when a process receives a message it is handled by mailbox controller, that stores this message into a special segment of the process state ({\em mailbox} $B_p$). Business logic handler gets a message provided by MBC and triggers a user-defined operator. User-defined operator process the data element, that message contains, and generates arbitrary number of outgoing messages. BLH stores generated messages back to a mailbox. MBC iterate outgoing messages and send them along communication channels to destination processes. All mailbox controller operations respect the order of messages in the mailbox. If user-defined operator have a state $U_p$, the joined process state will consist of the mailbox and this state $s=U_p \cup B_p$. In Chandy-Lamport paradigm this algorithm produce the following events within a process:
+More formally, when a process receives a message it is handled by mailbox controller, that puts this message into a special segment of the process state ({\em mailbox} $B_p$). Business logic handler gets a message provided by MBC and triggers a user-defined operator. User-defined operator process the data element, that message contains, and generates arbitrary number of outgoing messages. BLH puts generated messages back to a mailbox. MBC sends outgoing messages along communication channels to destination processes. All mailbox controller operations respect the order of messages in the mailbox. If user-defined operator has a state $U_p$, the joined process state will consist of the mailbox and this state $s=U_p \cup B_p$. In Chandy-Lamport paradigm this algorithm produces the following events within a process:
 \begin{itemize}
     \item Communication events: $\langle recv, p, M\rangle$, $\langle send, p, M \rangle$ -- these events are handled by mailbox controller
     \item Processing of an incoming message $\langle proc, p, M, M' \rangle$
@@ -74,9 +76,9 @@ We assume that within the same process $p$ all events are totally ordered by a l
 % Atomicity of the events and their sequential nature allows a system to build guarantees for processing and state management.
 
 \subsection{Substream management events}
-The processing of unbounded data sequences sometimes is difficult, and it is easier to solve an unlimited stream of small tasks than a single task for an unlimited stream of data. We use a condition on a data elements to limit the scope of a task. The data elements that satisfy a condition form a {\em substream}. The practical examples of substreams are: ``clicks received in time window $w$'', or ``requests from user 0x0321da83'', etc.
+The processing of unbounded data sequences sometimes is difficult, and it is easier to solve an unlimited stream of small tasks than a single task for an unlimited stream of data. We filter data elements with a condition to limit the scope of a task. The data elements that satisfy a condition form a {\em substream}. The practical examples of substreams are: ``clicks received in time window $w$'', or ``requests from user 0x0321da83'', etc.
 
-For each process we want to get the first and the last element of a substream. The first one could be found naturally when it emerges, but get ensure that the will be no more events of a substream could be problematic. To obtain the strict substream termination guarantee source must promise that no more messages from substream emerge, and the system must ensure that there are no substream messages inside the system. The first task requires contract with particular data sources and is out of scope of this paper, while discussed in the literature~\cite{awad2019adaptive}. Instead, we focus on the second task that is challenging due to distributed nature of the system and the lack of some common message lifetime limit. This problem becomes even more difficult with the introduction of cycles into dataflow. The problem here is that processes are not isolated from each other and substream message could move from one process to another. That is why we need to observe all in-flight messages in the system.
+For each process we want to get the first and the last element of a substream. The first one could be found naturally when it emerges, but verification that there will be no more events of a substream could be problematic. Strict substream termination guarantee consists of two parts: source must promise that no more messages from substream emerge, and the system must ensure that there are no substream messages inside the system. The first task requires a contract with particular data sources and is out of scope of this paper, while discussed in the literature~\cite{awad2019adaptive}. Instead, we focus on the second task that is challenging due to distributed nature of the system and the lack of some common message lifetime limit. This problem becomes even more difficult with the introduction of cycles into dataflow. The problem here is that processes are not isolated from each other and substream messages could move from one process to another. That is why we need to observe all in-flight messages in the system.
 
 Formally, a substream can be defined via propositional formula $Pred(e)$ for any system event. We have to use system events as they are ordered inside each process and can define a border of a substream. Sometimes it is more practical to induce this predicate to messages ($pred(M)$) involved in processing: $Pred(e) = (e = \langle proc, p, M, M'\rangle) \wedge pred(M)$.
 
@@ -110,10 +112,10 @@ Figure~\ref{general_guarantees} illustrates this notion. Terms $a,b,c,d...$ deno
 
 The guarantee that any new event will not satisfy the predicate is sufficient for many real-life problems, e.g., SPE can initiate process state pruning on such events. However, some problems require a {\em firm bound}: guarantee that the substream ends {\em exactly} after the termination event. 
 
-For example, epoch-based snapshotting protocol~\cite{2015arXiv150608603C, jacques2016consistent} bases on a notion of {\em epoch}. Epoch is a special substream that should be atomically processed. Therefore, SPE requires the termination event for an epoch that occurs right after the last processing event for this epoch. Otherwise, the snapshot can be inconsistent, because it captures elements from various epochs. To support such scenarios, the end-of-substream event $\langle eoss_{firm}, p, Pred\rangle$ should satsify the following condition:
+For example, epoch-based snapshotting protocol~\cite{2015arXiv150608603C, jacques2016consistent} bases on a notion of {\em epoch}. Epoch is a special substream that should be atomically processed. Therefore, SPE requires an epoch termination event to occur right after the last processing event for this epoch. Otherwise, the snapshot can be inconsistent, because it captures elements from various epochs. To support such scenarios, the end-of-substream event $\langle eoss_{firm}, p, Pred\rangle$ should satsify the following condition:
 
 \begin{equation}\begin{array}{l}
-\langle eoss_{firm}, p, Pred\rangle = \inf_{p} \langle eoss_{soft}, p, Pred\rangle
+\langle eoss_{firm}, p, Pred\rangle = \inf_{<_p} \langle eoss_{soft}, p, Pred\rangle
 \end{array}\end{equation}
 
 Unlike soft bound the firm one guarantee that the first element outside the substream $Pred$ must be ordered after the firm bound event in the process $p$. This position satisfies to the first possible soft bound in the events ordering. Figure~\ref{strict_guarantees} illustrates the notion of the firm bound. As in the previous example, terms $a,b,c,d...$ denote ordered processing events of a process $p$. However, in this case, event $\langle eoss_{firm}, p, Pred\rangle$ occurs right after the substream terminates.
@@ -126,7 +128,7 @@ Unlike soft bound the firm one guarantee that the first element outside the subs
 \end{figure}
 
 \subsubsection{Consistent termination events order}
-Some specific applications, including the mentioned earlier epoch-based snapshotting method and techniques for enforcing deterministic processing~\cite{we2018adbis} require an order of termination events to be synchronized with the order of substreams endings (events from data sources). For example, if termination events are reordered, then snapshots for consecutive epochs can be inconsistent. Another example is deterministic join that also requires the defined order of termination events~\cite{gulisano2016scalejoin}.
+Some specific applications, including the mentioned earlier epoch-based snapshotting method and techniques for enforcing deterministic processing~\cite{we2018adbis} require an order of termination events to be synchronized with the order of substreams last elements processing. For example, if termination events are reordered, then snapshots for consecutive epochs can be inconsistent. Another example is deterministic join that also requires the defined order of termination events~\cite{gulisano2016scalejoin}.
 
 \begin{figure}[htbp]
   \centering
@@ -137,10 +139,10 @@ Some specific applications, including the mentioned earlier epoch-based snapshot
 
 Termination events reordering in case of the soft bound guarantee is illustrated in Figure~\ref{notifications_reordering}. Terms $a,b,c,d...$ denote ordered processing events of a process $p$. Although the substream containing events $a,b$ terminates earlier, the end-of-substream event for this substream occurs after the termination event for the substream containing events $d,e$. 
 
-Let $e^{*}_1$ and $e^{*}_2$ be the last elements of substreams defined by predicates $pred_1$ and $pred_2$. Termination events $\langle eoss, p, pred_1\rangle$ and $\langle eoss, p, pred_2\rangle$ are {\em consistently ordered} iff:
+Let $e^{*}_1$ and $e^{*}_2$ be the last elements of substreams defined by predicates $Pred_1$ and $Pred_2$. Termination events $\langle eoss, p, Pred_1\rangle$ and $\langle eoss, p, Pred_2\rangle$ are {\em consistently ordered} iff:
 
 \begin{equation}
-e^{*}_1 >_p e^{*}_2 \Leftrightarrow \langle eoss, p, pred_1\rangle >_p \langle eoss, p, pred_2\rangle
+e^{*}_1 >_p e^{*}_2 \Leftrightarrow \langle eoss, p, Pred_1\rangle >_p \langle eoss, p, Pred_2\rangle
 \end{equation}
 
 \subsubsection{Optimal traffic overhead}
@@ -151,15 +153,16 @@ A vital performance property of a substream management system is the amount of e
 The network overhead induced by a substream management system cannot be lower than $O(K|\Pi|)$. 
 \end{lemma}
 \begin{proof}
-When a substream management system detects the end of a substream, each stateful process should be informed about this. In a general case, e.g., for a state snapshotting problem, it should inform all processes. Hence, at least one network message (termination notification) must be received by each process for each substream.
+We assume one by one processing of substreams for them to be isolated (e.g. epochs). When a substream management system detects the termination of a substream, each stateful process should be informed about this. Hence, at least one network message (termination notification) must be received by each process for each substream.
 \end{proof}
 
-Despite this lemma's simplicity, we will further use it to figure out how far is some substream management system from this bound. We can also claim a solution as {\em optimal} if its extra traffic estimation is equal to the lower bound from the lemma. In the next sections, we demonstrate that it is possible to design a substream management system that achieves optimal network traffic overhead.
+Despite this lemma's simplicity, we will further use it to figure out how far is some substream management system from this bound. We can also claim a solution as {\em optimal} if its extra traffic estimation is equal to the lower bound from the lemma.
+% In the next sections, we demonstrate that it is possible to design a substream management system that achieves optimal network traffic overhead.
 
 \subsection{Punctuations framework}
 \label{fs-acker-punctuations}
 
-The main idea behind the punctuations framework is to inject special data elements $\mathcal{P}^{pred}$ into data stream one per substream. These elements, called punctuations, flows down the workflow as ordinary data elements. The injector promises that all elements after punctuations won't satisfy the predicate. Hence, the punctuation itself defines the ``border'' of a substream.
+The main idea behind the punctuations framework is to inject special data elements $\mathcal{P}^{pred}$ into data stream one per substream. These elements, called punctuations, flow down the workflow as ordinary data elements. The injector promises that all elements after punctuations won't satisfy the predicate. Hence, the punctuation itself defines the ``border'' of a substream.
 
 Figure~\ref{punctuations_scheme} illustrates the punctuations framework. Green elements indicate elements that belong to some substream, while red elements do not. As we can see, punctuations play the role of delimiter between the substream elements and all further items.
 
@@ -170,15 +173,16 @@ Figure~\ref{punctuations_scheme} illustrates the punctuations framework. Green e
   \label{punctuations_scheme}
 \end{figure}
 
-Processes within SPE do not apply user-defined operators to punctuations. Instead, each process $p$ propagates punctuation data element to all outgoing channels $c_{pq} \in O_p$ in messages $\mathcal{P}_{pq}^{pred}$ when it receives corresponding punctuations from all input channels $I_p$. If a process receives punctuations from all inputs, it is guaranteed that it will not receive elements that satisfy the predicate further due to FIFO network channels. 
+Processes within SPE do not apply user-defined operators to punctuations. Instead, each process $p$ propagates punctuation messages $\mathcal{P}_{pq}^{pred}$ to all outgoing channels $c_{pq} \in O_p$  when it receives corresponding punctuations from all input channels $I_p$.
+
 \begin{lemma}
 Generating event by following rule make it a soft bound of the substream $pred$:
 \begin{equation}
-\forall q \in I_p, \exists \mathcal{P}^{pred}_{qp} \in B_p, \forall M\in B : \neg pred(M) \wedge dst(M) \ne p
+\forall q \in I_p, \exists \mathcal{P}^{pred}_{qp} \in B_p, \forall M\in B : \neg pred(M) \vee dst(M) \ne p
 \end{equation}
 \end{lemma}
 \begin{proof}
-Using the definition of the soft bound we can use indirect proof. If there is a processing event from the substream, that happens after the generated event, there is a message that generates this event. This message could emerge from two sources: from the mailbox of a process, or from incoming channels. The mailbox does not contain such elements due to condition $pred(M) \wedge dst(M) = p$. Data sources guarantee that after a punctuation element they will provide the system with no substream elements. This condition allows us to say that the data element entered the system before punctuation. Because of broadcasting on each step, punctuations cover all possible processing paths of a data element, including the processing path of the particular message. This mean that the punctuation message and message with the data element were reordered along the processing path which contradicts with either mailbox controller order preservation, or the FIFO nature of communication channels.
+Using the definition of the soft bound we can use indirect proof. If there is a processing event from the substream, that happens after the generated event, there is a message $M^*$ that generates this event. This message could emerge from two sources: from the mailbox of a process, or from incoming channels. The mailbox does not contain such elements due to condition $pred(M) \wedge dst(M) = p$. Data sources guarantee that after a punctuation element they will provide the system with no substream elements. This condition allows us to say that the data element entered the system before punctuation. Because of broadcasting on each step, punctuations cover all possible processing paths of a data element, including the processing path of the particular message $M^*$. This mean that the punctuation message and data element from $M^*$ were reordered along the processing path which contradicts with either mailbox controller order preservation, or the FIFO nature of communication channels.
 \end{proof}
 
 To satisfy the firm bound guarantee, the mailbox controller should block processing of all incoming messages from a channel as soon as it receives a punctuation from this channel. In~\cite{Carbone:2017:SMA:3137765.3137777} such behavior is called {\em watermark (punctuation) alignment}. Formally we can rewrite this requirement in terms of event ordering:
@@ -194,8 +198,8 @@ A soft bound becomes firm if a process event order satisfy the following conditi
 Lets suppose that there is a message $M_{qp}$ of a next substream that was processed after the last element of the current substream, but before generation of bound event. This message either came from the channel $q$ before a punctuation from that channel generating a bound, or was processed before all channels delivers their punctuations. The first case could happen if $M_{qp}$ was reordered with the punctuation along the processing path and contradicts with FIFO processing logic (see previous proof for details). The second case is impossible because of processing limitations introduced by~\ref{eq:firm_condition}.
 \end{proof}
 
-While the punctuations approach is robust and easy-to-implement, it has several limitations. In the punctuations framework, the information about the ending of a substream is propagated using ordinary data elements via the data flow network channels. It implies that punctuations are not applicable for cyclic dataflows because a process that receives elements from a cyclic channel will never receive punctuations from this channel~\cite{carbone2018scalable}.
+While the punctuations approach is robust and easy-to-implement, it has several limitations. In the punctuations framework, the information about the substream termination is propagated using ordinary data elements via the same network channels. It implies that punctuations are not applicable for cyclic dataflows because a process that receives elements from a cyclic channel will never receive punctuations from this channel~\cite{carbone2018scalable}.
 
-The high network overhead forms another limitation. This method's amount of service traffic is $O(K|\Pi|^2)$, where $|\Pi|$ is the number of processes and $K$ is the number of substreams. As we can see, this estimation is far from the lower bound ($O(|\Pi|)$). It is quadratic in the number of processes, as each process should propagate punctuations to all output channels. 
+The high network overhead forms another limitation. This method's amount of service traffic is $O(K|\Pi|^2)$, where $|\Pi|$ is the number of processes and $K$ is the number of substreams. As we can see, this estimation is far from the lower bound ($O(K|\Pi|)$). It is quadratic in the number of processes, as each process should propagate punctuations to all output channels. 
 
 Substreams can be {\em fine-grained}: for example, each user session defines a substream. If there are a lot of small substreams, an inefficient substream management system can degrade the throughput of an SPE~\cite{Li:2008:OPN:1453856.1453890} or affect the performance of state checkpointing~\cite{zhang2021research}.

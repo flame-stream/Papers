@@ -132,7 +132,7 @@ In the next sections, we will explore our system in four experimental setups:
 
 % \end{description}
 
-In our study, we use a common synthetic workload shown in Fig.~\ref{fig:physical_graph}. All vertices pass an input element to the next operation. On each step, items are re-partitioned (round-robin). This shape of the physical execution graph allows us to measure the properties of the system with the growth of key switches in a workload. This setup does not induce possible overhead by heavy computations while covering many realistic scenarios. Graphs with few vertices (under 30) may fit almost any acyclic streaming pipeline~\cite{akidau2018streaming}. Longer instances of this workload correspond to flattened iterative dataflows such as PageRank or Connected Components~\cite{Murray:2013:NTD:2517349.2522738, xu2016efficient}. We reference this synthetic workload as RR-$N$, where $N$ is the number of steps.
+In our study, we use a common synthetic workload shown in Fig.~\ref{fig:physical_graph}. All vertices pass an input element to the next operation. On each step, items are re-partitioned (round-robin). This shape of the physical execution graph allows us to measure the properties of the system with the growth of key switches in a workload. This setup has no computational overhead while covering many realistic scenarios. Graphs with few vertices (under 30) may fit almost any acyclic streaming pipeline~\cite{akidau2018streaming}. Longer instances of this workload correspond to flattened iterative dataflows such as PageRank or Connected Components~\cite{Murray:2013:NTD:2517349.2522738, xu2016efficient}. We reference this synthetic workload as RR-$N$, where $N$ is the number of steps.
 
 To compare tracking mechanisms, we have to implement them on top of a single SPE. Otherwise, the performance could be affected by inequalities in serialization, network protocols, etc.  The difficulty here is that the tracking mechanism is usually a core part of SPE, and the implementation is often optimized for it. 
 
@@ -189,36 +189,36 @@ The notification latency of a punctuations-based technique depends on the graph 
 
 Such a significant difference in latency between the punctuations and \tracker\ is explained by the fact that each operator in a dataflow must wait for punctuations from all partitions of the previous operator to send it further. This behavior ensures that punctuations do not overtake ordinary records that guarantee the correctness of this approach.
 
-\subsubsection{Scalability of \tracker }
-% https://gist.github.com/faucct/546f5617b958349a125449926373b780
-\begin{figure*}[t!]
-    \begin{subfigure}[b]{0.30\textwidth}
-            \includegraphics[width=0.99\textwidth]{pics/scalability_01x.pdf}
-            \caption{1x reports}
-            \label{1x_acks}
-    \end{subfigure}
-    \hspace{5mm}
-    \begin{subfigure}[b]{0.30\textwidth}
-            \includegraphics[width=0.99\textwidth]{pics/scalability_05x.pdf}
-            \caption{5x reports}
-            \label{5x_acks}
-    \end{subfigure}
-    \hspace{5mm}
-    \begin{subfigure}[b]{0.30\textwidth}
-            \includegraphics[width=0.99\textwidth]{pics/scalability_09x.pdf}
-            \caption{9x reports}
-            \label{9x_acks}
-    \end{subfigure}
-    \caption{\tracker\ scalability}
-    \label{notification_scalability}
-\end{figure*}
-This section demonstrates that the distributed version of the tracking agent allows the substream management mechanism to scale. We measure the median notification latency depending on the rate of input records. The rapid growth of median latency indicates agent overloading. Input rate that corresponds to the point where latency starts to grow indicates a {\em sustainable throughput} of the \tracker. 
+% \subsubsection{Scalability of \tracker }
+% % https://gist.github.com/faucct/546f5617b958349a125449926373b780
+% \begin{figure*}[t!]
+%     \begin{subfigure}[b]{0.30\textwidth}
+%             \includegraphics[width=0.99\textwidth]{pics/scalability_01x.pdf}
+%             \caption{1x reports}
+%             \label{1x_acks}
+%     \end{subfigure}
+%     \hspace{5mm}
+%     \begin{subfigure}[b]{0.30\textwidth}
+%             \includegraphics[width=0.99\textwidth]{pics/scalability_05x.pdf}
+%             \caption{5x reports}
+%             \label{5x_acks}
+%     \end{subfigure}
+%     \hspace{5mm}
+%     \begin{subfigure}[b]{0.30\textwidth}
+%             \includegraphics[width=0.99\textwidth]{pics/scalability_09x.pdf}
+%             \caption{9x reports}
+%             \label{9x_acks}
+%     \end{subfigure}
+%     \caption{\tracker\ scalability}
+%     \label{notification_scalability}
+% \end{figure*}
+% This section demonstrates that the distributed version of the tracking agent allows the substream management mechanism to scale. We measure the median notification latency depending on the rate of input records. The rapid growth of median latency indicates agent overloading. Input rate that corresponds to the point where latency starts to grow indicates a {\em sustainable throughput} of the \tracker. 
 
-To simulate an additional load on the tracking agent, staying on a budget of 20 machines, we artificially increased the number of sent service messages by 5 and 9 times. We approximate the sustainable throughput by multiplying the extra service messages ratio by the obtained throughput due to the direct dependency between the input and service messages rates. This trick allows us to estimate agent throughput in the number of input data items per second rate without  SPE overloading. Figure~\ref{notification_scalability} demonstrates the results of this experiment.
+% To simulate an additional load on the tracking agent, staying on a budget of 20 machines, we artificially increased the number of sent service messages by 5 and 9 times. We approximate the sustainable throughput by multiplying the extra service messages ratio by the obtained throughput due to the direct dependency between the input and service messages rates. This trick allows us to estimate agent throughput in the number of input data items per second rate without  SPE overloading. Figure~\ref{notification_scalability} demonstrates the results of this experiment.
 
-Without the extra load, distributed tracking agent provides results similar to a centralized setup, as Figure~\ref{1x_acks} indicates. Note, SPE overloading limits the throughput of the agent because it starts to delay service messages sending. Figure~\ref{5x_acks} demonstrates that with 5x simulated extra load, distributed \tracker\ can sustain $\sim 27K$ requests (items) per second input rate, while centralized provides only $\sim 20K$ RPS throughput. Figure~\ref{9x_acks} shows that with the increase of the extra load to 9x, distributed \tracker\ provides almost 2x throughput increase: $\sim 40K$ RPS against $\sim 22K$ RPS. 
+% Without the extra load, distributed tracking agent provides results similar to a centralized setup, as Figure~\ref{1x_acks} indicates. Note, SPE overloading limits the throughput of the agent because it starts to delay service messages sending. Figure~\ref{5x_acks} demonstrates that with 5x simulated extra load, distributed \tracker\ can sustain $\sim 27K$ requests (items) per second input rate, while centralized provides only $\sim 20K$ RPS throughput. Figure~\ref{9x_acks} shows that with the increase of the extra load to 9x, distributed \tracker\ provides almost 2x throughput increase: $\sim 40K$ RPS against $\sim 22K$ RPS. 
 
-The experiments demonstrate that even the centralized tracking agent can sustain a high input rate within 20 computational nodes. Besides, the distributed version of the agent can make the tracking scalable in larger setups.
+% The experiments demonstrate that even the centralized tracking agent can sustain a high input rate within 20 computational nodes. Besides, the distributed version of the agent can make the tracking scalable in larger setups.
 
 \subsection{End-to-end latency}
 
