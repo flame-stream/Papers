@@ -317,7 +317,7 @@ Substream management can be used to solve this task because we can consider elem
 
 In the experimental setting, we solve a depth search problem for a graph of Twitter users. This task is relevant for social recommendation systems and requires both scalability and freshness of the results due to the dynamic nature of the graph and the number of nodes. An SPE is a suitable candidate host for such a solution due to the low latency (freshness) requirement. 
 
-Within our model, the user is a key, and a set of her subscribers is a state associated with this key. A stream of queries for user neighborhoods is issued to the system. The resulting set of unique users is expected in return. An execution graph for the depth search problem is cyclic, so \tracker\ fits this task. 
+Within this model, the user is the key, and the set of her subscribers is the state associated with the key. A stream of queries of user neighborhoods is issued to the system. A resulting set of unique users is expected in return. The execution graph for the depth search problem is cyclic, so \tracker\ suits this task. 
 
 We compare \textit{distributed garbage collection} approach with LRU caching for this task. The keys are removed from the hot set as soon as none of the currently processed messages contain a reference for it. We used a ratio of cache-misses during processing as a measure of the effectiveness of the memory management mechanism. 
 
