@@ -30,7 +30,7 @@ SELECT P.name, P.city, P.state,
 \end{lstlisting}
 
 This query selects all the people who have joined the auction as both bidders and sellers. 
-For each such person their name, city and state of residence are selected, as well as the price of each of their bids and the name of each item they are selling at the auction. 
+For each such person, their name, city, and state of residence are selected, as well as the price of each of their bids and the name of each item they are selling at the auction. 
 
 This query contains two join operators, which means that there are at least two ways to execute this query.
 
@@ -103,4 +103,3 @@ Due to the imprecision of data statistics, it is well known that optimal in term
 We use a different kind of adaptivity in our approach: the statistics collected during previous query executions are used to re-optimize the query for subsequent executions. As soon as the new plan changes, the query execution on subsequent windows is switched to the new plan. 
 
 This, as well as other specifics of SPEs, presents particular challenges in implementing global optimization of streaming queries, which we explore in the following section.
-

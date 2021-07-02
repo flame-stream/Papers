@@ -1,9 +1,9 @@
 Distributed stream processing is widely adopted for real-time data analysis and management. SQL is becoming a common language for robust streaming analysis due to the introduction of time-varying relations and event time semantics. 
 However, query optimization in state-of-the-art stream processing engines (SPEs) remains limited: runtime adjustments to execution plans are not applied. 
-This fact restricts the optimization capabilities because SPEs lack the statistical data properties before query execution begins. Moreover, streaming queries are often long-lived, and these properties can  change over time. 
+This fact restricts the optimization capabilities because SPEs lack the statistical data properties before query execution begins. Moreover, streaming queries are often long-lived, and these properties can change over time. 
 
-Adaptive optimization, used in databases for queries with insufficient or unknown  data statistics, can fit the streaming scenario. 
-In this work, we explore the main challenges that SPEs face during the adjustment of adaptive optimization such as predicting statistical properties of streams and execution graph migration.
+Adaptive optimization, used in databases for queries with insufficient or unknown data statistics, can fit the streaming scenario. 
+In this work, we explore the main challenges that SPEs face during the adjustment of adaptive optimization, such as predicting statistical properties of streams and execution graph migration.
 We demonstrate potential performance gains of our approach within an extension of the {\em NEXMark} streaming benchmark and outline our further work.
 
 % \keywords{First keyword  \and Second keyword \and Another keyword.}

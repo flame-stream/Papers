@@ -7,7 +7,7 @@ For our experiments, we used the same query that was described in Section \ref{s
 
 First, we execute this query using the plan in which \texttt{Auction} and \texttt{Person} are joined first, and the result is joined with \texttt{Bid}; then, we use the plan in which \texttt{Person} and \texttt{Bid} are joined first (see Section  \ref{sec:fs-optimization-problem-statement}). For each run, we use a different $|Person|:|Auction|:|Bid|$ ratio.
 
-To evaluate performance, we measure latency and throughput for each window. For a join result, we consider \textit{latency} to be the difference between the maximum arrival time of each of the rows making up the join result and the output time of the resulting row; then, we select the maximum out of the latency values of all the rows in each window. The throughput that we measure is \textit{sustainable throughput}, i.e. the maximum events arrival rate that a streaming system can handle without the continuous buildup of latency.
+To evaluate performance, we measure latency and throughput for each window. For a join result, we consider \textit{latency} to be the difference between the maximum arrival time of each of the rows making up the join result and the output time of the resulting row; then, we select the maximum out of the latency values of all the rows in each window. The throughput that we measure is \textit{sustainable throughput}, i.e., the maximum events arrival rate that a streaming system can handle without the continuous buildup of latency.
 % sustainable throughput is the maximal rate at which the latency does not start increasing catastrophically
 % benchmarking distributed processing systems <-- that's the article from which we use the definition
 
