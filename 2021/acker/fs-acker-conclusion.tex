@@ -14,7 +14,7 @@
 
 % We conducted a series of experiments and compared the proposed method with a baseline approach based on the markers mechanism used in Apache Flink. We demonstrated that both centralized and decentralized implementations of \tracker\ provide lower notification latency that does not considerably degrade with an increase of a logical graph size or a cluster size. Experiments also showed that \tracker\ has lower throughput overhead in case of fine-grained tracking.
 
-In this work, we formalized the problem of substreams management. We designed and implemented a new substreams management technique called \tracker\ that does not require injecting service elements directly into the stream. Instead, we mark all data elements with ordered labels and use the distributed agent, which notifies operators that a substream ends since receiving an input element with the specified label. Our approach has the following features:
+In this work, we formalized the problem of substreams management. We designed and implemented a new substreams management technique called \tracker\ that does not require injecting service elements directly into the stream. Instead, we mark all data elements with ordered labels and use the distributed agent, which notifies operators that a substream ends. Our approach has the following features:
 
 \begin{itemize}
      \item {\bf Cyclic dataflows support:} the method is suitable for problems that require non-linear executions: graph traversing, iterative algorithms, etc. We evaluated this feature within the real-life problem.
@@ -24,7 +24,7 @@ In this work, we formalized the problem of substreams management. We designed an
 \end{itemize}
 
 
-These properties of the \tracker\ framework create a possibility to apply substream management in new  applications; as indicated in the experimental section, this includes smart caching of operator state and latency-conscious windowed joins.
+These properties of the \tracker\ framework create a possibility to apply substream management in new applications; as indicated in the experimental section, this includes smart caching of operator state and latency-conscious windowed joins.
 
 
 % both centralized and decentralized implementations of \tracker\ provide lower notification latency that does not considerably degrade with an increase of a logical graph size or a cluster size. Experiments also showed that \tracker\ has lower throughput overhead in case of fine-grained tracking.

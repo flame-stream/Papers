@@ -12,7 +12,7 @@ To track the messages path through segments, the agent receives SND/RCV reports 
 \caption{\tracker\ table: a general example}
   \label{tracker-table-simple}
   \centering
-  \small
+  \footnotesize
   \begin{tabular}{|c|c|c|>{\bfseries}c|} 
     \hline
     Notified & Predicate & Segment & Substream elements  \\ \hline \hline
@@ -38,8 +38,6 @@ There are several possible methods to build the indicator that the segment conta
 
 Each report is labeled by a random number $X$, and this number is the same for the send action and the corresponding receive action. This trick makes it easy to check if the segment contains a full set of $SND$/$RCV$ pairs for a message: XOR operation for all numbers received from the chain will turn into 0. The result of the XOR operation can accidentally become zero, but the probability of this event is controlled by the length of the random number $X$ so that it can be neglected in practice~\cite{apache:storm:acker}.
 
-Figure~\ref{fig:tracker-reports} illustrates the reports with random numbers. The elements satisfying a predicate $h(x)$ flow through a dataflow. The first process generates an output and sends the SND report with $X=5$. The corresponding RCV report by the second process also has $X=5$ because this process receives the element from the first one. The second process sends a new element that satisfies $h(x)$ further, and the new SND report with $X=12$ is produced. The third operator receives this element and also produces an RCV report with $X=12$. If there are no more elements such that $h(x)=1$, then we can send NEOSS for the substream defined by $h(x)$ ends because {\em 5 XOR 5 XOR 12 XOR 12 = 0}. 
-
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.3\textwidth]{pics/tracker-segments-example.pdf}
@@ -47,15 +45,15 @@ Figure~\ref{fig:tracker-reports} illustrates the reports with random numbers. Th
   \label{fig:tracker-reports}
 \end{figure}
 
-Table~\ref{tracker-table-xor} illustrates the actual \tracker\ table for the mentioned technique.
+Figure~\ref{fig:tracker-reports} illustrates the reports with random numbers. The elements satisfying a predicate $h(x)$ flow through a dataflow. The first process generates an output and sends the SND report with $X=5$. The corresponding RCV report by the second process also has $X=5$ because this process receives the element from the first one. The second process sends a new element that satisfies $h(x)$ further, and the new SND report with $X=12$ is produced. The third operator receives this element and also produces an RCV report with $X=12$. If there are no more elements such that $h(x)=1$, then we can send NEOSS for the substream defined by $h(x)$ ends because {\em 5 XOR 5 XOR 12 XOR 12 = 0}. Table~\ref{tracker-table-xor} illustrates the actual \tracker\ table for the mentioned technique.
 
 % All reports from processes are grouped by the satisfying predicate and the segment. Random numbers from these reports are XORed into the result shown in columns {\em Segment XOR} and {\em XOR}. If the XOR value is equal to 0, then the tracking agent can send the NEOSS, providing the soft bound guarantee for the corresponding predicate.
 
 \begin{table}[htbp]
-\caption{\tracker\ table: an example with XORing technique}
+\caption{\tracker\ table: XORing technique example}
   \label{tracker-table-xor}
   \centering
-  \small
+  \footnotesize
   \begin{tabular}{|c|c|c|>{\bfseries}c|>{\bfseries}c|} 
     \hline
     Notified & Predicate & Segment & Segment XOR & XOR  \\ \hline \hline
@@ -79,10 +77,10 @@ If the order of NEOSS is consistent, the order of termination events will be con
 Table~\ref{tracker-table-oder} illustrates the \tracker\ table in case of consistent NEOSS order. Column {\em min t(x)} indicates the minimal $t(x)$ among the elements that satisfy the corresponding predicate. The tracking agent sends notifications for the substream if the $XOR$ value is 0 and all substreams that contain elements with less {\em min t(x)} have finished (notifications have been produced). Therefore, NEOSS for the substream defined by the predicate $h(x)$ is not sent until the NEOSS for the predicate $q(x)$ is generated. 
 
 \begin{table}[htbp]
-\caption{\tracker\ table: an example with consistent NEOSS order}
+\caption{\tracker\ table: consistent NEOSS order example}
   \label{tracker-table-oder}
   \centering
-  \small
+  \footnotesize
   \begin{tabular}{|c|c|>{\bfseries}c|c|} 
     \hline
     Notified & Predicate & min t(x) &  XOR  \\ \hline \hline
