@@ -1,5 +1,5 @@
 Cost-based optimization requires statistical information on data in order to calculate cost function values for each plan. However, upon starting a streaming query execution, no information about the data, such as its arrival rate, is available. 
-Therefore, to properly apply cost-based optimization to streaming SQL queries, it is necessary to collect data statistics for query execution. 
+Therefore, to properly apply cost-based optimization to streaming SQL queries, it is necessary to collect data statistics over the course of query execution. 
 Moreover, since we possess no definitive knowledge about the arriving data, we need to predict statistics for each next window based on statistics for previous windows to utilize an optimal plan for the upcoming windows. To this end, we identify two challenges in using statistics for streaming query optimization:
 
 \begin{itemize}

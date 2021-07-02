@@ -34,7 +34,7 @@ For each such person, their name, city, and state of residence are selected, as 
 
 This query contains two join operators, which means that there are at least two ways to execute this query.
 
-One of the logical   plans (with substituted variable names omitted; using Apache Beam transforms as operators) for our example query looks like  follows: 
+One of the logical plans (with substituted variable names omitted; using Apache Beam transforms as operators) for our example query is as follows: 
 
 \begin{lstlisting}[
            showspaces=false,
@@ -73,7 +73,7 @@ BeamCalcRel(name, city, state, price, itemName)
       BeamIOSourceRel(table=Auction)
 \end{lstlisting}
 
-An alternative is  the following physical plan for this query, with the two join operators in a different order:
+An alternative is the following physical plan for this query, with the two join operators in a different order:
 
 \begin{lstlisting}[
            showspaces=false,
@@ -98,7 +98,7 @@ Cost-based optimization requires statistical knowledge about the data, such as t
 In our example, the first plan, where \texttt{Person} and \texttt{Bid} are joined first, and then the result is joined with \texttt{Auction}, would be preferable if the arrival rate of auctions significantly exceeded the arrival rate of bids, meaning that while many items have been getting put up for Auction, not many sellers have been making bids. 
 If, however, after some time, sellers started making many bids, the second execution plan would have a lesser cost value. Thus, as data statistics change for the query execution, a previously optimal plan might become inefficient. 
 
-Due to the imprecision of data statistics, it is well known that optimal in terms of cost function plan is not necessarily optimal in actual resource consumption. To address this issue, several techniques known as adaptive query processing were developed~\cite{deshpande2007adaptive}. Under these techniques, the execution is paused, and the query is re-optimized with more precise statistics, and then execution is resumed with the new plan. As the repeated optimization consumes a certain amount of resources itself, the adaptive optimization makes sense for relatively long-running queries and is hardly applicable in data streams. 
+Due to the imprecision of data statistics, it is well-known that a plan optimal in terms of cost function is not necessarily optimal in actual resource consumption. To address this issue, several techniques known as adaptive query processing were developed~\cite{deshpande2007adaptive}. Under these techniques, the execution is paused, and the query is re-optimized with more precise statistics, and then execution is resumed with the new plan. As the repeated optimization consumes a certain amount of resources itself, adaptive optimization makes sense for relatively long-running queries and is hardly applicable in data streams. 
 
 We use a different kind of adaptivity in our approach: the statistics collected during previous query executions are used to re-optimize the query for subsequent executions. As soon as the new plan changes, the query execution on subsequent windows is switched to the new plan. 
 
