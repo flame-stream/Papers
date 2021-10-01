@@ -203,4 +203,4 @@ While the punctuations approach is robust and easy-to-implement, it has several 
 
 The high network overhead forms another limitation. This method's amount of service traffic is $O(K|\Pi|^2)$, where $|\Pi|$ is the number of processes and $K$ is the number of substreams. As we can see, this estimation is far from the lower bound ($O(K|\Pi|)$). It is quadratic in the number of processes, as each process should propagate punctuations to all output channels. 
 
-Substreams can be {\em fine-grained}: for example, each user session defines a substream. If there are a lot of small substreams, an inefficient substream management system can degrade the throughput of an SPE~\cite{Li:2008:OPN:1453856.1453890} or affect the performance of state checkpointing~\cite{zhang2021research}.
+Substreams can be {\em fine-grained}: for example, each user session defines a substream. If there are a lot of small substreams, an inefficient substream management system can degrade the latency~\cite{DBLP:journals/pvldb/BegoliACHKKMS21} and the throughput of an SPE~\cite{Li:2008:OPN:1453856.1453890} or affect the performance of state checkpointing~\cite{zhang2021research}.
