@@ -103,11 +103,11 @@
     \begin{abstract}
         Fault tolerance properties for distributed stream processing engines (DSPE) are declared in terms of delivery guarantees: at-most-once, at-least-once, and exactly-once.
         Despite the seeming simplicity of these notions, they capture network protocols guarantees as well as state recovery in case of failures.
-        The absence of delivery guarantees formal definitions leads to various DSPEs call the same name various properties.
+        The absence of delivery guarantees formal definitions leads to the usage of the same name for various properties.
         In this paper, we introduce a formal framework that allows us to define streaming guarantees more regularly.
-        Using the formal definitions, we demonstrate an anomaly that may arise if an execution graph contains a non-commutative operation.
-        We show how this anomaly can lead to inconsistent outputs in state-of-the-art DSPE Apache Flink.
-        We also discuss and formalize the ways to eliminate that are used in other DSPEs.
+        Using the formal definitions, we demonstrate an anomaly in execution results that may arise if an execution graph contains a non-commutative operation.
+        We show how the anomaly can lead to inconsistent outputs in state-of-the-art DSPE Apache Flink.
+        We also discuss and formalize the ways to eliminate the anomaly applied in other DSPEs.
     \end{abstract}
 
 % \begin{CCSXML}
