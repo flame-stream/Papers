@@ -1,0 +1,169 @@
+\documentclass[sigconf]{acmart}
+
+
+\usepackage{graphicx}
+\usepackage{algorithm} % for algorithms
+\usepackage{algpseudocode}
+\usepackage{booktabs} % For formal tables
+\usepackage{amsthm} % For claims
+\usepackage{bbm} % indicator function
+\usepackage{acmcopyright}
+
+% \usepackage{subfig}
+\usepackage{subcaption}
+
+% listings
+\usepackage{xcolor,listings}
+\usepackage{textcomp}
+\lstset{upquote=true}
+
+% plots
+\usepackage{pgfplots}
+
+% table
+\usepackage[flushleft]{threeparttable} % http://ctan.org/pkg/threeparttable
+\usepackage{booktabs,caption}
+
+\theoremstyle{remark}
+
+\settopmatter{printacmref=false, printccs=true, printfolios=true}
+\pagestyle{empty} % removes running headers
+
+\newcommand{\PicScale}{0.5}
+\newcommand {\FlameStream} {FlameStream}
+\begin{document}
+
+% \copyrightyear{2019} 
+% \acmYear{2019} 
+% \setcopyright{rightsretained} 
+% \acmConference[DEBS '19]{DEBS '19: The 13th ACM International Conference on Distributed and Event-based Systems}{June 24--28, 2019}{Darmstadt, Germany}
+% \acmBooktitle{DEBS '19: The 13th ACM International Conference on Distributed and Event-based Systems (DEBS '19), June 24--28, 2019, Darmstadt, Germany}\acmDOI{10.1145/3328905.3332514}
+% \acmISBN{978-1-4503-6794-3/19/06}
+
+    \title {Anomalies in delivery guarantees for distributed stream processing}
+
+% \author{Darya Sharkova}
+% \authornote{Both authors contributed equally to this research.}
+% \affiliation{%
+%   \institution{HSE University}
+%   \city{Saint Petersburg}
+%   \country{Russia}
+% }
+% \email{sharkovadarya@gmail.com}
+
+% \author{Alexander Chernokoz}
+% \authornotemark[1]
+% \affiliation{%
+%   \institution{ITMO University}
+%   \city{Saint Petersburg}
+%   \country{Russia}
+% }
+% \email{chernokoz@hotmail.com}
+
+% \author{Artem Trofimov}
+% \affiliation{%
+%   \institution{Yandex}
+%   \city{Saint Petersburg}
+%   \country{Russia}
+% }
+% \email{trofimov9artem@gmail.com}
+
+% \author{Nikita Sokolov}
+% \affiliation{%
+%   \institution{Yandex}
+%   \city{Saint Petersburg}
+%   \country{Russia}
+% }
+% \email{faucct@gmail.com}
+
+% \author{Ekaterina Gorshkova}
+% \affiliation{%
+%   \institution{JResearch Software}
+%   \city{Prague}
+%   \country{Czech Republic}
+% }
+% \email{cathy@jresearch.org}
+
+% \author{Igor Kuralenok}
+% \affiliation{%
+%   \institution{Yandex}
+%   \city{Saint Petersburg}
+%   \country{Russia}
+% }
+% \email{ikuralenok@gmail.com}
+
+% \author{Boris Novikov}
+% \affiliation{%
+%   \institution{HSE University}
+%   \city{Saint Petersburg}
+%   \country{Russia}
+% }
+% \email{borisnov@acm.org}
+
+    \begin{abstract}
+        Fault tolerance properties for distributed stream processing engines (DSPE) are declared in terms of delivery guarantees: at-most-once, at-least-once, and exactly-once.
+        Despite the seeming simplicity of these notions, they capture network protocols guarantees as well as state recovery in case of failures.
+        The absence of delivery guarantees formal definitions leads to various DSPEs call the same name various properties.
+        In this paper, we introduce a formal framework that allows us to define streaming guarantees more regularly.
+        Using the formal definitions, we demonstrate an anomaly that may arise if an execution graph contains a non-commutative operation.
+        We show how this anomaly can lead to inconsistent outputs in state-of-the-art DSPE Apache Flink.
+        We also discuss and formalize the ways to eliminate that are used in other DSPEs.
+    \end{abstract}
+
+% \begin{CCSXML}
+% \begin{CCSXML}
+% \begin{CCSXML}
+% <ccs2012>
+% <concept>
+% <concept_id>10002951.10002952.10002953.10010820.10003208</concept_id>
+% <concept_desc>Information systems~Data streams</concept_desc>
+% <concept_significance>500</concept_significance>
+% </concept>
+% <concept>
+% <concept_id>10002951.10003317.10003347.10003356</concept_id>
+% <concept_desc>Information systems~Clustering and classification</concept_desc>
+% <concept_significance>500</concept_significance>
+% </concept>
+% <concept>
+% <concept_id>10002951.10003227.10003351.10003446</concept_id>
+% <concept_desc>Information systems~Data stream mining</concept_desc>
+% <concept_significance>300</concept_significance>
+% </concept>
+% </ccs2012>
+% \end{CCSXML}
+
+% \ccsdesc[500]{Information systems~Data streams}
+% \ccsdesc[500]{Information systems~Clustering and classification}
+% \ccsdesc[300]{Information systems~Data stream mining}
+
+% \keywords{Data streams, text classification, reproducibility, exactly once}
+
+    \maketitle
+
+    \thispagestyle{empty}
+
+
+    \section{Introduction}
+%\input{fs-optimization-introduction}
+
+
+    \section{Problem statement}
+%\input{fs-optimization-problem-statement}
+
+
+    \section{Challenges}
+%\input{fs-optimization-challenges}
+
+    \section {Preliminary experiments}
+%\input{fs-optimization-experiments}
+
+
+    \section{Conclusion}
+%\input{fs-optimization-conclusion}
+
+    \bibliographystyle{ACM-Reference-Format}
+    \bibliography{../../bibliography/flame-stream}
+
+\end {document}
+
+\endinput
