@@ -1,6 +1,6 @@
 \label{fs-acker-tracker}
 
-This section introduces a novel substream management framework called \tracker\ that is suitable for cyclic dataflows and achieves the lower bound of network overhead. We also demonstrate that it provides all lifespan event properties defined in the previous section.
+% This section introduces a novel substream management framework called \tracker\ that is suitable for cyclic dataflows and achieves the lower bound of network overhead. We also demonstrate that it provides all lifespan event properties defined in the previous section.
 
 A substream management system should inform all processes that a substream ends, so the amount of extra traffic cannot be lower than $O(K||\Pi||)$. To achieve this lower bound, one can apply an additional agent (process) that receives information about substreams from processes and sends back information about terminated substreams. 
 
@@ -12,7 +12,7 @@ In this case, the fact that substream terminates is propagated through this agen
     \item Notifies dataflow processes when the substream ends {\em for them}, i.e., when they stop receiving elements which satisfy some predicate.
 \end{enumerate}
 
-The general scheme of the \tracker\ mechanism is shown in Figure~\ref{tracker_scheme}. A special (possibly distributed) tracking agent receives signals from data sources, fetches information about in-flight elements, and then decides where to send {\em end-of-substream notifications} (NEOSS).
+The general scheme of the \tracker\ mechanism is shown in Figure~\ref{tracker_scheme}. A special tracking agent receives signals from data sources, fetches information about in-flight elements, and then decides where to send {\em end-of-substream notifications} (NEOSS).
 
 This substream notifications distribution can be more efficient in terms of network traffic but provides new challenges. Before diving into implementation details, we should answer the following questions regarding \tracker\ framework:
 
@@ -84,4 +84,4 @@ A vital question here is how to implement the assignment of ordered labels $t(m)
     \item {\bf Low latency and impact on SPE throughput.} Punctuations can be stuck by other data elements if they are sent with some delay after the last substream element. In \tracker, service traffic goes through other network channels that can reduce latency between actual substream termination and the corresponding event. Together with the low amount of service traffic, this scheme does not significantly reduce the throughput of an SPE, as we show in Section~\ref{fs-experiments}.
 \end{enumerate}
 
-At the same time, \tracker\ can provide both soft and firm bound guarantees along with the consistent order of notifications. A limitation of the \tracker\ framework is a potentially more complex implementation. The details of the straightforward implementation of the \tracker\ framework are discussed in the next section.
+% At the same time, \tracker\ can provide both soft and firm bound guarantees along with the consistent order of notifications. A limitation of the \tracker\ framework is a potentially more complex implementation. The details of the straightforward implementation of the \tracker\ framework are discussed in the next section.

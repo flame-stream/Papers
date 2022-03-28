@@ -1,6 +1,6 @@
 \label {fs-acker-impl}
 
-In the previous section, we introduced a general schema of the \tracker\ framework. In this section, we deepen into its implementation details. We describe and explore the properties of the tracking agent that produces the substream termination notifications (NEOSS). After that, the technique to achieve consistent termination events order is detailed. Distributed implementation of the tracking agent concludes this part.
+In the previous section, we introduced a general schema of the \tracker\ framework. In this section, we deepen into its implementation details. We describe and explore the properties of the tracking agent that produces the substream termination notifications (NEOSS). After that, the technique to achieve consistent termination events order is detailed.
 
 \subsection{Bound guarantees}
 
@@ -106,16 +106,16 @@ This fact allows us to define $t(x)$ such that $t(x) = [s(x) / \delta]$. This wa
     \item Termination events are generated according to the order of NEOSS arriving
 \end{enumerate}
 
-\subsection{Distributed tracking agent}
+% \subsection{Distributed tracking agent}
 
-The tracking agent accumulates all the service traffic from the entire system. To ensure scalability, we introduce a distributed version of the tracking agent.
+% The tracking agent accumulates all the service traffic from the entire system. To ensure scalability, we introduce a distributed version of the tracking agent.
 
-A straightforward approach is to partition predicates between the shards of the tracking agent. For example, one shard can handle all reports for the predicate $h(x)$, while the second all reports for the predicate $q(x)$. Note that the network traffic complexity remains the same $O(K|\Pi|)$ because each process sends each report to only a single shard depending on the predicate.
+% A straightforward approach is to partition predicates between the shards of the tracking agent. For example, one shard can handle all reports for the predicate $h(x)$, while the second all reports for the predicate $q(x)$. Note that the network traffic complexity remains the same $O(K|\Pi|)$ because each process sends each report to only a single shard depending on the predicate.
 
-The main problem regarding this approach is to enforce the consistent NEOSS order. Centralized agent sends NEOSS through the FIFO network channels, so the NEOSS elements for the same processes cannot be reordered. There can be a race between NEOSS from various shards due to asynchronous network channels in the distributed case.
+% The main problem regarding this approach is to enforce the consistent NEOSS order. Centralized agent sends NEOSS through the FIFO network channels, so the NEOSS elements for the same processes cannot be reordered. There can be a race between NEOSS from various shards due to asynchronous network channels in the distributed case.
 
-A simple solution for this issue is on each NEOSS from a shard to wait for NEOSS from all other shards but with greater $t(x)$. For example, if a process receives NEOSS for some predicate with $\min t(x) = 3$, then it needs to wait until receiving NEOSS with $t(x) > 3$ from all other shards to produce the termination event. However, this method can increase the latency between the substream end and the termination event.
+% A simple solution for this issue is on each NEOSS from a shard to wait for NEOSS from all other shards but with greater $t(x)$. For example, if a process receives NEOSS for some predicate with $\min t(x) = 3$, then it needs to wait until receiving NEOSS with $t(x) > 3$ from all other shards to produce the termination event. However, this method can increase the latency between the substream end and the termination event.
 
-We employ the vector clock algorithm to mitigate latency overhead. Each process either periodically sends its system time to all tracking agent shards. In turn, tracking agents also periodically sends the minimal vector among the in-flight elements. Therefore, if a process receives NEOSS for some predicate with $\min t(x) = 3, vec=[0,4,1]$, then it needs to wait until receiving of vectors component-wise greater than $[0,4,1]$ from all shards to produce the termination event.
+% We employ the vector clock algorithm to mitigate latency overhead. Each process either periodically sends its system time to all tracking agent shards. In turn, tracking agents also periodically sends the minimal vector among the in-flight elements. Therefore, if a process receives NEOSS for some predicate with $\min t(x) = 3, vec=[0,4,1]$, then it needs to wait until receiving of vectors component-wise greater than $[0,4,1]$ from all shards to produce the termination event.
 
-The vector clock introduction increases the service traffic but allows to eliminate bottleneck from the system. The service traffic complexity remains the same, but the $O$ factor increases. In the experimental section, we will study how significant is this increase.
+% The vector clock introduction increases the service traffic but allows to eliminate bottleneck from the system. The service traffic complexity remains the same, but the $O$ factor increases. In the experimental section, we will study how significant is this increase.
