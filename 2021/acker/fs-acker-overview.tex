@@ -24,13 +24,6 @@ This substream notifications distribution can be more efficient in terms of netw
 
 {\bf Q4 What functional and performance properties does the \tracker\ have?} \tracker\ framework is designed to eliminate the limitations of punctuations framework. We should demonstrate that it is suitable for cyclic dataflows as well as can provide lower network overhead.
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.20\textwidth]{pics/tracker-scheme.pdf}
-  \caption{\tracker\ framework: tracking agent aggregates information about substreams and produces NEOSS}
-  \label{tracker_scheme}
-\end{figure}
-
 \subsection{Answering Q1: How to monitor in-flight elements?}
 To start tracking of a data element the system sends an $SND(pred, M, \emptyset)$ notification to the tracker. Then each process sends the following report messages on each $\langle proc, p, M, M' \rangle$ event:
 \begin{enumerate}
