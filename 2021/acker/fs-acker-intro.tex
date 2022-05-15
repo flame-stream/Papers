@@ -1,21 +1,8 @@
 \label {fs-acker-intro}
 
-% Distributed stream processing engines (SPEs), such as Flink~\cite{carbone2015apache}, Heron~\cite{Kulkarni:2015:THS:2723372.2742788}, or MillWheel~\cite{Akidau:2013:MFS:2536222.2536229}, aim to handle potentially unbounded sequences of data elements. These systems receive input data elements one-by-one, process them, update the internal state, and eventually release results. 
-
 The processing of a data stream without insights on properties of its data elements can be challenging. For example, it may be unclear when a system can prune outdated keyed state~\cite{Tucker:2003:EPS:776752.776780}, release windowed aggregations~\cite{Begoli:2019:OSR:3299869.3314040}, or create a state snapshot for an epoch~\cite{Carbone:2017:SMA:3137765.3137777}.
 
 Each of these scenarios can be considered as a special case of {\em substream management problem}. This problem is to monitor substreams emergence and termination. More formally, a substream is a part of the stream such that all its elements satisfy some predicate. For example, in the case of state pruning, the predicate is {\em [a data element has a key $K$]}, for time window aggregations, the predicate is {\em [a data element is generated with timestamp less than $T$]}, and for state snapshotting it is {\em [a data element belongs to the epoch $E$]}.
-
-
-% The processing of unbounded data sequences is challenging. The volume of the system state may become unlimited, and SPE needs to optimize state access policy to balance memory consumption and latency of requests. To solve these and many other challenges of stream processing, infinite streams are often split into finite {\em substreams}, that are assumed isolated from each other. This trick allows us to convert a single task on an infinite stream of messages to a stream of tasks on a limited number of messages.
-
-% \noindent {\bf State pruning}. Most SPEs group state by keys that are also used for data partitioning. For example, the task is to aggregate news into stories assigning every news item a story tag. In this case, a story tag will be the key; the properties of the story that are needed for tagging procedure will be the state. The number of stories is not limited, and to prevent overflow~\cite{Tucker:2003:EPS:776752.776780}, SPE can remove state for outdated keys, e.g., for completed stories. In this case, we can consider the stream as a mixture of substreams: one per story.  
-
-% \noindent {\bf Windowed aggregations}. One way to adapt a relational query to a streaming environment is to run it on a window of data elements. This way, an initial stream will be converted into a stream of query results for each window instance. This method is widely applied in online analytics~\cite{traub2018scotty} and is used for streaming SQL implementation~\cite{Begoli:2019:OSR:3299869.3314040}. The window definition, in this case, forms a substream. For example, a sliding window will define a substream for each message in the initial stream.
-
-% \noindent {\bf State snapshotting}. Epoch-based state snapshotting is a popular recovery technique applied in Flink~\cite{Carbone:2017:SMA:3137765.3137777}, Storm~\cite{Toshniwal:2014:STO:2588555.2595641}, Samza~\cite{Noghabi:2017:SSS:3137765.3137770}, IBM Streams~\cite{jacques2016consistent}. This method divides a stream into a sequence of data element chunks called ({\em epochs}). An SPE takes a state snapshot when a regular epoch is {\em atomically} processed. In case of failures, SPE can consistently recover the state from the snapshot~\cite{2015arXiv150608603C}. 
-
-% Each of these scenarios can be considered as a special case of {\em substream management problem}. This problem is to monitor substreams emergence and termination. More formally, a substream is a part of the stream such that all its elements satisfy some predicate. For example, in the case of state pruning, the predicate is {\em [a news item is tagged by story $X$]}, while for time window aggregations, the predicate is {\em [a data element is generated with timestamp less than $T$]}. 
 
 In this paper, we focus only on two signals: substream start and its termination. Tracking a start of a substream is a straightforward task: the first event of a substream will naturally trigger its start. On the contrary, generating a substream termination event is a challenging task, and various properties may be required by practical problems:
 \begin{itemize}
@@ -24,14 +11,11 @@ In this paper, we focus only on two signals: substream start and its termination
     \item State pruning problem does not require any specific properties from termination events. However, late termination event receiving may cause sub-optimal memory utilization.
 \end{itemize}
 
-% As we can see, the substream management problem appears in many practical scenarios that impose requirements on the termination events. We formalize the substream management problem and generalize its properties. The formalization allows us to verify that a certain solution of the problem is suitable for the mentioned scenarios as well as for the more general problems that require substream management.
-
 A popular substream management method is the punctuations framework~\cite{tucker2003exploiting}. The main idea behind this framework is to divide the stream injecting special elements called {\em punctuations} that define substreams ``borders''. While the punctuations approach is robust and easy-to-implement, it has two limitations:
 \begin{enumerate}
     \item The lack of cyclic dataflows support~\cite{carbone2018scalable}. Many real-life applications, including machine learning~\cite{webirte} or graphs processing pipelines~\cite{xu2018fault}, require cyclic dataflows. The absence of a common substream management mechanism for this scenario reduces the applicability of SPEs for such tasks.
     \item High network traffic overhead. Punctuations framework has been initially designed for centralized stream processing~\cite{Tucker:2003:EPS:776752.776780} and requires frequent broadcasts between SPE nodes in distributed implementation. It can influence the end-to-end performance~\cite{DBLP:journals/pvldb/BegoliACHKKMS21} of SPEs and reduce their scalability because present-day deploys can consist of over 1000 nodes~\cite{Carbone:2017:SMA:3137765.3137777}. 
 \end{enumerate}
-% First, it does not support general cyclic dataflows~\cite{carbone2018scalable}. Second, the ``border'' elements are frequently broadcasted between SPE nodes, so punctuations have high network traffic overhead and can reduce the throughput of an SPE in case of numerous substreams~\cite{Li:2008:OPN:1453856.1453890}. 
 
 \begin{figure}[t]
   \centering
@@ -63,10 +47,6 @@ Basic comparison between the \tracker\ framework and its alternatives is shown i
         *progress tracker
     \end{threeparttable}
 \end{table}
-
-% A distributed version of the agent allows a system to scale and stay fault-tolerant.
-
-% By tackling challenges, \tracker\ opens an ability to apply substreams-based techniques for new tasks, such as iterative stream processing and new setups, e.g., very granular substreams. We compare the performance of \tracker\ to the punctuations framework applied in most state-of-the-art SPEs. We demonstrate that \tracker\ can outperform punctuations on synthetic and real-world dataflows. We also show a novel application of substream management for a real-world cyclic dataflow. 
 
 In summary, our contributions are as follows:
 \begin{enumerate}
