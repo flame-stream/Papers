@@ -1,8 +1,9 @@
 \label {fs-acker-intro}
 
-The processing of a data stream without insights on properties of its data elements can be challenging. For example, it may be unclear when a system can prune outdated keyed state~\cite{Tucker:2003:EPS:776752.776780}, release windowed aggregations~\cite{Begoli:2019:OSR:3299869.3314040}, or create a state snapshot for an epoch~\cite{Carbone:2017:SMA:3137765.3137777}.
+The processing of a data stream without insights into the properties of its data elements can be challenging. For example, it may be unclear when a system can prune outdated keyed state~\cite{Tucker:2003:EPS:776752.776780}, release windowed aggregations~\cite{Begoli:2019:OSR:3299869.3314040}, or create a state snapshot for an epoch~\cite{Carbone:2017:SMA:3137765.3137777}.
 
-Each of these scenarios can be considered as a special case of {\em substream management problem}. This problem is to monitor substreams emergence and termination. More formally, a substream is a part of the stream such that all its elements satisfy some predicate. For example, in the case of state pruning, the predicate is {\em [a data element has a key $K$]}, for time window aggregations, the predicate is {\em [a data element is generated with timestamp less than $T$]}, and for state snapshotting it is {\em [a data element belongs to the epoch $E$]}.
+Each of these scenarios is a particular case of a problem of monitoring substreams emergence and termination that we call a {\em substream management problem}. A substream is a part of the stream such that all its elements satisfy some predicate. 
+For example, in the case of state pruning, the predicate is {\em [a data element key equals to $K$]}, for time window aggregations, the predicate is {\em [a data element has a timestamp less than $T$]}, and for state snapshotting it is {\em [a data element belongs to the epoch $E$]}.
 
 In this paper, we focus only on two signals: substream start and its termination. Tracking a start of a substream is a straightforward task: the first event of a substream will naturally trigger its start. On the contrary, generating a substream termination event is a challenging task, and various properties may be required by practical problems:
 \begin{itemize}
@@ -26,7 +27,9 @@ A popular substream management method is the punctuations framework~\cite{tucker
 
 In this work we formalize the substream management problem and show that the network traffic overhead of the punctuations framework is far from the optimal. We also formally define properties of a substream management technique required by various problems such as state snapshotting to ensure that a newly proposed method satisfy them. 
 
-We introduce a new substream management framework called \tracker. The high-level scheme of our method is shown in Figure~\ref{tracker_scheme}. Within this framework, we use a dedicated agent that receives information about substreams from the entire SPE and sends back {\em end-of-substream notifications} (NEOSS). NEOSS messages is propagated through this agent without broadcasting between processes, reducing the amount of extra traffic. Such propagation method is suitable for cyclic dataflows because there is no need to forward service traffic through the cycles.
+We introduce a new substream management framework called \tracker. The figure~\ref{tracker_scheme} shows the high-level scheme of our method. 
+Within this framework, we use a dedicated agent that receives information about substreams from the entire SPE and sends back {\em end-of-substream notifications} (NEOSS). 
+NEOSS messages are propagated through this agent without broadcasting between processes, reducing the amount of extra traffic. Such propagation method is suitable for cyclic dataflows because there is no need to forward service traffic through the cycles.
 
 Basic comparison between the \tracker\ framework and its alternatives is shown in Table~\ref{solutions-overview-table}. Regarding network traffic, $|\Pi|$ is the number of computational nodes and $K$ is the number of substreams. We can outline that the punctuations framework is the only substream management mechanism that supports arbitrary predicates for substreams, so we use it as a baseline approach in the experiments. The commonalities and differences between the \tracker\ framework and alternative solutions are detailed in Section~\ref{fs-acker-related}.
 
