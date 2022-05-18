@@ -7,7 +7,7 @@ For example, in the case of state pruning, the predicate is {\em [a data element
 
 In this paper, we focus only on two signals: substream start and its termination. Tracking a start of a substream is a straightforward task: the first event of a substream will naturally trigger its start. On the contrary, generating a substream termination event is a challenging task, and various properties may be required by practical problems:
 \begin{itemize}
-    \item Deterministic windowed join requires an order of termination signals to respect the order of input elements (termination events from data producers)~\cite{najdataei2019stretch, gulisano2016scalejoin}.
+    \item Deterministic\footnote{given the same sequences of input tuples, the same output tuples will be produced} windowed join requires an order of termination signals to respect the order of input elements (termination events from data producers)~\cite{najdataei2019stretch, gulisano2016scalejoin}.
     \item An epoch is a substream that an SPE should process atomically. A termination event for an epoch should arrive before any elements of the next epoch~\cite{2015arXiv150608603C}.
     \item State pruning problem does not require any specific properties from termination events. However, late termination event receiving may cause sub-optimal memory utilization.
 \end{itemize}
