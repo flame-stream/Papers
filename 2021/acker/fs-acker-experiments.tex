@@ -113,7 +113,7 @@
     \caption{Service network traffic of punctuations approach and various \tracker\ setups}
     \label{traffic_plots}
 \end{figure*}
-In previous sections we put several statements out: \tracker\ framework provides low service traffic, low latency between the actual substream termination and termination event receiving, and SPE throughput does not depend on the substream size. In the experimental part of the paper, we will examine examine these properties on synthetic and real-world examples. 
+In previous sections we put several statements out: \tracker\ framework provides low service traffic, low latency between the actual substream termination and termination event receiving, and SPE throughput does not depend on the substream size. In the experimental part of the paper, we will examine these properties on synthetic and real-world examples. 
 
 As a baseline approach, we utilize the punctuations-based method employed in many state-of-the-art stream processing systems such as Flink~\cite{Carbone:2017:SMA:3137765.3137777}, Storm~\cite{apache:storm:state}, Heron~\cite{Kulkarni:2015:THS:2723372.2742788}, IBM Streams~\cite{jacques2016consistent}. To the best of our knowledge, the punctuation framework is the only existing general-purpose substream management technique.
 
@@ -188,7 +188,7 @@ In this experiment, we measure the notification latency as an interval duration 
 
 The notification latency of a punctuations-based technique depends on the graph and cluster sizes and the granularity of tracking as figures~\ref{notification_graph},\ref{notification_machines}, and~\ref{notification_granularity} indicate. These results are in-line with the overhead induced by punctuations shown in Section~\ref{fs-acker-punctuations}. Notification latency of \tracker\ slightly fluctuates but does not directly depend on the investigated parameters.
 
-uch a  difference in latency between the punctuations and \tracker\ appears because each operator in a dataflow must wait for punctuations from all partitions to sign off the previous operator to send it further to ensure the correctness. 
+The difference in latency between the punctuations and \tracker\ appears because each operator in a dataflow must wait for punctuations from all partitions to sign off the previous operator to send it further to ensure the correctness. 
 
 %Such a  difference in latency between the punctuations and \tracker\ is explained by the fact that each operator in a dataflow must wait for punctuations from all partitions osignificantf the previous operator to send it further. This behavior ensures that punctuations do not overtake ordinary records that guarantee the correctness of this approach.
 
