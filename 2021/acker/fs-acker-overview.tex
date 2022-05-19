@@ -58,7 +58,7 @@ In the punctuations framework, such order is provided by design because punctuat
 
 In this case, if the order on $t(M)$ coincides with the order of input elements, then \tracker\ can produce the NEOSS events according to this order as well. In other words, \tracker\ can reorder the NEOSS events such that they will be consistent with the substreams order. An example of this concept is shown in Figure~\ref{tracker_ordering}. The substream containing element with $t=1$ ends before the substream containing element with $t=2$. As we can see, the order of NEOSS elements from \tracker\ coincides with $t(M)$.
 
-\begin{figure}[htbp]
+\begin{figure}[t]
   \centering
   \includegraphics[width=0.20\textwidth]{pics/tracker-ordering.pdf}
   \caption{\tracker\ framework: tracking agent sends NEOSS elements according to the order on t(m)}

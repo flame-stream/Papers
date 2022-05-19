@@ -7,16 +7,18 @@ For example, in the case of state pruning, the predicate is {\em [a data element
 
 In this paper, we focus only on two signals: substream start and its termination. Tracking a start of a substream is a straightforward task: the first event of a substream will naturally trigger its start. On the contrary, generating a substream termination event is a challenging task, and various properties may be required by practical problems:
 \begin{itemize}
-    \item Deterministic\footnote{given the same sequences of input tuples, the same output tuples will be produced} windowed join requires an order of termination signals to respect the order of input elements (termination events from data producers)~\cite{najdataei2019stretch, gulisano2016scalejoin}.
+    \item Deterministic windowed join\footnote{given the same sequences of input tuples, the same output tuples will be produced} requires an order of termination signals to respect the order of input elements (termination events from data producers)~\cite{najdataei2019stretch, gulisano2016scalejoin}.
     \item An epoch is a substream that an SPE should process atomically. A termination event for an epoch should arrive before any elements of the next epoch~\cite{2015arXiv150608603C}.
     \item State pruning problem does not require any specific properties from termination events. However, late termination event receiving may cause sub-optimal memory utilization.
 \end{itemize}
 
-A popular substream management method is the punctuations framework~\cite{tucker2003exploiting}. The main idea behind this framework is to divide the stream injecting special elements called {\em punctuations} that define substreams ``borders''. While the punctuations approach is robust and easy-to-implement, it has two limitations:
-\begin{enumerate}
-    \item The lack of cyclic dataflows support~\cite{carbone2018scalable}. Many real-life applications, including machine learning~\cite{webirte} or graphs processing pipelines~\cite{xu2018fault}, require cyclic dataflows. The absence of a common substream management mechanism for this scenario reduces the applicability of SPEs for such tasks.
-    \item High network traffic overhead. Punctuations framework has been initially designed for centralized stream processing~\cite{Tucker:2003:EPS:776752.776780} and requires frequent broadcasts between SPE nodes in distributed implementation. It can influence the end-to-end performance~\cite{DBLP:journals/pvldb/BegoliACHKKMS21} of SPEs and reduce their scalability because present-day deploys can consist of over 1000 nodes~\cite{Carbone:2017:SMA:3137765.3137777}. 
-\end{enumerate}
+A popular substream management method is the punctuations framework~\cite{tucker2003exploiting}. The main idea behind this framework is to divide the stream by injecting special elements called {\em punctuations} that define substreams ``borders''. These special elements are propagated via the same network channels as data elements. While the punctuation approach is robust and easy to implement, it has several limitations. 
+
+Punctuations are not applicable for cyclic dataflows in a general case because elements belonging to a substream can remain in transit within a cycle for an uncertain time~\cite{carbone2018scalable}. The technique proposed in~\cite{Carbone:2017:SMA:3137765.3137777} mitigates this issue for the state snapshotting problem. The main idea of this technique is to include in a snapshot all in-transit elements (possibly from previous epochs) within a cycle and then resend them on rollback. However, it provides a solution for a specific problem that does not allow a system to determine a substream termination for cyclic dataflows using punctuations.
+
+The high network overhead forms another limitation. Network traffic complexity for this method is $O(K|\Pi|^2)$, where $|\Pi|$ is the number of processes and $K$ is the number of substreams because each process should propagate punctuations to all output channels. This complexity boundary covers the worst case when all processes are interconnected. However, SPEs prefer to distribute the work among nodes evenly to ensure scalability~\cite{carbone2015apache, Kulkarni:2015:THS:2723372.2742788, Akidau:2013:MFS:2536222.2536229}. This load balancing implies that each process effectively occupies channels to all other processes. The worst-case complexity boundary is tight for scenarios when an execution graph contains at least one operator that repartitions data.
+
+Substreams can be {\em fine-grained}: for example, each user session defines a substream. If there are a lot of small substreams, an inefficient substream management system can degrade the latency~\cite{DBLP:journals/pvldb/BegoliACHKKMS21} and the throughput of an SPE~\cite{Li:2008:OPN:1453856.1453890} or affect the performance of state checkpointing~\cite{zhang2021research}.
 
 \begin{figure}[t]
   \centering
@@ -27,7 +29,7 @@ A popular substream management method is the punctuations framework~\cite{tucker
 
 In this work we formalize the substream management problem and show that the network traffic overhead of the punctuations framework is far from the optimal. We also formally define properties of a substream management technique required by various problems such as state snapshotting to ensure that a newly proposed method satisfy them. 
 
-We introduce a new substream management framework called \tracker. The figure~\ref{tracker_scheme} shows the high-level scheme of our method. 
+We introduce a new substream management framework called \tracker. Figure~\ref{tracker_scheme} shows the high-level scheme of our method. 
 Within this framework, we use a dedicated agent that receives information about substreams from the entire SPE and sends back {\em end-of-substream notifications} (NEOSS). 
 NEOSS messages are propagated through this agent without broadcasting between processes, reducing the amount of extra traffic. Such propagation method is suitable for cyclic dataflows because there is no need to forward service traffic through the cycles.
 

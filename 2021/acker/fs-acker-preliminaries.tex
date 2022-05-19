@@ -105,7 +105,7 @@ Many applications that apply substream management systems do not require any spe
 
 Figure~\ref{general_guarantees} illustrates this notion. Terms $a,b,c,d...$ denote ordered processing events of a process $p$. The substream ends after event $c$. Note that there are several other events between the end-of-substream and $c$. This is the property of a {\em soft bound} guarantee: if $\langle eoss_{soft}, p, Pred\rangle$ occurs, all subsequent elements do not satisfy the predicate, but it is not necessarily the exact substream ``border''.
 
-\begin{figure}[htbp]
+\begin{figure}[t]
   \centering
   \includegraphics[width=0.50\textwidth]{pics/general-guarantee.pdf}
   \caption{Substream management: soft bound}
@@ -201,11 +201,3 @@ A soft bound becomes firm if a process event order satisfy the following conditi
 \begin{proof}
 Let us suppose that there is a message $M_{qp}$ of a next substream that was processed after the last element of the current substream, but before the generation of a bound event. This message either came from the channel $q$ before a punctuation from that channel generating a bound, or was processed before all channels delivers their punctuations. The first case could happen if $M_{qp}$ was reordered with the punctuation along the processing path and contradicts with FIFO processing logic (see previous proof for details). The second case is impossible because of processing limitations introduced by~\ref{eq:firm_condition}.
 \end{proof}
-
-While the punctuations approach is robust and easy-to-implement, it has several limitations. In the punctuations framework, the information about the substream termination propagates via the same network channels. While the punctuation approach is robust and easy to implement, it has several limitations. Punctuations are not applicable for cyclic dataflows in a general case because elements belonging to a substream can remain in transit within a cycle for an uncertain time~\cite{carbone2018scalable}. 
-
-The technique proposed in~\cite{Carbone:2017:SMA:3137765.3137777} mitigates this issue for the state snapshotting problem. The main idea of this technique is to include in a snapshot all in-transit elements (possibly from previous epochs) within a cycle and then resend them on rollback. However, it provides a solution for a specific problem that does not allow a system to determine a substream termination for cyclic dataflows using punctuations.
-
-The high network overhead forms another limitation. This method's service traffic is $O(K|\Pi|^2)$, where $|\Pi|$ is the number of processes and $K$ is the number of substreams because each process should propagate punctuations to all output channels. This complexity boundary covers the worst case when all processes are interconnected. SPEs prefer to distribute the work among nodes evenly to ensure scalability~\cite{carbone2015apache, Kulkarni:2015:THS:2723372.2742788, Akidau:2013:MFS:2536222.2536229}. This load balancing implies that each process effectively occupies channels to all other processes. The worst-case complexity boundary is tight for scenarios when an execution graph contains at least one operator that repartitions data.
-
-Substreams can be {\em fine-grained}: for example, each user session defines a substream. If there are a lot of small substreams, an inefficient substream management system can degrade the latency~\cite{DBLP:journals/pvldb/BegoliACHKKMS21} and the throughput of an SPE~\cite{Li:2008:OPN:1453856.1453890} or affect the performance of state checkpointing~\cite{zhang2021research}.
