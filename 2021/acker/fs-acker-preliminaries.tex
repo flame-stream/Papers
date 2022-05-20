@@ -37,6 +37,7 @@ First, in this section, we formalize a stream processing engine based on Chandy-
 \end{table}
 
 \subsection{Processing model}
+\label{fs-acker-processing-model}
 
 \begin{figure}[htbp]
   \centering
@@ -185,8 +186,12 @@ Generating event by following rule make it a soft bound of the substream $pred$:
 \forall q \in I_p, \exists \mathcal{P}^{pred}_{qp} \in B_p, \forall M\in B : \neg pred(M) \vee dst(M) \ne p
 \end{equation}
 \end{lemma}
+% \begin{proof}
+% Using the definition of the soft bound, we can use indirect proof. If there is a processing event from the substream that happens after the generated event, there is a message $M^*$ that generates this event. This message could emerge from two sources: from the mailbox of a process or from incoming channels. The mailbox does not contain such elements due to condition $pred(M) \wedge dst(M) = p$. Data sources guarantee that after a punctuation element, they will provide the system with no substream elements. This condition allows us to say that the data element entered the system before punctuation. Because of broadcasting on each step, punctuations cover all possible processing paths of a data element, including the processing path of the particular message $M^*$. This means that the punctuation message and data element from $M^*$ were reordered along the processing path, which contradicts with either mailbox controller order preservation or the FIFO nature of communication channels.
+% \end{proof}
+
 \begin{proof}
-Using the definition of the soft bound, we can use indirect proof. If there is a processing event from the substream that happens after the generated event, there is a message $M^*$ that generates this event. This message could emerge from two sources: from the mailbox of a process or from incoming channels. The mailbox does not contain such elements due to condition $pred(M) \wedge dst(M) = p$. Data sources guarantee that after a punctuation element, they will provide the system with no substream elements. This condition allows us to say that the data element entered the system before punctuation. Because of broadcasting on each step, punctuations cover all possible processing paths of a data element, including the processing path of the particular message $M^*$. This means that the punctuation message and data element from $M^*$ were reordered along the processing path, which contradicts with either mailbox controller order preservation or the FIFO nature of communication channels.
+We can use indirect proof. Let $\langle proc, p, M^*, M' \rangle$ be a processing event that happens after the soft bound termination event but $pred(M^*)$. In other words, there is a message $M*, pred(M^*)$ that arrived after all punctuations for the predicate $pred$ had been arrived. Following the definition of a distributed system from Section~\ref{fs-acker-processing-model}, message $M^*$ could emerge either from the mailbox of a process or from incoming channels. The emergence from the mailbox contradicts the condition of the termination event generation rule $\forall M\in B : \neg pred(M) \vee dst(M) \ne p$. On the other side, the emergence from an incoming channel contradicts the condition that punctuations arrived from all channels $\forall q \in I_p, \exists \mathcal{P}^{pred}_{qp}$ because message $M*$ cannot be reordered with punctuations by design.
 \end{proof}
 
 To satisfy the firm bound guarantee, the mailbox controller should block processing of all incoming messages from a channel as soon as it receives punctuation from this channel. In~\cite{Carbone:2017:SMA:3137765.3137777} such behavior is called {\em watermark (punctuation) alignment}. Formally we can rewrite this requirement in terms of event ordering:
