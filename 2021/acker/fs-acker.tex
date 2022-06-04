@@ -128,6 +128,20 @@
 Most state-of-the-art SPEs use punctuations to divide a stream into bounded substreams of messages, such as epochs and windows. The punctuation approach is powerful but has limitations: it does not support cyclic dataflows, is poorly scalable in some cases due to intensive use of broadcasts, and becomes inefficient when the number of chunks or cluster size becomes significant. We introduce a new substream tracking technique called \tracker\ that overcomes the limits of punctuations. We experimentally evaluate the properties of \tracker\ in both synthetic and real-world environments. Experiments show that our technique outperforms punctuations for a large number of substreams and efficiently handles real-world cyclic dataflows.
 \end{abstract}
 
+\begin{CCSXML}
+<ccs2012>
+<concept>
+<concept_id>10002951.10002952.10003190.10010842</concept_id>
+<concept_desc>Information systems~Stream management</concept_desc>
+<concept_significance>500</concept_significance>
+</concept>
+</ccs2012>
+\end{CCSXML}
+
+\ccsdesc[500]{Information systems~Stream management}
+
+\keywords{Data streams, punctuations, stream join, state management}
+
 \maketitle
 
 % \keywords{Data streams, exactly-once, drifting state, optimistic OOP}
