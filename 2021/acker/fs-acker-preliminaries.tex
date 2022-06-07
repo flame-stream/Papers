@@ -39,20 +39,20 @@ First, in this section, we formalize a stream processing engine based on Chandy-
 \subsection{Processing model}
 \label{fs-acker-processing-model}
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=0.2\textwidth]{pics/process-scheme.pdf}
-  \caption{Structure of the SPE process}
-  \label{fig:spe_process}
-\end{figure}
-
 Typically, distributed stream processing engines are shared-nothing runtimes that continuously ingest input elements, transform them according to a logical dataflow graph, and deliver output elements. The logical dataflow graph consists of user-defined operators. Operators are functions of a single input data element that produce a number of output data elements. Operators can be stateless or stateful: output elements may depend on the current state. A logical graph is mapped to a physical, distributed graph on deployment. Commonly, a single logical operator can be deployed on multiple computational nodes. Further, we denote physical instances of logical operators as {\em processes}.
 
 A deployed physical graph is a distributed system and could be described in terms of the Chandy-Lamport model~\cite{Chandy:1985:DSD:214451.214456, carbone2018scalable}. In this model, the authors introduce \textit{events} that allow observing a state of the entire system. This approach allows defining system-wide guarantees: in the original paper, it is used to introduce the notion of {\em consistent state}, we use this approach for the definition of a substream management problem.
 
 Following the notation from~\cite{Chandy:1985:DSD:214451.214456, carbone2018scalable}, the distributed system is observed with events. Each event is a tuple of 5 elements $e = (p, s, s', c, M)$, where $p$ is one of the deployed processes, $s$ and $s'$ are state of the process before and after processing, $c$ is one of network FIFO channels that connect processes, and $M$ is a message generated during processing. The generated event $M$ comes to a channel state $C$ until the destination process receives it. Processes and channels form a physical graph of the system $G=\{\Pi,\mathcal{E}\}$. We denote all input channels as $I_p$ and output channels as $O_p$.
 
-In a stream processing engine, we need to specify a process $p$ to reflect the nature of SPE. In our model we split a process into two separate blocks: {\em business logic handler} (BLH), and {\em mailbox controller} (MBC). The first block encapsulates a user-defined operator. In this model user-defined operator does not directly communicate with other processes in the system. Instead of this, it receives and generates {\em messages} -- data elements that are tagged by their source and destination. Further delivery of these messages along the communication channels is then handled by a mailbox controller that preserves the order of message generation. This system layout is not new, and it is widely used in practice (Akka, YDB, Millwheel, etc.).
+In a stream processing engine, we need to specify a process $p$ to reflect the nature of SPE. In our model we split a process into two separate blocks: {\em business logic handler} (BLH), and {\em mailbox controller} (MBC). The first block encapsulates a user-defined operator. In this model user-defined operator does not directly communicate with other processes in the system. Instead of this, it receives and generates {\em messages} -- data elements that are tagged by their source and destination. Further delivery of these messages along the communication channels is then handled by a mailbox controller that preserves the order of message generation. Figure~\ref{fig:spe_process} illustrates the scheme of a process. This system layout is not new, and it is widely used in practice (Akka, YDB, Millwheel, etc.).
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.2\textwidth]{pics/process-scheme.pdf}
+  \caption{Structure of the SPE process}
+  \label{fig:spe_process}
+\end{figure}
 
 More formally, when a process receives a message, it is handled by the mailbox controller that puts this message into a special segment of the process state ({\em mailbox} $B_p$). The business logic handler gets a message provided by MBC and triggers a user-defined operator. The user-defined operator processes the data element that the message contains and generates an arbitrary number of outgoing messages. BLH puts generated messages back to a mailbox. MBC sends outgoing messages along communication channels to destination processes. All mailbox controller operations respect the order of messages in the mailbox. If a user-defined operator has a state $U_p$, the joined process state will consist of the mailbox and this state $s=U_p \cup B_p$. In the Chandy-Lamport paradigm this algorithm produces the following events within a process:
 \begin{itemize}

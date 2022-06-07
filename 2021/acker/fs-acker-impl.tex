@@ -38,7 +38,7 @@ There are several possible methods to build the indicator that the segment conta
 
 Each report is labeled by a random number $X$, and this number is the same for the send action and the corresponding receive action. This trick makes it easy to check if the segment contains a full set of $SND$/$RCV$ pairs for a message: XOR operation for all numbers received from the chain will turn into 0. The result of the XOR operation can accidentally become zero, but the probability of this event is controlled by the length of the random number $X$ so that it can be neglected in practice~\cite{apache:storm:acker}.
 
-\begin{figure}[htbp]
+\begin{figure}[t]
   \centering
   \includegraphics[width=0.25\textwidth]{pics/tracker-segments-example.pdf}
   \caption{Reports example}
