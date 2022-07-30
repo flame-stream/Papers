@@ -1,0 +1,31 @@
+\label {fs-acker-conclusion}
+
+% In this work, we formulated a problem of dependency tracking between input and output elements in streaming dataflows. We demonstrated that state-of-the-art distributed stream processing systems face this problem in state snapshotting mechanisms~\cite{Carbone:2017:SMA:3137765.3137777, apache:storm}, the materialization of time-varying relations~\cite{Begoli:2019:OSR:3299869.3314040}, and atomic delivery of all descendants of an input item~\cite{we2018adbis}.  
+
+% To solve this problem, we proposed a mechanism that adopts ideas from the Apache Storm completion tracking mechanism called \acker. We extend each data item with a logical timestamp that denotes corresponding input items and tracks if dataflow contains elements with specific timestamps. 
+
+% Our solution, called \tracker\ inherits from \acker\ fine-grained tracking, and cyclic dataflows support and provides the following features:
+% \begin{itemize}
+%     \item {\bf Notifications order preservation:} the order of notifications that system completely processed some set of input items does not contradict the order of input elements. This feature allows using \tracker\ for state snapshotting.
+%     \item {\bf Dataflow locality:} different parts of a dataflow can receive independent notifications that allow a stream processing system to apply efficient asynchronous state snapshotting algorithms, e.g., one that is used in Apache Flink~\cite{Carbone:2017:SMA:3137765.3137777}. 
+%     \item {\bf Scalability:} we introduced a distributed version of \tracker\ that allows a system to distribute extra network traffic between all computational units. 
+%     \item {\bf Low overhead:} \tracker\ does not produce any significant performance penalty and does not affect the throughput of a distributed streaming dataflow.
+% \end{itemize}
+
+% We conducted a series of experiments and compared the proposed method with a baseline approach based on the markers mechanism used in Apache Flink. We demonstrated that both centralized and decentralized implementations of \tracker\ provide lower notification latency that does not considerably degrade with an increase of a logical graph size or a cluster size. Experiments also showed that \tracker\ has lower throughput overhead in case of fine-grained tracking.
+
+In this work, we formalized the problem of substreams management. We designed and implemented a new substreams management technique called \tracker\ that does not require injecting service elements directly into the stream. Instead, we mark all data elements with ordered labels and use the distributed agent, which notifies operators that a substream ends. Our approach has the following features:
+
+\begin{itemize}
+     \item {\bf Cyclic dataflows support:} the method is suitable for problems that require non-linear executions: graph traversing, iterative algorithms, etc. We evaluated this feature within the real-life problem.
+     \item {\bf Low overhead:} we showed that our implementation achieves the lower bound of service traffic overhead. We demonstrated that \tracker\ insignificantly affects the throughput of an SPE in practice.
+     \item {\bf Fine-grained substreams support:} \tracker\ framework is suitable for substreams consisting of a small number of elements. This feature is achieved due to low traffic overhead and another way of notifications propagation.
+    %  \item {\bf Scalability:} extra network traffic from operators can be distributed between multiple nodes. Experiments on synthetic dataflows indicated the practical feasibility of balancing extra traffic.
+\end{itemize}
+
+The centralized agent is a limitation of a solution presented in this paper. The first problem is scalability. Due to the page limit, we omitted the discussion about the distributed \tracker\ agent. Fault tolerance is another problem because we should ensure recovery of the \tracker\ agent in case of failures. We are leaving both topics for future work.
+
+% These properties of the \tracker\ framework create a possibility to apply substream management in new applications; as indicated in the experimental section, this includes smart caching of operator state and latency-conscious windowed joins.
+
+
+% both centralized and decentralized implementations of \tracker\ provide lower notification latency that does not considerably degrade with an increase of a logical graph size or a cluster size. Experiments also showed that \tracker\ has lower throughput overhead in case of fine-grained tracking.
