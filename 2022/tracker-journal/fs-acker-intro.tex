@@ -31,7 +31,7 @@ In this work we formalize the substream management problem and show that the net
 
 We introduce a new substream management framework called \tracker. Figure~\ref{tracker_scheme} shows the high-level scheme of our method. 
 Within this framework, we use a dedicated agent that receives information about substreams from the entire SPE and sends back {\em end-of-substream notifications} (NEOSS). 
-NEOSS messages are propagated through this agent without broadcasting between processes, reducing the amount of extra traffic. Such propagation method is suitable for cyclic dataflows because there is no need to forward service traffic through the cycles.
+NEOSS messages are propagated through this agent without broadcasting between processes, reducing the amount of extra traffic. Such propagation method is suitable for cyclic dataflows because there is no need to forward service traffic through the cycles. A distributed version of the agent allows an SPE to scale.
 
 Basic comparison between the \tracker\ framework and its alternatives is shown in Table~\ref{solutions-overview-table}. Regarding network traffic, $|\Pi|$ is the number of computational nodes and $K$ is the number of substreams. We can outline that the punctuations framework is the only substream management mechanism that supports arbitrary predicates for substreams, so we use it as a baseline approach in the experiments. The commonalities and differences between the \tracker\ framework and alternative solutions are detailed in Section~\ref{fs-acker-related}.
 
