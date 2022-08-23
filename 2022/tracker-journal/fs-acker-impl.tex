@@ -25,14 +25,14 @@ To track the messages path through segments, the agent receives SND/RCV reports 
   \end{tabular}
 \end{table}
 
-% A graph shown in Figure~\ref{fig:tracker-acker-comparison} illustrates the notion of segments. This graph has two segments: $A$ and $B$. Note that according to Table~\ref{tracker-table-simple}, the NEOSS for predicate $q(x)$ can be sent for a segment $A$, but not for a segment $B$. This behavior is similar to punctuations: NEOSS can be spawned earlier for the upstream processes.
+A graph shown in Figure~\ref{fig:tracker-acker-comparison} illustrates the notion of segments. This graph has two segments: $A$ and $B$. Note that according to Table~\ref{tracker-table-simple}, the NEOSS for predicate $q(x)$ can be sent for a segment $A$, but not for a segment $B$. This behavior is similar to punctuations: NEOSS can be spawned earlier for the upstream processes.
 
-% \begin{figure}[htbp]
-%   \centering
-%   \includegraphics[width=0.3\textwidth]{pics/segments-example.pdf}
-%   \caption{Graph segmentation example}
-%   \label{fig:tracker-acker-comparison}
-% \end{figure}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.3\textwidth]{pics/segments-example.pdf}
+  \caption{Graph segmentation example}
+  \label{fig:tracker-acker-comparison}
+\end{figure}
 
 There are several possible methods to build the indicator that the segment contains elements from a substream using the reports from processes. Our implementation uses the trick applied in Apache Storm to monitor the completeness of processing~\cite{apache:storm:acker}. 
 
