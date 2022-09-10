@@ -206,3 +206,24 @@ A soft bound becomes firm if a process event order satisfy the following conditi
 \begin{proof}
 Let us suppose that there is a message $M_{qp}$ of a next substream that was processed after the last element of the current substream, but before the generation of a bound event. This message either came from the channel $q$ before a punctuation from that channel generating a bound, or was processed before all channels delivers their punctuations. The first case could happen if $M_{qp}$ was reordered with the punctuation along the processing path and contradicts with FIFO processing logic (see previous proof for details). The second case is impossible because of processing limitations introduced by~\ref{eq:firm_condition}.
 \end{proof}
+
+The design of the punctuations framework implies two important properties:
+
+\begin{enumerate}
+    \item {\bf Lack of cyclic dataflows support.} Although there are techniques that extend punctuations for state snapshotting of iterative processing~\cite{Carbone:2017:SMA:3137765.3137777}, the termination of a general substream cannot be determined using punctuations framework if an execution graph contains cycles.
+    \item {\bf Network traffic complexity quadratically depends on the number of processes.} .
+\end{enumerate}
+
+\begin{lemma}
+Punctuations framework does not support cycles.
+\end{lemma}
+\begin{proof}
+
+\end{proof}
+
+\begin{lemma}
+Network traffic complexity for this method is $O(K|\Pi|^2)$, where $|\Pi|$ is the number of processes and $K$ is the number of substreams.
+\end{lemma}
+\begin{proof}
+
+\end{proof}

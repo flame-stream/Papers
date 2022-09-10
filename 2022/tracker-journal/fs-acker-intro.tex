@@ -1,6 +1,6 @@
 \label {fs-acker-intro}
 
-The processing of a data stream without insights into the properties of its data elements can be challenging. The following scenarios illustrate the problem from various perspectives.
+There are plenty of data processing scenarios where results are most valuable at the time of data arrival, for example, IoT, news processing, financial analysis, anti-fraud, network monitoring, etc. Distributed stream processing engines (SPEs), such as Flink~\cite{carbone2015apache}, Heron~\cite{Kulkarni:2015:THS:2723372.2742788}, or MillWheel~\cite{Akidau:2013:MFS:2536222.2536229} aim to solve such problems at scale. They are deployed on multiple computational nodes which receive input data elements one-by-one, process them, and update the internal state. The challenging problem here is to aggregate finite parts of a stream or {\em substreams} satisfying some specific properties system-wide among all computational nodes. The following scenarios illustrate the problem from various perspectives.
 
 \noindent {\bf State pruning}. Most SPEs group state by keys that are also used for data partitioning. For example, the task is to aggregate news into stories assigning every news item a story tag. In this case, a story tag will be the key; the properties of the story that are needed for tagging procedure will be the state. The number of stories is not limited, and to prevent overflow~\cite{Tucker:2003:EPS:776752.776780}, SPE can remove state for outdated keys, e.g., for completed stories. In this case, we can consider the stream as a mixture of substreams: one per story.  
 
@@ -65,5 +65,7 @@ In summary, our contributions are as follows:
     \item We present a novel substream management technique that achieves a lower bound of network traffic overhead.
     \item We demonstrate \tracker\ performance in comparison to a state-of-the-art approach on diverse workloads.
 \end{enumerate}
+
+This paper is an extended version of a conference publication~\cite{10.1145/3524860.3539809}. In this paper we address a scalability problem by introduction of a distributed version of the tracking agent and evaluate it on workloads with increased load. We further expand the theoretical properties of punctuation and tracker frameworks and reveal the motivation behind this work in more details.
 
 The rest of the paper is organized as follows: Section~\ref{fs-acker-preliminaries} formalizes the substream management problem and indicates its main properties. In Section~\ref{fs-acker-tracker}, we introduce a general design of the \tracker\ framework and demonstrate the properties of this substream management solution. Section~\ref{fs-acker-impl} summarizes the implementation of \tracker\ for both centralized and distributed setups with optimizations that can reduce the amount of extra traffic. In Section~\ref{fs-experiments}, we show that the proposed technique is scalable and can outperform alternatives employed in state-of-the-art stream processing engines. The relevant prior research is outlined in Section~\ref{fs-acker-related}. Finally, we discuss our conclusions in Section~\ref{fs-acker-conclusion}.
