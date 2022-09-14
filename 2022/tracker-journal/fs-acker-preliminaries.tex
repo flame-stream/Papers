@@ -79,6 +79,7 @@ Note that in this case, $M'$ may contain more than one message. Following the Ch
 % Atomicity of the events and their sequential nature allows a system to build guarantees for processing and state management.
 
 \subsection{Substream management events}
+\label{fs-acker-substream-events}
 % The processing of unbounded data sequences sometimes is difficult, and it is easier to solve an unlimited stream of small tasks than a single task for an unlimited stream of data. We filter data elements with a condition to limit the scope of a task. The data elements that satisfy a condition form a {\em substream}. The practical examples of substreams are: ``clicks received in time window $w$'', or ``requests from user 0x0321da83'', etc.
 
 \subsubsection{Substreams lifespan}
@@ -166,6 +167,8 @@ We assume one by one processing of substreams for them to be isolated (e.g. epoc
 
 \subsection{Punctuations framework}
 \label{fs-acker-punctuations}
+
+To justify the usefulness of our model described above in Section~\ref{fs-acker-substream-events}, we show how our model can describe the most widely used by state-of-the-art SPEs substream management framework called {\em pucntuations}. We also prove certain properties which are inherent to any implementation of the punctuations framework. 
 
 The main idea behind the punctuations framework is to inject special data elements $\mathcal{P}^{pred}$ into data stream one per substream. These elements, called punctuations, flow down the workflow as ordinary data elements. The injector promises that all elements after punctuations won't satisfy the predicate. Hence, the punctuation itself defines the ``border'' of a substream.
 
