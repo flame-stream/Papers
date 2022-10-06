@@ -69,12 +69,16 @@ A vital question here is how to implement the assignment of ordered labels $t(m)
 
 \subsection{Answering Q4: What are the functional and performance properties of \tracker?}
 
-\tracker\ does not require regular broadcasting of the elements to all computational nodes because all service traffic goes through a single agent. This change allows \tracker\ to have the following features by design:
+\tracker\ does not require regular broadcasting of the elements to all computational nodes because all service traffic goes through a single agent. This change allows \tracker\ to have the following properties by design:
 
-\begin{enumerate}
-    \item {\bf Cyclic dataflows support.} Because the tracking agent is monitoring the properties of in-flight elements without directly injecting service items into a dataflow, \tracker\ does not have the problem of throwing them through a cycle.
-    \item {\bf Low network overhead.} Processes can send reports once per a fixed time period, so there is a constant time of such reports per a finite substream. The reports require $O(|\Pi|)$ extra messages, while the NEOSS events $O(K|\Pi|)$. The total amount is $O(K|\Pi| + |\Pi|) = O(K|\Pi|)$ that is optimal for the substream management problem. 
-    \item {\bf Low latency and impact on SPE throughput.} Punctuations can be stuck by other data elements if they are sent with some delay after the last substream element. In \tracker, service traffic goes through other network channels that can reduce latency between actual substream termination and the corresponding event. Together with the low amount of service traffic, this scheme does not significantly reduce the throughput of an SPE, as we show in Section~\ref{fs-experiments}.
-\end{enumerate}
+{\bf Cyclic dataflows support.} Because the tracking agent is monitoring the properties of in-flight elements without directly injecting service items into a dataflow, \tracker\ does not have the problem of throwing them through a cycle.
+
+{\bf Low network overhead.} Processes can send reports once per a fixed time period, so there is a constant time of such reports per a finite substream. The reports require $O(|\Pi|)$ extra messages, while the NEOSS events $O(K|\Pi|)$. The total amount is $O(K|\Pi| + |\Pi|) = O(K|\Pi|)$ that is optimal for the substream management problem.
+
+Both of these properties are enhancements over the punctuations framework. They lead to an important corollary: 
+
+{\bf Low latency and impact on SPE throughput.} Punctuations can be stuck by other data elements if they are sent with some delay after the last substream element. In \tracker, service traffic goes through other network channels that can reduce latency between actual substream termination and the corresponding event. Together with the low amount of service traffic, this scheme does not significantly reduce the throughput of an SPE, as we show in Section~\ref{fs-experiments}.
+
+In the next section we theoretically proof the first two properties. The fairness of the corollary is experimentally demonstrated in Section~\ref{fs-experiments}.
 
 % At the same time, \tracker\ can provide both soft and firm bound guarantees along with the consistent order of notifications. A limitation of the \tracker\ framework is a potentially more complex implementation. The details of the straightforward implementation of the \tracker\ framework are discussed in the next section.
