@@ -184,9 +184,9 @@ Figure~\ref{punctuations_scheme} illustrates the punctuations framework. Green e
 Processes within SPE do not apply user-defined operators to punctuations. Instead, each process $p$ propagates punctuation messages $\mathcal{P}_{pq}^{pred}$ to all outgoing channels $c_{pq} \in O_p$  when it receives corresponding punctuations from all input channels $I_p$.
 
 \begin{lemma}
-Generating event by following rule make it a soft bound of the substream $pred$:
+Generating event by following rule make it a soft bound of a substream $pred$:
 \begin{equation}
-\forall q \in I_p, \exists \mathcal{P}^{pred}_{qp} \in B_p, \forall M\in B : \neg pred(M) \vee dst(M) \ne p
+\forall q \in I_p, \exists \mathcal{P}^{pred}_{qp} \in B_p, \forall M\in B_p : \neg pred(M) \vee dst(M) \ne p
 \end{equation}
 \end{lemma}
 % \begin{proof}
@@ -194,7 +194,7 @@ Generating event by following rule make it a soft bound of the substream $pred$:
 % \end{proof}
 
 \begin{proof}
-We can use indirect proof. Let $\langle proc, p, M^*, M' \rangle$ be a processing event that happens after the soft bound termination event but $pred(M^*)$. In other words, there is a message $M*, pred(M^*)$ that arrived after all punctuations for the predicate $pred$ had been arrived. According to the definition of a distributed system from Section~\ref{fs-acker-processing-model}, message $M^*$ could emerge either from the mailbox of a process or from incoming channels. The emergence from the mailbox contradicts the condition of the termination event generation rule $\forall M\in B : \neg pred(M) \vee dst(M) \ne p$. On the other side, the emergence from an incoming channel contradicts the condition that punctuations arrived from all channels $\forall q \in I_p, \exists \mathcal{P}^{pred}_{qp}$ because message $M*$ cannot be reordered with punctuations by design.
+We can use indirect proof. Let $\langle proc, p, M^*, M' \rangle$ be a processing event that happens after the soft bound termination event but $pred(M^*)$. In other words, there is a message $M^*, pred(M^*)$ that arrived after all punctuations for the predicate $pred$ had been arrived. According to the definition of a distributed system from Section~\ref{fs-acker-processing-model}, message $M^*$ could emerge either from the mailbox of a process or from incoming channels. The emergence from the mailbox contradicts the condition of the termination event generation rule $\forall M\in B : \neg pred(M) \vee dst(M) \ne p$. On the other side, if element come from an incoming channel, we can track it's path through the system from a data source to the channel (processing path). Because of broadcasts on each step, watermarks travel all possible paths in the system including the path, that traveled the element. Along this path they were reordered. This could happen either during transmission, or during processing. The first hypothesis contradicts with the FIFO nature of communication channels. The second one is impossible due to definition of the processing model, that protects a processing order. We excluded all possible ways of getting event $M^*$ and have to reject initial hypothesis.
 \end{proof}
 
 To satisfy the firm bound guarantee, the mailbox controller should block processing of all incoming messages from a channel as soon as it receives punctuation from this channel. In~\cite{Carbone:2017:SMA:3137765.3137777} such behavior is called {\em watermark (punctuation) alignment}. Formally we can rewrite this requirement in terms of event ordering:
@@ -221,22 +221,17 @@ The design of the punctuations framework implies two important properties:
 Punctuations framework cannot determine substream termination of an execution graph contains cycle.
 \end{lemma}
 \begin{proof}
-Let us suppose that all punctuations for the predicate $pred$ had been arrived to a process $p$ and all conditions to generate soft bound event $e_{soft} = \langle eoss_{soft}, p, Pred\rangle$ are satisfied:
-
-\begin{equation}
-\forall q \in I_p, \exists \mathcal{P}^{pred}_{qp} \in B_p, \forall M\in B : \neg pred(M) \vee dst(M) \ne p
-\end{equation}
-
-However, having a cycle in a graph, we cannot guarantee that messages satisfying the predicate $pred$ will not return through the cycle even if all network channels are FIFO. Hence, there can be an event $e^{*} = \langle recv, p, M^{*}\rangle$ such that $e^{*} > e_{soft}$ and $pred(M^{*})$ that contradicts the definition of the soft bound event.
-
+If we have a cycle in the processing graph we can find a process that receives input from the latter steps of the cycle (back-link). This process will propagate a punctuation element when all incoming channels have received their punctuation elements. Due to cycle, for a back-link channel this punctuation element processing path contains the process itself (as a starting element of the cycle) and this means that to generate a punctuation we need it to be already generated. Contradiction.
 \end{proof}
+
+Despite the Lemma we just proved, some punctuation based systems report support of cyclic workflows. This is practically achieved with the limitation on the number of possible entrances into cycle by some $m$. With this limitation, we can roll out the cycle with repeating fragment of the cycle $m$ times. The first block is then connected to the input of the cycle, and the last element of the cycle to two elements: repetition entrance and the output of the cycle. Repetitions are organized the same way. From theoretical perspective this representation of the cycle is a DAG, that indeed could be served by punctuation mechanism.
 
 \begin{lemma}
 Network traffic complexity for this method is $O(K|\Pi|^2)$, where $|\Pi|$ is the number of processes and $K$ is the number of substreams if an SPE distributes the work among processes evenly.
 \end{lemma}
 \begin{proof}
 
-Even the soft bound event requires receiving punctuations from all incoming network channels. If a distributed stream processing engine balances the work evenly among the processes, all processes are interconnected. Therefore, each process should broadcast punctuations to all other processes. Therefore, if the number of existing substreams is $K$ then the network traffic complexity for the punctuations framework is $O(K|\Pi|^2)$ because each process should broadcast punctuations for each substream. 
+Even the soft bound event requires receiving punctuations from all incoming network channels. If a distributed stream processing engine balances the work evenly among the processes, all processes are interconnected. Therefore, each active process should broadcast punctuations to all other processes. If we assume that all proccesses involved into processing of the elements that belong to predicate, the transmission complecsity of punctuation elements is $O(K|\Pi|^2)$. Therefore, if the number of existing substreams is $K$ then the network traffic complexity for the punctuations framework is $O(K|\Pi|^2)$ because each process should broadcast punctuations for each substream. 
 
 \end{proof}
 
