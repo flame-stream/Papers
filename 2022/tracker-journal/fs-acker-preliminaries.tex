@@ -36,16 +36,14 @@ First, in this section, we formalize a stream processing engine based on Chandy-
     \label{notations}
 \end{table}
 
-\subsection{Processing model}
+\subsection{Stream processing model}
 \label{fs-acker-processing-model}
 
-\subsubsection{Streaming runtime}
+\subsubsection{SPE model}
 
 Typically, distributed stream processing engines are shared-nothing runtimes that continuously ingest input elements, transform them according to a logical dataflow graph, and deliver output elements. The logical dataflow graph consists of user-defined operators. Operators are functions of a single input data element that produce a number of output data elements. Operators can be stateless or stateful: output elements may depend on the current state. A logical graph is mapped to a physical, distributed graph on deployment. Commonly, a single logical operator can be deployed on multiple computational nodes. Further, we denote physical instances of logical operators as {\em processes}.
 
 A deployed physical graph is a distributed system and could be described in terms of the Chandy-Lamport model~\cite{Chandy:1985:DSD:214451.214456, carbone2018scalable}. In this model, the authors introduce \textit{events} that allow observing a state of the entire system. This approach allows defining system-wide guarantees: in the original paper, it is used to introduce the notion of {\em consistent state}, we use this approach for the definition of a substream management problem.
-
-\subsubsection{Communication and processing}
 
 Following the notation from~\cite{Chandy:1985:DSD:214451.214456, carbone2018scalable}, the distributed system is observed with events. Each event is a tuple of 5 elements $e = (p, s, s', c, M)$, where $p$ is one of the deployed processes, $s$ and $s'$ are state of the process before and after processing, $c$ is one of network FIFO channels that connect processes, and $M$ is a message generated during processing. The generated event $M$ comes to a channel state $C$ until the destination process receives it. Processes and channels form a physical graph of the system $G=\{\Pi,\mathcal{E}\}$. We denote all input channels as $I_p$ and output channels as $O_p$.
 
@@ -58,13 +56,13 @@ In a stream processing engine, we need to specify a process $p$ to reflect the n
   \label{fig:spe_process}
 \end{figure}
 
-More formally, when a process receives a message, it is handled by the mailbox controller that puts this message into a special segment of the process state ({\em mailbox} $B_p$). The business logic handler gets a message provided by MBC and triggers a user-defined operator. The user-defined operator processes the data element that the message contains and generates an arbitrary number of outgoing messages. BLH puts generated messages back to a mailbox. MBC sends outgoing messages along communication channels to destination processes. All mailbox controller operations respect the order of messages in the mailbox. If a user-defined operator has a state $U_p$, the joined process state will consist of the mailbox and this state $s=U_p \cup B_p$. In the Chandy-Lamport paradigm this algorithm produces the following events within a process:
+\subsubsection{Stream processing events}
+
+When a process receives a message, it is handled by the mailbox controller that puts this message into a special segment of the process state ({\em mailbox} $B_p$). The business logic handler gets a message provided by MBC and triggers a user-defined operator. The user-defined operator processes the data element that the message contains and generates an arbitrary number of outgoing messages. BLH puts generated messages back to a mailbox. MBC sends outgoing messages along communication channels to destination processes. All mailbox controller operations respect the order of messages in the mailbox. If a user-defined operator has a state $U_p$, the joined process state will consist of the mailbox and this state $s=U_p \cup B_p$. In the Chandy-Lamport paradigm this algorithm produces the following events within a process:
 \begin{itemize}
     \item Communication events: $\langle recv, p, M\rangle$, $\langle send, p, M \rangle$ -- these events are handled by mailbox controller
     \item Processing of an incoming message $\langle proc, p, M, M' \rangle$
 \end{itemize}
-
-\subsubsection{Formal events}
 
 Lets translate these events into 5-tuple language. Communication events move a message between communication channel and mailbox section of the state:
 \begin{eqnarray}
@@ -230,7 +228,7 @@ The design of the punctuations framework implies two important properties:
 \end{enumerate}
 
 \begin{lemma}
-Punctuations framework cannot determine substream termination of an execution graph contains cycle.
+Punctuations framework cannot determine substream termination of an execution graph if the graph contains cycle.
 \end{lemma}
 \begin{proof}
 If we have a cycle in the processing graph we can find a process that receives input from the latter steps of the cycle (back-link). This process will propagate a punctuation element when all incoming channels have received their punctuation elements. Due to cycle, for a back-link channel this punctuation element processing path contains the process itself (as a starting element of the cycle) and this means that to generate a punctuation we need it to be already generated. Contradiction.

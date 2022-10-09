@@ -66,9 +66,29 @@ Figure~\ref{fig:tracker-reports} illustrates the reports with random numbers. Th
   \end{tabular}
 \end{table}
 
+\subsection{Implementation properties}
+
+In \tracker\ framework there is no need to inject service items into a dataflow. Thus, \tracker\ can handle cyclic execution graphs.
+
+\begin{lemma}
+If an execution graph is cyclic, the \tracker\ framework can determine substream termination.
+\end{lemma}
+\begin{proof}
+Suppose that an execution graph contains cycle and there are no in-flight elements in the system satisfying a predicate $pred$, but \tracker\ did not provide NEOSS for the substream. It means that the corresponding XOR value is not 0. Therefore, there is a process that sends an element satisfying $pred$ (possibly through the cycle) but the following process has not yet received and processed it. We obtain a contradiction because we supposed that the execution graph does not contain in-flight element satisfying the predicate $pred$.
+\end{proof}
+
+Another property that became reachable due to avoid of injecting service items into a dataflow is low network traffic overhead. Basically, all traffic goes between tracking agent and processes without broadcasting service items among processes.
+
 Due to the associativity of XOR, we can optimize tracking agent incoming traffic by aggregating reports locally within the processes. For each process, we introduce a {\em local tracking agent} component. It serves as a mediator between the process and the global agent, buffering the outgoing reports and flushing them periodically. 
 
-The flushing window is the parameter that allows us to balance the service traffic and latency between the actual substream termination (the event from the data producer) and the termination event. Note that substreams last a finite time period by definition, so we assume that each process sends aggregated reports a constant number of times that does not depend on the number of substreams and processes. Therefore, the amount of extra network traffic for the reports is $O(|\Pi|)$, so the total estimation with the overhead on the notifications is $O(K|\Pi|)$.
+\begin{lemma}
+Network traffic complexity for the \tracker\ framework is $O(K|\Pi|)$, where $|\Pi|$ is the number of processes and $K$ is the number of substreams.
+\end{lemma}
+\begin{proof}
+Substreams last a finite time period by definition, so that each process sends aggregated reports a constant number of times that does not depend on the number of substreams and processes. Therefore, the amount of extra network traffic for the reports is $O(|\Pi|)$, so the total estimation with the overhead on the notifications is $O(K|\Pi|)$ because \tracker\ must inform all processes about substream termination (send NEOSS).
+\end{proof}
+
+The flushing window is the parameter that allows us to balance the service traffic and latency between the actual substream termination (the event from the data producer) and the termination event. Although this optimization does not reduce theoretical estimation of network traffic complexity, it can significantly reduce substream termination latency as we demonstrate in Section~\ref{fs-experiments}.
 
 \subsection{Consistent termination events order}
 
