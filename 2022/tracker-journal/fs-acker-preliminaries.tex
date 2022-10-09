@@ -39,9 +39,13 @@ First, in this section, we formalize a stream processing engine based on Chandy-
 \subsection{Processing model}
 \label{fs-acker-processing-model}
 
+\subsubsection{Streaming runtime}
+
 Typically, distributed stream processing engines are shared-nothing runtimes that continuously ingest input elements, transform them according to a logical dataflow graph, and deliver output elements. The logical dataflow graph consists of user-defined operators. Operators are functions of a single input data element that produce a number of output data elements. Operators can be stateless or stateful: output elements may depend on the current state. A logical graph is mapped to a physical, distributed graph on deployment. Commonly, a single logical operator can be deployed on multiple computational nodes. Further, we denote physical instances of logical operators as {\em processes}.
 
 A deployed physical graph is a distributed system and could be described in terms of the Chandy-Lamport model~\cite{Chandy:1985:DSD:214451.214456, carbone2018scalable}. In this model, the authors introduce \textit{events} that allow observing a state of the entire system. This approach allows defining system-wide guarantees: in the original paper, it is used to introduce the notion of {\em consistent state}, we use this approach for the definition of a substream management problem.
+
+\subsubsection{Communication and processing}
 
 Following the notation from~\cite{Chandy:1985:DSD:214451.214456, carbone2018scalable}, the distributed system is observed with events. Each event is a tuple of 5 elements $e = (p, s, s', c, M)$, where $p$ is one of the deployed processes, $s$ and $s'$ are state of the process before and after processing, $c$ is one of network FIFO channels that connect processes, and $M$ is a message generated during processing. The generated event $M$ comes to a channel state $C$ until the destination process receives it. Processes and channels form a physical graph of the system $G=\{\Pi,\mathcal{E}\}$. We denote all input channels as $I_p$ and output channels as $O_p$.
 
@@ -59,6 +63,8 @@ More formally, when a process receives a message, it is handled by the mailbox c
     \item Communication events: $\langle recv, p, M\rangle$, $\langle send, p, M \rangle$ -- these events are handled by mailbox controller
     \item Processing of an incoming message $\langle proc, p, M, M' \rangle$
 \end{itemize}
+
+\subsubsection{Formal events}
 
 Lets translate these events into 5-tuple language. Communication events move a message between communication channel and mailbox section of the state:
 \begin{eqnarray}
@@ -170,6 +176,8 @@ We assume one by one processing of substreams for them to be isolated (e.g. epoc
 
 To justify the usefulness of our model described above in Section~\ref{fs-acker-substream-events}, we show how our model can describe the most widely used by state-of-the-art SPEs substream management framework called {\em pucntuations}. We also prove certain properties which are inherent to any implementation of the punctuations framework. 
 
+\subsubsection{Framework overview}
+
 The main idea behind the punctuations framework is to inject special data elements $\mathcal{P}^{pred}$ into data stream one per substream. These elements, called punctuations, flow down the workflow as ordinary data elements. The injector promises that all elements after punctuations won't satisfy the predicate. Hence, the punctuation itself defines the ``border'' of a substream.
 
 Figure~\ref{punctuations_scheme} illustrates the punctuations framework. Green elements indicate elements that belong to some substream, while red elements do not. As we can see, punctuations play the role of delimiter between the substream elements and all further items.
@@ -182,6 +190,8 @@ Figure~\ref{punctuations_scheme} illustrates the punctuations framework. Green e
 \end{figure}
 
 Processes within SPE do not apply user-defined operators to punctuations. Instead, each process $p$ propagates punctuation messages $\mathcal{P}_{pq}^{pred}$ to all outgoing channels $c_{pq} \in O_p$  when it receives corresponding punctuations from all input channels $I_p$.
+
+\subsubsection{Substream termination events}
 
 \begin{lemma}
 Generating event by following rule make it a soft bound of a substream $pred$:
@@ -209,6 +219,8 @@ A soft bound becomes firm if a process event order satisfy the following conditi
 \begin{proof}
 Let us suppose that there is a message $M_{qp}$ of a next substream that was processed after the last element of the current substream, but before the generation of a bound event. This message either came from the channel $q$ before a punctuation from that channel generating a bound, or was processed before all channels delivers their punctuations. The first case could happen if $M_{qp}$ was reordered with the punctuation along the processing path and contradicts with FIFO processing logic (see previous proof for details). The second case is impossible because of processing limitations introduced by~\ref{eq:firm_condition}.
 \end{proof}
+
+\subsubsection{Properties of the punctuation framework}
 
 The design of the punctuations framework implies two important properties:
 
