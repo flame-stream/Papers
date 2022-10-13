@@ -45,9 +45,21 @@ Typically, distributed stream processing engines are shared-nothing runtimes tha
 
 A deployed physical graph is a distributed system and could be described in terms of the Chandy-Lamport model~\cite{Chandy:1985:DSD:214451.214456, carbone2018scalable}. In this model, the authors introduce \textit{events} that allow observing a state of the entire system. This approach allows defining system-wide guarantees: in the original paper, it is used to introduce the notion of {\em consistent state}, we use this approach for the definition of a substream management problem.
 
-Following the notation from~\cite{Chandy:1985:DSD:214451.214456, carbone2018scalable}, the distributed system is observed with events. Each event is a tuple of 5 elements $e = (p, s, s', c, M)$, where $p$ is one of the deployed processes, $s$ and $s'$ are state of the process before and after processing, $c$ is one of network FIFO channels that connect processes, and $M$ is a message generated during processing. The generated event $M$ comes to a channel state $C$ until the destination process receives it. Processes and channels form a physical graph of the system $G=\{\Pi,\mathcal{E}\}$. We denote all input channels as $I_p$ and output channels as $O_p$.
+Following the notation from~\cite{Chandy:1985:DSD:214451.214456, carbone2018scalable}, the distributed system is observed with events. 
 
-In a stream processing engine, we need to specify a process $p$ to reflect the nature of SPE. In our model we split a process into two separate blocks: {\em business logic handler} (BLH), and {\em mailbox controller} (MBC). The first block encapsulates a user-defined operator. In this model user-defined operator does not directly communicate with other processes in the system. Instead of this, it receives and generates {\em messages} -- data elements that are tagged by their source and destination. Further delivery of these messages along the communication channels is then handled by a mailbox controller that preserves the order of message generation. Figure~\ref{fig:spe_process} illustrates the scheme of a process. This system layout is not new, and it is widely used in practice (Akka, YDB, Millwheel, etc.).
+\begin{definition}[Event]
+An event is a tuple of 5 elements $e = (p, s, s', c, M)$, where $p$ is one of the deployed processes, $s$ and $s'$ are state of the process before and after processing, $c$ is one of network FIFO channels that connect processes, and $M$ is a message generated during processing.
+\end{definition}
+
+The generated event $M$ comes to a channel state $C$ until the destination process receives it. Processes and channels form a physical graph of the system $G=\{\Pi,\mathcal{E}\}$. We denote all input channels as $I_p$ and output channels as $O_p$.
+
+In a stream processing engine, we need to specify a process $p$ to reflect the nature of SPE. 
+
+\begin{definition}[Process]
+A process in an SPE is an actor consisting of {\em business logic handler} (BLH), and {\em mailbox controller} (MBC). The first block encapsulates a user-defined operator. User-defined operator does not directly communicate with other processes in the system. Instead of this, it receives and generates {\em messages} -- data elements that are tagged by their source and destination. Further delivery of these messages along the communication channels is then handled by a mailbox controller that preserves the order of message generation.
+\end{definition}
+
+Figure~\ref{fig:spe_process} illustrates the scheme of a process. This system layout is not new, and it is widely used in practice (Akka, YDB, Millwheel, etc.).
 
 \begin{figure}[t]
   \centering
@@ -90,11 +102,19 @@ Note that in this case, $M'$ may contain more than one message. Following the Ch
 
 For each process, we want to get the first and the last element of a substream. The first one could be found naturally when it emerges, but verification that there will be no more events of a substream could be problematic. Strict substream termination guarantee consists of two parts: source must promise that no more messages from substream may emerge, and the system must ensure it contains no substream messages. The first task requires a contract with a particular data source and is thus out of scope for this paper, though it is discussed in relevant literature~\cite{awad2019adaptive}. Instead, we focus on the second task; this is challenging due to distributed nature of the system and the lack of a common message lifetime limit. This difficulty increases with the introduction of cycles into dataflow. Crucially, processes are not isolated from one another, and substream messages can move from one process to another. That is why we need to observe all in-flight messages in the system.
 
-Formally, a substream can be defined via the propositional formula $Pred(e)$ for any system event. We have to use system events as they are ordered inside each process and can define a border of a substream. Sometimes it is more practical to induce this predicate to messages ($pred(M)$) involved in processing: $Pred(e) = (e = \langle proc, p, M, M'\rangle) \wedge pred(M)$.
+\begin{definition}[Substream]
+Substream is a part of the all events in a system, such that these events satisfy a propositional formula $Pred(e)$.
+\end{definition}
+
+We have to use system events as they are ordered inside each process and can define a border of a substream. Sometimes it is more practical to induce this predicate to messages ($pred(M)$) involved in processing: $Pred(e) = (e = \langle proc, p, M, M'\rangle) \wedge pred(M)$.
 
 In this paper we are interested in such $Pred(e)$, that has limited lifespan within a process and want to know when substream starts and terminates: $\forall p, \exists t_0^p, t_1^p: \exists e: e_{t_0^p} <_p e <_p e_{t_1^p}, Pred(e) \And \forall e': e_{t_1^p} <_p e', \neg Pred(e')$. Lets boil this formula down: for each process $p$ in the system there must be two event indices $t_0^p$ for substream start and $t_1^p$ for its termination, such that events satisfying $Pred$ must be between these indices. 
 
-{\em Substream management problem} is to define a special mechanism that estimates substream bound for each process. In our system model, we need to define a system event that indicates the bound of a substream for a process. We call this termination event or end-of-substream event, this appropriate :
+\begin{definition}[Substream management problem]
+Substream management problem is to define a special mechanism that estimates substream bound for each process.
+\end{definition}
+
+In our system model, we need to define a system event that indicates the bound of a substream for a process. We call this termination event or end-of-substream event, this appropriate :
 \begin{equation}
   \langle eoss, p, Pred \rangle = (p, B_p, B_p\cup eoss(Pred), \emptyset, \emptyset)  
 \end{equation}
@@ -103,11 +123,15 @@ As we mentioned before, some problems require certain properties of the terminat
 
 \subsubsection{Soft bound}
 
-Many applications that apply substream management systems do not require any special properties of termination events. In this case, we denote the guarantee provided by such events as {\em soft bound}, because termination events indicate only the fact that the substream ended some time ago, and other input elements could be processed after that. More formally, we define the soft bound guarantee of the termination event (end-of-substream) $\langle eoss_{soft}, p, Pred\rangle$ as follows:
+Many applications that apply substream management systems do not require any special properties of termination events. In this case, we denote the guarantee provided by such events as {\em soft bound}, because termination events indicate only the fact that the substream ended some time ago, and other input elements could be processed after that.
+
+\begin{definition}[Soft bound]
+Termination event (end-of-substream) $\langle eoss_{soft}, p, Pred\rangle$ satisfies a soft bound guarantee iff:
 
 \begin{equation}
 \forall e, e >_p \langle eoss_{soft}, p, Pred\rangle \Rightarrow \neg Pred(e)
 \end{equation}
+\end{definition}
 
 Figure~\ref{general_guarantees} illustrates this notion. Terms $a,b,c,d...$ denote ordered processing events of a process $p$. The substream ends after event $c$. Note that there are several other events between the end-of-substream and $c$. This is the property of a {\em soft bound} guarantee: if $\langle eoss_{soft}, p, Pred\rangle$ occurs, all subsequent elements do not satisfy the predicate, but it is not necessarily the exact substream ``border''.
 
@@ -122,11 +146,15 @@ Figure~\ref{general_guarantees} illustrates this notion. Terms $a,b,c,d...$ deno
 
 The guarantee that any new event will not satisfy the predicate is sufficient for many real-life problems, e.g., SPE can initiate process state pruning on such events. However, some problems require a {\em firm bound}: guarantee that the substream ends {\em exactly} after the termination event. 
 
-For example, epoch-based snapshotting protocol~\cite{2015arXiv150608603C, jacques2016consistent} relies on the notion of {\em epoch}. An epoch is a special substream that must be processed atomically. Therefore, the SPE requires the termination event for a given epoch to occur immediately after the last processing event for that epoch. Otherwise, the snapshot can be inconsistent, capturing elements from multiple epochs. To support such scenarios, the end-of-substream event $\langle eoss_{firm}, p, Pred\rangle$ should satisfy the following condition:
+For example, epoch-based snapshotting protocol~\cite{2015arXiv150608603C, jacques2016consistent} relies on the notion of {\em epoch}. An epoch is a special substream that must be processed atomically. Therefore, the SPE requires the termination event for a given epoch to occur immediately after the last processing event for that epoch. Otherwise, the snapshot can be inconsistent, capturing elements from multiple epochs. To support such scenarios, the end-of-substream event $\langle eoss_{firm}, p, Pred\rangle$ should satisfy a firm bound guarantee.
+
+\begin{definition}[Firm bound]
+Termination event (end-of-substream) $\langle eoss_{firm}, p, Pred\rangle$ satisfies a firm bound guarantee iff:
 
 \begin{equation}\begin{array}{l}
 \langle eoss_{firm}, p, Pred\rangle = \inf_{<_p} \langle eoss_{soft}, p, Pred\rangle
 \end{array}\end{equation}
+\end{definition}
 
 Unlike the soft bound, within the firm guarantee, the first element outside the substream $Pred$ must be ordered after the firm bound event in the process $p$. This position satisfies the first possible soft bound in the events ordering. Figure~\ref{strict_guarantees} illustrates the notion of the firm bound. As in the previous example, terms $a,b,c,d...$ denote ordered processing events of a process $p$. However, in this case, event $\langle eoss_{firm}, p, Pred\rangle$ occurs right after the substream terminates.
 
@@ -149,11 +177,13 @@ Some specific applications, including the mentioned earlier epoch-based snapshot
 
 Termination events reordering in case of the soft bound guarantee is illustrated in Figure~\ref{notifications_reordering}. Terms $a,b,c,d...$ denote ordered processing events of a process $p$. Although the substream containing events $a,b$ terminates earlier, the end-of-substream event for this substream occurs after the termination event for the substream containing events $d,e$. 
 
+\begin{definition}[Consistent termination events order]
 Let $e^{*}_1$ and $e^{*}_2$ be the last elements of substreams defined by predicates $Pred_1$ and $Pred_2$. Termination events $\langle eoss, p, Pred_1\rangle$ and $\langle eoss, p, Pred_2\rangle$ are {\em consistently ordered} iff:
 
 \begin{equation}
 e^{*}_1 >_p e^{*}_2 \Leftrightarrow \langle eoss, p, Pred_1\rangle >_p \langle eoss, p, Pred_2\rangle
 \end{equation}
+\end{definition}
 
 \subsubsection{Optimal traffic overhead}
 
