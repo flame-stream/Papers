@@ -108,18 +108,16 @@ Substream is a part of the all events in a system, such that these events satisf
 
 We have to use system events as they are ordered inside each process and can define a border of a substream. Sometimes it is more practical to induce this predicate to messages ($pred(M)$) involved in processing: $Pred(e) = (e = \langle proc, p, M, M'\rangle) \wedge pred(M)$.
 
-In this paper we are interested in such $Pred(e)$, that has limited lifespan within a process and want to know when substream starts and terminates: $\forall p, \exists t_0^p, t_1^p: \exists e: e_{t_0^p} <_p e <_p e_{t_1^p}, Pred(e) \And \forall e': e_{t_1^p} <_p e', \neg Pred(e')$. Lets boil this formula down: for each process $p$ in the system there must be two event indices $t_0^p$ for substream start and $t_1^p$ for its termination, such that events satisfying $Pred$ must be between these indices. 
+In this paper we consider substreams with limited lifespan within a process. We want to know when substream starts and terminates: $\forall p, \exists t_0^p, t_1^p: \exists e: e_{t_0^p} <_p e <_p e_{t_1^p}, Pred(e) \And \forall e': e_{t_1^p} <_p e', \neg Pred(e')$. Lets boil this formula down: for each process $p$ in the system there must be two event indices $t_0^p$ for substream start and $t_1^p$ for its termination, such that events satisfying $Pred$ must be between these indices. 
 
 \begin{definition}[Substream management problem]
-Substream management problem is to define a special mechanism that estimates substream bound for each process.
-\end{definition}
-
-In our system model, we need to define a system event that indicates the bound of a substream for a process. We call this termination event or end-of-substream event, this appropriate :
+Substream management problem is to define a special mechanism that estimates substream bound for each process. To indicate the bound of a substream for a process, we use termination event or end-of-substream event, this appropriate:
 \begin{equation}
   \langle eoss, p, Pred \rangle = (p, B_p, B_p\cup eoss(Pred), \emptyset, \emptyset)  
 \end{equation}
+\end{definition}
 
-As we mentioned before, some problems require certain properties of the termination events. For example, the state pruning problem does not require any special properties, while for the state snapshotting problem, the substream management system should detect the exact substream bound. In the following sections, we formalize these properties. 
+Some problems require additional properties of the termination events. For example, the state pruning problem does not require any special properties, while for the state snapshotting problem, the substream management system should detect the exact substream bound. In the following sections, we formalize these properties. 
 
 \subsubsection{Soft bound}
 
@@ -277,7 +275,7 @@ Even the soft bound event requires receiving punctuations from all incoming netw
 
 \end{proof}
 
-Note that the are several promising directions of improving the network traffic complexity for punctuations framework. Firstly, we can batch punctuations for several substreams if they do not require independent termination events. It can reduce network complexity to $O(\frac{K}{B}|\Pi|^2)$ where B is a batching frequency. On the other hand, such approach is not suitable for all substream types (e.g. it cannot be applied for epochs) and can increase the latency between the substream end and the termination event while keeping the quadratic dependency on the number of nodes.
+Note that the are several promising directions of improving the network traffic complexity for punctuations framework. Firstly, one can batch punctuations for several substreams if they do not require independent termination events. It can reduce network complexity to $O(\frac{K}{B}|\Pi|^2)$ where B is a batching frequency. On the other hand, such approach is not suitable for all substream types (e.g. it cannot be applied for epochs) and can increase the latency between the substream end and the termination event while keeping the quadratic dependency on the number of nodes.
 
 Secondly, it is possible to attach punctuations to all regular input data elements. In this case, there can be no extra traffic in terms of messages at all. However, it makes the latency between the substream end and the termination event completely unpredictable because some network channels can be used rarely.
 
