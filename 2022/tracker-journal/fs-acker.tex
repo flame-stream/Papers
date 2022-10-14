@@ -1,16 +1,16 @@
 % \documentclass{vldb}
-\documentclass[sigconf]{acmart}
-\AtBeginDocument{%
-  \providecommand\BibTeX{{%
-    \normalfont B\kern-0.5em{\scshape i\kern-0.25em b}\kern-0.8em\TeX}}}
+\documentclass[preprint,12pt,twocolumn]{elsarticle}
+% \AtBeginDocument{%
+%   \providecommand\BibTeX{{%
+%     \normalfont B\kern-0.5em{\scshape i\kern-0.25em b}\kern-0.8em\TeX}}}
 
-\copyrightyear{2022} 
-\acmYear{2022} 
-\setcopyright{acmcopyright}\acmConference[DEBS '22]{The 16th ACM International Conference on Distributed and Event-based Systems}{June 27--30, 2022}{Copenhagen, Denmark}
-\acmBooktitle{The 16th ACM International Conference on Distributed and Event-based Systems (DEBS '22), June 27--30, 2022, Copenhagen, Denmark}
-\acmPrice{15.00}
-\acmDOI{10.1145/3524860.3539809}
-\acmISBN{978-1-4503-9308-9/22/06}
+% \copyrightyear{2022} 
+% \acmYear{2022} 
+% \setcopyright{acmcopyright}\acmConference[DEBS '22]{The 16th ACM International Conference on Distributed and Event-based Systems}{June 27--30, 2022}{Copenhagen, Denmark}
+% \acmBooktitle{The 16th ACM International Conference on Distributed and Event-based Systems (DEBS '22), June 27--30, 2022, Copenhagen, Denmark}
+% \acmPrice{15.00}
+% \acmDOI{10.1145/3524860.3539809}
+% \acmISBN{978-1-4503-9308-9/22/06}
 
 \usepackage[utf8]{inputenc}
 
@@ -20,6 +20,8 @@
 \usepackage{array}
 \usepackage{hyperref}
 \usepackage{algorithm} % for algorithms
+\usepackage{makecell}
+\usepackage{amsmath}
 % \usepackage{algorithmicx}
 % \usepackage{algorithm2e} % for algorithms
 \usepackage{algpseudocode}
@@ -56,47 +58,63 @@
 
 \begin{document}
 
+\twocolumn[{
+\begin{frontmatter}
+
 \title {Substream Management in Distributed Streaming Dataflows}
 
-\author{Artem Trofimov}
-\email{tyoma@lzy.ai}
-\affiliation{
-  \institution{lzy.ai}
-  \city{Tel Aviv}
-  \country{Israel}
-}
+\author[1]{Artem Trofimov}
+\author[2]{Nikita Sokolov}
+\author[3]{Nikita Marshalkin}
+\author[4]{Igor Kuralenok}
+\author[5]{Boris Novikov}
 
-\author{Nikita Sokolov}
-\email{faucct@gmail.com}
-\affiliation{
-  \institution{Yandex Cloud}
-  \city{Saint Petersburg}
-  \country{Russia}
-}
+\address[1]{lzy.ai, Tel Aviv, Israel}
+\address[2]{Yandex Cloud, Saint Petersburg, Russia}
+\address[3]{No affiliation, Limassol, Cyprus}
+\address[4]{Huawei, Saint Petersburg, Russia}
+\address[5]{HSE University, Saint Petersburg, Russia}
 
-\author{Nikita Marshalkin}
-\email{marnikitta@gmail.com}
-\affiliation{
-  \institution{No affiliation}
-  \city{Limassol}
-  \country{Cyprus}
-}
 
-\author{Igor Kuralenok}
-\email{igor.kuralenok@huawei.com}
-\affiliation{
-  \institution{Huawei}
-  \city{Saint Petersburg}
-  \country{Russia}
-}
+% \author{Artem Trofimov}
+% \email{tyoma@lzy.ai}
+% \affiliation{
+%   \institution{lzy.ai}
+%   \city{Tel Aviv}
+%   \country{Israel}
+% }
 
-\author{Boris Novikov}
-\email{borisnov@acm.org}
-\affiliation{
-  \institution{HSE University}
-  \city{Saint Petersburg}
-  \country{Russia}
-}
+% \author{Nikita Sokolov}
+% \email{faucct@gmail.com}
+% \affiliation{
+%   \institution{Yandex Cloud}
+%   \city{Saint Petersburg}
+%   \country{Russia}
+% }
+
+% \author{Nikita Marshalkin}
+% \email{marnikitta@gmail.com}
+% \affiliation{
+%   \institution{No affiliation}
+%   \city{Limassol}
+%   \country{Cyprus}
+% }
+
+% \author{Igor Kuralenok}
+% \email{igor.kuralenok@huawei.com}
+% \affiliation{
+%   \institution{Huawei}
+%   \city{Saint Petersburg}
+%   \country{Russia}
+% }
+
+% \author{Boris Novikov}
+% \email{borisnov@acm.org}
+% \affiliation{
+%   \institution{HSE University}
+%   \city{Saint Petersburg}
+%   \country{Russia}
+% }
 
 % \numberofauthors{5}
 % Nikita Sokolov\\
@@ -125,25 +143,28 @@
 A common problem in distributed stream processing is to split a stream into finite chunks of messages (substreams) and to determine their boundaries: stateful streaming operators should clear outdated state; time window operators should release output after all elements within the specified time range have arrived. Most state-of-the-art SPEs use punctuations to divide a stream into bounded substreams of messages. The punctuation approach is powerful but has limitations: it does not support cyclic dataflows, is poorly scalable in some cases due to intensive use of broadcasts, and becomes inefficient when the number of chunks or cluster size becomes significant. We introduce a new substream tracking technique called \tracker\ that overcomes the limits of punctuations. We experimentally evaluate the properties of \tracker\ in both synthetic and real-world environments. Experiments show that our technique is scalable, outperforms punctuations for a large number of substreams, and efficiently handles real-world cyclic dataflows.
 \end{abstract}
 
-\begin{CCSXML}
-<ccs2012>
-<concept>
-<concept_id>10002951.10002952.10003190.10010842</concept_id>
-<concept_desc>Information systems~Stream management</concept_desc>
-<concept_significance>500</concept_significance>
-</concept>
-</ccs2012>
-\end{CCSXML}
+\end{frontmatter}
+}]
 
-\ccsdesc[500]{Information systems~Stream management}
+% \begin{CCSXML}
+% <ccs2012>
+% <concept>
+% <concept_id>10002951.10002952.10003190.10010842</concept_id>
+% <concept_desc>Information systems~Stream management</concept_desc>
+% <concept_significance>500</concept_significance>
+% </concept>
+% </ccs2012>
+% \end{CCSXML}
 
-\keywords{Data streams, punctuations, watermarks, substreams, stream join, state management}
+% \ccsdesc[500]{Information systems~Stream management}
 
-\maketitle
+% \keywords{Data streams, punctuations, watermarks, substreams, stream join, state management}
 
-% \keywords{Data streams, exactly-once, drifting state, optimistic OOP}
+% \maketitle
 
-\thispagestyle{empty}
+% % \keywords{Data streams, exactly-once, drifting state, optimistic OOP}
+
+% \thispagestyle{empty}
 
 \section {Introduction}
 \input {fs-acker-intro}
@@ -170,7 +191,7 @@ A common problem in distributed stream processing is to split a stream into fini
 % \section {Punctuations} \label{appendix:punctuations-proof}
 % \section {\tracker} \label{appendix:tracker-proof}
 
-\bibliographystyle{ACM-Reference-Format}
+\bibliographystyle{elsarticle-num}
 % \bibliography{bibliography/flame-stream}
 \bibliography{bibliography/flame-stream}
 

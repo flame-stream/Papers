@@ -77,17 +77,21 @@ When a process receives a message, it is handled by the mailbox controller that 
 \end{itemize}
 
 Lets translate these events into 5-tuple language. Communication events move a message between communication channel and mailbox section of the state:
-\begin{eqnarray}
-\langle recv, p, M\rangle = (p, s_p, s'_p = U_p \cup \left(B_p \cup \{M\}\right), c_{qp}, M) \\
-\langle send, p, M \rangle = (p, s_p, s'_p = U_p \cup \left(B_p\setminus\{M\}\right), c_{p, dst(M)}, M)
-\end{eqnarray}
+
+\begin{multline}
+\langle recv, p, M\rangle = \\ (p, s_p, s'_p = U_p \cup \left(B_p \cup \{M\}\right), c_{qp}, M)
+\end{multline}
+
+\begin{multline}
+\langle send, p, M \rangle = \\ (p, s_p, s'_p = U_p \cup \left(B_p\setminus\{M\}\right), c_{p, dst(M)}, M)
+\end{multline}
 
 Note that we need to be able to get a destination process directly from the message $dst(M)$. This function translates a destination element from logical dataflow graph nodes, used in user-defined code, to physical communication channels between processes. A practical case of this abstraction is a sharding scheme for some key: user-defined procedure emits event for some key, and a system is responsible for finding a proper physical channel to deliver this message.
 
 Incoming message processing does not influence the communication channels and only ingest results of a message processing $(U', M') = func_p(U, M)$:
-\begin{equation}
-    \langle proc, p, M, M' \rangle = (p, s_p, s'_p = U'_p \cup \left(B_p \setminus \{M\} \cup M' \right) , \emptyset, \emptyset)
-\end{equation}
+\begin{multline}
+    \langle proc, p, M, M' \rangle = \\ (p, s_p, s'_p = U'_p \cup \left(B_p \setminus \{M\} \cup M' \right) , \emptyset, \emptyset)
+\end{multline}
 
 Note that in this case, $M'$ may contain more than one message. Following the Chandy-Lamport model, we assume processes are single-threaded, so within the specific process $p$, all events are ordered by a local causal order relation $<_p$: $e^{0}_p,e^{1}_p,\ldots,e^{i}_p,\ldots$. Please note that each process has its own local causal order relation, so we do not assume any total order among events from different processes. This model is indeed practical, e.g., implemented in actor-based systems.
 
@@ -108,13 +112,19 @@ Substream is a part of the all events in a system, such that these events satisf
 
 We have to use system events as they are ordered inside each process and can define a border of a substream. Sometimes it is more practical to induce this predicate to messages ($pred(M)$) involved in processing: $Pred(e) = (e = \langle proc, p, M, M'\rangle) \wedge pred(M)$.
 
-In this paper we consider substreams with limited lifespan within a process. We want to know when substream starts and terminates: $\forall p, \exists t_0^p, t_1^p: \exists e: e_{t_0^p} <_p e <_p e_{t_1^p}, Pred(e) \And \forall e': e_{t_1^p} <_p e', \neg Pred(e')$. Lets boil this formula down: for each process $p$ in the system there must be two event indices $t_0^p$ for substream start and $t_1^p$ for its termination, such that events satisfying $Pred$ must be between these indices. 
+In this paper we consider substreams with limited lifespan within a process. We want to know when substream starts and terminates: 
 
-\begin{definition}[Substream management problem]
+\begin{multline}
+\forall p, \exists t_0^p, t_1^p: \exists e: e_{t_0^p} <_p e <_p e_{t_1^p}, Pred(e) \And \\ \forall e': e_{t_1^p} <_p e', \neg Pred(e') 
+\end{multline}
+
+Lets boil this formula down: for each process $p$ in the system there must be two event indices $t_0^p$ for substream start and $t_1^p$ for its termination, such that events satisfying $Pred$ must be between these indices. 
+
+\begin{definition}[Substream management]
 Substream management problem is to define a special mechanism that estimates substream bound for each process. To indicate the bound of a substream for a process, we use termination event or end-of-substream event, this appropriate:
-\begin{equation}
-  \langle eoss, p, Pred \rangle = (p, B_p, B_p\cup eoss(Pred), \emptyset, \emptyset)  
-\end{equation}
+\begin{multline}
+  \langle eoss, p, Pred \rangle = \\ (p, B_p, B_p\cup eoss(Pred), \emptyset, \emptyset)  
+\end{multline}
 \end{definition}
 
 Some problems require additional properties of the termination events. For example, the state pruning problem does not require any special properties, while for the state snapshotting problem, the substream management system should detect the exact substream bound. In the following sections, we formalize these properties. 
@@ -149,9 +159,9 @@ For example, epoch-based snapshotting protocol~\cite{2015arXiv150608603C, jacque
 \begin{definition}[Firm bound]
 Termination event (end-of-substream) $\langle eoss_{firm}, p, Pred\rangle$ satisfies a firm bound guarantee iff:
 
-\begin{equation}\begin{array}{l}
-\langle eoss_{firm}, p, Pred\rangle = \inf_{<_p} \langle eoss_{soft}, p, Pred\rangle
-\end{array}\end{equation}
+\begin{multline}
+\langle eoss_{firm}, p, Pred\rangle = \\ \inf_{<_p} \langle eoss_{soft}, p, Pred\rangle
+\end{multline}
 \end{definition}
 
 Unlike the soft bound, within the firm guarantee, the first element outside the substream $Pred$ must be ordered after the firm bound event in the process $p$. This position satisfies the first possible soft bound in the events ordering. Figure~\ref{strict_guarantees} illustrates the notion of the firm bound. As in the previous example, terms $a,b,c,d...$ denote ordered processing events of a process $p$. However, in this case, event $\langle eoss_{firm}, p, Pred\rangle$ occurs right after the substream terminates.
