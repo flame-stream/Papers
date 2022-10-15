@@ -76,7 +76,7 @@ When a process receives a message, it is handled by the mailbox controller that 
     \item Processing of an incoming message $\langle proc, p, M, M' \rangle$
 \end{itemize}
 
-Lets translate these events into 5-tuple language. Communication events move a message between communication channel and mailbox section of the state:
+Let us translate these events into 5-tuple language. Communication events move a message between communication channel and mailbox section of the state:
 
 \begin{multline}
 \langle recv, p, M\rangle = \\ (p, s_p, s'_p = U_p \cup \left(B_p \cup \{M\}\right), c_{qp}, M)
@@ -118,12 +118,12 @@ In this paper we consider substreams with limited lifespan within a process. We 
 \forall p, \exists t_0^p, t_1^p: \exists e: e_{t_0^p} <_p e <_p e_{t_1^p}, Pred(e) \And \\ \forall e': e_{t_1^p} <_p e', \neg Pred(e') 
 \end{multline}
 
-Lets boil this formula down: for each process $p$ in the system there must be two event indices $t_0^p$ for substream start and $t_1^p$ for its termination, such that events satisfying $Pred$ must be between these indices. 
+We can boil this formula down: for each process $p$ in the system there must be two event indices $t_0^p$ for substream start and $t_1^p$ for its termination, such that events satisfying $Pred$ must be between these indices. 
 
 \begin{definition}[Substream management]
 Substream management problem is to define a special mechanism that estimates substream bound for each process. To indicate the bound of a substream for a process, we use termination event or end-of-substream event, this appropriate:
 \begin{multline}
-  \langle eoss, p, Pred \rangle = \\ (p, B_p, B_p\cup eoss(Pred), \emptyset, \emptyset)  
+  \langle eoss, p, Pred \rangle = (p, B_p, B_p\cup eoss(Pred), \emptyset, \emptyset)  
 \end{multline}
 \end{definition}
 
@@ -160,7 +160,7 @@ For example, epoch-based snapshotting protocol~\cite{2015arXiv150608603C, jacque
 Termination event (end-of-substream) $\langle eoss_{firm}, p, Pred\rangle$ satisfies a firm bound guarantee iff:
 
 \begin{multline}
-\langle eoss_{firm}, p, Pred\rangle = \\ \inf_{<_p} \langle eoss_{soft}, p, Pred\rangle
+\langle eoss_{firm}, p, Pred\rangle = \inf_{<_p} \langle eoss_{soft}, p, Pred\rangle
 \end{multline}
 \end{definition}
 
@@ -185,7 +185,7 @@ Some specific applications, including the mentioned earlier epoch-based snapshot
 
 Termination events reordering in case of the soft bound guarantee is illustrated in Figure~\ref{notifications_reordering}. Terms $a,b,c,d...$ denote ordered processing events of a process $p$. Although the substream containing events $a,b$ terminates earlier, the end-of-substream event for this substream occurs after the termination event for the substream containing events $d,e$. 
 
-\begin{definition}[Consistent termination events order]
+\begin{definition}[Consistent events order]
 Let $e^{*}_1$ and $e^{*}_2$ be the last elements of substreams defined by predicates $Pred_1$ and $Pred_2$. Termination events $\langle eoss, p, Pred_1\rangle$ and $\langle eoss, p, Pred_2\rangle$ are {\em consistently ordered} iff:
 
 \begin{equation}
@@ -231,9 +231,9 @@ Processes within SPE do not apply user-defined operators to punctuations. Instea
 
 \begin{lemma}
 Generating event by following rule make it a soft bound of a substream $pred$:
-\begin{equation}
-\forall q \in I_p, \exists \mathcal{P}^{pred}_{qp} \in B_p, \forall M\in B_p : \neg pred(M) \vee dst(M) \ne p
-\end{equation}
+\begin{multline}
+\forall q \in I_p, \exists \mathcal{P}^{pred}_{qp} \in B_p, \forall M\in B_p : \\ \neg pred(M) \vee dst(M) \ne p
+\end{multline}
 \end{lemma}
 % \begin{proof}
 % Using the definition of the soft bound, we can use indirect proof. If there is a processing event from the substream that happens after the generated event, there is a message $M^*$ that generates this event. This message could emerge from two sources: from the mailbox of a process or from incoming channels. The mailbox does not contain such elements due to condition $pred(M) \wedge dst(M) = p$. Data sources guarantee that after a punctuation element, they will provide the system with no substream elements. This condition allows us to say that the data element entered the system before punctuation. Because of broadcasting on each step, punctuations cover all possible processing paths of a data element, including the processing path of the particular message $M^*$. This means that the punctuation message and data element from $M^*$ were reordered along the processing path, which contradicts with either mailbox controller order preservation or the FIFO nature of communication channels.
@@ -247,10 +247,10 @@ To satisfy the firm bound guarantee, the mailbox controller should block process
 
 \begin{lemma}
 A soft bound becomes firm if a process event order satisfy the following conditions:
-\begin{equation}
-  \forall e_1, e_2 = \langle recv, p, \mathcal{P}^{pred}_{q_{1,2}p} \rangle, \nexists e' = \langle proc, p, M_{q_1p}, M' \rangle, e_1 <_p e' <_p e_2
-  \label{eq:firm_condition}
-\end{equation}
+\begin{multline}
+\label{eq:firm_condition}
+\forall e_1, e_2 = \langle recv, p, \mathcal{P}^{pred}_{q_{1,2}p} \rangle, \nexists e' = \\ \langle proc, p, M_{q_1p}, M' \rangle, e_1 <_p e' <_p e_2
+\end{multline}
 \end{lemma}
 \begin{proof}
 Let us suppose that there is a message $M_{qp}$ of a next substream that was processed after the last element of the current substream, but before the generation of a bound event. This message either came from the channel $q$ before a punctuation from that channel generating a bound, or was processed before all channels delivers their punctuations. The first case could happen if $M_{qp}$ was reordered with the punctuation along the processing path and contradicts with FIFO processing logic (see previous proof for details). The second case is impossible because of processing limitations introduced by~\ref{eq:firm_condition}.
