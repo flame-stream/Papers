@@ -2512,3 +2512,29 @@ Trill uses a streaming batched-columnar data representation with a new dynamic c
 }
 
 @inproceedings{10.1145/3524860.3539809, author = {Trofimov, Artem and Sokolov, Nikita and Marshalkin, Nikita and Kuralenok, Igor and Novikov, Boris}, title = {Substream Management in Distributed Streaming Dataflows}, year = {2022}, isbn = {9781450393089}, publisher = {Association for Computing Machinery}, address = {New York, NY, USA}, url = {https://doi.org/10.1145/3524860.3539809}, doi = {10.1145/3524860.3539809}, abstract = {Most state-of-the-art SPEs use punctuations to divide a stream into bounded substreams of messages, such as epochs and windows. The punctuation approach is powerful but has limitations: it does not support cyclic dataflows, is poorly scalable in some cases due to intensive use of broadcasts, and becomes inefficient when the number of chunks or cluster size becomes significant. We introduce a new substream tracking technique called trAcker that overcomes the limits of punctuations. We experimentally evaluate the properties of trAcker in both synthetic and real-world environments. Experiments show that our technique outperforms punctuations for a large number of substreams and efficiently handles real-world cyclic dataflows.}, booktitle = {Proceedings of the 16th ACM International Conference on Distributed and Event-Based Systems}, pages = {55–66}, numpages = {12}, keywords = {data streams, state management, stream join, watermarks, punctuations, substreams}, location = {Copenhagen, Denmark}, series = {DEBS '22} }
+
+@inproceedings{purtzel2022predicate,
+  title={Predicate-based push-pull communication for distributed CEP},
+  author={Purtzel, Steven and Akili, Samira and Weidlich, Matthias},
+  booktitle={Proceedings of the 16th ACM International Conference on Distributed and Event-Based Systems},
+  pages={31--42},
+  year={2022}
+}
+
+@article{awad2022d2ia,
+  title={D2IA: User-defined interval analytics on distributed streams},
+  author={Awad, Ahmed and Tommasini, Riccardo and Langhi, Samuele and Kamel, Mahmoud and Della Valle, Emanuele and Sakr, Sherif},
+  journal={Information Systems},
+  volume={104},
+  pages={101679},
+  year={2022},
+  publisher={Elsevier}
+}
+
+@inproceedings{hirzel2012partition,
+  title={Partition and compose: Parallel complex event processing},
+  author={Hirzel, Martin},
+  booktitle={Proceedings of the 6th ACM International Conference on Distributed Event-Based Systems},
+  pages={191--200},
+  year={2012}
+}

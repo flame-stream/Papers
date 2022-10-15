@@ -12,6 +12,10 @@ Naiad~\cite{Murray:2013:NTD:2517349.2522738} has a mechanism for tracking the pr
 
 Another technique for tracking centralized iterative processing is introduced in~\cite{chandramouli2014trill}, but it is not yet adapted for distributed processing. Although these methods are robust for progress tracking, they are also currently unsuitable for window termination or state pruning problems.
 
+There are also other works which apply predicates for filtering events in stream processing and complex event processing. Method for building optimized {\em push-pull} plans for complex event processing queries is proposed in~\cite{purtzel2022predicate}. A method for parallel complex event processing over the stream processing engine based on predicates for matching events is detailed in~\cite{hirzel2012partition}.
+
+A novel approach to define analytics on user-defined event intervals is introduced in~\cite{awad2022d2ia}. This work focuses on a language that can express queries over user-defined event intervals. Authors implement this approach on top of the Apache Flink that internally use punctuations for window-based computations. Combining ideas provided by authors of this work with the notion of the substream for complex event processing can be an interesting direction of our future work.
+
 % Another related research direction is the generation of substream termination signals from data producers. Some systems apply periodic scheme~\cite{Akidau:2013:MFS:2536222.2536229, Akidau:2015:DMP:2824032.2824076}, while others try to use knowledge about the content of the data. Adaptive approach~\cite{awad2019adaptive} does not use any information about data but takes into account arrival rate and delay. The enhancements of these methods can increase the applicability of substream management in practice.
 
 % Most dependency tracking techniques employed in state-of-the-art stream processing systems are discussed in detail in Section~\ref{existing_solutions}. In this section we hightlight the differences between 
