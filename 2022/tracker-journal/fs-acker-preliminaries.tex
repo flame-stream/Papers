@@ -1,6 +1,6 @@
 \label{fs-acker-preliminaries}
 
-First, in this section, we formalize a stream processing engine based on Chandy-Lamport definition of a distributed system. Then we define the substream management problem based on the notions from the proposed model. Finally, we discuss a state-of-the-art substream management technique called punctuations.
+First, in this section, we formalize a stream processing engine based on Chandy-Lamport definition of a distributed system. Then we define the substream management problem based on the notions from the proposed model. Finally, we describe a state-of-the-art substream management technique called punctuations in terms of our framework.
 
 \begin{table}[!b]
     \caption{Notations used throughout the paper}
@@ -120,8 +120,8 @@ In this paper we consider substreams with limited lifespan within a process. We 
 
 We can boil this formula down: for each process $p$ in the system there must be two event indices $t_0^p$ for substream start and $t_1^p$ for its termination, such that events satisfying $Pred$ must be between these indices. 
 
-\begin{definition}[Substream management]
-Substream management problem is to define a special mechanism that estimates substream bound for each process. To indicate the bound of a substream for a process, we use termination event or end-of-substream event, this appropriate:
+\begin{definition}[Substream management problem]
+Substream management problem is to estimate substream bound for each process. To indicate the bound of a substream for a process, we use termination event or end-of-substream event, this appropriate:
 \begin{multline}
   \langle eoss, p, Pred \rangle = (p, B_p, B_p\cup eoss(Pred), \emptyset, \emptyset)  
 \end{multline}
