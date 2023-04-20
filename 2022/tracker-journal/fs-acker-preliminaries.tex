@@ -15,7 +15,7 @@ First, in this section, we formalize a stream processing engine based on Chandy-
         \hline
         $\Pi$ & The set of all processes  \\
         \hline
-        $K$ & Number of substreams  \\
+        $K$ & Number of substreams (can be unlimited if substreams are regularly created) \\
         \hline
         $c$ & A network channel between processes  \\
         \hline
@@ -195,7 +195,7 @@ e^{*}_1 >_p e^{*}_2 \Leftrightarrow \langle eoss, p, Pred_1\rangle >_p \langle e
 
 \subsubsection{Optimal traffic overhead}
 
-A vital performance property of a substream management system is the amount of extra network traffic. Let $|\Pi|$ be a number of processes, and $K$ be a number of substreams. 
+A vital performance property of a substream management system is the amount of extra network traffic. Let $|\Pi|$ be a number of processes, and $K$ be a number of substreams~\footnote{number of all created substreams, no matter if they exist concurrently or not}. 
 
 \begin{lemma}
 The network overhead induced by a substream management system cannot be lower than $O(K|\Pi|)$. 
