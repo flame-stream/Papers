@@ -91,6 +91,7 @@ Substreams last a finite time period by definition so that each process sends ag
 The flushing window is the parameter that allows us to balance the service traffic and latency between the actual substream termination (the event from the data producer) and the termination event. Although this optimization does not reduce the theoretical estimation of network traffic complexity, it can significantly reduce substream termination latency as we demonstrate in Section~\ref{fs-experiments}.
 
 \subsection{Consistent termination events order}
+\label{termination_order_impl}
 
 If the order of NEOSS is consistent, the order of termination events will be consistent as well. To achieve consistent order of NEOSS, we need to define $t(M)$ such that the order on $t(M)$ respects the order of input elements. All reports that processes send to the tracking agent should be labeled with $t(M)$. In turn, the tracking agent sends the NEOSS elements according to the order on $t(<)$.
 
