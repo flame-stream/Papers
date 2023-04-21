@@ -177,7 +177,7 @@ Unlike the soft bound, within the firm guarantee, the first element outside the 
 \subsubsection{Consistent termination events order}
 Some specific applications, including the mentioned earlier epoch-based snapshotting method and techniques for enforcing deterministic processing~\cite{we2018adbis} require an order of termination events to be synchronized with the order of substreams last elements processing. For example, if termination events are reordered, then snapshots for consecutive epochs can be inconsistent. Another example is deterministic join that also requires the defined order of termination events~\cite{gulisano2016scalejoin}.
 
-\begin{figure}[htbp]
+\begin{figure}[t]
   \centering
   \includegraphics[width=0.50\textwidth]{pics/notifications-reordering.pdf}
   \caption{An example of termination events reordering}
@@ -221,7 +221,7 @@ The main idea behind the punctuations framework is to inject special data elemen
 
 Figure~\ref{punctuations_scheme} illustrates the punctuations framework. Green elements indicate elements that belong to some substream, while red elements do not. As we can see, punctuations play the role of delimiter between the substream elements and all further items.
 
-\begin{figure}[htbp]
+\begin{figure}[t]
   \centering
   \includegraphics[width=0.40\textwidth]{pics/punctuations-scheme.pdf}
   \caption{Punctuations handling by a single process}

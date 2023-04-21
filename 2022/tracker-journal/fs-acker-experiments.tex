@@ -1,6 +1,19 @@
 \label {fs-experiments}
 
-\begin{figure}
+
+In previous sections we put several statements out: \tracker\ framework provides low service traffic, low latency between the actual substream termination and termination event receiving, and SPE throughput does not depend on the substream size. In the experimental part of the paper, we will examine these properties on synthetic and real-world examples. 
+
+As a baseline approach, we utilize the punctuations-based method employed in many state-of-the-art stream processing systems such as Flink~\cite{Carbone:2017:SMA:3137765.3137777}, Storm~\cite{apache:storm:state}, Heron~\cite{Kulkarni:2015:THS:2723372.2742788}, IBM Streams~\cite{jacques2016consistent}. To the best of our knowledge, the punctuation framework is the only existing general-purpose substream management technique.
+
+% Our goal is to explore how the change of the tracking mechanism affects the behavior of an SPE. 
+
+% We implemented both methods on top of an open-source distributed streaming engine called \FlameStream. Functionality and use-cases of this SPE are similar to state-of-the-art stream processing systems (Flink, Storm, etc.). None of the system-specific features were exploited during the implementation of substream management methods. All experiments are performed on virtual machines with a dual-core CPU and 4 GB RAM from one of the major cloud providers. 
+
+To compare tracking mechanisms, we have to implement them on top of a single SPE. Otherwise, the performance could be affected by inequalities in serialization, network protocols, etc.  The difficulty here is that the tracking mechanism is usually a core part of SPE, and the implementation is often optimized for it. 
+
+We implemented both punctuations and \tracker\ techniques on top of \FlameStream~\cite{we2018beyondmr}. It is an open-source Java-based SPE that allows tracking mechanism customization by its design. In~\cite{we2018adbis}, authors demonstrated that the performance of the \FlameStream\ is comparable to state-of-the-art SPE Flink. None of the system-specific features were exploited during the implementation of substream management methods. All experiments are performed on virtual machines with a dual-core CPU and 4 GB RAM from one of the major cloud providers. 
+
+\begin{figure}[t!]
 \centering
 % \small
 \begin{tikzpicture}[%
@@ -91,6 +104,27 @@
 \label{fig:physical_graph}
 \end{figure}
 
+In the next sections, we will explore our system in four experimental setups:
+% \begin{description}
+    
+    \noindent \textbf{Service traffic:} the last setup aims to demonstrate the asymptotic behavior of competitive approaches. We show that our theoretical estimation meets practical measurements.
+    
+    \noindent \textbf{Latency:} we explore both the notification latency (a delay between a moment when a substream ends and the reception of the termination event for this substream) and the end-to-end processing latency. We compare the \tracker\ and punctuations approaches on synthetic and real-world workloads in soft and firm bounds.
+    
+    \noindent \textbf{Maximum SPE throughput:} we study the influence of the notification mechanism on the maximum throughput of the system using the synthetic workload. This experiment shows an overhead induced by a substream management  on regular data processing.
+    
+    \noindent \textbf{Substream management for cyclic graphs:} \tracker\ framework supports substream management for cyclic dataflows. In this setup, we demonstrate the benefits of this approach for a novel problem setup: state smart caching.
+
+% \end{description}
+
+In our study, we use a common synthetic workload shown in Fig.~\ref{fig:physical_graph}. All vertices pass an input element to the next operation. On each step, items are re-partitioned (round-robin). This shape of the physical execution graph allows us to measure the properties of the system with the growth of key switches in a workload. This setup has no computational overhead while covering many realistic scenarios. Graphs with few vertices (under 30) may fit almost any acyclic streaming pipeline~\cite{akidau2018streaming}. Longer instances of this workload correspond to flattened iterative dataflows such as PageRank or Connected Components~\cite{Murray:2013:NTD:2517349.2522738, xu2016efficient}. We reference this synthetic workload as RR-$N$, where $N$ is the number of steps.
+
+\subsection{Service traffic}
+\label{exp_network_traffic}
+In the theoretical part of the paper, we put a statement that the service traffic of the \tracker\ grows linearly with the number of processes and granularity of the tracking. In this section, we prove this statement in practice. 
+
+We can measure the extra load provided by tracking mechanisms in a number of service messages sent over the network. In \tracker, there are several types of these messages: SND and RCV reports, NEOSS, and logical clock vectors in the distributed setup. In the baseline approach, all service messages are punctuations. If it is not specified, the graph size is 30, the number of VMs is 15, and the granularity is 10.
+
 % https://gist.github.com/faucct/032aaf6240db361d30a184b1d7bf3c8e
 \begin{figure*}[t!]
     \begin{subfigure}[b]{0.3\textwidth}
@@ -137,40 +171,6 @@
     \label{notification_latency}
 \end{figure*}
 
-
-In previous sections we put several statements out: \tracker\ framework provides low service traffic, low latency between the actual substream termination and termination event receiving, and SPE throughput does not depend on the substream size. In the experimental part of the paper, we will examine these properties on synthetic and real-world examples. 
-
-As a baseline approach, we utilize the punctuations-based method employed in many state-of-the-art stream processing systems such as Flink~\cite{Carbone:2017:SMA:3137765.3137777}, Storm~\cite{apache:storm:state}, Heron~\cite{Kulkarni:2015:THS:2723372.2742788}, IBM Streams~\cite{jacques2016consistent}. To the best of our knowledge, the punctuation framework is the only existing general-purpose substream management technique.
-
-% Our goal is to explore how the change of the tracking mechanism affects the behavior of an SPE. 
-
-% We implemented both methods on top of an open-source distributed streaming engine called \FlameStream. Functionality and use-cases of this SPE are similar to state-of-the-art stream processing systems (Flink, Storm, etc.). None of the system-specific features were exploited during the implementation of substream management methods. All experiments are performed on virtual machines with a dual-core CPU and 4 GB RAM from one of the major cloud providers. 
-
-To compare tracking mechanisms, we have to implement them on top of a single SPE. Otherwise, the performance could be affected by inequalities in serialization, network protocols, etc.  The difficulty here is that the tracking mechanism is usually a core part of SPE, and the implementation is often optimized for it. 
-
-We implemented both punctuations and \tracker\ techniques on top of \FlameStream~\cite{we2018beyondmr}. It is an open-source Java-based SPE that allows tracking mechanism customization by its design. In~\cite{we2018adbis}, authors demonstrated that the performance of the \FlameStream\ is comparable to state-of-the-art SPE Flink. None of the system-specific features were exploited during the implementation of substream management methods. All experiments are performed on virtual machines with a dual-core CPU and 4 GB RAM from one of the major cloud providers. 
-
-In the next sections, we will explore our system in four experimental setups:
-% \begin{description}
-    
-    \noindent \textbf{Service traffic:} the last setup aims to demonstrate the asymptotic behavior of competitive approaches. We show that our theoretical estimation meets practical measurements.
-    
-    \noindent \textbf{Latency:} we explore both the notification latency (a delay between a moment when a substream ends and the reception of the termination event for this substream) and the end-to-end processing latency. We compare the \tracker\ and punctuations approaches on synthetic and real-world workloads in soft and firm bounds.
-    
-    \noindent \textbf{Maximum SPE throughput:} we study the influence of the notification mechanism on the maximum throughput of the system using the synthetic workload. This experiment shows an overhead induced by a substream management  on regular data processing.
-    
-    \noindent \textbf{Substream management for cyclic graphs:} \tracker\ framework supports substream management for cyclic dataflows. In this setup, we demonstrate the benefits of this approach for a novel problem setup: state smart caching.
-
-% \end{description}
-
-In our study, we use a common synthetic workload shown in Fig.~\ref{fig:physical_graph}. All vertices pass an input element to the next operation. On each step, items are re-partitioned (round-robin). This shape of the physical execution graph allows us to measure the properties of the system with the growth of key switches in a workload. This setup has no computational overhead while covering many realistic scenarios. Graphs with few vertices (under 30) may fit almost any acyclic streaming pipeline~\cite{akidau2018streaming}. Longer instances of this workload correspond to flattened iterative dataflows such as PageRank or Connected Components~\cite{Murray:2013:NTD:2517349.2522738, xu2016efficient}. We reference this synthetic workload as RR-$N$, where $N$ is the number of steps.
-
-\subsection{Service traffic}
-\label{exp_network_traffic}
-In the theoretical part of the paper, we put a statement that the service traffic of the \tracker\ grows linearly with the number of processes and granularity of the tracking. In this section, we prove this statement in practice. 
-
-We can measure the extra load provided by tracking mechanisms in a number of service messages sent over the network. In \tracker, there are several types of these messages: SND and RCV reports, NEOSS, and logical clock vectors in the distributed setup. In the baseline approach, all service messages are punctuations. If it is not specified, the graph size is 30, the number of VMs is 15, and the granularity is 10.
-
 Figure~\ref{traffic_plots} demonstrates the dependency between service network messages and the size of the logical graph, the number of computational nodes, and the granularity of tracking. The extra service traffic is generated by $50K$ input elements sent with 100 items per second arrival rate. 
 
 As shown in Figure~\ref{traffic_graph}, service traffic for punctuations linearly depends on the dataflow size because each new logical vertex adds network broadcasts of punctuations on a physical level. Dependency from the number of computational nodes is quadratic \footnote{At first glance, the dependency may seem linear, but please note that the X-axis covers range from 10 to 20, and the Y-axis is log-scaled} due to the need to broadcast punctuations to each node after each operator, as it is demonstrated in Figure~\ref{traffic_machines}. 
@@ -190,13 +190,6 @@ One of the key performance metrics is the latency of notifications: a delay betw
 
 In this experiment, we measure the notification latency as an interval duration between a promise from the data source that it will never generate substream elements and the reception of the termination event for this substream. As an experimental workload, we use synthetic workload RR-$N$. We investigate the dependency between the notification latency and cluster sizes, the length $N$ of the workload, and the granularity of tracking (number of elements within a substream). Figure~\ref{notification_latency} shows the results of the experiment. 
 
-The notification latency of a punctuations-based technique depends on the graph and cluster sizes and the granularity of tracking as figures~\ref{notification_graph},\ref{notification_machines}, and~\ref{notification_granularity} indicate. These results are in-line with the overhead induced by punctuations shown in Section~\ref{fs-acker-punctuations}. Notification latency of \tracker\ slightly fluctuates but does not directly depend on the investigated parameters. One can also note that local \tracker\ optimization, as well as distributed version, does not induce heavy overhead on the latency.
-
-The difference in latency between the punctuations and \tracker\ appears because each operator in a dataflow must wait for punctuations from all partitions to sign off the previous operator to send it further to ensure the correctness. 
-
-%Such a  difference in latency between the punctuations and \tracker\ is explained by the fact that each operator in a dataflow must wait for punctuations from all partitions osignificantf the previous operator to send it further. This behavior ensures that punctuations do not overtake ordinary records that guarantee the correctness of this approach.
-
-\subsection{Scalability}
 % https://gist.github.com/faucct/546f5617b958349a125449926373b780
 \begin{figure*}[t!]
     \begin{subfigure}[b]{0.30\textwidth}
@@ -219,6 +212,15 @@ The difference in latency between the punctuations and \tracker\ appears because
     \caption{\tracker\ scalability}
     \label{notification_scalability}
 \end{figure*}
+
+The notification latency of a punctuations-based technique depends on the graph and cluster sizes and the granularity of tracking as figures~\ref{notification_graph},\ref{notification_machines}, and~\ref{notification_granularity} indicate. These results are in-line with the overhead induced by punctuations shown in Section~\ref{fs-acker-punctuations}. Notification latency of \tracker\ slightly fluctuates but does not directly depend on the investigated parameters. One can also note that local \tracker\ optimization, as well as distributed version, does not induce heavy overhead on the latency.
+
+The difference in latency between the punctuations and \tracker\ appears because each operator in a dataflow must wait for punctuations from all partitions to sign off the previous operator to send it further to ensure the correctness. 
+
+%Such a  difference in latency between the punctuations and \tracker\ is explained by the fact that each operator in a dataflow must wait for punctuations from all partitions osignificantf the previous operator to send it further. This behavior ensures that punctuations do not overtake ordinary records that guarantee the correctness of this approach.
+
+\subsection{Scalability}
+
 This section demonstrates that the distributed version of the tracking agent allows the substream management mechanism to scale. We measure the median notification latency depending on the rate of input records. The rapid growth of median latency indicates agent overloading. Input rate that corresponds to the point where latency starts to grow indicates a {\em sustainable throughput} of the \tracker. 
 
 To simulate an additional load on the tracking agent, staying on a budget of 20 machines, we artificially increased the number of sent service messages by 5 and 9 times. We approximate the sustainable throughput by multiplying the extra service messages ratio by the obtained throughput due to the direct dependency between the input and service messages rates. This trick allows us to estimate agent throughput in the number of input data items per second rate without  SPE overloading. Figure~\ref{notification_scalability} demonstrates the results of this experiment.

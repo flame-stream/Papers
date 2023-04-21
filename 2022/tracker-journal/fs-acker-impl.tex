@@ -8,7 +8,7 @@ The tracking agent splits the workflow graph into partially ordered segments and
 
 To track the messages path through segments, the agent receives SND/RCV reports containing a segment identifier and a list of predicates the message satisfies. The agent aggregates this information into the table illustrated in Table~\ref{tracker-table-simple}.
 
-\begin{table}[htbp]
+\begin{table}[t]
 \caption{\tracker\ table: a general example}
   \label{tracker-table-simple}
   \centering
@@ -27,7 +27,7 @@ To track the messages path through segments, the agent receives SND/RCV reports 
 
 A graph shown in Figure~\ref{fig:tracker-acker-comparison} illustrates the notion of segments. This graph has two segments: $A$ and $B$. Note that according to Table~\ref{tracker-table-simple}, the NEOSS for predicate $q(x)$ can be sent for a segment $A$, but not for a segment $B$. This behavior is similar to punctuations: NEOSS can be spawned earlier for the upstream processes.
 
-\begin{figure}[htbp]
+\begin{figure}[t]
   \centering
   \includegraphics[width=0.3\textwidth]{pics/segments-example.pdf}
   \caption{Graph segmentation example}
@@ -49,7 +49,7 @@ Figure~\ref{fig:tracker-reports} illustrates the reports with random numbers. Th
 
 % All reports from processes are grouped by the satisfying predicate and the segment. Random numbers from these reports are XORed into the result shown in columns {\em Segment XOR} and {\em XOR}. If the XOR value is equal to 0, then the tracking agent can send the NEOSS, providing the soft bound guarantee for the corresponding predicate.
 
-\begin{table}[htbp]
+\begin{table}[t]
 \caption{\tracker\ table: XORing technique example}
   \label{tracker-table-xor}
   \centering
@@ -97,7 +97,7 @@ If the order of NEOSS is consistent, the order of termination events will be con
 
 Table~\ref{tracker-table-oder} illustrates the \tracker\ table in case of consistent NEOSS order. Column {\em min t(x)} indicates the minimal $t(x)$ among the elements that satisfy the corresponding predicate. The tracking agent sends notifications for the substream if the $XOR$ value is 0 and all substreams that contain elements with less {\em min t(x)} have finished (notifications have been produced). Therefore, NEOSS for the substream defined by the predicate $h(x)$ is not sent until the NEOSS for the predicate $q(x)$ is generated. 
 
-\begin{table}[htbp]
+\begin{table}[t]
 \caption{\tracker\ table: consistent NEOSS order example}
   \label{tracker-table-oder}
   \centering
