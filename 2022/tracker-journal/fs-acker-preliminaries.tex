@@ -107,7 +107,7 @@ Note that in this case, $M'$ may contain more than one message. Following the Ch
 For each process, we want to get the first and the last element of a substream. The first one could be found naturally when it emerges, but verification that there will be no more events of a substream could be problematic. Strict substream termination guarantee consists of two parts: source must promise that no more messages from substream may emerge, and the system must ensure it contains no substream messages. The first task requires a contract with a particular data source and is thus out of scope for this paper, though it is discussed in relevant literature~\cite{awad2019adaptive}. Instead, we focus on the second task; this is challenging due to distributed nature of the system and the lack of a common message lifetime limit. This difficulty increases with the introduction of cycles into dataflow. Crucially, processes are not isolated from one another, and substream messages can move from one process to another. That is why we need to observe all in-flight messages in the system.
 
 \begin{definition}[Substream]
-Substream is a part of the all events in a system, such that these events satisfy a propositional formula $Pred(e)$.
+All events in a system satisfying a propositional formula $Pred(e)$ form a substream.
 \end{definition}
 
 We have to use system events as they are ordered inside each process and can define a border of a substream. Sometimes it is more practical to induce this predicate to messages ($pred(M)$) involved in processing: $Pred(e) = (e = \langle proc, p, M, M'\rangle) \wedge pred(M)$.
