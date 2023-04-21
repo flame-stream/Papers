@@ -40,6 +40,7 @@ First, in this section, we formalize a stream processing engine based on Chandy-
 \label{fs-acker-processing-model}
 
 \subsubsection{SPE model}
+\label{fs-acker-spe-model}
 
 Typically, distributed stream processing engines are shared-nothing runtimes that continuously ingest input elements, transform them according to a logical dataflow graph, and deliver output elements. The logical dataflow graph consists of user-defined operators. Operators are functions of a single input data element that produce a number of output data elements. Operators can be stateless or stateful: output elements may depend on the current state. A logical graph is mapped to a physical, distributed graph on deployment. Commonly, a single logical operator can be deployed on multiple computational nodes. Further, we denote physical instances of logical operators as {\em processes}.
 
@@ -203,6 +204,8 @@ The network overhead induced by a substream management system cannot be lower th
 \begin{proof}
 We assume one by one processing of substreams for them to be isolated (e.g. epochs). When a substream management system detects the termination of a substream, each stateful process should be informed about this. Hence, at least one network message (termination notification) must be received by each process for each substream.
 \end{proof}
+
+In this proof, we assume that each process should be informed about substream termination, while some processes may not require such notifications, for example, if they are stateless. This assumption is realistic because, as we mentioned in Section~\ref{fs-acker-spe-model}, logical operators are commonly deployed on each computational node, e.g. in state-of-the-art SPEs such as Flink~\cite{Carbone:2017:SMA:3137765.3137777}, Storm~\cite{apache:storm}, Samza~\cite{Noghabi:2017:SSS:3137765.3137770}. In this model, each process must be notified, because each process handles all logical operators.
 
 % Despite the simplicity of this lemma, it will be further used to determine how far a given substream management system is from the theoretical bound. We can also claim a solution is {\em optimal} as its extra traffic estimation is equal to the lower bound of the lemma.
 % In the next sections, we demonstrate that it is possible to design a substream management system that achieves optimal network traffic overhead.
