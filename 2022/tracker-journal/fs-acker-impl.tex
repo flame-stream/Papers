@@ -131,7 +131,7 @@ The tracking agent accumulates all the service traffic from the entire system. T
 
 A basic approach is to partition predicates between the shards of the tracking agent. One shard can handle all reports for the predicate $h(x)$, while the second all reports for the predicate $q(x)$. The network traffic complexity remains the same $O(K|\Pi|)$ because each process sends each report to only a single shard, depending on the predicate.
 
-The main problem regarding this approach is enforcing the consistent NEOSS order. A centralized agent sends NEOSS through the FIFO network channels, so the NEOSS elements for the same processes cannot be reordered. There can be a race between NEOSS from various shards due to asynchronous network channels in the distributed case.
+The main problem regarding this approach is enforcing the consistent NEOSS order. The centralized agent sends NEOSS through the FIFO network channels, so the NEOSS elements for the same processes cannot be reordered. There can be a race between NEOSS from various shards due to asynchronous network channels in the distributed case.
 
 A simple solution for this issue is for each NEOSS from a shard to wait for NEOSS from all other shards but with greater $t(x)$. For example, if a process receives NEOSS for some predicate with $\min t(x) = 3$, then it needs to wait until receiving NEOSS with $t(x) > 3$ from all other shards to produce the termination event. However, this method can increase the latency between the substream end and the termination event.
 
