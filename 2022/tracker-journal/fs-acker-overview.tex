@@ -44,7 +44,7 @@ A process must ensure that input channels will provide no more elements of this 
 \end{itemize}
 It is easy to show that we can join workflow segments for all incoming channels $W_p = \cup_{c\in I_p} W_c$ and track a single subgraph $W_p$ per process. Using the properties of NEOSS, we can define a soft bound criterion:
 \begin{lemma}
-The following rule can generate a soft substream bound:
+The following rule generates the soft substream bound:
 \begin{multline}
  \exists NEOSS \in B_p, \forall M\in B_p : \\ \neg pred(M) \vee dst(M) \ne p
 \end{multline}
