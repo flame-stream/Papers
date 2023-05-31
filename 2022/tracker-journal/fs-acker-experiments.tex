@@ -5,7 +5,7 @@ In previous sections, we put several statements out: \tracker\ framework provide
 
 As a baseline approach, we utilize the punctuations-based method employed in many state-of-the-art stream processing systems such as Flink~\cite{Carbone:2017:SMA:3137765.3137777}, Storm~\cite{apache:storm:state}, Heron~\cite{Kulkarni:2015:THS:2723372.2742788}, IBM Streams~\cite{jacques2016consistent}. To the best of our knowledge, the punctuation framework is the only existing general-purpose substream management technique. 
 
-We have to implement tracking mechanisms on top of a single SPE to compare tracking mechanisms. Otherwise, the performance could be affected by inequalities in serialization, network protocols, etc.  The difficulty here is that the tracking mechanism is usually a core part of SPE, and its implementation is often optimized. 
+We have to implement tracking mechanisms on top of a single SPE to compare tracking mechanisms. Otherwise, the performance could be affected by inequalities in serialization, network protocols, etc.  The difficulty here is that the tracking mechanism is usually a core part of an SPE, and its implementation is often optimized. 
 
 We implemented punctuations and \tracker\ techniques on top of \FlameStream~\cite{we2018beyondmr}. It is an open-source Java-based SPE that allows tracking mechanism customization by its design. In~\cite{we2018adbis}, authors demonstrated that the performance of the \FlameStream\ is comparable to state-of-the-art SPE Flink. We have not exploited the system-specific features while implementing substream management methods. We performed all experiments on virtual machines with a dual-core CPU and 4 GB RAM from one of the major cloud providers. 
 
