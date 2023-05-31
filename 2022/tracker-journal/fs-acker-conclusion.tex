@@ -5,7 +5,7 @@ In this work, we formalized the problem of substreams management. We designed an
 \begin{itemize}
      \item {\bf Cyclic dataflows support:} the method is suitable for problems that require non-linear executions: graph traversing, iterative algorithms, etc. We evaluated this feature within a real-life problem.
      \item {\bf Low overhead:} we showed that our implementation achieves the lower bound of service traffic overhead. We demonstrated that \tracker\ insignificantly affects the throughput of an SPE in practice.
-     \item {\bf Fine-grained substreams support:} \tracker\ framework is suitable for substreams consisting of several elements. This feature is achieved due to low traffic overhead and another way of notifications propagation.
+     \item {\bf Fine-grained substreams support:} \tracker\ framework is suitable for substreams consisting of a few elements. This feature is achieved due to low traffic overhead and another way of notifications propagation.
      \item {\bf Scalability:} extra network traffic from operators can be distributed between multiple nodes. Experiments on synthetic dataflows indicated the practical feasibility of balancing extra traffic.
 \end{itemize}
 
