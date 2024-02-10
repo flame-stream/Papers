@@ -1,0 +1,65 @@
+\documentclass[runningheads]{llncs}
+% packages should be added as needed 
+\usepackage{graphicx}
+
+\usepackage{algorithm} % for algorithms
+%\usepackage{mathtools}
+
+\usepackage{algpseudocode}
+\algblockdefx[Process]{Process}{EndProcess}[2][Unknown]{{\bf Process} {\it #2}}{}
+\algblockdefx[Event]{Event}{EndEvent}[2][Unknown]{{\bf upon event #2 do}}{}
+
+\usepackage{booktabs} % For formal tables
+\usepackage{cite} %for multiple refs
+
+\usepackage{amssymb} %for nice emptyset
+
+\usepackage[T1]{fontenc}
+\usepackage{inconsolata}
+
+\pagestyle{plain} % removes running headers
+
+\newcommand{\PicScale}{0.5}
+\newcommand {\FlameStream} {FlameStream}
+
+\begin{document}
+
+\title {Research Proposal: Consistent Scalable Processing of Data Streams in  a Distributed Environment
+}
+\author{Artem Trofimov}
+\institute{Constructor University}
+
+\maketitle
+
+\begin{abstract}
+Distributed stream processing has two significant differences from batch processing arising due to potentially infinite data streams. The first one is the need for sophisticated consistency maintenance and fault tolerance mechanisms because it is impossible to restart processing from the beginning. The second one is the need to produce preliminary results continuously during processing. In this proposal, we overview start-of-the-art techniques that mitigate the mentioned issues. We observe that these problems are connected with each other as well as with the notion of determinism. We formulate research questions that should be answered to obtain improvements over state-of-the-art. 
+\end{abstract}
+
+\section {Introduction}
+
+\section {Review and literature}
+\input{2024/phd-research-proposal/phd-related-work}
+
+\section {Discussion and observations}
+
+\section {Research questions}
+
+In this work, we aim to answer the following research questions:
+\begin{enumerate}
+    \item What are the formal relations between determinism and consistency guarantees in distributed stream processing?
+    \item Can deterministic stream processing systems theoretically be more efficient regarding latency than non-deterministic? 
+    \item How does efficient deterministic stream processing relate to substream management?
+    \item What are the theoretical bounds of efficiency for substream management techniques, and can we achieve the lower bound?
+\end{enumerate}
+
+\section {Current Progress}
+
+\section {Conclusion}
+\input{2024/phd-research-proposal/phd-conclusion}
+
+\bibliographystyle{splncs04}
+\bibliography{bibliography/flame-stream}
+
+\end {document}
+
+\endinput
