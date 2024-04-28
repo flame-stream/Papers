@@ -11,14 +11,22 @@ Delivery guarantees, such as at-most-once, at-least-once, and exactly-once, defi
     \item Exactly-once is a system processing term that guarantees each input element or transaction is processed exactly one time. This means that it ensures there is no data loss and no duplicate processing. It combines both the prevention of input data losses and the avoidance of repeated delivery of results.
 \end{itemize}
 
-The type of delivery guarantee chosen for a system directly influences how that system handles failures~\cite{zhang2024survey, silvestre2021clonos}. In at-most-once delivery, if a failure occurs during processing, the system may not attempt to reprocess the input, leading to potential data loss. In at-least-once delivery, the system ensures no data is lost by reprocessing inputs in case of failures. However, this can lead to duplicate processing and results if the system doesn't track what has already been processed. In exactly-once delivery, the system ensures that every input is processed exactly one time, even in the case of failures. This is the most complex to implement as it needs to ensure atomicity between reading input data, processing, and delivering results, and it requires the system to be able to recover to a consistent state after a failure.
+The type of delivery guarantee chosen for a system directly influences how that system handles failures~\cite{zhang2024survey, silvestre2021clonos, wang2021consistency}. In at-most-once delivery, if a failure occurs during processing, the system may not attempt to reprocess the input, leading to potential data loss. In at-least-once delivery, the system ensures no data is lost by reprocessing inputs in case of failures. However, this can lead to duplicate processing and results if the system doesn't track what has already been processed. In exactly-once delivery, the system ensures that every input is processed exactly one time, even in the case of failures. This is the most complex to implement as it needs to ensure atomicity between reading input data, processing, and delivering results, and it requires the system to be able to recover to a consistent state after a failure~\cite{Carbone:2017:SMA:3137765.3137777}.
 
+\paragraph{State recovery and consistency}\mbox{} \\
 
-% Delivery guarantees, such as at-most-once, at-least-once, and exactly-once, define how and when data is delivered and processed in the system. These guarantees have a direct impact on the consistency of the system:
-% \cite{carbone2018scalable}
+State recovery is crucial for consistency because it allows a system to return to a known, correct state after a failure. Without state recovery, a failure can leave the system in an inconsistent state, where the results of some operations are lost or incorrect~\cite{Carbone:2017:SMA:3137765.3137777, Akidau:2013:MFS:2536222.2536229}. State recovery also allows the system to resume processing from a recent checkpoint instead of starting over from the beginning, saving both time and computational resources.
 
-\paragraph{State recovery and consistency}
-\cite{carbone2018scalable}
+In the context of data processing systems, state recovery is particularly important for handling transient failures. For instance, if a node in a distributed system fails and then restarts, it needs to know what data it has already processed to avoid duplicating work or missing some data. By restoring its state from before the failure, the node can ensure it processes each piece of data exactly once, maintaining the consistency of the system's output~\cite{silvestre2021clonos, Carbone:2017:SMA:3137765.3137777, wang2021consistency}.
+
+The two main ways to recover a consistent state are~\cite{fragkoulis2024survey, zhang2024survey}:
+
+\begin{enumerate}
+    \item {\em Global State Snapshotting} involves taking snapshots of the entire system's state at given points in time. The snapshot includes the state of all nodes in the system and any in-transit messages. This approach provides a consistent view of the system, but it may lead to high overhead on recovery because there is a need to re-process all data items since the previous snapshot is taken.
+    \item {\em Record-Level Logging} involves saving data elements, state, or causal logs after processing each record or a batch of records. This allows for very fine-grained recovery, as the system can resume processing from the last processed record. However, this approach can introduce significant overhead, as the system needs to save the state frequently.
+\end{enumerate}
+
+We will dive into the details of the specific state recovery techniques in Section~\ref{phd-related-fault-tolerance}.
 
 \paragraph{Suitable consistency levels for various types of problems}
 \cite{boden2017distributed}
@@ -38,6 +46,7 @@ The type of delivery guarantee chosen for a system directly influences how that 
 \cite{tellis2018detecting}
 
 \subsection{Fault tolerance mechanisms in stream processing}
+\label{phd-related-fault-tolerance}
 
 \subsubsection{Global state checkpointing}
 
