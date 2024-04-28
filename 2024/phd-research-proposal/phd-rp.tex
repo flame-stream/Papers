@@ -32,11 +32,11 @@
 \maketitle
 
 \begin{abstract}
-Batch and stream systems cover two various data processing scenarios. In batch processing, a system works with preliminarily collected and stored static datasets ensuring latency in terms of hours or even days. However, there are problems such as short-term personalization, IoT, or network monitoring where results freshness is crucial. In this scenario, data is usually represented as a discrete and potentially infinite stream of items, and there is a need to continuously produce a stream of freshly updated results. 
+Distributed batch and stream systems cover two various data processing scenarios. In batch processing, a system works with preliminarily collected and stored static datasets ensuring latency in terms of hours or even days. However, there are problems such as short-term personalization, IoT, or network monitoring where results freshness is crucial. In this scenario, data is usually represented as a discrete and potentially infinite stream of items, and there is a need to continuously produce a stream of freshly updated results. 
 % This distinction implies major problems in distributed stream processing. 
 The low latency requirement implies two major problems in distributed stream processing. Firstly, a stream processing engine (SPE) needs sophisticated fault tolerance mechanisms to ensure quick recovery and data consistency in case of failures. 
 If failures do not affect results, one states that an SPE provides an exactly-once guarantee. 
-The second problem is the need to continuously produce results stream during processing. It may be non-trivial to detect the exact moment when the resulting item is ready to be released in a distributed environment. State-of-the-art approaches for both fault tolerance and results updating problems still imply significant latency overhead. 
+The second problem is the need to continuously produce results stream during processing. It may be non-trivial to detect the exact moment when the resulting item is ready to be released in a distributed environment. State-of-the-art approaches for both fault tolerance and results updating problems still imply high processing latency. 
 % Latency is one of the key metrics in stream processing since the freshness of results is usually valuable. 
 In this proposal, we overview state-of-the-art techniques that solve the mentioned issues. We offer a technique to achieve the exactly-once guarantee with a lower latency due to the lower overhead on ensuring consistency during processing. We also propose a theoretically more efficient approach to form a result stream even in the case of high granularity of results. We formulate research questions that should be answered to confirm our ideas. 
 \end{abstract}
@@ -52,7 +52,7 @@ In this proposal, we overview state-of-the-art techniques that solve the mention
 
 In this work, we aim to answer the following research questions:
 \begin{enumerate}
-    \item What are the reasons behind the high latency overhead on exactly-once guarantee in state-of-the-art SPEs?
+    \item What are the reasons behind the high latency within exactly-once guarantee in state-of-the-art SPEs?
     \item Can deterministic stream processing systems theoretically be more efficient regarding latency than non-deterministic? 
     \item What is the theoretical lower bound estimation of required network traffic to detect that the result update is ready in a distributed environment? 
     \item Is it possible to provide a technique that achieves this lower bound, and will it be more practically efficient than state-of-the-art? 
