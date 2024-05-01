@@ -28,8 +28,19 @@ The two main ways to recover a consistent state are~\cite{fragkoulis2024survey, 
 
 We will dive into the details of the specific state recovery techniques in Section~\ref{phd-related-fault-tolerance}.
 
-\paragraph{Suitable consistency levels for various types of problems}
-\cite{boden2017distributed}
+\paragraph{Suitable consistency levels for various types of problems}\mbox{} \\
+
+Distributed stream processing is used in many areas~\cite{fragkoulis2024survey} including network monitoring, IoT, financial processing, machine learning, etc. There are many applications, such as financial systems, where the integrity and correctness of the data are crucial~\cite{zhang2024survey}. Therefore, such applications usually require exactly-once delivery guarantee. In applications like fraud detection, IoT, earthquakes detection, or network security, where each piece of data needs to be analyzed to detect potential anomalies or threats, exactly-once processing is also critical. Missing a data point or processing it multiple times could lead to failure in detecting an anomaly or false alarms~\cite{zhou2019scalable, diro2024anomaly, 10.1093/gji/ggac355, geldenhuys2021dependable}.
+
+On the other hand, the need for exactly-once processing guarantees in machine learning applications depends on the specific requirements of the problem being addressed. While exactly-once processing is critical in some scenarios to ensure data integrity and correctness, it might be less crucial in others~\cite{boden2017distributed, webirte}:
+\begin{itemize}
+    \item {\em Training Data Preparation}: In the preparation phase of training data, ensuring that each data sample is included exactly once is important for the accuracy of the model. Duplicate data can skew the distribution of the training set, leading to biased models. However, many machine learning algorithms are robust to small inconsistencies, so exactly-once processing might not always be strictly required.
+    \item {\em Model Training}: During the training process, especially in distributed systems, exactly-once processing might be less critical depending on the training algorithm. For example, stochastic gradient descent, commonly used in training neural networks, can inherently tolerate some level of noise and inconsistency in data updates, as it is designed to converge despite the random nature of the input data batches.
+    \item {\em Real-time Predictions}: For real-time machine learning systems, such as those used in recommendation engines or dynamic pricing models, exactly-once processing can be crucial. Ensuring that each event or piece of data affects the system once prevents the model from making decisions based on duplicated data, which could mislead the prediction outcomes.
+    \item {\em Online Learning}: In online learning, where the model continuously updates itself based on incoming data streams, exactly-once processing is beneficial to maintain the correctness of the model updates. Duplicate or missed data points can significantly affect the accuracy and reliability.
+\end{itemize}
+
+In summary, whether exactly-once or at-least-once processing is required primarily depends on the tolerance of the specific algorithm to inconsistencies and the impact of data duplication or loss on the application's effectiveness. In cases where data integrity directly influences decision-making processes, exactly-once processing becomes more crucial.
 
 \subsubsection{Completeness of results}
 
