@@ -51,13 +51,24 @@ On the other hand, the need for exactly-once processing guarantees in machine le
 
 In summary, whether exactly-once or at-least-once processing is required primarily depends on the tolerance of the specific algorithm to inconsistencies and the impact of data duplication or loss on the application effectiveness. In cases where data integrity directly influences decision-making processes, exactly-once processing becomes more crucial.
 
-\subsubsection{Completeness of results}
+\subsubsection{Completeness of results}\mbox{} \\
 \label{completeness}
 
-% In static batch data processing, an operator can read an entire input and produce an output. However, with unbounded streams, there is no defined end to the data, which means that the traditional approach of processing all the data before generating an output is not feasible. Therefore, another important aspect of consistency in distributed stream processing is the {\em completeness} of results.
+In static batch data processing, an operator can read an entire input and produce an output. However, with unbounded streams, there is no defined end to the data, which means that the traditional approach of processing all the data before generating an output is not feasible. Therefore, another important aspect of consistency in distributed stream processing is the {\em completeness} of results~\cite{Tucker:2003:EPS:776752.776780}. Completeness of results in stream processing refers to the extent to which the results generated from processing a data stream fully and accurately reflect all the relevant data for a given query or operation. In other words, it measures whether all the necessary data points have been included in the computation to produce a correct and comprehensive result~\cite{akidau2015streaming}.
 
-\paragraph{Substreams}
-\cite{Tucker:2003:EPS:776752.776780}
+\paragraph{Substreams and punctuations framework}\mbox{} \\
+
+Substreams in stream processing refer to smaller, finite segments or partitions of a larger, potentially infinite data stream~\cite{Tucker:2003:EPS:776752.776780}. Substreams are created to manage and process data more efficiently by breaking down the continuous data flow into more manageable chunks. A substream can be expressed as a predicate on stream elements. All elements satisfying the predicate form the substream.
+
+For example, in a stream of web server logs, one could create substreams for each user session, where each substream contains all events (page views, clicks, etc.) that occurred within a specific session. Another example is the system that analyzes customers' activity within hourly windows. It needs to ensure that all orders within that hour are included in the analysis. In this case, the substream is formed by all events from that window.
+
+Substreams allow outputting results before all input is processed. By dividing the continuous data stream into smaller, manageable segments, an SPE can produce intermediate results as each substream is processed. In terms of substreams, the problem of result completeness comes down to ensuring that all substream elements are processed before outputting the corresponding result. 
+
+Solving the problem of detecting that all substream elements have been processed is the prerequisite for ensuring that system results are complete. Such detection is especially complex in distributed environment where elements can be easily reordered due to asynchronous network channels. Hence, there is a need for more complex mechanism than checking that all elements arrived in a strict order~\cite{Li:2008:OPN:1453856.1453890}.
+
+Punctuations framework was firstly introduced in~\cite{Tucker:2003:EPS:776752.776780} and then developed to a distributed setup in~\cite{Akidau:2015:DMP:2824032.2824076} and~\cite{Carbone:2017:SMA:3137765.3137777}. According to this method, special data elements, called punctuations, are injected into the data stream. These punctuations serve as markers that define the boundaries of substreams. They indicate that all elements following punctuation will not satisfy a specified predicate, effectively indicating the end of the corresponding substream.
+
+While the punctuations framework is widely adopted in major SPEs~\cite{carbone2015apache, Noghabi:2017:SSS:3137765.3137770, Kulkarni:2015:THS:2723372.2742788}, it has several pitfalls. It is not applicable for execution graphs with cycles~\cite{carbone2018scalable}. Additionally, the punctuations framework generates extra service traffic that can degrade the latency~\cite{DBLP:journals/pvldb/BegoliACHKKMS21} and throughput~\cite{Li:2008:OPN:1453856.1453890} of an SPE.
 
 \paragraph{Window aggregations}
 \cite{verwiebe2023survey}
