@@ -2,9 +2,9 @@
 
 In this section, we discuss several types of consistency in distributed stream processing. We start with delivery guarantees in Section~\ref{delivery_guarantees}: exactly-once, at-least-once, and at-most-once. Delivery guarantees specify the rules for how a system should behave in case of node failures to maintain a consistent state and prevent data loss or duplication.
 
-Section~\ref{completeness} covers the completeness of results.  In a distributed system, especially in streaming or real-time processing, data can arrive out of order, be delayed, or even temporarily lost. Completeness guarantees that the system's output reflects all the data that should have been processed within a given window or time frame, preventing partial or misleading results.
+Section~\ref{completeness} covers the completeness of results.  In a distributed system, especially in streaming, data can arrive out of order, be delayed, or even temporarily lost. Completeness guarantees that the system's output reflects all the data that should have been processed within a given window or time frame, preventing partial or misleading results.
 
-In Section~\ref{transactional} we discuss transactional stream processing (TSP). TSP integrates the real-time data processing capabilities of stream processing with the reliability and consistency guarantees of traditional transactional systems. TSP systems achieve consistency by incorporating the ACID (Atomicity, Consistency, Isolation, Durability) properties typically found in traditional database transactions.
+In Section~\ref{transactional} we discuss transactional stream processing (TSP). TSP integrates the low latency processing capabilities of stream processing with the reliability and consistency guarantees of traditional transactional systems. TSP systems achieve consistency by incorporating the ACID (Atomicity, Consistency, Isolation, Durability) properties typically found in traditional database transactions.
 
 Eventually, in Section~\ref{statistical} we touch on the topic of statistical consistency in stream processing. Statistical consistency refers to the accuracy and reliability of statistical estimates and summaries derived from continuous data streams. This type of consistency ensures that the statistical measures calculated over the data stream are accurate and close to the expected values. Statistical consistency is close to anomaly detection because anomalies, such as sudden spikes or unusual data patterns, can be detected based on deviations from these consistent statistical measures.
 
@@ -82,6 +82,9 @@ While the punctuations framework is widely adopted in major SPEs~\cite{carbone20
 \subsubsection{Statistical consistency and anomalies}
 \label{statistical}
 \cite{tellis2018detecting}
+
+\subsubsection{Overview}
+\label{transactional}
 
 \subsection{Fault tolerance mechanisms in stream processing}
 \label{phd-related-fault-tolerance}
