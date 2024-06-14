@@ -84,8 +84,22 @@ Session windows are dynamic and determined by the occurrence of events. A sessio
 
 Another important aspect of window aggregations is timing. In stream processing, there are two concepts of time: event time and processing time~\cite{Akidau:2015:DMP:2824032.2824076, carbone2015apache}. Event time refers to the time at which an event actually occurred outside an SPE. This timestamp is usually embedded within the event data itself. Event time is essential for applications that require precise temporal analysis, such as user behavior analysis, billing systems, or anomaly detection. It allows for constructing a timeline of events, even if those events are ingested into the system out of order. Processing time is when an event is observed and processed by the stream processing system. This is typically the system clock time when the event is processed. Processing time is often simpler to manage and can be sufficient for use cases where exact temporal accuracy is not critical. However, relying solely on processing time can lead to inaccuracies if events are delayed or arrive out-of-order~\cite{Akidau:2015:DMP:2824032.2824076, carbone2015apache}.
 
-\subsubsection{Transactional guarantees}
+\subsubsection{Transactional guarantees}\mbox{} \\
 \label{transactional}
+
+Transactional stream processing (TSP) systems have emerged as a solution that combines data stream management with ACID (atomicity, consistency, isolation, durability) guarantees~\cite{zhang2024survey, affetti2020tspoon, botan2012transactional}. Unlike traditional databases, TSP systems initiate transactions through streaming events, which can be triggered individually or in batches. Transactions can modify the system's internal state, including data aggregates, intermediate results, or configurations~\cite{zhang2024survey}.
+
+\paragraph{ACID properties in streaming} \mbox{} \\
+
+{\em Atomicity} means that all operations within a transaction are either successfully processed together or not processed at all, thereby preventing partial updates that could lead to an inconsistent state~\cite{zhang2024survey}. The level of atomicity in TSP can vary depending on the transaction model. For instance, traditional commit protocols like two-phase commit (2PC) ensure atomicity by coordinating commit or abort decisions among distributed participants. Conversely, some models allow the exposure of intermediate uncommitted states and require developers to define compensating actions for each operation, providing a more flexible way to handle atomicity at the expense of strong isolation guarantees~\cite{10.1145/38713.38742}.
+
+{\em Consistency} requires the system to transit from one consistent state to another~\cite{zhang2024survey}. This involves the preservation of integrity constraints, which are rules defining the valid states of the data and events within the stream processing system. In TSP systems, consistency also includes the processing and updating of data following a specified consistency model, like strong or eventual consistency. This is crucial in stream processing, where real-time data interaction is involved~\cite{affetti2017flowdb, zhang2020towards}.
+
+{\em Isolation} ensures that concurrent transactions do not interfere with each other~\cite{zhang2024survey}. In TSP systems, isolation is crucial for maintaining consistent output data, even when transactions are executed concurrently due to simultaneous input events. TSP systems can offer various isolation levels, including serializability, snapshot isolation, or read committed. Some TSP systems provide configurable isolation levels, allowing developers to adjust the isolation guarantees to meet the specific needs of their applications~\cite{affetti2017flowdb}.
+
+{\em Durability} in TSP systems ensures that once a transaction is committed, its changes are permanently stored. Unlike traditional transactional systems, TSP's recovery mechanism may involve replaying input streams to rebuild the state, which might not always result in an identical state due to concurrent processing, asynchronous network channels, and timing differences~\cite{thepaper}. TSP systems must ensure properties like input preservation, state maintenance, and output persistence. Achieving these properties often involves strategies such as replication, logging, or checkpointing, which must balance trade-offs between performance, availability, and the application's specific requirements~\cite{zhang2024survey}.
+
+\paragraph{State management and delivery guarantees} \mbox{} \\
 
 % \subsubsection{Statistical consistency and anomalies}
 % \label{statistical}
