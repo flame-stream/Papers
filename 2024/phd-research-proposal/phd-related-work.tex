@@ -1,4 +1,5 @@
 \subsection{Consistency in stream processing}
+\label{consistency_overview}
 
 In this section, we discuss several types of consistency in distributed stream processing. We start with delivery guarantees in Section~\ref{delivery_guarantees}: exactly-once, at-least-once, and at-most-once. Delivery guarantees specify the rules for how a system should behave in case of node failures to maintain a consistent state and prevent data loss or duplication.
 
@@ -112,21 +113,27 @@ Therefore, delivery guarantees are tightly connected to transactional stream pro
 \subsection{Fault tolerance mechanisms in stream processing}
 \label{phd-related-fault-tolerance}
 
+As discussed in Section~\ref{consistency_overview}, consistency is closely linked with fault tolerance in stream processing. State recovery is essential for achieving delivery guarantees. Completeness and transactional guarantees depend on these delivery guarantees. Consequently, a fundamental mechanism for maintaining consistency in distributed stream processing is recovery after failures, ensuring the necessary level of delivery guarantee: at-most-once, at-least-once, or exactly-once.
+
+In Section~\ref{phd-related-global-state-checkpointing}, we explore two primary mechanisms for global state checkpointing and rollback utilized by major distributed stream processing engines: {\em micro-batching} (or {\em discretized streams}) used in Apache Spark~\cite{Zaharia:2012:DSE:2342763.2342773}, and {\em global asynchronous snapshots} used in Apache Flink~\cite{2015arXiv150608603C, Carbone:2017:SMA:3137765.3137777}. We examine the similarities and differences between these methods, highlighting their respective advantages and limitations.
+
+In Section~\ref{phd-related-critical-path-recovery}, we examine techniques for ensuring fault tolerance without requiring global state recovery. These techniques propose protocols to localize failure and recover only the state of failed nodes, possibly including dependent nodes. We begin with the local recovery method used in MillWheel distributed stream processing~\cite{Akidau:2013:MFS:2536222.2536229}, which involves each operator writing its state and intermediate records to persistent storage. Following this, we discuss two mechanisms for causal recovery: the first, called {\em lineage stash}, extends the micro-batching model~\cite{Wang:2019:LSF:3341301.3359653}, while the second, {\em Clonos}, applies the continuous stream model~\cite{silvestre2021clonos}.
+
 \subsubsection{Global state checkpointing}
+\label{phd-related-global-state-checkpointing}
 
 \paragraph{Micro-batching}
-\cite{Zaharia:2012:DSE:2342763.2342773}
 
 \paragraph{Asynchronous snapshots}
-\cite{Carbone:2017:SMA:3137765.3137777}
 
 \subsubsection{Critical path recovery}
+\label{phd-related-critical-path-recovery}
 
-\paragraph{Lineage stash}
-\cite{Wang:2019:LSF:3341301.3359653}
+\paragraph{Local recovery}
 
-\paragraph{Effective determinism}
-\cite{Akidau:2013:MFS:2536222.2536229, silvestre2021clonos}
+\paragraph{Lineage stash: causal logging recovery for micro-batching}
+
+\paragraph{Clonos: causal logging recovery for continuous streams}
 
 \subsection{Summary}
 \label{review_summary}
