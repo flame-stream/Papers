@@ -122,14 +122,20 @@ In Section~\ref{phd-related-critical-path-recovery}, we examine techniques for e
 \subsubsection{Global state checkpointing}
 \label{phd-related-global-state-checkpointing}
 
-\paragraph{Micro-batching}
+\paragraph{Micro-batching} \mbox{} \\
+
+Micro-batching is a stream processing technique that combines elements of both stream and batch processing~\cite{Zaharia:2012:DSE:2342763.2342773, zaharia2010spark}. In this approach, incoming data streams are divided into small, time-bounded batches, which are then processed sequentially. This hybrid method leverages the low-latency benefits of stream processing while simplifying state management and error recovery by treating each micro-batch as a small batch job~\cite{garcia2023micro}. Micro-batching involves a central coordinating mechanism that regularly segments the data stream into batches and assigns a corresponding job (a process graph of short-lived tasks) to each batch~\cite{Zaharia:2012:DSE:2342763.2342773}.
+
+In micro-batching, a snapshot of the state is periodically saved to persistent storage to prevent recomputation of all input data. To take a snapshot, the central coordinating mechanism initiates a synchronous protocol similar to the two-phase commit protocol: in the first stage, it sends a prepare snapshot request, and when all nodes have saved their state, it sends a commit request~\cite{carbone2018scalable}. This protocol can be initiated only after the current batch is finished. Note that the system cannot output results before the corresponding snapshot is taken because recomputed output data can be inconsistent with already delivered results~\cite{carbone2018scalable, thepaper}. When a failure occurs, each node first recovers its state from the last snapshot. After that, all batches processed after the snapshot was taken are reprocessed from the beginning~\cite{Zaharia:2012:DSE:2342763.2342773}.
+
+Although this approach is widely adopted in practice, it has a significant drawback: it requires a blocking synchronous coordination protocol for taking snapshots. The primary issue with this protocol is that most tasks must remain idle until all other tasks have completed their computations and committed their state to persistent storage~\cite{carbone2018scalable, thepaper}. This problem could be mitigated by increasing the interval between snapshots. However, this can lead to high processing latency, as output data cannot be delivered until the corresponding snapshot is taken, as mentioned earlier. Consequently, this approach may be unsuitable for tasks with stringent low-latency requirements~\cite{carbone2018scalable}.
 
 \paragraph{Asynchronous snapshots}
 
 \subsubsection{Critical path recovery}
 \label{phd-related-critical-path-recovery}
 
-\paragraph{Local recovery}
+\paragraph{Local recovery: MillWheel model}
 
 \paragraph{Lineage stash: causal logging recovery for micro-batching}
 
