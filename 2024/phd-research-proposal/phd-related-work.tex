@@ -145,7 +145,9 @@ The benefits of asynchronous snapshots include less disruption to the system, re
 \subsubsection{Critical path recovery}
 \label{phd-related-critical-path-recovery}
 
-\paragraph{Local recovery: MillWheel model}
+\paragraph{Local recovery: MillWheel model} \mbox{} \\
+
+MillWheel is a distributed stream processing system and model presented in~\cite{Akidau:2013:MFS:2536222.2536229}. Its approach to state snapshotting and recovery is significantly different from both micro-batching (synchronous global snapshots) and asynchronous global snapshots. Instead of taking global snapshots and recomputing parts of the input stream after a failure, each computational node in MillWheel persistently stores all input, corresponding output elements, and state changes. As a result, in case of a failure, each node can lose the processing results of at most a single element. This design allows each node to recover locally without the need for a global coordinator.
 
 \paragraph{Lineage stash: causal logging recovery for micro-batching}
 
