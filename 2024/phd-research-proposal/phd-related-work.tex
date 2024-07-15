@@ -124,7 +124,7 @@ We use the notion of a {\em snapshot} or {\em checkpoint} throughout this sectio
 \subsubsection{Global state checkpointing}
 \label{phd-related-global-state-checkpointing}
 
-\paragraph{Micro-batching} \mbox{} \\
+\paragraph{Global synchronous snapshots: Micro-Batching} \mbox{} \\
 
 Micro-batching is a stream processing technique that combines elements of both stream and batch processing~\cite{Zaharia:2012:DSE:2342763.2342773, zaharia2010spark}. In this approach, incoming data streams are divided into small, time-bounded batches, which are then processed sequentially. This hybrid method leverages the low-latency benefits of stream processing while simplifying state management and error recovery by treating each micro-batch as a small batch job~\cite{garcia2023micro}. Micro-batching involves a central coordinating mechanism that regularly segments the data stream into batches and assigns a corresponding job (a process graph of short-lived tasks) to each batch~\cite{Zaharia:2012:DSE:2342763.2342773}.
 
@@ -145,7 +145,7 @@ The benefits of asynchronous snapshots include less disruption to the system, re
 \subsubsection{Critical path recovery}
 \label{phd-related-critical-path-recovery}
 
-\paragraph{Local recovery: MillWheel model} \mbox{} \\
+\paragraph{Local recovery: MillWheel} \mbox{} \\
 
 MillWheel is a distributed stream processing system and model presented in~\cite{Akidau:2013:MFS:2536222.2536229}. Its approach to state snapshotting and recovery is significantly different from both micro-batching (synchronous global snapshots) and asynchronous global snapshots. Instead of taking global snapshots and recomputing parts of the input stream after a failure, each computational node in MillWheel persistently stores all input, corresponding output elements, and state changes. As a result, in case of a failure, each node can lose the processing results of at most a single element. This design allows each node to recover locally without the need for a global coordinator. This mechanism is called {\em strong productions}.
 
@@ -153,9 +153,15 @@ Diving into more details, the strong productions mechanism works as follows. Whe
 
 MillWheel ensures an exactly-once guarantee by making all operations idempotent and filtering duplicates. It requires all streaming operations to be pure functions, meaning they must operate without any side-effects. This behavior is referred to as effective determinism \cite{akidau2018streaming} because computations remain deterministic until the persistent storage is cleared. The strong production method ensures that, even though many possible results of a non-commutative operation can occur due to race conditions, only one result is computed and saved. The cost of this exactly-once enforcement is an overhead on external writes for each transformation. Implementing this approach requires high-performance distributed storage that supports blind writes, such as BigTable \cite{chang2008bigtable}.
 
-\paragraph{Lineage stash: causal logging recovery for micro-batching}
+\paragraph{Causal logging recovery for micro-batching: Lineage Stash} \mbox{} \\
 
-\paragraph{Clonos: causal logging recovery for continuous streams}
+The {\em Lineage Stash} mechanism presented in~\cite{Wang:2019:LSF:3341301.3359653} aims to make the recovery mechanism for micro-batching more efficient. The main idea of the lineage stash is to record information during process execution to minimize the amount of work that needs to be redone in case of a failure. Instead of completely recomputing all elements since the previous global snapshot, the lineage stash allows the system to recompute only the necessary data, thereby reducing the overhead on recovery. This approach uses causal logging for recording and replaying computations~\cite{elnozahy1994manetho, alvisi1998message}. Each process keeps a buffer of all nondeterministic events that have affected its current state, and these volatile records are attached to messages sent to other processes. If a process fails, it can recover by retrieving logs from the other processes. This technique ensures global consistency by allowing all nondeterministic events from the initial execution to be replayed exactly as they occurred.
+
+The key challenge of the lineage stash mechanism is to identify and efficiently capture the sources of nondeterminism that occur in data processing applications. The key optimization here is leveraging the deterministic nature of data processing outputs. Instead of recording raw data, lineage stash records the lineage, which includes a pointer to the application data (an object) and a description of the computation (a task). Each task uses the process's local state and one or more objects as inputs and can produce new objects and tasks. The lineage of an object consists of the task that created it and the lineage of the task's inputs. Because object values are deterministic, it is possible to cache multiple immutable copies across multiple nodes. If all copies are lost, objects can be recomputed during recovery. For smaller objects, the data can be directly included in the task specification~\cite{Wang:2019:LSF:3341301.3359653}.
+
+One limitation of the lineage stash is its lack of support for certain important nondeterministic functions in stream processing. For instance, it does not support timer-based services used for processing time windows, nor does it handle punctuations needed for progress tracking and managing out-of-order events. Additionally, the use of a micro-batching architecture further limits the applicability of lineage stash~\cite{silvestre2021clonos}.
+
+\paragraph{Causal logging recovery for continuous streams: Clonos}
 
 % \subsection{Summary}
 % \label{review_summary}
