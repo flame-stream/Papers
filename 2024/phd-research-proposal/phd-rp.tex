@@ -33,16 +33,12 @@
 \maketitle
 
 \begin{abstract}
-Distributed batch and stream systems cover two various data processing scenarios. In batch processing, a system works with preliminarily collected and stored static datasets ensuring latency in terms of hours or even days. However, there are problems such as short-term personalization, IoT, or network monitoring where results freshness is crucial. In this scenario, data is usually represented as a discrete and potentially infinite stream of items, and there is a need to continuously produce a stream of freshly updated results. 
-% This distinction implies major problems in distributed stream processing. 
-The low latency requirement implies two major problems in distributed stream processing. Firstly, a stream processing engine (SPE) needs sophisticated fault tolerance mechanisms to ensure quick recovery and data consistency in case of failures. 
-If failures do not affect results, one states that an SPE provides an exactly-once guarantee. 
-The second problem is the need to continuously produce results stream during processing. It may be non-trivial to detect the exact moment when the resulting item is ready to be released in a distributed environment. State-of-the-art approaches for both fault tolerance and results updating problems still imply high processing latency. 
-% Latency is one of the key metrics in stream processing since the freshness of results is usually valuable. 
-In this proposal, we overview state-of-the-art techniques that solve the mentioned issues. We offer a technique to achieve the exactly-once guarantee with a lower latency due to the lower overhead on ensuring consistency during processing. We also propose a theoretically more efficient approach to form a result stream even in the case of high granularity of results. We formulate research questions that should be answered to confirm our ideas. 
+The low latency requirement presents two major challenges in distributed stream processing. Firstly, a stream processing engine (SPE) needs sophisticated fault tolerance mechanisms to ensure quick recovery and data consistency in case of failures. Secondly, there is the challenge of continuously producing a results stream during processing. Detecting the exact moment when the resulting item is ready to be released in a distributed environment can be non-trivial. State-of-the-art approaches to both fault tolerance and results updating still result in high processing latency.
+In this proposal, we review state-of-the-art techniques that address these issues. We highlight promising directions to achieve the exactly-once guarantee with lower latency, due to the reduced overhead required to ensure consistency during processing. We also propose a theoretically more efficient approach to forming a result stream, even when dealing with high granularity of results. We outline research questions that need to be explored to validate our ideas.
 \end{abstract}
 
 \section {Introduction}
+\input{2024/phd-research-proposal/phd-introduction}
 
 \section {Review and literature}
 \input{2024/phd-research-proposal/phd-related-work}
@@ -51,14 +47,7 @@ In this proposal, we overview state-of-the-art techniques that solve the mention
 \input{2024/phd-research-proposal/phd-discussion}
 
 \section {Research questions}
-
-In this work, we aim to answer the following research questions:
-\begin{enumerate}
-    \item What are the reasons behind the high latency within exactly-once guarantee in state-of-the-art SPEs?
-    \item Can deterministic stream processing systems theoretically be more efficient regarding latency than non-deterministic? 
-    \item What is the theoretical lower bound estimation of required network traffic to detect that the result update is ready in a distributed environment? 
-    \item Is it possible to provide a technique that achieves this lower bound, and will it be more practically efficient than state-of-the-art? 
-\end{enumerate}
+\input{2024/phd-research-proposal/phd-questions}
 
 \section {Current Progress}
 \input{2024/phd-research-proposal/phd-progress}
