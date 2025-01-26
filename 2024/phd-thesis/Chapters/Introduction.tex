@@ -2,9 +2,13 @@
 
 Distributed batch and stream systems address two distinct data processing scenarios. Batch processing deals with pre-collected and stored static datasets, with latency spanning hours or even days~\cite{carbone2015apache, chang2014hawq, sun2023survey}. Conversely, applications requiring short-term personalization, IoT, or network monitoring demand results with high freshness. In these cases, data appears as a continuous, discrete, and potentially infinite stream of items, necessitating the continuous production of freshly updated results~\cite{fragkoulis2024survey, diro2024anomaly}.
 
-This distinction highlights significant challenges in distributed stream processing, particularly the low latency requirement.
+This distinction highlights significant challenges in distributed stream processing, particularly the low latency requirement, which brings forth two major issues. Firstly, a stream processing engine (SPE) requires advanced fault tolerance mechanisms to ensure quick recovery and data consistency during failures~\cite{Wang:2019:LSF:3341301.3359653, akidau2015streaming}. Secondly, there is the challenge of continuously producing a results stream during processing. Determining the precise moment when a resulting item is ready for release in a distributed environment can be complex~\cite{Tucker:2003:EPS:776752.776780, DBLP:journals/pvldb/BegoliACHKKMS21}.
 
-% which brings forth two major issues. Firstly, a stream processing engine (SPE) requires advanced fault tolerance mechanisms to ensure quick recovery and data consistency during failures~\cite{Wang:2019:LSF:3341301.3359653, akidau2015streaming}. When failures do not compromise results, the SPE is said to provide an exactly-once guarantee. Secondly, there is the challenge of continuously producing a results stream during processing. Determining the precise moment when a resulting item is ready for release in a distributed environment can be complex~\cite{Tucker:2003:EPS:776752.776780, DBLP:journals/pvldb/BegoliACHKKMS21}. Current state-of-the-art approaches addressing both fault tolerance and results updating still result in high processing latency.
+While partial solutions have been proposed for these problems, in this thesis, we: 
+\begin{itemize}
+    \item Design formal models describing the limitations of existing approaches
+    \item Search for more efficient techniques based on the obtained theoretical insights
+\end{itemize}
 
 \section{Open Challenges Related to Consistency}
 
