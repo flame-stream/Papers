@@ -10,6 +10,16 @@ While partial solutions have been proposed for these problems, in this thesis, w
     \item Search for more efficient techniques based on the obtained theoretical insights
 \end{itemize}
 
+\section{Research Methodology and Novelty}
+
+Our first step is to identify the actual challenges. The challenges have been identified throughout preparation of our prior publications~\cite{we2018adbis, trofimov2018consistency, we2018seim, we2018beyondmr, we2019debs, webirte, thepaper, 10.1145/3524860.3539809, trofimov2023bounding}. We briefly discuss them in Section~\ref{thesis-intro-challenges}. The corresponding literature is reviewed in Chapter~\ref{thesis-chapter-literature-review}.
+
+After the identification of challenges, we design a formal model suitable to describe the corresponding domain. This step allows us to theoretically justify the challenges, compare existing approaches, highlight their advantages and limitations, and identify areas for improvement. Chapter~\ref{thesis-chapter-delivery-guarantees} and Chapter~\ref{thesis-chapter-substreams-consistency} are dedicated for such formal insights.
+
+In the third step, we verify whether our theoretical findings align with experimental studies. At this stage, our goal is to develop technical implementations and ensure that our theoretically more optimal approaches are feasible in practice. Chapter~\ref{thesis-chapter-delivery-guarantees} and Chapter~\ref{thesis-chapter-substreams-consistency} cover these findings.
+
+The novelty of this work lies in addressing open challenges and achieving results that surpass the current state-of-the-art. The theoretical models we have designed are more suitable for describing real-life scenarios than existing alternatives. Additionally, our practical approaches and algorithms outperform those found in current research and industry standards. The main contribuitons of this work are briefly outlined in Section~\ref{thesis-intro-contributions}.
+
 \section{Open Challenges Related to Consistency}
 \label{thesis-intro-challenges}
 
@@ -52,6 +62,7 @@ A popular method for the generation of substream termination events is the punct
 We argue that the worst case can appear on any execution graph that contains a re-partitioning operator. Indeed, SPEs try to distribute workload evenly between processes~\cite{carbone2015apache, Kulkarni:2015:THS:2723372.2742788, Akidau:2013:MFS:2536222.2536229}, so elements of a substream can be evenly distributed among processes as well. When a process reaches the end of a substream, it must broadcast the punctuation because the items of the part of a sub-stream handled by this process are re-distributed evenly for subsequent processing. Substreams can be {\em fine-grained}: for example, each user session defines a substream. If there are a lot of small substreams, an inefficient substreaming system can degrade the latency~\cite{DBLP:journals/pvldb/BegoliACHKKMS21} and the throughput of an SPE~\cite{Li:2008:OPN:1453856.1453890} or affect the performance of state checkpointing~\cite{zhang2021research}. Therefore, reducing an overhead on substreams management is an important open challenge in distributed stream processing.
 
 \section{Primary Contributions}
+\label{thesis-intro-contributions}
 
 We highlight the main results of this work in the following contributions, which address the challenges detailed in Section~\ref{thesis-intro-challenges}.
 
@@ -99,8 +110,6 @@ We designed and implemented a new substreams management technique called \tracke
 \end{itemize}
 
 These properties of the \tracker\ framework create a possibility to apply substream management in new applications; this includes smart caching of operator state and latency-conscious windowed joins.
-
-\section{Research Methodology and Novelty}
 
 \section{Published Work}
 
