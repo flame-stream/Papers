@@ -78,7 +78,7 @@ We demonstrated that most of the state-of-the-art stream processing systems~\cit
     \item Write results of an operation to external storage on each input element
 \end{itemize}
 
-All these methods experience difficulties with working under low-latency requirements (less than a second). In the first case, latency cannot be lower than the batching period, in the second case, the distributed two-phase commit may result in a significant increase of latency, while in the third case latency is bounded below by the duration of external writes.
+All these methods experience difficulties with working under low-latency requirements (less than a second). In the first case, latency cannot be lower than the batching period, in the second case, the distributed two-phase commit may result in a significant increase of latency, while in the third case latency is bounded below by the duration of external writes. The formal framework along with the mentioned theoretical insights are covered in Chapter~\ref{thesis-chapter-delivery-guarantees}.
 
 \subsection{Exactly-once based on lightweight determinism}
 
@@ -90,13 +90,13 @@ Using our formal inference, we designed the \textit{drifting state} technique~\c
     \item Exactly-once processing semantics are maintained.
 \end{itemize}
 
-We implemented the prototype of the proposed technique to examine its performance~\cite{we2018adbis, we2018seim, thepaper}. Our experiments demonstrated that the introduced protocols for fault tolerance are scalable and provide remarkably low overhead within different computational layouts. The comparison with the industrial stream processing solution indicated that our prototype could provide lower latency under exactly-once requirement.
+We implemented the prototype of the proposed technique to examine its performance~\cite{we2018adbis, we2018seim, thepaper}. Our experiments demonstrated that the introduced protocols for fault tolerance are scalable and provide remarkably low overhead within different computational layouts. The comparison with the industrial stream processing solution indicated that our prototype could provide lower latency under exactly-once requirement. The drifting state technique along with exactly-once implementation on top of it and experimental study are detailed in Chapter~\ref{thesis-chapther-optimistic}.
 
 \subsection{Formalization of substreams consistency}
 
 We formalized the problem of substreams management and highlighted its main features~\cite{10.1145/3524860.3539809, trofimov2023bounding}. Particularly, we introduced the notions of {\em soft bound} and {\em firm bound} required by various stream processing scenarios. Some applications that apply substream management systems do not require any particular properties of termination events. In this case, we denote the guarantee provided by such events as {\em soft bound} because termination events indicate that the substream ended some time ago. However, other problems require a {\em firm bound}: guarantee that the substream ends {\em exactly} after the termination event. For example, a commonly used snapshotting protocol~\cite{2015arXiv150608603C, jacques2016consistent} relies on an {\em epoch}. An epoch is a special substream that must be processed atomically. Therefore, the SPE requires the termination event for a given epoch to occur immediately after the last processing event belonging to that epoch. Otherwise, the snapshot can be inconsistent, capturing elements from multiple epochs.
 
-We also provided several insights into the performance of substream management systems. We showed that the network overhead induced by a substream management system cannot be lower than linear in terms of the number of computational nodes. We demonstrated that the state-of-the-art punctuations framework, as applied in many production-scale SPEs~\cite{tucker2003exploiting}, incurs quadratic network overhead with respect to the number of computational nodes, indicating that it is far from the lower bound.
+We also provided several insights into the performance of substream management systems. We showed that the network overhead induced by a substream management system cannot be lower than linear in terms of the number of computational nodes. We demonstrated that the state-of-the-art punctuations framework, as applied in many production-scale SPEs~\cite{tucker2003exploiting}, incurs quadratic network overhead with respect to the number of computational nodes, indicating that it is far from the lower bound. Chapter~\ref{thesis-chapter-substreams-consistency} is dedicated to the substreams formal model and the mentioned performance insights.
 
 \subsection{Substream management approach reaching lower bound of network traffic overhead}
 
@@ -110,6 +110,8 @@ We designed and implemented a new substreams management technique called \tracke
 \end{itemize}
 
 These properties of the \tracker\ framework create a possibility to apply substream management in new applications; this includes smart caching of operator state and latency-conscious windowed joins.
+
+We also demonstrated that \tracker\ outperforms state-of-the-art substream management mechanisms in real-life scenarios. The design of the \tracker\ framework along with its implementation details and experimental study are discussed in Chapter~\ref{thesis-chapter-tracker}.
 
 \section{Published Work}
 
