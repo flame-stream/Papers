@@ -11,6 +11,7 @@
 \usepackage{verbatim}  % Needed for the "comment" environment to make LaTeX comments
 \usepackage{vector}  % Allows "\bvec{}" and "\buvec{}" for "blackboard" style bold vectors in maths
 \usepackage{enumitem} % for customizing lists
+\usepackage{pdfpages}
 \hypersetup{urlcolor=blue, colorlinks=true}  % Colours hyperlinks in blue, but this can be distracting if there are many links.
 \renewcommand\bibname{References}
 \newcommand {\FlameStream} {FlameStream}
@@ -117,6 +118,7 @@
 
 \pagestyle{fancy}  %The page style headers have been "empty" all this time, now use the "fancy" headers as defined before to bring them back
 
+\includepdf[pages={1},offset=80 -80]{cover_page.pdf}
 
 %% ----------------------------------------------------------------
 \lhead{\emph{Contents}}  % Set the left side page header to "Contents"
