@@ -1,17 +1,15 @@
 \chapter{Introduction}
 \lhead{\emph{Introduction}}
 
-Distributed batch and stream systems address two distinct data processing scenarios. Batch processing deals with pre-collected and stored static datasets, with latency spanning hours or even days~\cite{carbone2015apache, chang2014hawq, sun2023survey}. Conversely, applications requiring short-term personalization, IoT, or network monitoring demand results with high freshness. In these cases, data appears as a continuous, discrete, and potentially infinite stream of items, necessitating the continuous production of freshly updated results~\cite{fragkoulis2024survey, diro2024anomaly}.
+Distributed batch processing systems, such as Google MapReduce~\cite{Dean:2008:MSD:1327452.1327492}, Apache Hadoop~\cite{hadoop2009hadoop}, and Apache Spark~\cite{Zaharia:2016:ASU:3013530.2934664}, address the need to process large amounts of data (e.g., Internet-scale). The basic idea behind them is to independently process large data blocks (batches) that are collected from static datasets. The main advantages of these systems are the fault tolerance and scalability~\cite{borthakur2011apache} of massively parallel computations on commodity hardware. Batch processing ensures latency in terms of hours or even days~\cite{carbone2015apache, chang2014hawq, sun2023survey}. Therefore, batch processing is suitable for scenarios where data freshness is not a critical factor, such as in the collection of large datasets, exract-transform-load (ETL) problems, non-real-time data analysis, large-scale scientific computing, and log processing.
 
-This distinction highlights significant challenges in distributed stream processing, particularly the low latency requirement, which brings forth two major issues. Firstly, a stream processing engine (SPE) requires advanced fault tolerance mechanisms to ensure quick recovery and data consistency during failures~\cite{Wang:2019:LSF:3341301.3359653, akidau2015streaming}. Secondly, there is the challenge of continuously producing a results stream during processing. Determining the precise moment when a resulting item is ready for release in a distributed environment can be complex~\cite{Tucker:2003:EPS:776752.776780, DBLP:journals/pvldb/BegoliACHKKMS21}.
+Distributed stream processing engines (SPEs) handle analytical, computational, and monitoring scenarios where data freshness is a strong requirement. These scenarios include online analytics (OLAP), short-term personalization, IoT, network monitoring. In these cases, data appear as a continuous, discrete, and potentially infinite stream of items, necessitating the continuous production of freshly updated results~\cite{fragkoulis2024survey, diro2024anomaly}.
 
-While partial solutions have been proposed for these problems, in this thesis, we: 
-\begin{itemize}
-    \item Design formal models describing the limitations of existing approaches
-    \item Search for more efficient techniques based on the obtained theoretical insights
-\end{itemize}
+The low latency requirement raises two major issues related to data consistency. Firstly, an SPE requires advanced fault tolerance mechanisms to ensure quick recovery and data consistency during failures~\cite{Wang:2019:LSF:3341301.3359653, akidau2015streaming}. Secondly, there is the challenge of continuously producing a consistent resulting stream during processing. Determining the precise moment when a data item is ready for release in a distributed environment can be complex~\cite{Tucker:2003:EPS:776752.776780, DBLP:journals/pvldb/BegoliACHKKMS21}.
 
-\section{Research Methodology and Novelty}
+We acknowledge that, although there have been attempts to address these challenges, there is still room for improvement. In this thesis, we develop formal models that describe the shortcomings and limitations of current approaches. Additionally, we design more efficient techniques based on the theoretical insights gained from our analysis and modeling of existing methods. We demonstrate that the proposed methods are not only theoretically more efficient, but can also outperform state-of-the-art industrial alternatives.
+
+\section{Research Methodology}
 
 Our first step is to identify the actual challenges. The challenges have been identified throughout preparation of our prior publications~\cite{we2018adbis, trofimov2018consistency, we2018seim, we2018beyondmr, we2019debs, webirte, thepaper, 10.1145/3524860.3539809, trofimov2023bounding}. We briefly discuss them in Section~\ref{thesis-intro-challenges}. The corresponding literature is reviewed in Chapter~\ref{thesis-chapter-literature-review}.
 
@@ -19,14 +17,16 @@ After the identification of challenges, we design a formal model suitable to des
 
 In the third step, we verify whether our theoretical findings align with experimental studies. At this stage, our goal is to develop technical implementations and ensure that our theoretically more optimal approaches are feasible in practice. Chapter~\ref{thesis-chapter-delivery-guarantees} and Chapter~\ref{thesis-chapter-substreams-consistency} cover these findings.
 
+\section{Novelty}
+
 The novelty of this work lies in addressing open challenges and achieving results that surpass the current state-of-the-art. The theoretical models we have designed are more suitable for describing real-life scenarios than existing alternatives. Additionally, our practical approaches and algorithms outperform those found in current research and industry standards. The main contribuitons of this work are briefly outlined in Section~\ref{thesis-intro-contributions}.
 
-\section{Open Challenges Related to Consistency}
+\section{Open Challenges}
 \label{thesis-intro-challenges}
 
 We identify two key challenges in achieving consistency in distributed stream processing, which are critical yet difficult to address in both academic and industrial contexts: the lack of formalization and the high overhead of consistency mechanisms. Specifically, we discuss how these challenges arise in the two main types of consistency covered in this thesis: delivery guarantees and substreams consistency.
 
-\subsection{Lack of formalization}
+\subsection{Lack of consistency concepts formalization}
 
 \subsubsection{Delivery guarantees}
 
