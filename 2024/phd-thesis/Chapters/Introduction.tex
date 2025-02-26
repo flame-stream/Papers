@@ -45,7 +45,9 @@ In state-of-the-art stream processing systems like Flink~\cite{Carbone:2017:SMA:
 
 \subsubsection{Substreams consistency}
 
-There are plenty of data processing scenarios where results are most valuable at the time of data arrival, for example, IoT, news processing, financial analysis, fraud detection, and network monitoring. However, regular blocking data processing operators read an entire input before producing an output and can never release a result in the case of a stream. To handle this problem, one can divide the whole unbounded, potentially infinite data stream into bounded, possibly overlapping substreams˜\cite{tucker2003exploiting}. In this case, an operator can produce an output when a corresponding substream terminates.
+% There are plenty of data processing scenarios where results are most valuable at the time of data arrival, for example, IoT, news processing, financial analysis, fraud detection, and network monitoring. However, 
+
+Regular blocking data processing operators read an entire input before producing an output and can never release a result in the case of a stream. To handle this problem, one can divide the whole unbounded, potentially infinite data stream into bounded, possibly overlapping substreams˜\cite{tucker2003exploiting}. In this case, an operator can produce an output when a corresponding substream terminates.
 
 Generating a substream termination event is a challenging task that often depends on the specific properties of practical problems. For instance, a deterministic windowed join operation\footnote{given the identical sequences of input tuples, the identical output tuples will be produced} requires that the order of termination signals mirrors the order of input elements (termination events from data producers)~\cite{najdataei2019stretch, gulisano2016scalejoin}. Another example is an epoch: a substream that an SPE should process atomically. A termination event for an epoch must occur before any elements of the subsequent epoch arrive. These examples demonstrate that it is crucial to formally define the properties of substream management techniques to determine their suitability for specific scenarios.
 
@@ -53,7 +55,8 @@ Generating a substream termination event is a challenging task that often depend
 
 \subsubsection{Delivery guarantees}
 
-One of the most challenging tasks for streaming systems is to design and implement delivery guarantees. 
+% One of the most challenging tasks for streaming systems is to design and implement delivery guarantees.
+
 Streaming systems must release output elements before processing has finished because the input data is assumed to be unbounded. Exactly-once is the strongest and the most valuable guarantee from the user perspective as it ensures that input elements are processed atomically and are not lost. These notions are seemingly simple but shadow the dependency of an output item on the {\em system state} as well as on the input item. 
 Streaming systems face the need to recover computations consistently with previous input data, current system state, and already delivered elements.
 This requirement makes failure recovery mechanisms somewhat complicated. 
