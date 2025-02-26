@@ -1,8 +1,8 @@
-\chapter{Literature Review}
+\chapter{Consistency and Fault Tolerance in Distributed Stream Processing}
 \label{thesis-chapter-literature-review}
-\lhead{\emph{Literature Review}}
+\lhead{\emph{Consistency and Fault Tolerance in Distributed Stream Processing}}
 
-\section{Consistency in stream processing}
+\section{Consistency in distributed stream processing}
 \label{consistency_overview}
 
 In this section, we discuss several types of consistency in distributed stream processing. We start with delivery guarantees in Section~\ref{delivery_guarantees}: exactly-once, at-least-once, and at-most-once. Delivery guarantees specify the rules for how a system should behave in case of node failures to maintain a consistent state and prevent data loss or duplication.
@@ -114,7 +114,7 @@ Therefore, delivery guarantees are tightly connected to transactional stream pro
 % \label{statistical}
 % \cite{tellis2018detecting}
 
-\section{Fault tolerance mechanisms in stream processing}
+\section{Fault tolerance in distributed stream processing}
 \label{phd-related-fault-tolerance}
 
 As discussed in Section~\ref{consistency_overview}, consistency is closely linked with fault tolerance in stream processing. State recovery is essential for achieving delivery guarantees. Completeness and transactional guarantees depend on these delivery guarantees. Consequently, a fundamental mechanism for maintaining consistency in distributed stream processing is recovery after failures, ensuring the necessary level of delivery guarantee: at-most-once, at-least-once, or exactly-once.
