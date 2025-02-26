@@ -69,7 +69,7 @@ For example, in a stream of web server logs, one could create substreams for eac
 
 Substreams allow outputting results before all input is processed. By dividing the continuous data stream into smaller, manageable segments, an SPE can produce intermediate results as each substream is processed. In terms of substreams, the problem of result completeness comes down to ensuring that all substream elements are processed before outputting the corresponding result. 
 
-\subsubsection{Detecting substreams termination}
+\subsubsection{Detecting termination of substreams}
 
 Solving the problem of detecting that all substream elements have been processed is the prerequisite for ensuring that system results are complete. The strict substream termination guarantee consists of two parts: the source must promise that no more messages from the substream may emerge, and the system must ensure it contains no substream messages. 
 
