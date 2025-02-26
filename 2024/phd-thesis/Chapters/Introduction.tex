@@ -7,7 +7,7 @@ Distributed stream processing engines (SPEs) handle analytical, computational, a
 
 The low latency requirement raises two major issues related to data consistency. Firstly, an SPE requires advanced fault tolerance mechanisms to ensure quick recovery and data consistency during failures~\cite{Wang:2019:LSF:3341301.3359653, akidau2015streaming}. Secondly, there is the challenge of continuously producing a consistent resulting stream during processing. Determining the precise moment when a data item is ready for release in a distributed environment can be complex~\cite{Tucker:2003:EPS:776752.776780, DBLP:journals/pvldb/BegoliACHKKMS21}.
 
-We acknowledge that, although there have been attempts to address these challenges, there is still room for improvement. In this thesis, we develop formal models that describe the shortcomings and limitations of current approaches. Additionally, we design more efficient techniques based on the theoretical insights gained from our analysis and modeling of existing methods. We demonstrate that the proposed methods are not only theoretically more efficient, but can also outperform state-of-the-art industrial alternatives.
+We acknowledge that, although there have been attempts to address these challenges, there is still room for improvement. In this thesis, we develop formal models that describe the shortcomings and limitations of current approaches. Additionally, we design more efficient techniques based on the theoretical insights gained from our analysis and modeling of existing methods. We demonstrate that the proposed methods are not only theoretically more efficient, but also outperforms state-of-the-art industrial alternatives.
 
 \section{Research Methodology}
 
@@ -24,9 +24,9 @@ The novelty of this work lies in addressing open challenges and achieving result
 More specifically, this work brings the following novelty:
 \begin{enumerate}
     \item Formal model for delivery guarantees, and a demonstration based on this model that deterministic SPEs can theoretically outperform non-deterministic ones in terms of latency.
-    \item Experimental demonstration that deterministic SPE can outperform state-of-the-art alternatives in terms of latency.
+    \item Experimental demonstration that deterministic SPE outperforms state-of-the-art alternatives in terms of latency.
     \item Formal model for substream management, and a demonstration based in this model of the lower bound of extra network traffic for detecting substream termination.
-    \item Implementation of the substream management framework reaching the lower bound of extra network traffic and demonstration that it can outperform state-of-the-art alternatives.
+    \item Implementation of the substream management framework reaching the lower bound of extra network traffic and demonstration that it outperforms state-of-the-art alternatives.
 \end{enumerate}
 The main contributions of this work are outlined in more detail in Section~\ref{thesis-intro-contributions}.
 
@@ -113,7 +113,7 @@ We also provided several insights into the performance of substream management s
 
 \subsection{Substream management approach reaching lower bound of network traffic overhead}
 
-We designed and implemented a new substream management technique called \tracker~\cite{10.1145/3524860.3539809, trofimov2023bounding}. Our approach has the following features:
+We designed and implemented a new substream management technique called \tracker~\cite{10.1145/3524860.3539809, trofimov2023bounding} that reaches the theoretical lower bound of network traffic overhead for this task. Our approach has the following features:
 
 \begin{itemize}
     \item Efficiency due to the lower bound of service traffic overhead
@@ -172,4 +172,4 @@ The complete list of published material along with assigned contributions is the
 
 \section{Dissertation Outline}
 
-The rest of the dissertation is structured as follows: Chapter~\ref{thesis-chapter-literature-review} covers the literature review of the consistency and fault tolerance in distributed stream processing. In Chapter~\ref{thesis-chapter-delivery-guarantees} we formalize the delivery guarantees and demonstrate that deterministic systems can be theoretically more efficient for exactly-once than non-deterministic in terms of latency. In Chapter~\ref{thesis-chapther-optimistic} we indtroduce a lightweight approach for achievening determinism and exactly-once and show that it can outperform state-of-the-art alternatives. Chapter~\ref{thesis-chapter-substreams-consistency} covers the formal model for the substream consistency and the estimation of the lower bound for extra network traffic required by substream management mechanisms. In Chapter~\ref{thesis-chapter-tracker} we present the substream management technique reaching the lower bound of extra network traffic and demonstrate its practical feasibility. In Chapter~\ref{thesis-chapter-conclusion}, we conclude by summarizing our findings and discussing future directions.
+The rest of the dissertation is structured as follows: Chapter~\ref{thesis-chapter-literature-review} covers the literature review of the consistency and fault tolerance in distributed stream processing. In Chapter~\ref{thesis-chapter-delivery-guarantees} we formalize the delivery guarantees and demonstrate that deterministic systems can be theoretically more efficient for exactly-once than non-deterministic in terms of latency. In Chapter~\ref{thesis-chapther-optimistic} we indtroduce a lightweight approach for achievening determinism and exactly-once and show that it outperforms state-of-the-art alternatives. Chapter~\ref{thesis-chapter-substreams-consistency} covers the formal model for the substream consistency and the estimation of the lower bound for extra network traffic required by substream management mechanisms. In Chapter~\ref{thesis-chapter-tracker} we present the substream management technique reaching the lower bound of extra network traffic and demonstrate its practical feasibility. In Chapter~\ref{thesis-chapter-conclusion}, we conclude by summarizing our findings and discussing future directions.
