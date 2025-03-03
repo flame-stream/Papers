@@ -1,0 +1,48 @@
+We highlight the main results of this work in the following contributions, which address the challenges detailed in Section~\ref{thesis-intro-challenges}.
+
+\subsection{Formal model for delivery guarantees}
+
+We introduced a formal framework for modeling consistency properties for any stream processing system~\cite{thepaper}. It was shown that the property of determinism is tightly connected with the concept of exactly-once. We proved that non-deterministic systems must persistently save a state of non-commutative operations before output delivery in order to achieve exactly-once.
+
+We demonstrated that most of the state-of-the-art stream processing systems~\cite{Carbone:2017:SMA:3137765.3137777, Zaharia:2012:DSE:2342763.2342773, Akidau:2013:MFS:2536222.2536229, apache:storm:trident} use one of the following approaches to overcome this problem: 
+
+\begin{itemize}
+    \item Inherit exactly-once from batch processing using small-sized batches (micro-batching)
+    \item Apply distributed transaction control protocols which guarantee that states are saved before delivery of elements affected by these states
+    \item Write results of an operation to external storage on each input element
+\end{itemize}
+
+All these methods experience difficulties with working under low-latency requirements (less than a second). In the first case, latency cannot be lower than the batching period, in the second case, the distributed two-phase commit may result in a significant increase of latency, while in the third case latency is bounded below by the duration of external writes. The formal framework along with the mentioned theoretical insights are covered in Chapter~\ref{thesis-chapter-delivery-guarantees}.
+
+\subsection{Exactly-once based on lightweight determinism}
+
+Using our formal inference, we designed the \textit{drifting state} technique~\cite{we2018adbis}, a lightweight optimistic approach for ensuring deterministic processing. As demonstrated earlier, deterministic systems can theoretically be more efficient for exactly-once processing in terms of latency, so that we adapted drifting state to achieve exactly-once guarantee~\cite{thepaper}. Our protocols offer several important features:
+
+\begin{itemize}
+    \item Elements are processed in a pure streaming fashion, without the need for input buffering.
+    \item Business-logic computations, state snapshotting, and the delivery of output items operate asynchronously and independently.
+    \item Exactly-once processing semantics are maintained.
+\end{itemize}
+
+We implemented the prototype of the proposed technique to examine its performance~\cite{we2018adbis, we2018seim, thepaper}. Our experiments demonstrated that the introduced protocols for fault tolerance are scalable and provide remarkably low overhead within different computational layouts. The comparison with the industrial stream processing solution indicated that our prototype could provide lower latency under exactly-once requirement. The drifting state technique along with exactly-once implementation on top of it and experimental study are detailed in Chapter~\ref{thesis-chapther-optimistic}.
+
+\subsection{Formal model for substream consistency}
+
+We formalized the problem of substream management and highlighted its main features~\cite{10.1145/3524860.3539809, trofimov2023bounding}. Particularly, we introduced the notions of {\em soft bound} and {\em firm bound} required by various stream processing scenarios. Some applications that apply substream management systems do not require any particular properties of termination events. In this case, we denote the guarantee provided by such events as {\em soft bound} because termination events indicate that the substream ended some time ago. However, other problems require a {\em firm bound}: guarantee that the substream ends {\em exactly} after the termination event. For example, a commonly used snapshotting protocol~\cite{2015arXiv150608603C, jacques2016consistent} relies on an {\em epoch}. An epoch is a special substream that must be processed atomically. Therefore, the SPE requires the termination event for a given epoch to occur immediately after the last processing event belonging to that epoch. Otherwise, the snapshot can be inconsistent, capturing elements from multiple epochs.
+
+We also provided several insights into the performance of substream management systems. We showed that the network overhead induced by a substream management system cannot be lower than linear in terms of the number of computational nodes. We demonstrated that the state-of-the-art punctuations framework, as applied in many production-scale SPEs~\cite{tucker2003exploiting}, incurs quadratic network overhead with respect to the number of computational nodes, indicating that it is far from the lower bound. Chapter~\ref{thesis-chapter-substreams-consistency} is dedicated to the substream formal model and the mentioned performance insights.
+
+\subsection{Substream management approach reaching lower bound of network traffic overhead}
+
+We designed and implemented a new substream management technique called \tracker~\cite{10.1145/3524860.3539809, trofimov2023bounding} that reaches the theoretical lower bound of network traffic overhead for this task. Our approach has the following features:
+
+\begin{itemize}
+    \item Efficiency due to the lower bound of service traffic overhead
+    \item Suitability for problems that require non-linear executions: graph traversing, iterative algorithms, etc.
+    \item Suitability for substreams consisting of a few elements
+    \item Scalability due to the distribution of extra network traffic from operators between multiple nodes
+\end{itemize}
+
+These properties of the \tracker\ framework create a possibility to apply substream management in new applications; this includes smart caching of operator state and latency-conscious windowed joins.
+
+We also demonstrated that \tracker\ outperforms state-of-the-art substream management mechanisms in real-life scenarios. The design of the \tracker\ framework along with its implementation details and experimental study are discussed in Chapter~\ref{thesis-chapter-tracker}.

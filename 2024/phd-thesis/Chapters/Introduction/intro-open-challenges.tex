@@ -1,0 +1,40 @@
+We identify two key challenges in achieving consistency in distributed stream processing, which are critical yet difficult to address in both academic and industrial contexts: the lack of a formal model and the high overhead of consistency mechanisms. Specifically, we discuss how these challenges arise in the two main types of consistency covered in this thesis: delivery guarantees and substream consistency.
+
+\subsection{Lack of a formal model for the consistency concepts}
+
+\subsubsection{Delivery guarantees}
+
+Delivery guarantees, such as at-most-once, at-least-once, and exactly-once, define how and when data is delivered and processed in the system~\cite{fragkoulis2024survey, carbone2018scalable, Akidau:2013:MFS:2536222.2536229}. The type of delivery guarantee chosen for a system directly influences how that system handles failures~\cite{zhang2024survey, silvestre2021clonos, wang2021consistency}. In at-most-once, if a failure occurs during processing, the system may not attempt to reprocess the input, leading to potential data loss. In at-least-once, the system ensures no data is lost by reprocessing inputs in case of failures. However, this can lead to duplicate processing and results if the system doesn't track what has already been processed. In exactly-once, the system ensures that every input is processed exactly one time, even in the case of failures.
+
+In state-of-the-art stream processing systems like Flink~\cite{Carbone:2017:SMA:3137765.3137777} and Spark~\cite{Zaharia:2012:DSE:2342763.2342773}, delivery guarantees are primarily defined through each system's internal failure recovery mechanisms. However, a significant limitation of this approach is the variation in features provided by different recovery mechanisms, complicating the assurance of delivery guarantees across systems. For instance, in Flink with declared at-least-once guarantee, if an operation within the execution graph is non-commutative, this can result not only in duplicated outputs but also in outputs that are inconsistent with previously released data, as we will further demonstrate in this thesis. Consequently, one of the critical issues we have identified is the lack of a formal model for delivery guarantees. A deeper understanding of the expected outputs following a system failure is essential for developing reliable, production-ready systems based on distributed stream processing.
+
+\subsubsection{Substream consistency}
+
+% There are plenty of data processing scenarios where results are most valuable at the time of data arrival, for example, IoT, news processing, financial analysis, fraud detection, and network monitoring. However, 
+
+Regular blocking data processing operators read an entire input before producing an output and can never release a result in the case of a stream. To handle this problem, one can divide the whole unbounded, potentially infinite data stream into bounded, possibly overlapping substreams˜\cite{tucker2003exploiting}. In this case, an operator can produce an output when a corresponding substream terminates.
+
+Generating a substream termination event is a challenging task that often depends on the specific properties of practical problems. For instance, a deterministic windowed join operation\footnote{given the identical sequences of input tuples, the identical output tuples will be produced} requires that the order of termination signals mirrors the order of input elements (termination events from data producers)~\cite{najdataei2019stretch, gulisano2016scalejoin}. Another example is an epoch: a substream that an SPE should process atomically. A termination event for an epoch must occur before any elements of the subsequent epoch arrive. These examples demonstrate that it is crucial to formally define the properties of substream management techniques to determine their suitability for specific scenarios.
+
+\subsection{High overhead on consistency mechanisms that leads to high processing latency}
+
+\subsubsection{Delivery guarantees}
+
+% One of the most challenging tasks for streaming systems is to design and implement delivery guarantees.
+
+Streaming systems must release output elements before processing has finished because the input data is assumed to be unbounded. Exactly-once is the strongest and the most valuable guarantee from the user perspective as it ensures that input elements are processed atomically and are not lost. These notions are seemingly simple but shadow the dependency of an output item on the {\em system state} as well as on the input item. 
+Streaming systems face the need to recover computations consistently with previous input data, current system state, and already delivered elements.
+This requirement makes failure recovery mechanisms somewhat complicated. 
+
+This complication is resolved by most existing stream processing engines. 
+Flink ensures the atomicity of state updates and delivery using a protocol based on distributed transactions. 
+Google MillWheel~\cite{Akidau:2013:MFS:2536222.2536229} enforces consistency between state and output elements by writing the results of each operation to persistent external storage. 
+Micro-batching engines like Storm Trident~\cite{apache:storm:trident} and Spark Streaming~\cite{Zaharia:2012:DSE:2342763.2342773} process data in small-sized blocks. 
+Each block is atomically processed at each stage of a data flow, providing properties similar to batch processing. 
+The price for exactly-once delivery is a high latency observed in these implementations (e.g., ~\cite{7530084, 7474816}). It is unclear if it is possible to mitigate the latency overhead on exactly-once enforcement.
+
+\subsubsection{Substream consistency}
+
+A popular method for the generation of substream termination events is the punctuation framework~\cite{tucker2003exploiting} applied in many production-scale SPEs such as Flink~\cite{carbone2015apache}, Heron~\cite{Kulkarni:2015:THS:2723372.2742788}, Samza~\cite{Noghabi:2017:SSS:3137765.3137770}, IBM Streams~\cite{jacques2016consistent}, Apex~\cite{pathak2016introduction}. The main idea behind this framework is to divide the stream by injecting special elements called {\em punctuations} that define substream ``borders''. An SPE propagates these special elements via the same network channels as data elements. The high network overhead is one of the major limitations of the punctuation framework. Network traffic complexity for this method is $O(K|\Pi|^2)$, where $|\Pi|$ is the number of processes and $K$ is the number of substreams because each process should propagate punctuations to all output channels. The above formula estimates the number of punctuation messages needed in the worst case of fully interconnected processes. 
+
+We argue that the worst case can appear on any execution graph that contains a re-partitioning operator. Indeed, SPEs try to distribute workload evenly between processes~\cite{carbone2015apache, Kulkarni:2015:THS:2723372.2742788, Akidau:2013:MFS:2536222.2536229}, so elements of a substream can be evenly distributed among processes as well. When a process reaches the end of a substream, it must broadcast the punctuation because the items of the part of a sub-stream handled by this process are re-distributed evenly for subsequent processing. Substreams can be {\em fine-grained}: for example, each user session defines a substream. If there are a lot of small substreams, an inefficient substreaming system can degrade the latency~\cite{DBLP:journals/pvldb/BegoliACHKKMS21} and the throughput of an SPE~\cite{Li:2008:OPN:1453856.1453890} or affect the performance of state checkpointing~\cite{zhang2021research}. Therefore, reducing an overhead on substream management is an important open challenge in distributed stream processing.
