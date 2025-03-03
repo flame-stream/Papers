@@ -12,6 +12,41 @@
 \usepackage{vector}  % Allows "\bvec{}" and "\buvec{}" for "blackboard" style bold vectors in maths
 \usepackage{enumitem} % for customizing lists
 \usepackage{pdfpages}
+\usepackage{colortbl}
+\usepackage{amsmath,amssymb,amsfonts}
+
+\usepackage{booktabs} % For formal tables		
+ %\usepackage{cite} %for multiple refs		
+
+  %\usepackage{amssymb} %for nice emptyset		
+
+  \usepackage{amsmath,amssymb,amsfonts}		
+ \DeclareMathOperator{\rank}{rank}		
+ \makeatletter		
+ \newenvironment{sqcases}{%		
+   \matrix@check\sqcases\env@sqcases		
+ }{%		
+   \endarray\right.%		
+ }		
+ \def\env@sqcases{%		
+   \let\@ifnextchar\new@ifnextchar		
+   \left\lbrack		
+   \def\arraystretch{1.2}%		
+   \array{@{}l@{\quad}l@{}}%		
+ }		
+ \makeatother		
+
+  \let\proof\relax		
+ \let\endproof\relax	
+\usepackage{amsthm}
+\theoremstyle{definition}		
+% \newtheorem{definition}{Definition}		
+% \newtheorem{corollary}{Corollary}		
+% \newtheorem{theorem}{Theorem}		
+
+\newenvironment{sketch}{%		
+\renewcommand{\proofname}{Proof Sketch}\proof}{\endproof}	
+
 \hypersetup{urlcolor=blue, colorlinks=true}  % Colours hyperlinks in blue, but this can be distracting if there are many links.
 \renewcommand\bibname{References}
 \newcommand {\FlameStream} {FlameStream}
@@ -192,9 +227,9 @@
 \lhead{\emph{Consistency and Fault Tolerance in Distributed Stream Processing}}
 \input{Chapters/Review/review}
 
-\chapter{Delivery Guarantees}
+\chapter{Delivery Guarantees and Determinism}
 \label{thesis-chapter-delivery-guarantees}
-\lhead{\emph{Delivery Guarantees}}
+\lhead{\emph{Delivery Guarantees and Determinism}}
 \input{Chapters/DeliveryGuarantees/delivery}
 
 \chapter{Deterministic Model and Runtime for Exactly-Once Processing}
