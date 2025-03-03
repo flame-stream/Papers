@@ -183,19 +183,39 @@
 % Include the chapters of the thesis, as separate files
 % Just uncomment the lines as you write the chapters
 
+\chapter{Introduction}
+\lhead{\emph{Introduction}}
 \input{Chapters/Introduction/intro} % Introduction
 
+\chapter{Consistency and Fault Tolerance in Distributed Stream Processing}
+\label{thesis-chapter-literature-review}
+\lhead{\emph{Consistency and Fault Tolerance in Distributed Stream Processing}}
 \input{Chapters/Review/review}
 
-\input{Chapters/DeliveryGuarantees}
+\chapter{Delivery Guarantees}
+\label{thesis-chapter-delivery-guarantees}
+\lhead{\emph{Delivery Guarantees}}
+\input{Chapters/DeliveryGuarantees/delivery}
 
+\chapter{Deterministic Model and Runtime for Exactly-Once Processing}
+\label{thesis-chapther-optimistic}
+\lhead{\emph{Deterministic Model and Runtime for Exactly-Once Processing}}
 \input{Chapters/OptimisticDeterminismForEO}
 
+\chapter{Substreams Consistency}
+\label{thesis-chapter-substreams-consistency}
+\lhead{\emph{Substreams Consistency}}
 \input{Chapters/SubstreamsConsistency}
 
+\chapter{Tracker: Substreams Consistency Approach}
+\label{thesis-chapter-tracker}
+\lhead{\emph{Tracker: Substreams Consistency Approach}}
 \input{Chapters/Tracker}
 
-\input{Chapters/Conclusions}
+\chapter{Conclusion}
+\label{thesis-chapter-conclusion}
+\lhead{\emph{Conclusion}}
+\input{Chapters/Conclusion}
 
 %\input{Chapters/Chapter2} % Background Theory 
 
