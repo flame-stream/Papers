@@ -1,0 +1,9 @@
+In this chapter, we introduced a formal, conceptual framework for modeling consistency properties for any stream processing system. We demonstrated how the behavior of state-of-the-art research and industrial systems could be described in terms of the proposed framework. It was shown that the property of determinism is tightly connected with the concept of of exactly-once. We proved that non-deterministic systems must persistently save a state of non-commutative operations before output delivery in order to achieve exactly-once. Most of the state-of-the-art stream processing systems use one of the following approaches to overcome this problem: 
+
+\begin{itemize}
+    \item Inherit exactly-once from batch processing using small-sized batches (micro-batching)
+    \item Apply distributed transaction control protocols which guarantee that states are saved before delivery of elements affected by these states
+    \item Write results of an operation to external storage on each input element
+\end{itemize}
+
+All these methods experience difficulties with working under low-latency requirements (less than a second). In the first case, latency cannot be lower than the batching period, in the second case, the distributed two-phase commit may result in a significant increase of latency, while in the third case latency is bounded below by the duration of external writes.

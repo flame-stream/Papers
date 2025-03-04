@@ -103,6 +103,13 @@ is a tuple of $(\Gamma,D,F)$, where $\Gamma$ is a set of all possible data flow 
 
 Data producers and consumers are modeled using sets $A$ and $B$, respectively. All elements that in the system at the time $\tau$ are also presented in the set $W_\tau$. We assume that operation states are common elements that are presented in $W_\tau$ as well. Binary relation $D$ captures all possible transformations within a physical graph. {\em Input} step indicates that a new streaming element enters the system. This element is also presented in set $A$, because the system may request it for reprocessing. {\em Output step} describes a case, when an element leaves the system, e.g., during delivery of an output element to a data consumer. {\em Transform} step denotes the internal transformation of an element according to user-defined operations. In this model, we do not explicitly introduce computational units and asynchronous network channels. Instead, we simulate possible races and distributed asynchronous processing through the probability of the next transformation inside a data flow. Such probability is modeled using a random variable $\chi_\tau$, which indicates the input of an operation that will be executed next. {\em Failure and recover} step indicates the recovery of the system state based on input and output elements.
 
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.6\textwidth]{Chapters/DeliveryGuarantees/pics/concat.pdf}
+  \caption{Strings concatenation physical graph}
+  \label{concat}
+\end{figure}
+
 We allow using output elements in system transformations because we suppose that {\em snapshots} of operation states taken by real stream processing systems are common output elements. The rationale for this assumption is the following:
 
 \begin{itemize}
@@ -113,13 +120,6 @@ We allow using output elements in system transformations because we suppose that
 Let us illustrate the proposed model by an example. Assume that a physical graph consists of a single windowed operation (window = 2) that concatenates strings from multiple asynchronous input channels. This graph is illustrated in Figure~\ref{concat}: $x \in W$ indicates input channels, $y\in W$ denotes output channel, and $ s \in W$ is the state of the operation. Set $\Gamma$ contains all possible characters, and binary relation $D$ contains all possible options for their concatenation. Recovery function $F$ reprocess all input elements since the last snapshot. Table~\ref{concat_example} demonstrates a potential execution of the defined graph with strings $"a","c","b","d","e"$ as input elements. The concatenation operation receives a random element from its input due to asynchronous channels. Wall time is indicated to highlight that races may occur in a data flow. Note that step {\em snapshot} can be considered as an ordinary output step. Red lines emphasize the recovery process after failure. 
 
 As one can see, the system reaches precisely the same state after recovery. Eventually, the end-user receives the output element {\em be} that is expected within such execution. Further, we demonstrate that simple reprocessing of missed input elements can cause significant inconsistencies in results.
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.48\textwidth]{Chapters/DeliveryGuarantees/pics/concat.pdf}
-  \caption{Strings concatenation physical graph}
-  \label{concat}
-\end{figure}
 
 \begin{table}[htbp]
 \begin {center}

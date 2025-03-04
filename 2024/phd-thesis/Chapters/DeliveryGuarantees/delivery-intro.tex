@@ -20,10 +20,17 @@ Misunderstandings of streaming delivery guarantees frequently cause debates and 
 Another property that can be easily obtained in batch processing systems but is hard to achieve in streaming engines is {\em a determinism}. 
 The determinism means that repeated runs of the system on the same data produce the same results. It is commonly considered as a challenging task~\cite{Zacheilas:2017:MDS:3093742.3093921}. On the other hand, this property is desirable because it implies reproducibility and predictability. Intuitively, determinism is connected with delivery guarantees~\cite{Stonebraker:2005:RRS:1107499.1107504}, but, to the best of our knowledge, this relation has not been deeply investigated. In this chapter, we demonstrate that the property of determinism can mitigate an overhead on exactly-once. 
 
-The rest of the chapter is structured as follows: 
-% in section~\ref{fs-preliminaries} the notion of consistency applied to a stream processing is discussed, 
-we introduce our formal framework in section~\ref{fs-formalism}, 
-existing implementations of exactly-once in terms of the proposed formal framework are described in section~\ref{fs-eo-impl}, 
+The main contributions of this chapter are the following: 
+\begin{itemize}
+    \item Formal model of a distributed stream processing  and a definition of  delivery guarantees 
+    \item Demonstration that in non-deterministic systems providing exactly-once, the lower bound of latency is the duration of state snapshotting
+    \item Overview of the state-of-the-art techniques for exactly-once in terms of the proposed formal framework
+\end{itemize}
+
+The rest of the chapter is structured as follows:
+we introduce our formal framework in Section~\ref{fs-formalism},
+the connection between exactly-once guarantee and determinism is discussed in Section~\ref{fs-determinism-eo}, 
+the existing implementations of exactly-once in terms of the proposed formal framework are described in Section~\ref{fs-eo-impl}, Section~\ref{fs-conclusion-seciton} concludes the main outcomes of the chapter.
 % implementation details of exactly-once over determinism are mentioned in section~\ref{fs-consistency-section}, 
 % experiments that demonstrate the feasibility of the proposed concept are detailed in section~\ref{fs-experiments-seciton}, 
 % and we discuss prior works on the topic in section~\ref{fs-related-seciton}. 
