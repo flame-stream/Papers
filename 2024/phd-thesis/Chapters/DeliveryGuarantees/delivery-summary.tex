@@ -1,4 +1,6 @@
-In this chapter, we introduced a formal, conceptual framework for modeling consistency properties for any stream processing system. We demonstrated how the behavior of state-of-the-art research and industrial systems could be described in terms of the proposed framework. It was shown that the property of determinism is tightly connected with the concept of of exactly-once. We proved that non-deterministic systems must persistently save a state of non-commutative operations before output delivery in order to achieve exactly-once. Most of the state-of-the-art stream processing systems use one of the following approaches to overcome this problem: 
+In this chapter, we introduced a formal framework for modeling delivery guarantees in distributed stream processing. We described the behavior of state-of-the-art research and industrial systems in terms of the proposed framework. It was shown that the property of determinism is tightly connected with the concept of of exactly-once. We proved that non-deterministic systems must persistently save a state of non-commutative operations before output delivery in order to achieve exactly-once. Therefore, in non-deterministic systems that guarantee exactly-once processing, output elements must wait to be released until after the next snapshot is taken.
+
+Most of the state-of-the-art stream processing systems use one of the following approaches to achieve exactly-once delivery guarantee: 
 
 \begin{itemize}
     \item Inherit exactly-once from batch processing using small-sized batches (micro-batching)
@@ -6,4 +8,4 @@ In this chapter, we introduced a formal, conceptual framework for modeling consi
     \item Write results of an operation to external storage on each input element
 \end{itemize}
 
-All these methods experience difficulties with working under low-latency requirements (less than a second). In the first case, latency cannot be lower than the batching period, in the second case, the distributed two-phase commit may result in a significant increase of latency, while in the third case latency is bounded below by the duration of external writes.
+Using the proposed formal framework we demonstrated the foundations behind high latency for the exactly-once mode in these systems. In the first case, latency cannot be lower than the batching period, in the second case, latency depends on the snapshotting period, while in the third case latency is bounded below by the duration of external writes.

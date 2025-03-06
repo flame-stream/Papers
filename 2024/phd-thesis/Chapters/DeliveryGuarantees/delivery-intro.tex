@@ -1,31 +1,15 @@
 %%% fs-state-intro - Introduction
 
-\label {fs-intro-seciton}
-
 Delivery guarantees describe a contract regarding {\em which data} will be processed and released in case of failures. 
 Exactly-once is the strongest and the most valuable guarantee from the user perspective as it ensures that input elements are processed atomically and are not lost. These notions are seemingly simple but shadow the dependency of an output item on the {\em system state} as well as on the input item. 
 Streaming systems face a need to recover computations consistently with previous input data, the current system state, and with the already delivered elements.
-This requirement makes failure recovery mechanisms somewhat complicated. 
+This requirement makes failure recovery mechanisms somewhat complicated.
 
-This complication is resolved by most of the existing stream processing engines. 
-Flink ensures the atomicity of state updates and delivery using a protocol based on distributed transactions. 
-Google MillWheel~\cite{Akidau:2013:MFS:2536222.2536229} enforces consistency between state and output elements by writing results of each operation to persistent external storage. 
-Micro-batching engines like Storm Trident~\cite{apache:storm:trident} and Spark Streaming~\cite{Zaharia:2012:DSE:2342763.2342773} process data in small-sized blocks. 
-Each block is atomically processed on each stage of a data flow, providing properties similar to batch processing. 
-The price for exactly-once delivery is a high latency observed in these implementations (e.g., ~\cite{7530084, 7474816}).
+As we showed in~\ref{thesis-intro-challenges} there is a lack of a  formal model for delivery guarantees. 
+Misunderstandings of delivery guarantees frequently cause debates and discussions~\cite{JerryPengStreamIO, PaperTrail}. Without a formal model, it is hard to observe similarities and distinctions between existing solutions and to recognize their limitations. In this chapter, we introduce a formal model of stream processing that captures delivery guarantees existing in most of the state-of-the-art systems.
 
-The vast gap between the notion of exactly-once and the properties of its implementations indicates the lack of a formal model. 
-Misunderstandings of streaming delivery guarantees frequently cause debates and discussions~\cite{JerryPengStreamIO, PaperTrail}. Without a formal model, it is hard to observe similarities and distinctions between existing solutions and to recognize their limitations. In this chapter, we introduce a formal model of stream processing that captures delivery guarantees existing in most of the state-of-the-art systems.
-
-Another property that can be easily obtained in batch processing systems but is hard to achieve in streaming engines is {\em a determinism}. 
+Another important property of streaming engines is {\em a determinism}. 
 The determinism means that repeated runs of the system on the same data produce the same results. It is commonly considered as a challenging task~\cite{Zacheilas:2017:MDS:3093742.3093921}. On the other hand, this property is desirable because it implies reproducibility and predictability. Intuitively, determinism is connected with delivery guarantees~\cite{Stonebraker:2005:RRS:1107499.1107504}, but, to the best of our knowledge, this relation has not been deeply investigated. In this chapter, we demonstrate that the property of determinism can mitigate an overhead on exactly-once. 
-
-The main contributions of this chapter are the following: 
-\begin{itemize}
-    \item Formal model of a distributed stream processing  and a definition of  delivery guarantees 
-    \item Demonstration that in non-deterministic systems providing exactly-once, the lower bound of latency is the duration of state snapshotting
-    \item Overview of the state-of-the-art techniques for exactly-once in terms of the proposed formal framework
-\end{itemize}
 
 The rest of the chapter is structured as follows:
 we introduce our formal framework in Section~\ref{fs-formalism},
