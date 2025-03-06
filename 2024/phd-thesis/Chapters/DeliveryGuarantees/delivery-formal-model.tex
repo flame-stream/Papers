@@ -30,39 +30,6 @@ A distributed stream processing system is a shared-nothing distributed runtime, 
 
 A user specifies required stream processing with a {\em logical graph}. Vertices of this graph represent operations and edges determine the data flow between tasks. A processing system maps the logical graph to a {\em physical} graph that is used to control actual distributed execution. Commonly, each logical operation is mapped to several physical tasks that are deployed to a cluster of computational units connected through a network. Each operation may be {\em stateless} or {\em stateful}. A system is usually responsible for state management in order to prevent inconsistencies.
 
-An input element has {\em entered} if the system is aware of this element since that moment and takes some responsibility for its processing. 
-This concept can be implemented differently. 
-For example,
- an  element has been entered when  it  has arrived at {\em Source} vertex in Flink, while   
-an element enters, when it is read or received by an input agent also called  {\em Source}   in Spark Streaming.
-
-An output element has {\em left} the system if the element has been released to a consumer. 
-Since that time, the system cannot observe it anymore. This concept can also be implemented differently in various systems. For instance, in Spark Streaming element leaves when it is pushed to output operation, e.g., written to HDFS or file. In Flink, an element is delivered to end-user when it leaves from {\em Sink} vertex.   
-
-It is important to note that input and output elements cannot be directly matched due to the possibility of complex transformations within the system. 
-For instance, a single input element can be transformed into multiple ones.  The resulting elements may be processed in entirely different ways and even influence each other. 
-In general, it is hard to find out input elements on which an output element depends. 
-
-\subsection{Distributed streaming model}
-
-A formalization of streaming consistency guarantees we begin with a regular definition of a stream processing system. In order to be sufficient for the formalization, such a model should cover user-defined transformations, system state, data producers, and data consumers.
-
-Index $\tau\in{\mathbb{N}}$ can be considered as an exact global discrete time. We assume that only one event can happen at any single point in time $\tau$.
-
-\begin{definition}{Stream processing system}
-\label{reference_system}
-is a tuple of $(\Gamma,D,F)$, where $\Gamma$ is a set of all possible data flow elements, $D\subseteq{2^{\Gamma}\times2^{\Gamma}}$ is a binary relation on its power set. $F$ is a recovery function that restores the working set in case of system failures. Computations within the system are defined by the recurrent rules on the set of input elements $A$, output elements $B$, and the transient working set $W$. On each iteration, one of the following steps is chosen:
-
-\begin{enumerate}
-    \item \textbf{Input} $a_\tau\in{\Gamma}$:\\ $A_{\tau+1}=A_\tau \cup \{a_\tau\}, \\ B_{\tau+1}=B_{\tau}, \\ W_{\tau+1}=W_{\tau} \cup \{a_\tau\}.$
-    \item \textbf{Output} $b_\tau\in{W_\tau}$:\\ $A_{\tau + 1} = A_{\tau}$, \\ $B_{\tau+1}=B_\tau \cup \{b_\tau\}, \\ W_{\tau+1}=W_{\tau} \setminus \{b_\tau\}.$
-    \item \textbf{Transform}\\ $A_{\tau + 1} = A_{\tau}$,\\ $B_{\tau+1}=B_{\tau}$, \\ $W_{\tau+1}=(W_\tau \setminus \chi_\tau) \cup Y_\tau, (\chi_\tau,Y_\tau) \in D$, \\where\\$\chi_\tau \thicksim P(X\mid X \subseteq W_\tau \cup B_\tau , \exists Y : (X,Y) \in D)$, \\ probability distribution of $\chi_\tau$ depends on a system architecture. \label{random_formula}
-    \item \textbf{Failure and recover} \\  $A_{\tau + 1} = A_{\tau}$,\\ $B_{\tau+1}=B_{\tau}$, \\ $W_{\tau+1} = F(A_\tau,B_\tau)$
-\end{enumerate}
-
-\end{definition}
-
-
 \begin{table}[!b]
 \begin {center}
     \caption{Notations used throughout the chapter}
@@ -100,15 +67,39 @@ is a tuple of $(\Gamma,D,F)$, where $\Gamma$ is a set of all possible data flow 
 \end {center}
 \end{table}
 
+An input element has {\em entered} if the system is aware of this element since that moment and takes some responsibility for its processing. 
+This concept can be implemented differently. 
+For example,
+ an  element has been entered when  it  has arrived at {\em Source} vertex in Flink, while   
+an element enters, when it is read or received by an input agent also called  {\em Source}   in Spark Streaming.
+
+An output element has {\em left} the system if the element has been released to a consumer. 
+Since that time, the system cannot observe it anymore. This concept can also be implemented differently in various systems. For instance, in Spark Streaming element leaves when it is pushed to output operation, e.g., written to HDFS or file. In Flink, an element is delivered to end-user when it leaves from {\em Sink} vertex.   
+
+It is important to note that input and output elements cannot be directly matched due to the possibility of complex transformations within the system. 
+For instance, a single input element can be transformed into multiple ones.  The resulting elements may be processed in entirely different ways and even influence each other. 
+In general, it is hard to find out input elements on which an output element depends. 
+
+\subsection{Distributed streaming model}
+
+A formalization of streaming consistency guarantees we begin with a regular definition of a stream processing system. In order to be sufficient for the formalization, such a model should cover user-defined transformations, system state, data producers, and data consumers.
+
+Index $\tau\in{\mathbb{N}}$ can be considered as an exact global discrete time. We assume that only one event can happen at any single point in time $\tau$.
+
+\begin{definition}{Stream processing system}
+\label{reference_system}
+is a tuple of $(\Gamma,D,F)$, where $\Gamma$ is a set of all possible data flow elements, $D\subseteq{2^{\Gamma}\times2^{\Gamma}}$ is a binary relation on its power set. $F$ is a recovery function that restores the working set in case of system failures. Computations within the system are defined by the recurrent rules on the set of input elements $A$, output elements $B$, and the transient working set $W$. On each iteration, one of the following steps is chosen:
+
+\begin{enumerate}
+    \item \textbf{Input} $a_\tau\in{\Gamma}$:\\ $A_{\tau+1}=A_\tau \cup \{a_\tau\}, \\ B_{\tau+1}=B_{\tau}, \\ W_{\tau+1}=W_{\tau} \cup \{a_\tau\}.$
+    \item \textbf{Output} $b_\tau\in{W_\tau}$:\\ $A_{\tau + 1} = A_{\tau}$, \\ $B_{\tau+1}=B_\tau \cup \{b_\tau\}, \\ W_{\tau+1}=W_{\tau} \setminus \{b_\tau\}.$
+    \item \textbf{Transform}\\ $A_{\tau + 1} = A_{\tau}$,\\ $B_{\tau+1}=B_{\tau}$, \\ $W_{\tau+1}=(W_\tau \setminus \chi_\tau) \cup Y_\tau, (\chi_\tau,Y_\tau) \in D$, \\where\\$\chi_\tau \thicksim P(X\mid X \subseteq W_\tau \cup B_\tau , \exists Y : (X,Y) \in D)$, \\ probability distribution of $\chi_\tau$ depends on a system architecture. \label{random_formula}
+    \item \textbf{Failure and recover} \\  $A_{\tau + 1} = A_{\tau}$,\\ $B_{\tau+1}=B_{\tau}$, \\ $W_{\tau+1} = F(A_\tau,B_\tau)$
+\end{enumerate}
+
+\end{definition}
 
 Data producers and consumers are modeled using sets $A$ and $B$, respectively. All elements that in the system at the time $\tau$ are also presented in the set $W_\tau$. We assume that operation states are common elements that are presented in $W_\tau$ as well. Binary relation $D$ captures all possible transformations within a physical graph. {\em Input} step indicates that a new streaming element enters the system. This element is also presented in set $A$, because the system may request it for reprocessing. {\em Output step} describes a case, when an element leaves the system, e.g., during delivery of an output element to a data consumer. {\em Transform} step denotes the internal transformation of an element according to user-defined operations. In this model, we do not explicitly introduce computational units and asynchronous network channels. Instead, we simulate possible races and distributed asynchronous processing through the probability of the next transformation inside a data flow. Such probability is modeled using a random variable $\chi_\tau$, which indicates the input of an operation that will be executed next. {\em Failure and recover} step indicates the recovery of the system state based on input and output elements.
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=0.6\textwidth]{Chapters/DeliveryGuarantees/pics/concat.pdf}
-  \caption{Strings concatenation physical graph}
-  \label{concat}
-\end{figure}
 
 We allow using output elements in system transformations because we suppose that {\em snapshots} of operation states taken by real stream processing systems are common output elements. The rationale for this assumption is the following:
 
@@ -119,43 +110,14 @@ We allow using output elements in system transformations because we suppose that
 
 Let us illustrate the proposed model by an example. Assume that a physical graph consists of a single windowed operation (window = 2) that concatenates strings from multiple asynchronous input channels. This graph is illustrated in Figure~\ref{concat}: $x \in W$ indicates input channels, $y\in W$ denotes output channel, and $ s \in W$ is the state of the operation. Set $\Gamma$ contains all possible characters, and binary relation $D$ contains all possible options for their concatenation. Recovery function $F$ reprocess all input elements since the last snapshot. Table~\ref{concat_example} demonstrates a potential execution of the defined graph with strings $"a","c","b","d","e"$ as input elements. The concatenation operation receives a random element from its input due to asynchronous channels. Wall time is indicated to highlight that races may occur in a data flow. Note that step {\em snapshot} can be considered as an ordinary output step. Red lines emphasize the recovery process after failure. 
 
-As one can see, the system reaches precisely the same state after recovery. Eventually, the end-user receives the output element {\em be} that is expected within such execution. Further, we demonstrate that simple reprocessing of missed input elements can cause significant inconsistencies in results.
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.6\textwidth]{Chapters/DeliveryGuarantees/pics/concat.pdf}
+  \caption{Strings concatenation physical graph}
+  \label{concat}
+\end{figure}
 
-\begin{table}[htbp]
-\begin {center}
-\caption{String concatenation data flow}   \tabcolsep2pt
-\begin{tabular}{c|l|c|c|c|c|c|c}      
-wall\\ time & $\tau$& $a\in A$  &$x\in W$& $s\in W$ & $y\in W$ & $b \in B$ & step  \\
-\hline
-1   &   1   &   a   &   a           &           &       &           &   input \\
-1   &   2   &   c   &   a,c         &           &       &           &   input \\
-1   &   3   &       &    c          &   [a]     &    a  &           &   transform \\
-1   &   4   &       &   c           &   [a]     &       &   a       &   output \\
-1   &   5   &       &               &   [a,c]   &   ac  &           &   transform \\
-1   &   6   &       &               &   [a,c]   &       &   ac       &   output \\
-1   &   7   &       &               &   [a,c]   &       &   [a,c]   &   snapshot \\
-2   &   8   &   b    &   b          &   [a,c]   &       &           &   input \\
-2   &   9   &   d    &   b,d        &   [a,c]   &       &           &   input \\
-2   &   10   &       &   b          &   [c,d]   &  cd   &           &   transform \\
-2   &   11   &       &   b          &   [c,d]   &       &      cd     &   output \\
-2   &   12   &       &              &   [d,b]    &  db   &           &   transform \\
-2   &   13   &       &              &   {\bf [d,b]}    &       &      {\bf db}     &   output \\
-\arrayrulecolor{red}\hline
-3   &   14   &       &               &   [a,c]         &       &           &   recovery \\
-3   &   14   &   b   &   b           &   [a,c]         &       &           &   \\
-3   &   14   &   d   &   b,d         &   [a,c]         &       &           &   \\
-3   &   14   &       &   b           &   [c,d]         &       &           &   \\
-3   &   14   &       &   b           &   [c,d]         &       &           &   \\
-3   &   14   &       &               &   [d,b]         &       &           &    \\
-3   &   14   &       &               &   {\bf [d,b]}   &       &           &    \\
-\arrayrulecolor{red}\hline
-4   &   15   &  e    &   e           &   [d,b]   &      &           &   input \\
-4   &   16   &       &              &   [b,e]   &   be    &          &   transform \\
-4   &   17   &       &              &   [b,e]   &       &   {\bf be}       &   output \\
-\end{tabular}
-\label{concat_example}
-\end {center}
-\end{table}
+As one can see, the system reaches precisely the same state after recovery. Eventually, the end-user receives the output element {\em be} that is expected within such execution. Further, we demonstrate that simple reprocessing of missed input elements can cause significant inconsistencies in results.
 
 \subsection{Model analysis}
 
@@ -192,6 +154,42 @@ Using the notion of a reference recovery function, one can define the correct ou
 \begin{definition}{Output element $b_{\tau+1}$ is consistent}
 with all previous input and output elements $A_\tau$ and $B_\tau$ if the probability to observe it is non-zero in a system with reference recovery: $P(b_{\tau+1} \mid A_\tau,B_\tau,F^{*})>0$.
 \end{definition}
+
+\begin{table}[!b]
+\begin {center}
+\caption{String concatenation data flow}   \tabcolsep2pt
+\begin{tabular}{c|l|c|c|c|c|c|c}      
+wall\\ time & $\tau$& $a\in A$  &$x\in W$& $s\in W$ & $y\in W$ & $b \in B$ & step  \\
+\hline
+1   &   1   &   a   &   a           &           &       &           &   input \\
+1   &   2   &   c   &   a,c         &           &       &           &   input \\
+1   &   3   &       &    c          &   [a]     &    a  &           &   transform \\
+1   &   4   &       &   c           &   [a]     &       &   a       &   output \\
+1   &   5   &       &               &   [a,c]   &   ac  &           &   transform \\
+1   &   6   &       &               &   [a,c]   &       &   ac       &   output \\
+1   &   7   &       &               &   [a,c]   &       &   [a,c]   &   snapshot \\
+2   &   8   &   b    &   b          &   [a,c]   &       &           &   input \\
+2   &   9   &   d    &   b,d        &   [a,c]   &       &           &   input \\
+2   &   10   &       &   b          &   [c,d]   &  cd   &           &   transform \\
+2   &   11   &       &   b          &   [c,d]   &       &      cd     &   output \\
+2   &   12   &       &              &   [d,b]    &  db   &           &   transform \\
+2   &   13   &       &              &   {\bf [d,b]}    &       &      {\bf db}     &   output \\
+\arrayrulecolor{red}\hline
+3   &   14   &       &               &   [a,c]         &       &           &   recovery \\
+3   &   14   &   b   &   b           &   [a,c]         &       &           &   \\
+3   &   14   &   d   &   b,d         &   [a,c]         &       &           &   \\
+3   &   14   &       &   b           &   [c,d]         &       &           &   \\
+3   &   14   &       &   b           &   [c,d]         &       &           &   \\
+3   &   14   &       &               &   [d,b]         &       &           &    \\
+3   &   14   &       &               &   {\bf [d,b]}   &       &           &    \\
+\arrayrulecolor{red}\hline
+4   &   15   &  e    &   e           &   [d,b]   &      &           &   input \\
+4   &   16   &       &              &   [b,e]   &   be    &          &   transform \\
+4   &   17   &       &              &   [b,e]   &       &   {\bf be}       &   output \\
+\end{tabular}
+\label{concat_example}
+\end {center}
+\end{table}
 
 The reference recovery function allows us to express the notion of correct execution in terms of correspondence between input and output elements. In most real cases, input and output elements are the only data that can be observed by the end-user. In real distributed stream processing systems, failures and recoveries can corrupt the output, despite the fact, that in terms of a simple definition of delivery guarantees, all elements are processed exactly-once. 
 
