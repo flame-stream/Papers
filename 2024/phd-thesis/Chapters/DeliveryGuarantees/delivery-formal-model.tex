@@ -80,7 +80,7 @@ It is important to note that input and output elements cannot be directly matche
 For instance, a single input element can be transformed into multiple ones.  The resulting elements may be processed in entirely different ways and even influence each other. 
 In general, it is hard to find out input elements on which an output element depends. 
 
-\subsection{Distributed streaming model}
+\subsection{Distributed Streaming Model}
 
 A formalization of streaming consistency guarantees we begin with a regular definition of a stream processing system. In order to be sufficient for the formalization, such a model should cover user-defined transformations, system state, data producers, and data consumers.
 
@@ -119,7 +119,7 @@ Let us illustrate the proposed model by an example. Assume that a physical graph
 
 As one can see, the system reaches precisely the same state after recovery. Eventually, the end-user receives the output element {\em be} that is expected within such execution. Further, we demonstrate that simple reprocessing of missed input elements can cause significant inconsistencies in results.
 
-\subsection{Model analysis}
+\subsection{Model Analysis}
 
 In a classical model proposed by Chandy and Lamport~\cite{Chandy:1985:DSD:214451.214456}, a distributed system is represented as a graph of processes, which can be connected via channels. Each process can own a modifiable internal state, generate {\em events} and send them to other processes through the channels. {\em Global system state} in this model contains processes states and channel states, e.g., elements, which are in-flight at the moment. Distributed asynchronous processing is simulated using permutations of events.
 
@@ -131,7 +131,7 @@ The proposed model is a variation of a classical Chandy-Lamport distributed syst
     \item Distributed asynchronous computations are modeled through the random choice of an operation that is executed next. In the proposed model, instead of using permutations of data flow elements that fixate an execution route, we suppose that the next transition of the working set is a random variable. The distribution of this variable depends on system architecture. 
 \end{itemize}
 
-\subsection{Consistent input and output}
+\subsection{Consistent Input and Output}
 
 The parallel asynchronous nature of distributed stream processing allows us to handle only a {\em probability} of an output element because it can be different from run to run due to element reorderings.
 
@@ -195,7 +195,7 @@ The reference recovery function allows us to express the notion of correct execu
 
 The problem here is that elements can be concatenated in a different order on recovery. Let us demonstrate it by the already mentioned example demonstrated in Figure~\ref{concat} and Table~\ref{concat_example}. During recovery system may reach concatenation state $s=[b,d]$ at $\tau=15$ rather than $s=[d,b]$ due to asynchronous input. In this case, output at $\tau=17$ becomes {\em de} instead of {\em be}. However, {\em de} is inconsistent with the previous output, because element with prefix {\em d} has already been released at $\tau=13$. It is important to note that all input elements within the example are applied to concatenation state {\em  exactly-once}. This simple example demonstrates that informal definition of exactly-once does not guarantee the consistency of output elements.
 
-\subsection{Delivery guarantees}
+\subsection{Delivery Guarantees}
 
 As we demonstrate further, state-of-the-art stream processing systems prevent inconsistencies illustrated in the example above. However, the informal definition of exactly-once is insufficient to describe the level of data consistency that is provided. Here we introduce regular definitions of delivery guarantees which take this issue into account. 
 

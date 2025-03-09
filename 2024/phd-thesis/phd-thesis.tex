@@ -21,23 +21,23 @@
   %\usepackage{amssymb} %for nice emptyset		
 
   \usepackage{amsmath,amssymb,amsfonts}		
- \DeclareMathOperator{\rank}{rank}		
- \makeatletter		
- \newenvironment{sqcases}{%		
-   \matrix@check\sqcases\env@sqcases		
- }{%		
-   \endarray\right.%		
- }		
- \def\env@sqcases{%		
-   \let\@ifnextchar\new@ifnextchar		
-   \left\lbrack		
-   \def\arraystretch{1.2}%		
-   \array{@{}l@{\quad}l@{}}%		
- }		
- \makeatother		
+ % \DeclareMathOperator{\rank}{rank}		
+ % \makeatletter		
+ % \newenvironment{sqcases}{%		
+ %   \matrix@check\sqcases\env@sqcases		
+ % }{%		
+ %   \endarray\right.%		
+ % }		
+ % \def\env@sqcases{%		
+ %   \let\@ifnextchar\new@ifnextchar		
+ %   \left\lbrack		
+ %   \def\arraystretch{1.2}%		
+ %   \array{@{}l@{\quad}l@{}}%		
+ % }		
+ % \makeatother		
 
-  \let\proof\relax		
- \let\endproof\relax	
+ %  \let\proof\relax		
+ % \let\endproof\relax	
 \usepackage{amsthm}
 \theoremstyle{definition}		
 % \newtheorem{definition}{Definition}		
@@ -235,7 +235,7 @@
 \chapter{Deterministic Model and Runtime for Exactly-Once Processing}
 \label{thesis-chapther-optimistic}
 \lhead{\emph{Deterministic Model and Runtime for Exactly-Once Processing}}
-\input{Chapters/OptimisticDeterminismForEO}
+\input{Chapters/DeterministicModelRuntime/deterministic}
 
 \chapter{Substreams Consistency}
 \label{thesis-chapter-substreams-consistency}
