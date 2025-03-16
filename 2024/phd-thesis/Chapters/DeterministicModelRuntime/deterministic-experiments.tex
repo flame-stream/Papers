@@ -1,0 +1,127 @@
+%%% fs-state-experiments - Experiments
+
+\subsection{Setup}
+A series of experiments were performed in order to analyze the overall performance of the proposed approach. For experiments, we build a prototype on top of an open-source implementation of the drifting state model called~\FlameStream. \FlameStream\ is a distributed stream processing engine implemented in Java using Akka framework. \FlameStream\ can be deployed on a hardware cluster of computational units that we call nodes. We assume that each node is connected through a network with all other nodes.
+
+We used a problem of incremental inverted index maintenance over a stream of text items. 
+Building inverted index is implemented as a MapReduce transformation in a streaming manner. The scheme is shown in Figure~\ref{index}: 
+
+\begin{itemize}
+    \item Map phase includes conversion of input documents into the key-value pairs {\it (word; word positions within the page)}
+    \item Reduce phase consists of combining word positions for the corresponding word into the single index structure 
+\end{itemize}
+
+The Reduce phase produces the change records of the inverted index structure to make this algorithm suitable for stream processing systems. It implies that each input page triggers the output of the corresponding change records of the full index.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.80\textwidth]{Chapters/DeterministicModelRuntime/pics/index}
+  \caption{The inverted index pipeline}
+  \label {index}
+\end{figure}
+
+We choose the problem  of  an inverted index maintenance  because it satisfies the following properties:
+
+\begin{itemize}
+    \item Operation that generates change records is non-commutative
+    \item The computational workflow    contains network shuffle that can violate the ordering constraints
+    \item Consistency guarantees are strongly required because the inconsistent index does not make sense for many applications
+    \item The workload is unbalanced due to Zipf's law
+\end{itemize}
+
+Notably, building an inverted index in a streaming manner can be the halfway task between the generation of documents and consuming index updates by search infrastructure. In the real world, this scenario can be found in freshness-aware systems, e.g., news processing engines.
+
+By the notion of {\it latency} we assume the time between two events: 
+
+\begin{enumerate}
+    \item Input page is taken into the stream
+    \item All the change records for the page leave the stream
+\end{enumerate}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.80\textwidth]{Chapters/DeterministicModelRuntime/pics/fs-index-quantiles}
+  \caption{FlameStream latency distribution (left),  high quantiles (right)}
+  \label {fs-scalability}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.80\textwidth]{Chapters/DeterministicModelRuntime/pics/overhead}
+  \caption{The relation between the number of workers, the average input rate, and the repair ratio}
+  \label {overhead}
+\end{figure}
+
+Our experiments were performed on the cluster of 10 Amazon EC2 micro instances with 1 GB RAM and 1 core CPU. We used Wikipedia articles as a dataset. RocksDB~\cite{rocksdb} is used as a storage for the state. The role of data producer and data consumer is played by a custom server application that sends and receives data through socket and measures the latency.
+
+\subsection{Drifting State Scalability}
+
+We take the ratio of  the total number of items at the barrier   to the number of the valid items among them as a key metric for the estimation of the overhead of our prototype and measure it for several system configurations.
+
+The relation between the number of workers, the input  document  rate, and the  ratio is shown in Figure~\ref{overhead}. As expected, the peak of the ratio is achieved when the document per second rate is high, and the number of the nodes is low. This behavior can be explained by the fact that a few workers cannot effectively deal with such intensive load. Nevertheless, the proportion of invalid items reduces if the number of workers grows. The overhead of the optimistic technique under moderate pressure  is under 10\% for all  numbers of workers. These results confirm that the ratio does not increase with the growth of the number of nodes.
+
+% \begin{figure}[ht]
+%   \centering
+%   \begin{minipage}[b]{.58\textwidth}
+%     \centering
+%     \includegraphics[width=\linewidth]{Chapters/DeterministicModelRuntime/pics/fs-index-quantiles}
+%     \caption{FlameStream latency distribution (left),  high quantiles (right)}
+%     \label{fs-scalability}
+%   \end{minipage}%
+%   \hspace{\fill}
+%   \begin{minipage}[b]{.40\textwidth}
+%     \centering
+%     \includegraphics[width=\linewidth]{Chapters/DeterministicModelRuntime/pics/overhead}
+%     \caption{The relation between the number of workers, the average input rate, and the repair ratio}
+%     \label{overhead}
+%   \end{minipage}%
+% \end{figure}
+
+The latencies of \FlameStream\ across multiple workers for the fixed document rate of 15 rps are shown in Figure~\ref{fs-scalability}. This experiment demonstrates that latency is stable  under  the growth in the number of workers. These experiments show that our method is scalable with proper  optimization of  the system setup.
+
+\subsection{Drifting State Recovery}
+In this section, we aim to evaluate the overhead on providing consistency guarantees and the time needed for the full recovery.
+
+Figures~\ref{comparison50}, ~\ref{comparison500}, and ~\ref{comparison1000} show the latencies of our prototype within distinct times between checkpoints. As expected, the overhead on exactly-once enforcement is low (less than 10 ms), and it does not depend on the time between checkpoints. Slight overhead can be explained by the fact that asynchronous state snapshotting is executed on single-core nodes. The time between checkpoints does not influence latency because output elements delivery and state snapshotting mechanisms are independent in our model.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.8\textwidth]{Chapters/DeterministicModelRuntime/pics/blink-2}
+  \caption{The latencies of our prototype during three artificially reproduced failures and recoveries with 1000 ms between checkpoints}
+  \label {recovery}
+\end{figure}
+
+The system behavior in case of failures and recoveries with 1000 ms between checkpoints is demonstrated in Figure~\ref{recovery}. It is shown that the system can perform recovery processes in an adequate time. Existing latency spikes are caused by the replay process, JVM restart, etc.
+
+\subsection{Comparison with an industrial system}
+One of the most important goals of the experiments is the performance comparison with an industrial solution regarding latency. Apache Flink has been chosen for evaluation because it is a state-of-the-art stream processing system that provides similar functionality and achieves low latency in the real-world scenarios~\cite{S7530084}. 
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=.8\textwidth]{Chapters/DeterministicModelRuntime/pics/comparison50}
+  \caption{\FlameStream\ and Flink latencies with 50ms between checkpoints}
+  \label{comparison50}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=.8\textwidth]{Chapters/DeterministicModelRuntime/pics/comparison500}
+  \caption{\FlameStream\ and Flink latencies with 500ms between checkpoints}
+  \label{comparison500}
+\end{figure}
+
+For Apache Flink, the algorithm for building the inverted index is relies on the usage of {\it FlatMapFunction} for map step and stateful {\it RichMapFunction} for reduce step and for producing the change records. The network buffer timeout is set to 0 to minimize latency. Custom {\it TwoPhaseCommitSinkFunction} that buffers output items in memory until a transaction is committed is used for experiments that require exactly-once semantics. 
+
+{\it FsStateBackend} with the local file system is used for storing the state, because {\it RocksDBStateBackend} requires saving state to RocksDB on each update that leads to additional overhead. {\it FsStateBackend} stores state on the disk only on checkpoints and do not provide an additional overhead against RocksDB storage in \FlameStream, so it is fairer to use it rather than {\it RocksDBStateBackend} for comparison purposes.
+
+We compare $50^{th}$, $75^{th}$, $95^{th}$, and $99^{th}$ percentile of distributions, which clearly represent the performance from the perspective of the users' experience. Documents per second input rate is 50 because higher rates lead to enabling of backpressure mechanisms in an industrial system that we compare with.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=.8\textwidth]{Chapters/DeterministicModelRuntime/pics/comparison1000}
+  \caption{\FlameStream\ and Flink latencies with 1000ms between checkpoints}
+  \label{comparison1000}
+\end{figure}
+
+Figures~\ref{comparison50}, ~\ref{comparison500}, and ~\ref{comparison1000} demonstrate      the comparison of latencies between our prototype and Flink within distinct times between checkpoints, and different guarantees on data. Without guarantees, the latencies of the prototype and Flink do not significantly differ. However, for exactly-once, Flink's latency is dramatically higher, and it directly depends on the time between checkpoints. Nevertheless, such behavior is expected, because Flink needs to take state snapshot and release output items within a single transaction to ensure that all states of non-commutative operations are persistently saved. There are no hints implemented in Flink which could mark an operation as commutative, hence it waits until states of all operations are stored before output delivery. 
+On the other hand, the property of determinism allows our prototype to avoid synchronization state snapshotting and output delivery. This fact makes it possible to achieve exactly-once with low overhead.

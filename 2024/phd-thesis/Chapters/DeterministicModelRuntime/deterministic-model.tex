@@ -62,17 +62,16 @@ A distributed hardware environment is modeled as a set of {\em worker} processes
   \label{logical-graph-figure}
 \end{figure}
 
+Data items are totally ordered according to labeles assigned to events at the entry as a part of meta-information. All operations preserve this order. Any additional items produced by an operation are placed between the item being processed and the next item. The ordering labels are dropped when items are delivered from the barrier. 
+
+The ordering is illustrated  in Figure~\ref{ordering}. Data item with payload $1'$ is the derivative of the item with payload $1$, according to operation $F$. The same is for items with payloads $2'$ and $2$. After merge operation, the order between $1$ and $2$ is preserved. Furthermore, $1'$ follows $1$, and $2'$ follows $2$.  
+
 \begin{figure}[t]
   \centering
   \includegraphics[width=0.7\textwidth]{Chapters/DeterministicModelRuntime/pics/ordering}
   \caption{The ordering model}
   \label{ordering}
 \end{figure}
-
-Data items are totally ordered according to labeles assigned to events at the entry as a part of meta-information. All operations preserve this order. Any additional items produced by an operation are placed between the item being processed and the next item. The ordering labels are dropped when items are delivered from the barrier. 
-
-The ordering is illustrated  in Figure~\ref{ordering}. Data item with payload $1'$ is the derivative of the item with payload $1$, according to operation $F$. The same is for items with payloads $2'$ and $2$. After merge operation, the order between $1$ and $2$ is preserved. Furthermore, $1'$ follows $1$, and $2'$ follows $2$.  
-
 
 The list of available operations includes:
 \begin {description}

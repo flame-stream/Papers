@@ -1,0 +1,17 @@
+In this chapter we presented drifting state deterministic stream processing model with the following properties:
+
+\begin{itemize}
+  \item Novel optimistic approach for handling out-of-order items is applied to achieve determinism.
+  \item State management is implemented using drifting state technique, which allows the state to be the part of the stream in the form of an ordinary data item. Such approach relieves the user from the direct state handling.
+\end{itemize}
+
+We designed protocols for achieving exactly-once on top of the proposed drifting state technique. Because of the determinism, the protocols provide the following features:
+
+\begin{itemize}
+    \item Elements are processed in a pure streaming manner without input buffering
+    \item The processes of business-logic computations, state snapshotting and delivery of output items work asynchronously and independently
+    \item Exactly-once is preserved
+\end{itemize}
+
+We implemented the prototype of the proposed technique to examine its performance. Our experiments demonstrated that the drifting state model and the introduced protocols for fault tolerance are scalable and provide remarkably low overhead within different computational layouts. Furthermore, the comparison with the industrial stream processing solution indicated that our prototype could provide significantly lower latency under exactly-once requirement.
+
