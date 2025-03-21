@@ -4,7 +4,7 @@ In this section, we show how our model can describe the most widely used substre
 
 The main idea behind the punctuation framework is to inject special data elements $\mathcal{P}^{pred}$ into the data stream one per substream. These elements, called punctuations, flow down the workflow as ordinary data elements. The injector promises that all elements after punctuations will not satisfy the predicate. Hence, the punctuation itself defines the ``border'' of a substream.
 
-Figure~\ref{punctuations_scheme} illustrates the punctuations framework. Punctuations are delimiters between the substream elements and all other items. Green elements indicate elements that belong to some substream, while red elements do not.
+Figure~\ref{punctuations_scheme} illustrates the punctuation framework. Punctuations are delimiters between the substream elements and all other items. Green elements indicate elements that belong to some substream, while red elements do not.
 
 \begin{figure}[t]
   \centering
@@ -44,7 +44,7 @@ Suppose a message $M_{qp}$ of the next substream was processed after the last el
 
 \subsection{Properties of the punctuation framework}
 
-The design of the punctuations framework implies two important properties:
+The design of the punctuation framework implies two important properties:
 
 \begin{enumerate}
     \item {\bf Lack of cyclic dataflows support.} Although there are techniques that extend punctuations for state snapshotting of iterative processing~\cite{Carbone:2017:SMA:3137765.3137777}, the termination of a general substream cannot be determined using the punctuation framework if an execution graph contains cycles.
@@ -67,7 +67,7 @@ Network traffic complexity for this method is $O(K|\Pi|^2)$, where $|\Pi|$ is th
 \end{lemma}
 \begin{proof}
 
-Even the soft bound event requires receiving punctuations from all incoming network channels. If a distributed stream processing engine balances the work evenly among the processes, all processes are interconnected. Therefore, each active process should broadcast punctuations to all other processes. Assuming that all processes handle the elements belonging to the predicate, the transmission complexity of punctuation elements is $O(K|\Pi|^2)$. Therefore, if the number of existing substreams is $K$, then the network traffic complexity for the punctuations framework is $O(K|\Pi|^2)$ because each process should broadcast punctuations for each substream. 
+Even the soft bound event requires receiving punctuations from all incoming network channels. If a distributed stream processing engine balances the work evenly among the processes, all processes are interconnected. Therefore, each active process should broadcast punctuations to all other processes. Assuming that all processes handle the elements belonging to the predicate, the transmission complexity of punctuation elements is $O(K|\Pi|^2)$. Therefore, if the number of existing substreams is $K$, then the network traffic complexity for the punctuation framework is $O(K|\Pi|^2)$ because each process should broadcast punctuations for each substream. 
 
 \end{proof}
 

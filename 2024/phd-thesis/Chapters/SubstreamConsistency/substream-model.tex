@@ -95,7 +95,7 @@ Note that in this case, $M'$ may contain multiple messages. Following the Chandy
 
 \subsection{Substreams lifespan}
 
-We want to get a substream's first and last element for each process. One can easily find the first one when it emerges, but verification that there will be no more events of a substream could be problematic. The strict substream termination guarantee consists of two parts: the source must promise that no more messages from the substream may emerge, and the system must ensure it contains no substream messages. The first task requires a contract with a particular data source and is thus out of scope for this paper, though it is discussed in relevant literature~\cite{awad2019adaptive}. Instead, we focus on the second task; this is challenging due to distributed nature of the system and the absence of a standard message lifetime limit. This difficulty increases with the introduction of cycles into dataflow. Crucially, processes are not isolated, and substream messages can move from one process to another. That is why we need to observe all in-flight messages in the system.
+We want to get a substream's first and last element for each process. One can easily find the first one when it emerges, but verification that there will be no more events of a substream could be problematic. The strict substream termination guarantee consists of two parts: the source must promise that no more messages from the substream may emerge, and the system must ensure it contains no substream messages. The first task requires a contract with a particular data source and is thus out of scope for this chapter, though it is discussed in relevant literature~\cite{awad2019adaptive}. Instead, we focus on the second task; this is challenging due to distributed nature of the system and the absence of a standard message lifetime limit. This difficulty increases with the introduction of cycles into dataflow. Crucially, processes are not isolated, and substream messages can move from one process to another. That is why we need to observe all in-flight messages in the system.
 
 \begin{definition}[Substream]
 All events in a system satisfying a propositional formula $Pred(e)$ form a substream.
@@ -103,7 +103,7 @@ All events in a system satisfying a propositional formula $Pred(e)$ form a subst
 
 We have to use system events as they are ordered inside each process and can define a border of a substream. Sometimes it is more practical to induce this predicate to messages ($pred(M)$) involved in processing: $Pred(e) = (e = \langle proc, p, M, M'\rangle) \wedge pred(M)$.
 
-This paper considers substreams with a limited lifespan within a process. We want to know when a substream starts and terminates: 
+We consider substreams with a limited lifespan within a process. We want to know when a substream starts and terminates: 
 
 \begin{equation}
 \forall p, \exists t_0^p, t_1^p: \exists e: e_{t_0^p} <_p e <_p e_{t_1^p}, Pred(e) \And \forall e': e_{t_1^p} <_p e', \neg Pred(e') 
