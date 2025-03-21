@@ -1,0 +1,10 @@
+A vital performance property of a substream management system is the amount of extra network traffic. Let $|\Pi|$ be the number of processes, and $K$ be the number of substreams~\footnote{number of all created substreams, no matter if they exist concurrently or not}. 
+
+\begin{lemma}
+The network overhead induced by a substream management system cannot be lower than $O(K|\Pi|)$. 
+\end{lemma}
+\begin{proof}
+Assume one-by-one substreams processing (e.g., epochs). When a substream management system detects the termination of a substream, each stateful process should be informed about this. Hence, each process must receive at least one network message (termination notification) for each substream.
+\end{proof}
+
+In this proof, we assume that each process should be informed about substream termination, while some processes may not require such notifications, for example, if they are stateless. This assumption is realistic because, as we mentioned in Section~\ref{fs-acker-spe-model}, logical operators are commonly deployed on each computational node, e.g., in state-of-the-art SPEs such as Flink~\cite{Carbone:2017:SMA:3137765.3137777}, Storm~\cite{apache:storm}, Samza~\cite{Noghabi:2017:SSS:3137765.3137770}. In this model, each process must receive the substream termination event because each process handles all logical operators.

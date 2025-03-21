@@ -157,6 +157,9 @@ Termination event (end-of-substream) $\langle eoss_{firm}, p, Pred\rangle$ satis
 
 Unlike the soft bound, within the firm guarantee, the first element outside the substream $Pred$ must be ordered after the firm bound event in the process $p$. This position satisfies the first possible soft bound in the events ordering. Figure~\ref{strict_guarantees} illustrates the notion of the firm bound. As in the previous example, terms $a,b,c,d...$ denote ordered processing events of a process $p$. However, in this case, event $\langle eoss_{firm}, p, Pred\rangle$ occurs right after the substream terminates.
 
+\subsection{Consistent termination events order}
+Some applications require synchronization between substream termination events and substreams' last elements processing. Among these applications are epoch-based snapshotting methods and techniques for enforcing deterministic processing~\cite{we2018adbis}. For example, snapshots for consecutive epochs can be inconsistent if termination events reordering occurs. Another example is deterministic join~\cite{gulisano2016scalejoin}, which also requires the synchronized order of termination events.
+
 \begin{figure}[t]
   \centering
   \includegraphics[width=0.80\textwidth]{Chapters/SubstreamConsistency/pics/strict-guarantee.pdf}
@@ -164,8 +167,7 @@ Unlike the soft bound, within the firm guarantee, the first element outside the 
   \label{strict_guarantees}
 \end{figure}
 
-\subsection{Consistent termination events order}
-Some applications require synchronization between substream termination events and substreams' last elements processing. Among these applications are epoch-based snapshotting methods and techniques for enforcing deterministic processing~\cite{we2018adbis}. For example, snapshots for consecutive epochs can be inconsistent if termination events reordering occurs. Another example is deterministic join~\cite{gulisano2016scalejoin}, which also requires the synchronized order of termination events.
+Figure~\ref{notifications_reordering} illustrates termination events reordering in the case of the soft bound guarantee. Terms $a,b,c,d...$ denote ordered processing events of a process $p$. Although the substream containing events $a,b$ terminates earlier, the end-of-substream event for this substream occurs after the termination event for the substream containing events $d,e$. 
 
 \begin{figure}[t]
   \centering
@@ -173,8 +175,6 @@ Some applications require synchronization between substream termination events a
   \caption{An example of termination events reordering}
   \label{notifications_reordering}
 \end{figure}
-
-Figure~\ref{notifications_reordering} illustrates termination events reordering in the case of the soft bound guarantee. Terms $a,b,c,d...$ denote ordered processing events of a process $p$. Although the substream containing events $a,b$ terminates earlier, the end-of-substream event for this substream occurs after the termination event for the substream containing events $d,e$. 
 
 \begin{definition}[Consistent events order]
 Let $e^{*}_1$ and $e^{*}_2$ be the last elements of substreams defined by predicates $Pred_1$ and $Pred_2$. Termination events $\langle eoss, p, Pred_1\rangle$ and $\langle eoss, p, Pred_2\rangle$ are {\em consistently ordered} iff:
