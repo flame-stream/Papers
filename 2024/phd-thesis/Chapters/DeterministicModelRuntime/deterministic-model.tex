@@ -29,7 +29,7 @@ We will use the following principles for our system:
   \item MapReduce completeness
 \end{itemize}
 
-\subsection {Computational model}
+\subsection {Computational Model}
 %%%% fs-run-time-data-flow 
 \label{model-section}
 
@@ -90,7 +90,7 @@ The following example illustrates  the grouping operation. Let the input stream 
 $$(1), (2), (1|3), (2|4), (1|3|5), (2|4|6), (3|5|7), (4|6|8), \ldots$$
 
 
-\subsection{State updates}
+\subsection{State Updates}
 \label{fs-drifting}
 
 An important special case of grouping with $Window Size = 2$  provides for realization of stateful calculations with drifting state technique manifested in section~\ref{motivation-section}. Indeed, consider a map operation that follows the grouping and sends its output to the grouping input. This map operation receives a pair of its previous output considered as the state object, and new incoming item from the source stream. The map operation calculates new state object and sends it back as the grouping input. 
@@ -128,7 +128,7 @@ There are four types of data items in this stream: {\em input}, {\em mapped}, {\
 
 Ordering rules  guarantee that each $accumulator$  item always arrives at the grouping right before next not yet combined mapped item. The cycle gives the ability for new accumulator items to get back in the grouping operation. Thereby, the stream reacts to each input item by generating new reduced item, which contains the actual value of the reduce stage.
 
-\subsection {Deterministic computation}
+\subsection {Deterministic Computation}
 \label {fs-collision} 
 
 To restrict outputs to only one possible result, we impose the following  restrictions on our model: 

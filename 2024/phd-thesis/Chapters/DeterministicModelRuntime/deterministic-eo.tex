@@ -25,7 +25,7 @@ We do not add any significant changes on top of the~\FlameStream\ architecture d
 
 \subsection{Snapshotting}
 
-\subsubsection{Operation states}
+\subsubsection{Operation States}
 
 In order to periodically save operation states, there is a need to determine which input elements affect them. 
  We have to trace reversed dependencies: for each state element $s$ we desire to determine such input elements $\{a_i\}$ that $\forall i, s \in Cl_D^{-1}(a_i)$. Otherwise, it may be unclear, which input elements must be reprocessed during recovery. In Apache Flink, it is implemented through specific streaming elements which play the role of notifications that a determined set of input elements have been processed. In~\FlameStream\ this mechanism is implemented using a modification of {\em Acker} agent from Apache Storm~\cite{apache:storm}. 
@@ -54,7 +54,7 @@ It is worth to note that the proposed protocol is similar to the transactional (
   \label{protocol_fs}
 \end{figure}
 
-\subsubsection{Last output element}
+\subsubsection{Last Output Element}
 
 In order to preserve the deterministic outcome, the Barrier must release output items with monotonically increasing $t(x)$. Hence, the Barrier can filter out any items with $t(x)$ less than or equal to the $t(x)$ of the last released item $t_{last}$ in order to preserve exactly-once after recovery. To implement this mechanism, there is a need to deliver output items and update $t_{last}$ atomically. To solve this problem, we require the following output protocol between a {\em barrier} and a {\em data consumer}: 
 

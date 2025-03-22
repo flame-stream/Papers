@@ -1,6 +1,6 @@
 In this section, we show how our model can describe the most widely used substream management framework called {\em pucntuations}. We also prove specific properties that are inherent to any implementation of the punctuation framework. 
 
-\subsection{Framework overview}
+\subsection{Framework Overview}
 
 The main idea behind the punctuation framework is to inject special data elements $\mathcal{P}^{pred}$ into the data stream one per substream. These elements, called punctuations, flow down the workflow as ordinary data elements. The injector promises that all elements after punctuations will not satisfy the predicate. Hence, the punctuation itself defines the ``border'' of a substream.
 
@@ -15,7 +15,7 @@ Figure~\ref{punctuations_scheme} illustrates the punctuation framework. Punctuat
 
 Processes within SPE do not apply user-defined operators to punctuations. Instead, each process $p$ propagates punctuation messages $\mathcal{P}_{pq}^{pred}$ to all outgoing channels $c_{pq} \in O_p$  when it receives corresponding punctuations from all input channels $I_p$.
 
-\subsection{Substream termination events}
+\subsection{Substream Termination Events}
 
 \begin{lemma}
 Generating an event by the following rule ensures the soft bound of a substream $pred$:
@@ -42,7 +42,7 @@ A soft bound becomes firm if a process event order satisfies the following condi
 Suppose a message $M_{qp}$ of the next substream was processed after the last element of the current substream but before the generation of a bound event. This message either came from the channel $q$ before the punctuation from that channel or was processed before all channels delivered their punctuations. The first case could happen if $M_{qp}$ was reordered with the punctuation along the processing path and contradicts FIFO processing logic (see previous proof for details). The second case is impossible because of processing limitations introduced by~\ref{eq:firm_condition}.
 \end{proof}
 
-\subsection{Properties of the punctuation framework}
+\subsection{Properties of the Punctuation Framework}
 
 The design of the punctuation framework implies two important properties:
 

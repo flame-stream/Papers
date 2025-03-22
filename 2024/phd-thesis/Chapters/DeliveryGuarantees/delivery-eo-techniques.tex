@@ -19,7 +19,7 @@ The necessary condition of exactly-once from Theorem~\ref{necessary_conditions} 
 
 Such behavior is also called {\em effective determinism}~\cite{akidau2018streaming} because computations become deterministic until the persistent storage is cleared. Strong productions method guarantees that even if many possible results of a non-commutative operation may be obtained due to races, only one of them is computed and saved. The price for such exactly-once enforcement is an overhead on external writes on each transformation in a physical graph.
 
-\subsection{Spark streaming}
+\subsection{Spark Streaming}
 
 In Spark, the  $\Gamma$   is a set of all possible small collections of input items called  {\em RDD} records that are processed atomically.
 Dependency relation on the power set of $\Gamma$ is also defined using a directed acyclic graph of user operations. 

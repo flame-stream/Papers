@@ -1,0 +1,84 @@
+% This section introduces a novel substream management framework called \tracker\ that is suitable for cyclic dataflows and achieves the lower bound of network overhead. We also demonstrate that it provides all lifespan event properties defined in the previous section.
+
+In the previous chapter we showed that the extra traffic cannot be lower than $O(K||\Pi||)$, where $|\Pi|$ is the number of computational nodes and $K$ is the number of substreams. To achieve this lower bound, one can apply an additional agent (process) that receives information about substreams from processes and sends back information about terminated substreams. 
+
+In this case, the fact that a substream terminates is propagated through this agent without broadcasting between processes, so the amount of extra traffic can be linear by the number of processes. This propagation method is suitable for cyclic dataflows because there is no need to forward service traffic through the cycles. Therefore, we design a {\em tracking agent} that:
+
+\begin{enumerate}
+    \item Receives signals from data producers that a substream has terminated.
+    \item Watches for in-flight elements and substreams.
+    \item Notifies dataflow processes when the substream ends {\em for them}, i.e., when they stop receiving elements that satisfy some predicate.
+\end{enumerate}
+
+Figure~\ref{tracker_scheme} shows the general scheme of the \tracker\ mechanism. A tracking agent receives signals from data sources, fetches information about in-flight elements, and then decides where to send {\em end-of-substream notifications} (NEOSS).
+
+In this framework, substream termination events are propagated through additional network channels physically separated from the channels used for data elements. A similar idea of using extra network channels for service messages is applied in~\cite{wang2022fries} for a runtime reconfiguration problem.
+
+This approach can be more efficient regarding network traffic but provides new challenges. Before diving into implementation details, we should answer the following questions regarding \tracker\ framework:
+
+{\bf Q1 How to monitor in-flight elements?} To detect that a substream ends, the tracking agent should receive the corresponding signal from data producers and ensure no substream in-flight elements. 
+
+{\bf Q2 How to ensure bound guarantees?} While there are no longer special elements in the stream that denotes the substream end, we need to design soft and firm substream bound conditions based on NEOSS from the shared agent. 
+
+{\bf Q3 How to provide a consistent termination events order?} Unlike punctuations, \tracker\ notifications are completely async with dataflow elements because they go through another network channel. Hence, dataflow items and notifications are not ordered, making it hard to ensure that the notifications order is consistent.
+
+{\bf Q4 What functional and performance properties does the \tracker\ have?} \tracker\ framework is designed to eliminate the limitations of the punctuation framework. We should demonstrate that it is suitable for cyclic dataflows and can provide lower network overhead.
+
+\subsection*{Answering Q1: How to Monitor In-Flight Elements?}
+Each process sends the following report messages on each $\langle proc, p, M, M' \rangle$ event to the tracking agent:
+\begin{enumerate}
+    \item For all output elements $m \in M'$ for all substreams they belong to \\ $pred(m) = 1$: $SND(pred, m, p)$
+    \item For the input element $M$ and all satisfying substreams \\ $pred(M) = 1$: $RCV(pred, M, p)$
+\end{enumerate}
+Further in this paper, we will denote them as {\em SND report} and {\em RCV report}. The order of $SND$ and $RCV$ messages is vital because each pair of these events forms a chain ring, and sending $SND$ before $RCV$ links these rings together. We can use these chains to track data element processing for a workflow graph or its part.
+
+Chains of $SND$ and $RCV$ messages allow the \tracker\ to track the processing of a data element along with a workflow graph. This idea is based on the commutativity of XOR and used in Apache Storm Acker~\cite{apache:storm:acker}. However, despite the technical similarity of the core idea, Acker and \tracker\ play different roles in SPE. Acker ensures that the system processes an input element entirely and notifies the user when the processing runs out of time. \tracker\ tracks an entire substream and allows an SPE to detect its bounds.
+
+\subsection*{Answering Q2: How to Ensure Bound Guarantees?}
+A process must ensure that input channels will provide no more elements of this substream to detect a substream bound. In the case of the punctuation framework, the watermark messages carry this guarantee. In the case of the tracking agent, NEOSS messages play the same role. We can assume that each input channel $c$ comes from a segment of the workflow $W_c$ graph. NEOSS is sent to a process when:
+\begin{itemize}
+    \item for all incoming channels $c \in I_p$ corresponding segment $W_c$ contains no elements of the substream in-flight (has unpaired $SND$ report);
+    \item all data providers have promised to send no more elements of the substream.
+\end{itemize}
+It is easy to show that we can join workflow segments for all incoming channels $W_p = \cup_{c\in I_p} W_c$ and track a single subgraph $W_p$ per process. Using the properties of NEOSS, we can define a soft bound criterion:
+\begin{lemma}
+The following rule generates the soft substream bound:
+\begin{equation}
+ \exists NEOSS \in B_p, \forall M\in B_p : \neg pred(M) \vee dst(M) \ne p
+\end{equation}
+\end{lemma}
+\begin{proof}
+If a substream data element is processed after the defined point in events order, it comes from the mailbox or one of the incoming channels $c \in I_p$. The first case contradicts $\forall m\in B_p : \neg pred(m)$. The second case could happen because a new substream element enters the system (source broke the promise) or a substream element inside the $W_p$ without the $SND$/$RCV$ chain (contradicts with $SND$/$RCV$ chains generation rule). 
+\end{proof}
+
+To satisfy the firm bound guarantee, one needs to hold elements not belonging to the substream in the mailbox until NEOSS has arrived. This technique is similar to the punctuation alignment behavior mentioned in the previous section. If this condition is satisfied, then $\langle eoss_{firm}, Pred\rangle$ = $\langle eoss_{soft}, Pred\rangle$ for the \tracker.
+
+\subsection*{Answering Q3: How to Provide the Consistent Termination Events Order?}
+\label{termination_order}
+In the punctuation framework, such order is provided by design because punctuations and ordinary data items go through the same FIFO network channels. In \tracker\, this order should be enforced. Assume that SPE assigns a special totally ordered label $t(M)$ to the messages. All messages generated by single processing inherit the label from the input message. 
+
+In this case, if the order on $t(M)$ coincides with the order of input elements, then \tracker\ can also produce the NEOSS events according to this order. In other words, \tracker\ can reorder the NEOSS events to make them consistent with the substreams order. Figure~\ref{tracker_ordering} shows an example of this concept. The substream containing element with $t=1$ ends before the substream containing element with $t=2$. As we can see, the order of NEOSS elements from \tracker\ coincides with $t(M)$.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.60\textwidth]{Chapters/Tracker/pics/tracker-ordering.pdf}
+  \caption{\tracker\ framework: tracking agent sends NEOSS elements according to the order on t(m)}
+  \label{tracker_ordering}
+\end{figure}
+
+A vital question here is how to implement the assignment of ordered labels $t(m)$. One way is to use the {\em time oracle} service~\cite{10.14778/3055330.3055335}, which can provide totally ordered labels. We discuss a simple alternative in the next section. 
+
+\subsection*{Answering Q4: What are the Functional and Performance Properties of \tracker?}
+\label{tracker-properties}
+
+\tracker\ does not require regular broadcasting of the elements to all computational nodes because all service traffic goes through a single agent. This change allows \tracker\ to have the following properties by design:
+
+{\bf Cyclic dataflows support.} Because the tracking agent monitors the properties of in-flight elements without directly injecting service items into a dataflow, \tracker\ does not have the problem of throwing them through a cycle.
+
+{\bf Low network overhead.} Processes can send reports once per a fixed time period, so there is a constant time of such reports per a finite substream. The reports require $O(|\Pi|)$ extra messages, while the NEOSS events $O(K|\Pi|)$. The total amount is $O(K|\Pi| + |\Pi|) = O(K|\Pi|)$, which is optimal for the substream management problem.
+
+Both of these properties are enhancements to the punctuation framework. They lead to an important corollary: 
+
+{\bf Low latency and impact on SPE throughput.} Punctuations can be stuck by other data elements if they are sent with some delay after the last substream element. In \tracker, service traffic goes through other network channels that can reduce latency between actual substream termination and the corresponding event. Together with the low service network traffic, this scheme does not significantly reduce the throughput of an SPE, as we show in Section~\ref{fs-experiments}.
+
+In the next section, we theoretically prove the first two properties. We experimentally demonstrate the fairness of the corollary in Section~\ref{fs-experiments}.

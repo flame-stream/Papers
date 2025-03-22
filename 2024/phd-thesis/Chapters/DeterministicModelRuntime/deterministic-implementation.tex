@@ -24,7 +24,7 @@ The overall scheme of the system components is shown in Figure~\ref{system-archi
   \label {system-architecture}
 \end{figure}
 
-\subsection{Ordering model}
+\subsection{Ordering Model}
 The meta-information of data item is implemented as a tuple of a {\it global time}, a {\it trace}, {\it child ids} and a {\it tombstone flag}.
 
 \[Meta := (GlobalTime, ChildIds[\:], Trace, IsTombstone)\]
@@ -39,7 +39,7 @@ In order to filter out all invalid data at the barrier, there is a need to match
 
 \label{mininal-time}
 
-\subsection{Minimal time within stream}
+\subsection{Minimal Time within Stream}
 
 To release an item from the barrier we need to ensure that there are no in-flight tombstones for that item, i.e., tombstones which have been already generated but have not arrived at the barrier yet.
 

@@ -66,7 +66,7 @@ Figure~\ref{fig:spe_process} illustrates the scheme of a process. This system la
   \label{fig:spe_process}
 \end{figure}
 
-\subsection{Stream processing events}
+\subsection{Stream Processing Events}
 
 When a process receives a message, the mailbox controller puts it into a particular segment of the process state ({\em mailbox} $B_p$). The business logic handler gets a message provided by MBC and triggers a user-defined operator. The user-defined operator processes the data element that the message contains and generates an arbitrary number of outgoing messages. BLH puts generated messages back in a mailbox. MBC sends outgoing messages along communication channels to destination processes. All mailbox controller operations respect the order of messages in the mailbox. If a user-defined operator has a state $U_p$, the joined process state will consist of the mailbox and this state $s=U_p \cup B_p$. In the Chandy-Lamport paradigm, this algorithm produces the following events within a process:
 \begin{itemize}
@@ -93,7 +93,7 @@ Incoming message processing does not influence the communication channels and on
 
 Note that in this case, $M'$ may contain multiple messages. Following the Chandy-Lamport model, we assume processes are single-threaded, so within the specific process $p$, all events are ordered by a local causal order relation $<_p$: $e^{0}_p,e^{1}_p,\ldots,e^{i}_p,\ldots$. Please note that each process has its own local causal order relation, so we do not assume any total order among events from different processes. This model is indeed practical, e.g., implemented in actor-based systems.
 
-\subsection{Substreams lifespan}
+\subsection{Substream Lifespan}
 
 We want to get a substream's first and last element for each process. One can easily find the first one when it emerges, but verification that there will be no more events of a substream could be problematic. The strict substream termination guarantee consists of two parts: the source must promise that no more messages from the substream may emerge, and the system must ensure it contains no substream messages. The first task requires a contract with a particular data source and is thus out of scope for this chapter, though it is discussed in relevant literature~\cite{awad2019adaptive}. Instead, we focus on the second task; this is challenging due to distributed nature of the system and the absence of a standard message lifetime limit. This difficulty increases with the introduction of cycles into dataflow. Crucially, processes are not isolated, and substream messages can move from one process to another. That is why we need to observe all in-flight messages in the system.
 
@@ -111,7 +111,7 @@ We consider substreams with a limited lifespan within a process. We want to know
 
 We can boil this formula down: for each process $p$ in the system, there must be two event indices $t_0^p$ for substream start and $t_1^p$ for its termination, such that events satisfying $Pred$ must be between them. 
 
-\begin{definition}[Substream management problem]
+\begin{definition}[Substream Management Problem]
 A substream management problem is to estimate a substream bound for each process. To indicate the bound of a substream for a process, we use a termination event or end-of-substream event:
 \begin{equation}
   \langle eoss, p, Pred \rangle = (p, B_p, B_p\cup eoss(Pred), \emptyset, \emptyset)  
@@ -120,7 +120,7 @@ A substream management problem is to estimate a substream bound for each process
 
 Some problems require additional properties of the termination events. For example, the state pruning problem does not require any particular properties, while for the state snapshotting problem, the substream management system should detect the exact substream bound. In the following sections, we formalize these properties. 
 
-\subsection{Soft bound}
+\subsection{Soft Bound}
 
 Many applications that apply substream management systems do not require any particular properties of termination events. In this case, we denote the guarantee provided by such events as {\em soft bound} because termination events indicate that the substream ended some time ago.
 
@@ -141,7 +141,7 @@ Figure~\ref{general_guarantees} illustrates this notion. Terms $a,b,c,d...$ deno
   \label{general_guarantees}
 \end{figure}
 
-\subsection{Firm bound}
+\subsection{Firm Bound}
 
 The guarantee that any new event will not satisfy the predicate is sufficient for many real-life problems, e.g., SPE can initiate process state pruning on such events. However, some problems require a {\em firm bound}: guarantee that the substream ends {\em exactly} after the termination event. 
 
@@ -157,7 +157,7 @@ Termination event (end-of-substream) $\langle eoss_{firm}, p, Pred\rangle$ satis
 
 Unlike the soft bound, within the firm guarantee, the first element outside the substream $Pred$ must be ordered after the firm bound event in the process $p$. This position satisfies the first possible soft bound in the events ordering. Figure~\ref{strict_guarantees} illustrates the notion of the firm bound. As in the previous example, terms $a,b,c,d...$ denote ordered processing events of a process $p$. However, in this case, event $\langle eoss_{firm}, p, Pred\rangle$ occurs right after the substream terminates.
 
-\subsection{Consistent termination events order}
+\subsection{Consistent Termination Events Order}
 Some applications require synchronization between substream termination events and substreams' last elements processing. Among these applications are epoch-based snapshotting methods and techniques for enforcing deterministic processing~\cite{we2018adbis}. For example, snapshots for consecutive epochs can be inconsistent if termination events reordering occurs. Another example is deterministic join~\cite{gulisano2016scalejoin}, which also requires the synchronized order of termination events.
 
 \begin{figure}[t]
