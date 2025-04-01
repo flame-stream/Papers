@@ -1,4 +1,14 @@
-This thesis has made contributions to the field of stream processing, addressing the challenges of consistency in a distributed environment. As demonstrated in Chapter~\ref{thesis-chapter-literature-review}, prior work on this topic has made significant progress, with many ideas being implemented in state-of-the-art Stream Processing Engines (SPEs). In this thesis, we focused on building formal models for the existing problems and identifying areas for improvement using the proposed models.
+This thesis has made contributions to the field of stream processing, addressing the challenges of consistency in a distributed environment. As demonstrated in Chapter~\ref{thesis-chapter-literature-review}, prior work on this topic has made significant progress, with many ideas being implemented in state-of-the-art Stream Processing Engines (SPEs). In this thesis, we focused on building formal models for the existing problems and identifying areas for improvement using the proposed models. 
+
+A brief overview of the main contributions is the following:
+\begin{itemize}
+    \item Formal model for delivery guarantees
+    \item Mechanism for exactly-once based on the lighweight determinism
+    \item Formal model for substream management
+    \item Lower bound estimation for network traffic in substream management 
+    \item Substream management approach reaching the lower bound of network traffic
+    \item A demonstration of practical feasibility of the proposed methods
+\end{itemize}
 
 We developed a formal model for the concept of delivery guarantees. We showed connections between the property of determinism and exactly-once delivery guarantee, demonstrating the potential efficiency in terms of latency of deterministic systems ensuring exactly-once. We proposed {\em drifting state} technique that offers a lightweight and efficient method for ensuring determinism and exactly-once processing. This approach allows us to reduce processing latency significantly, providing an improvement over current industrial solutions.
 
