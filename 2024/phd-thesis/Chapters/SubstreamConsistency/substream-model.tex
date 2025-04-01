@@ -4,7 +4,7 @@ First, in this section, we formalize a stream processing engine based on Chandy-
 \begin {center}
     \caption{Notations used throughout the chapter}
     \footnotesize
-    \begin{tabular}{l|p{5cm}}
+    \begin{tabular}{l|p{8.5cm}}
         \hline
         $p$ & Process (node in a physical execution graph) \\ 
         \hline
@@ -136,9 +136,16 @@ Figure~\ref{general_guarantees} illustrates this notion. Terms $a,b,c,d...$ deno
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=0.80\textwidth]{Chapters/SubstreamConsistency/pics/general-guarantee.pdf}
+  \includegraphics[width=0.75\textwidth]{Chapters/SubstreamConsistency/pics/general-guarantee.pdf}
   \caption{Substream management: soft bound}
   \label{general_guarantees}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.75\textwidth]{Chapters/SubstreamConsistency/pics/strict-guarantee.pdf}
+  \caption{Substream management: firm bound}
+  \label{strict_guarantees}
 \end{figure}
 
 \subsection{Firm Bound}
@@ -160,18 +167,11 @@ Unlike the soft bound, within the firm guarantee, the first element outside the 
 \subsection{Consistent Termination Events Order}
 Some applications require synchronization between substream termination events and substreams' last elements processing. Among these applications are epoch-based snapshotting methods and techniques for enforcing deterministic processing~\cite{we2018adbis}. For example, snapshots for consecutive epochs can be inconsistent if termination events reordering occurs. Another example is deterministic join~\cite{gulisano2016scalejoin}, which also requires the synchronized order of termination events.
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=0.80\textwidth]{Chapters/SubstreamConsistency/pics/strict-guarantee.pdf}
-  \caption{Substream management: firm bound}
-  \label{strict_guarantees}
-\end{figure}
-
 Figure~\ref{notifications_reordering} illustrates termination events reordering in the case of the soft bound guarantee. Terms $a,b,c,d...$ denote ordered processing events of a process $p$. Although the substream containing events $a,b$ terminates earlier, the end-of-substream event for this substream occurs after the termination event for the substream containing events $d,e$. 
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=0.80\textwidth]{Chapters/SubstreamConsistency/pics/notifications-reordering.pdf}
+  \includegraphics[width=0.75\textwidth]{Chapters/SubstreamConsistency/pics/notifications-reordering.pdf}
   \caption{An example of termination events reordering}
   \label{notifications_reordering}
 \end{figure}
