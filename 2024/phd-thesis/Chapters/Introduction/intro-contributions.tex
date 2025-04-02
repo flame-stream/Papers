@@ -26,13 +26,13 @@ Using our formal inference, we designed the \textit{drifting state} technique~\c
 
 We implemented the prototype of the proposed technique to examine its performance~\cite{we2018adbis, we2018seim, thepaper}. Our experiments demonstrated that the introduced protocols for fault tolerance are scalable and provide remarkably low overhead within different computational layouts. The comparison with the industrial stream processing solution indicated that our prototype could provide lower latency under exactly-once requirement. The drifting state technique along with exactly-once implementation on top of it and experimental study are detailed in Chapter~\ref{thesis-chapther-optimistic}.
 
-\subsection{Formal Model for Substream Management}
+\subsection{Formal Model for Substream Management and Lower Bound Estimation for Network Traffic}
 
 We formalized the problem of substream management and highlighted its main features~\cite{10.1145/3524860.3539809, trofimov2023bounding}. Particularly, we introduced the notions of {\em soft bound} and {\em firm bound} required by various stream processing scenarios. Some applications that apply substream management systems do not require any particular properties of termination events. In this case, we denote the guarantee provided by such events as {\em soft bound} because termination events indicate that the substream ended some time ago. However, other problems require a {\em firm bound}: guarantee that the substream ends {\em exactly} after the termination event. For example, a commonly used snapshotting protocol~\cite{2015arXiv150608603C, jacques2016consistent} relies on an {\em epoch}. An epoch is a special substream that must be processed atomically. Therefore, the SPE requires the termination event for a given epoch to occur immediately after the last processing event belonging to that epoch. Otherwise, the snapshot can be inconsistent, capturing elements from multiple epochs.
 
 We also provided several insights into the performance of substream management systems. We showed that the network overhead induced by a substream management system cannot be lower than linear in terms of the number of computational nodes. We demonstrated that the state-of-the-art punctuations framework, as applied in many production-scale SPEs~\cite{tucker2003exploiting}, incurs quadratic network overhead with respect to the number of computational nodes, indicating that it is far from the lower bound. Chapter~\ref{thesis-chapter-substreams-consistency} is dedicated to the substream formal model and the mentioned performance insights.
 
-\subsection{Substream Management Approach Reaching Lower Bound of Network Traffic Overhead}
+\subsection{Substream Management Approach Reaching Lower Bound of Network Traffic}
 
 We designed and implemented a new substream management technique called \tracker~\cite{10.1145/3524860.3539809, trofimov2023bounding} that reaches the theoretical lower bound of network traffic overhead for this task. Our approach has the following features:
 
