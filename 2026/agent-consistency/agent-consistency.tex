@@ -1,0 +1,517 @@
+\documentclass[11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\title{Effect Isolation for AI Agent Workflows}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+Modern AI agents increasingly perform actions with irreversible effects:
+sending emails, charging credit cards, placing orders, publishing content,
+or interacting with external services. Unlike traditional transactions,
+such effects cannot always be rolled back. Consider an agent planning a trip under a fixed budget: flight and hotel
+together must cost at most 1500 EUR. To reduce latency, the supervisor
+runs two subagents in parallel: one books a flight for 900 EUR, while the
+other books a hotel for 700 EUR. Both subagents succeed locally. However,
+the resulting itinerary violates the global budget constraint. The agent then attempts to recover. The hotel reservation can be canceled,
+but the flight was purchased under a non-refundable fare. Thus every
+individual tool call was successful, yet the workflow as a whole produced
+an externally visible state that cannot be fully repaired.
+
+At the same time, modern agent systems increasingly employ
+parallel execution, speculative planning, and recovery after
+failures. These mechanisms improve latency and throughput, but they also
+introduce new classes of failures in the external world. Classical transaction processing addressed similar challenges through
+transaction isolation levels and anomaly-based reasoning~\cite{berenson1995critique,adya1999}.
+We argue that agent workflows require a similar abstraction for
+external effects.
+
+This direction is related to advanced transaction models, including
+Sagas, compensating transactions, escrow, and ACTA
+~\cite{garcia1987sagas,korth1990formal,oneil1986escrow,chrysanthis1991acta}.
+These models already studied long-running transactions, semantic
+compensation, conditional commutativity, and alternative execution
+paths. Our goal is not to rediscover these ideas. Rather, we study what
+changes when the elementary operations are black-box agent tools, may be
+nondeterministic, and may externalize irreversible effects before the
+workflow-level decision is known.
+
+\section{Why Agent Workflows Are Concurrent}
+
+Concurrency in agent systems emerges naturally from several sources. Unlike database transactions, these effects interact with an active
+external world and may be irreversible.
+
+\paragraph{Subagent decomposition.}
+Supervisor-worker architectures decompose tasks into parallel
+activities.
+
+\paragraph{Speculation.}
+Tree search, best-of-$k$, and branch exploration evaluate multiple
+alternative plans simultaneously.
+
+\paragraph{Latency hiding.}
+Long-running approvals or external APIs encourage systems to execute
+likely actions early.
+
+\paragraph{Recovery and replay.}
+Failures and retries introduce repeated execution of effectful actions.
+
+\section{Two Levels of Agent Operations}
+
+We distinguish two abstraction levels L0 and L1. This distinction is inspired by multilevel transaction management, where
+high-level transactional guarantees are derived from the properties of
+lower-level operations~\cite{weikum1991principles}. Agent workflows
+exhibit a similar separation, but with a different boundary. In classical
+systems, lower-level operations are typically under the control of the
+database system, and their semantic properties can be derived from the
+implementation. In agent systems, L0 operations are often black-box tools
+behind external APIs. Their properties---such as idempotence,
+invertibility, externalization, and determinism---must therefore be
+declared, inferred, or validated empirically. These L0 properties then
+constrain which isolation guarantees are achievable for the composed L1
+workflow.
+
+\subsection{L0: Tool Operations}
+
+L0 consists of individual effectful operations, e.g.:
+
+\begin{itemize}
+    \item \texttt{charge()}
+    \item \texttt{send\_email()}
+    \item \texttt{book\_flight()}
+    \item \texttt{publish\_post()}
+\end{itemize}
+
+Each operation possesses properties:
+
+\begin{itemize}
+\item idempotence,
+\item invertibility,
+\item externalization,
+\item determinism,
+\item commutativity.
+\end{itemize}
+
+These properties are independent: \texttt{increment} commutes but is not
+idempotent, while \texttt{delete} is idempotent but does not commute. They
+therefore form a lattice rather than a single scale (e.g.\ a
+reversible/irreversible axis). Commutativity is moreover \emph{relational}
+(a property of operation pairs) and often \emph{conditional} on state
+(escrow-style~\cite{oneil1986escrow}); determinism, absent from classical
+concurrency control, is an additional axis that black-box LLM-backed tools
+routinely violate.
+
+\subsection{L1: Workflow Operations}
+
+L1 consists of agent tasks, e.g.:
+
+\begin{itemize}
+    \item \texttt{HireCandidate}
+    \item \texttt{BookTrip}
+    \item \texttt{NegotiateContract}
+    \item \texttt{PurchaseEquipment}
+\end{itemize}
+
+Workflows turn individual tool calls into a logical unit of work. Tool properties constrain the guarantees achievable by workflows, but
+isolation itself is defined at L1.
+
+\section{Effect Histories}
+
+We model execution as histories consisting of:
+
+\begin{itemize}
+\item $effect(o)$: externalization of operation $o$ --- the moment its
+effect becomes visible outside the runtime and is no longer under full
+transactional control,
+\item $cmp(o)$: compensation,
+\item $dep(o_2 \leftarrow o_1)$: $o_2$ causally depends on the effect of
+$o_1$ (its decision was made observing $effect(o_1)$),
+\item $commit(w)$,
+\item $abort(w)$.
+\end{itemize}
+
+Each $effect(o)$ carries an outcome status: \emph{confirmed},
+\emph{failed}, or \emph{unknown} (no acknowledgment was received). We
+additionally define:
+
+\begin{itemize}
+\item $resolved(w)$: a $commit(w)$ or $abort(w)$ event has occurred, i.e.\
+the workflow's outcome is decided and will not change.
+\item $survives(o)$: $effect(o)$ may have occurred (\emph{confirmed} or
+\emph{unknown}) and there is no later successful $cmp(o)$ --- the effect
+remains in the external world.
+\end{itemize}
+
+Unlike classical read-write histories~\cite{adya1999},
+effect histories describe what the workflow irreversibly changed in the
+external world. The interesting anomalies live in the window between
+$effect$ and $resolved$/$cmp$ --- a window absent from read-write models.
+
+\section{Effect Anomalies}
+
+Each anomaly is a \emph{consequence of a missing property}. We give a
+one-line scenario and a formal trace.
+
+\paragraph{A1: Duplicated Effect}
+A payment request times out, the agent crashes, and after restart the
+same invoice is paid again.
+\begin{verbatim}
+effect(pay_invoice) = confirmed
+[crash; replay]
+effect(pay_invoice) = confirmed    same logical op, not idempotent
+=> invoice paid twice
+\end{verbatim}
+Non-determinism compounds this: if the operation is also non-deterministic,
+replay yields not a duplicate but a \emph{different} effect, and an
+\emph{unknown} outcome (A6) cannot even be checked for equality with the
+replayed one. Determinism is thus the property that makes recovery by
+replay sound.
+
+\paragraph{A2: Irreversible Regret}
+A non-refundable ticket is purchased before the remainder of the trip
+is finalized, then must be undone.
+\begin{verbatim}
+effect(book_flight) = confirmed    non-refundable (irreversible)
+abort(BookTrip)                    budget violated -> must undo
+cmp(book_flight)    = failed
+=> survives(book_flight): cannot retract; money lost
+\end{verbatim}
+
+\paragraph{A3: Contaminated Speculation}
+A committed branch externalizes an action based on a temporary
+reservation made by another branch that is later canceled.
+\begin{verbatim}
+effect(reserve_room R) = confirmed [b1]    b1 holds room R for 14:00
+dep(send_invites <- reserve_room R) [b2]   b2 relies on R being held
+effect(send_invites) = confirmed [b2]      "meet in R at 14:00" mailed out
+commit(b2)                                 b2 wins and is committed
+abort(b1); cmp(reserve_room R)             b1 loses; room R released
+=> b2 already announced R, which no longer survives
+\end{verbatim}
+The contamination is causal, not about reversibility: $b2$ trusted an
+effect of an unresolved branch. This is the effect-world analogue of a
+\emph{dirty read} --- reading uncommitted state that is later rolled
+back --- except the ``read'' is a causal dependency on an external effect.
+The harm (invitations already sent) would arise even if those invitations
+were themselves reversible.
+
+\paragraph{A4: Premature Externalization}
+An offer letter is sent before legal approval completes.
+\begin{verbatim}
+effect(send_offer) = confirmed     letter externalized
+NOT resolved(Hire)                 commit/abort(Hire) not yet reached
+[later] abort(Hire)                approval denied
+=> effect(send_offer) preceded resolved(Hire)
+\end{verbatim}
+Premature externalization is what separates E2-seq from E2-spec: E2-seq
+permits it (the effect may precede the workflow's resolution), while
+E2-spec forbids it (effects that may not survive must be staged or gated).
+
+\paragraph{A5: Phantom Compensation}
+A supplier receives an offer, reacts to it, and the offer is later
+withdrawn. The external world has already incorporated the temporary
+state.
+\begin{verbatim}
+effect(send_offer) = confirmed [A]   supplier sees offer; window opens
+effect(react) = confirmed [X]        supplier acts on it
+dep(react <- send_offer)             X's action depends on the offer
+cmp(send_offer) [A]                  offer withdrawn; window closes
+NOT commute(send_offer, react)       cannot reorder: X already acted
+=> supplier acted on a now-withdrawn offer; world diverges
+\end{verbatim}
+This is the only \emph{relational} anomaly (it turns on commutativity of a
+pair, not a single operation), which is why it requires a commutativity
+\emph{contract} rather than a per-operation hint, and why it is
+irremediable when the competitor is the open world (see E3 below).
+
+\paragraph{A6: Orphaned Compensation}
+A payment request times out, its status becomes unknown, and the system
+issues a refund without knowing whether the original payment succeeded.
+\begin{verbatim}
+effect(pay_invoice) = unknown      request timed out; outcome unknown
+cmp(pay_invoice)    = refund       refund issued blindly
+=> if payment never happened, refund is spurious (acting on unknown)
+\end{verbatim}
+The anomaly is the \emph{blind action} at the moment of $cmp$, not the
+eventual outcome; the remedy is to resolve $unknown$ before compensating.
+
+\section{Effect Isolation Levels}
+\label{sec:levels}
+
+We conjecture that these anomalies induce a hierarchy of effect isolation
+levels, each forbidding a prefix of the catalog. The strict hierarchy
+consists of E0, E1, E2-seq, E2-spec, and E3: E1 forbids A1, E2-seq forbids
+A1--A3, E2-spec forbids A1--A4, and E3 forbids A1--A6. E2-seq captures
+compensation-based sequential execution: it permits premature
+externalization (A4) but still excludes contaminated speculation (A3),
+requiring that aborted effects leave no surviving residue under the
+workflow's compensation assumptions. E2-spec is stricter, additionally
+forbidding A4: effects that may not survive must be staged or gated until
+the workflow-level decision is known. The anomaly ordering is chosen so
+that each level forbids a prefix; the catalog still groups
+agent-created anomalies (A1--A4) before externally-caused ones (A5--A6).
+
+\begin{center}
+\begin{tabular}{l l p{3.2cm} p{3.6cm}}
+\textbf{Level} & \textbf{Forbids} & \textbf{Informally} & \textbf{Where today} \\
+\hline
+E0 & --- & effects escape immediately & most agent frameworks \\
+E1 & A1 & at-most-once effects & ACRFence~\cite{zheng2026acrfence} \\
+E2-seq & A1--A3 & compensation-safe effects & RAC~\cite{perera2026rac} \\
+E2-spec & A1--A4 & speculation-safe effects & Atomix~\cite{mohammadi2026atomix}; Cordon~\cite{chen2026cordon} \\
+E3 & A1--A6 & serializable external history & controlled gateways / no general system yet \\
+\end{tabular}
+\end{center}
+
+The systems in the last column should be read as implementations of
+particular points in the hierarchy under their stated assumptions, rather
+than as formal completeness results. ACRFence targets E1 for the
+nondeterministic-replay case: after checkpoint-restore an LLM re-synthesizes
+a syntactically different but semantically equivalent irreversible call,
+which servers accept as new (a duplicate, our A1); ACRFence logs effects and
+enforces replay-or-fork to suppress it. (It validates the attack and
+proposes the mitigation rather than proving a guarantee.)
+RAC targets E2-seq under compensation assumptions: effects externalize
+\emph{immediately} during execution --- the runtime does not gate them,
+which is precisely why it is E2-seq rather than E2-spec --- and the runtime
+records them in a durable log and executes their compensations on abort,
+in dependency order so dependents are undone before parents. This excludes
+A2 only when the recorded compensations are correct, safe, complete, and
+eventually successful; otherwise the workflow may still exhibit irreversible
+residue (indeed, when no compensation is found RAC assumes the tool has no
+side effect).
+Atomix and Cordon implement the stricter E2-spec regime
+under a mediated runtime boundary, but by different mechanisms: Atomix
+uses frontier-gated settlement under speculation and contention, whereas
+Cordon uses task-level transactional containment and validation before
+releasing staged effects. None of these systems provides a general E3
+guarantee over an active external world.
+
+The difference between E2-seq and E2-spec is whether the runtime controls
+the \emph{moment} of externalization. E2-seq allows an effect to become
+visible before the workflow outcome is resolved, provided that abort can
+remove its residue and no committed branch depends on effects from an
+aborted branch. E2-spec is stricter: effects that may not survive must be
+staged or gated until the workflow-level decision is known.
+
+These levels are defined for L1 workflows rather than individual tools.
+The hierarchy reflects how external the cause of an anomaly is. A1--A4 are
+anomalies the agent creates itself and can in principle prevent through
+deduplication, gating, dependency tracking, and branch isolation. A5--A6
+arise from interaction with an uncontrolled external world: a reacting
+competitor, or an unacknowledged external outcome.
+
+Interactive tasks explain why E2-seq is sometimes the best achievable
+regime. Consider an agent negotiating on a user's behalf. It cannot learn
+the counterparty's reaction without sending an offer, and sending an offer
+is already an effect: the action must precede the observation. Full gating
+(E2-spec) is therefore impossible. The best attainable guarantee is
+E2-seq: the workflow may externalize effects sequentially, but must avoid
+irreversible residue in discarded branches. When the inputs needed to
+resolve the workflow can be observed without effect, for example through a
+\texttt{quote} operation, the stronger E2-spec guarantee becomes
+attainable.
+
+E3 should be understood as a mediated serializability target rather than
+as a guarantee available in arbitrary open-world settings. It requires
+control over the \emph{order} and atomic visibility of external effects:
+the system must mediate the order in which effects become visible, resolve
+unknown outcomes before compensation, and make dependent effects
+atomically visible. Under these assumptions, phantom compensation and
+orphaned compensation can be excluded, yielding a serializable external
+history.
+
+Without such mediation, E3 becomes an impossibility boundary. The system
+may still provide E2-style guarantees over its own actions, but it cannot
+in general prevent external actors from observing and reacting to
+intermediate states. In open-world settings, the best one can provide is
+reconciliation, audit, or application-specific constraints over a history
+that the system did not fully control.
+
+\section{Research Directions}
+
+Several questions naturally emerge from this framework.
+
+\subsection{Achievability}
+
+Given:
+\[
+E^*(W)
+\]
+the maximum achievable isolation level of workflow $W$.
+
+We conjecture:
+\[
+E^*(W) = F(P, S, C)
+\]
+where:
+
+\begin{itemize}
+\item $P$: per-tool properties (commutativity, invertibility, idempotence,
+externalization, determinism);
+\item $S$: workflow structure --- ordering, parallelism and speculation,
+the dependency graph, and whether read-only (\texttt{quote}) phases precede
+effects;
+\item $C$: task constraints and invariants (e.g.\ the budget bound).
+\end{itemize}
+
+A subtlety in $S$: an agent's execution graph is not fixed in advance. The
+agent decides nondeterministically what to call next, so the graph is
+\emph{generated dynamically}. We therefore read $S$ not as a single graph
+but as the \emph{space} of histories the agent may produce under a given
+tool set and policy, and $E^*(W)$ as the level guaranteed across all of
+them --- or, equivalently, the level a runtime mechanism can enforce as
+effects appear, rather than by static analysis of a fixed plan (the
+approach taken by systems such as Atomix~\cite{mohammadi2026atomix}). This structural nondeterminism
+(\emph{which} operation is invoked) is a distinct axis from the operational
+nondeterminism already captured in $P$ (whether a given operation is
+deterministic).
+
+The decisive argument differs by level: E1 follows mechanically from
+per-tool properties (idempotence), whereas E2-spec and above are dominated by
+the tool \emph{set} and \emph{composition}. For instance, the budget
+invariant of \texttt{BookTrip} depends on flight and hotel prices. If
+prices are revealed only by booking, verifying the invariant requires
+externalizing irreversible effects --- a cycle (to check, book; to book
+safely, check) --- and E2-spec is unachievable. If a read-only
+\texttt{quote()} exposes prices without effect, the invariant becomes
+checkable before any irreversible effect, and E2-spec becomes achievable. We
+call this condition \emph{observability of the invariant}: E2-spec is
+achievable iff the values an invariant depends on can be obtained without
+externalization, before irreversible effects must occur.
+
+\subsection{Synthesis: the Inverse Problem}
+
+Achievability asks, given a workflow, what level it reaches. The inverse
+is often what a developer actually wants: given a target level $E_{target}$
+and task constraints $C$, what is the minimal change that makes it
+achievable? The change may be a \emph{new tool} (e.g.\ a read-only
+\texttt{quote} exposing an invariant's inputs without effect), a
+\emph{strengthened tool property} (an idempotency key to reach E1), or a
+\emph{restructuring} (inserting a quote-then-commit phase). Each
+corresponds to a move in $P$ or $S$, and the output is effectively a
+\emph{specification for a missing tool contract} (see the Tool Contracts
+direction below).
+
+Two caveats keep the problem honest. Minimality must be defined against
+\emph{realistic} extensions: a read-only mirror of an effectful operation
+is realistic, whereas making an irreversible effect reversible often is
+not. And some targets are unachievable by \emph{any} addition --- e.g.\
+interactive tasks where an invariant's input is observable only through the
+effect itself (the E2-seq ceiling). The inverse problem must therefore
+distinguish ``a tool is missing'' from ``no tool can help.''
+
+\subsection{Commit Spheres}
+
+Some effects cannot be committed independently. In \texttt{BookTrip}, the
+charge depends on both bookings (its amount is their sum), and the
+confirmation email asserts all three; committing any one without the
+others leaves the world inconsistent --- a payment without a booking, or a
+confirmation that lies. Such effects must become final together or not at
+all. We call a minimal such set a \emph{commit sphere}: the unit of
+atomicity for external effects, by analogy with persistence
+spheres~\cite{weikum1991principles}, where a minimal set of pages must
+reach disk together. (A pure read such as \texttt{search\_flights} has no
+effect and belongs to no sphere.)
+
+Commit spheres are the unit of atomicity for external effects, and they
+act at two levels. As \emph{all-or-nothing} fixation they already matter
+from E2-seq up: a sphere must commit or abort as a whole, so that crashes and
+losing branches leave no partial residue (this is failure atomicity). At
+E3 a sphere additionally requires atomic \emph{visibility}: its effects
+become visible to competitors only all at once, so that no one observes an
+intermediate state --- which is exactly what would create phantom
+compensation (A5). Their size measures the cost of the guarantee: the
+larger the sphere, the more coordination, commit latency, and exposure of
+irreversible effects.
+
+Three features distinguish them from the classical
+notion: the execution graph is dynamic, so a sphere is discovered
+incrementally as dependent effects appear; its elements are heterogeneous
+in reversibility, so an irreversible effect cannot be committed on par with
+the rest but must be gated; and the dependency graph may contain cycles
+(reflection loops).
+
+\subsection{Potential Theorems}
+
+We expect results of the following form.
+
+\begin{itemize}
+\item \textbf{Observability is necessary for E2-spec.} If the inputs of a
+workflow invariant are observable only through externalizing operations,
+then no execution achieves E2-spec: the agent must either externalize
+before resolution or fail the task. (This lifts the ``iff'' of the
+achievability condition to an impossibility.)
+
+\item \textbf{External ordering precludes E3.} When the order of the
+external history is fixed by an actively reacting environment rather than
+mediated by the system, phantom compensation (A5) is unavoidable: E3 is
+not achievable, and the ceiling is E2-spec over the agent's own actions.
+E3 is attainable only when the system mediates the order and atomic
+visibility of effects.
+
+\item \textbf{Unknown outcomes preclude exactly-once.} If an effect's
+outcome can be \emph{unknown} and durable acknowledgment is unavailable, no
+mechanism simultaneously avoids duplication (A1) and orphaned compensation
+(A6) --- at-most-once and at-least-once cannot both hold. This is the
+agent-level reflection of the classical exactly-once impossibility.
+
+\item \textbf{Commit-sphere lower bound (conjecture).} The size of a forced
+commit sphere lower-bounds the coordination cost --- commit latency,
+exposure of irreversible effects, and wasted speculative work --- and we
+conjecture a protocol that matches it.
+\end{itemize}
+
+\subsection{Tool Contracts}
+
+Tool interfaces such as MCP currently expose limited operational
+properties. Richer contracts may allow automatic derivation of
+achievable isolation guarantees.
+
+\section{Related Work}
+
+Classical transaction models introduced isolation levels and anomaly
+definitions~\cite{berenson1995critique,adya1999}. Advanced transaction
+models investigated compensation, sagas, semantic recovery, contingency
+execution, and dependencies between long-running transactions
+~\cite{garcia1987sagas,korth1990formal,chrysanthis1991acta}. Escrow
+transactions introduced conditional commutativity and semantic
+concurrency control~\cite{oneil1986escrow}.
+
+Recent systems build runtime mechanisms for agent effects; we place them
+on the hierarchy in Section~\ref{sec:levels} (ACRFence at E1, RAC at
+E2-seq, Atomix and Cordon at E2-spec), and discuss their mechanisms there.
+SagaLLM~\cite{chang2025sagallm} applies Saga-style validation to
+multi-agent planning, and Stonebraker et
+al.~\cite{stonebraker2025consistency} call for isolation-level reasoning in
+data-oriented workflow systems. Two systems deserve closer comparison
+here. Cordon~\cite{chen2026cordon} introduces semantic transactions ---
+task-level boundaries tracking tool intents, result lineage, reversible
+state, staged effects, and authority --- which closely mirror our effect
+histories, dependency edges, and stage/gate distinction; but it targets
+security and least-privilege containment for a single sequential task
+rather than graded isolation under concurrency and speculation. On a
+complementary axis, S-Bus~\cite{khan2026sbus} formalizes \emph{read}-side
+isolation: its Observable-Read Isolation governs what an agent observes of
+shared mutable state, where we govern what it irreversibly externalizes ---
+the read-side and effect-side of the same consistency problem.
+
+None of these works, however, defines an anomaly-based \emph{hierarchy} of
+isolation levels for external effects, or characterizes the achievability
+of such levels from tool properties, workflow structure, and task
+invariants. Contaminated speculation, phantom compensation, orphaned
+compensation, and the joint treatment of read-side and effect-side
+isolation remain outside the scope of existing models.
+
+\bibliographystyle{plain}
+\bibliography{../../bibliography/flame-stream}
+
+\end{document}
