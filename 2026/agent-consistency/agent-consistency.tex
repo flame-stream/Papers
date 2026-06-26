@@ -409,6 +409,26 @@ interactive tasks where an invariant's input is observable only through the
 effect itself (the E2-seq ceiling). The inverse problem must therefore
 distinguish ``a tool is missing'' from ``no tool can help.''
 
+\subsection{Synthesizing Compensations}
+
+Much of the hierarchy --- A2, A3, E2-seq, and compensation-based commit
+spheres --- presumes that effects have compensations. In practice agent
+tools rarely ship with them; they arrive as bare API calls. The
+achievability of the compensation-based levels therefore hinges on whether
+a compensator can be \emph{synthesized} for a given operation --- generated
+from its signature, description, and observed effect --- together with the
+input mapping from the original effect to the compensating call (which
+output fields, such as a confirmation reference, the compensation consumes).
+This raises two questions the framework can frame. First,
+\emph{synthesizability}: for which operations is a correct compensator
+derivable, and for which is it provably impossible (a non-refundable
+purchase admits none)? This bounds where E2-seq is reachable at all. Second,
+\emph{trust}: a synthesized compensator inherits uncertain semantics
+(Section~\ref{sec:unknown}), so its own correctness becomes part of the
+guarantee rather than an assumption. We expect synthesizability to be the
+practical gate on whether the compensation-based levels are inhabited in
+real deployments.
+
 \subsection{Commit Spheres}
 
 Some effects cannot be committed independently. In \texttt{BookTrip}, the
@@ -469,6 +489,25 @@ commit sphere lower-bounds the coordination cost --- commit latency,
 exposure of irreversible effects, and wasted speculative work --- and we
 conjecture a protocol that matches it.
 \end{itemize}
+
+\subsection{Unknown Operation Semantics}
+\label{sec:unknown}
+
+The model so far takes operation properties --- invertibility, idempotence,
+commutativity --- as known, as in advanced transaction models. For
+LLM-driven agents this is the assumption most often violated: tool contracts
+are black boxes, and the agent \emph{infers or guesses} whether an effect is
+compensable, idempotent, or commutative, often incorrectly. RAC, for
+instance, assumes a tool has no side effect when it cannot find a
+compensator. This suggests enriching $P$ with an epistemic status for each
+property (\emph{known}, \emph{assumed}, \emph{unknown}) and a corresponding
+class of anomalies in which an action is taken under a mistaken belief about
+semantics --- compensating an operation that has no true inverse, or
+replaying one wrongly believed idempotent. Characterizing isolation under
+uncertain semantics, and the safe actions available when a contract is
+unknown, is to our knowledge unaddressed, since existing systems take
+contracts as given. We see this as the most agent-specific direction the
+framework opens.
 
 \subsection{Tool Contracts}
 
