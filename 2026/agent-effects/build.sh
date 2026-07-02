@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Build agent-consistency.pdf (pdflatex -> bibtex -> pdflatex -> pdflatex).
+# Build agent-effects.pdf (pdflatex -> bibtex -> pdflatex -> pdflatex).
 set -euo pipefail
 
 cd "$(dirname "$0")"
 
-DOC=agent-consistency
+DOC=agent-effects
 
 pdflatex -interaction=nonstopmode -halt-on-error "$DOC.tex"
 bibtex "$DOC"
