@@ -3018,3 +3018,63 @@ journal = {arXiv preprint arXiv:2605.03409},
 year    = {2026}
 }
 
+@article{zhai2026revisable,
+  title={Revisable by Design: A Theory of Streaming LLM Agent Execution},
+  author={Zhai, Zhiyuan and Li, Ming and Wang, Xin},
+  journal={arXiv preprint arXiv:2604.23283},
+  year={2026}
+}
+
+@article{lyu2026coagent,
+  title={CoAgent: Concurrency Control for Multi-Agent Systems},
+  author={Lyu, Hongtao and Zhang, Dingyan and Wu, Mingyu and Wei, Xingda and Chen, Haibo},
+  journal={arXiv preprint arXiv:2606.15376},
+  year={2026}
+}
+
+@article{yu2026shepherd,
+  title={Shepherd: Enabling Programmable Meta-Agents via Reversible Agentic Execution Traces},
+  author={Yu, Simon and Chong, Derek and Nandi, Ananjan and Soylu, Dilara and Sun, Jiuding and Manning, Christopher D and Shi, Weiyan},
+  journal={arXiv preprint arXiv:2605.10913},
+  year={2026}
+}
+
+@book{bernstein1987concurrency,
+  title={Concurrency control and recovery in database systems},
+  author={Bernstein, Philip A and Hadzilacos, Vassos and Goodman, Nathan and others},
+  volume={370},
+  year={1987},
+  publisher={Addison-wesley Reading}
+}
+
+@inproceedings{guerraoui2008opacity,
+author = {Guerraoui, Rachid and Kapalka, Michal},
+title = {On the correctness of transactional memory},
+year = {2008},
+isbn = {9781595937957},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/1345206.1345233},
+doi = {10.1145/1345206.1345233},
+abstract = {Transactional memory (TM) is perceived as an appealing alternative to critical sections for general purpose concurrent programming. Despite the large amount of recent work on TM implementations, however, very little effort has been devoted to precisely defining what guarantees these implementations should provide. A formal description of such guarantees is necessary in order to check the correctness of TM systems, as well as to establish TM optimality results and inherent trade-offs.This paper presents opacity, a candidate correctness criterion for TM implementations. We define opacity as a property of concurrent transaction histories and give its graph theoretical interpretation. Opacity captures precisely the correctness requirements that have been intuitively described by many TM designers. Most TM systems we know of do ensure opacity.At a very first approximation, opacity can be viewed as an extension of the classical database serializability property with the additional requirement that even non-committed transactions are prevented from accessing inconsistent states. Capturing this requirement precisely, in the context of general objects, and without precluding pragmatic strategies that are often used by modern TM implementations, such as versioning, invisible reads, lazy updates, and open nesting, is not trivial.As a use case of opacity, we prove the first lower bound on the complexity of TM implementations. Basically, we show that every single-version TM system that uses invisible reads and does not abort non-conflicting transactions requires, in the worst case, ?(k) steps for an operation to terminate, where k is the total number of objects shared by transactions. This (tight) bound precisely captures an inherent trade-off in the design of TM systems. The bound also highlights a fundamental gap between systems in which transactions can be fully isolated from the outside environment, e.g., databases or certain specialized transactional languages, and systems that lack such isolation capabilities, e.g., general TM frameworks.},
+booktitle = {Proceedings of the 13th ACM SIGPLAN Symposium on Principles and Practice of Parallel Programming},
+pages = {175–184},
+numpages = {10},
+keywords = {transactional memory, model, lower bound, correctness},
+location = {Salt Lake City, UT, USA},
+series = {PPoPP '08}
+}
+
+@book{elmagarmid1992transaction,
+  title={Database transaction models for advanced applications},
+  author={Elmagarmid, Ahmed K},
+  year={1992},
+  publisher={Morgan Kaufmann Publishers Inc.}
+}
+
+@book{weikum2001transactional,
+  title={Transactional information systems: theory, algorithms, and the practice of concurrency control and recovery},
+  author={Weikum, Gerhard and Vossen, Gottfried},
+  year={2001},
+  publisher={Elsevier}
+}
