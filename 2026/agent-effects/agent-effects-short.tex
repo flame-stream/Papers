@@ -51,15 +51,17 @@ although 66 of 81 possible annotation signatures occur, three account for
 AI agents increasingly take actions that change the outside world: sending
 emails, charging cards, placing orders, calling external services. Such
 effects often cannot be undone. Take an agent booking a trip on a 1500 EUR
-budget. To save time it books the flight (900) and the hotel (700) in
-parallel. Both calls succeed, but together they break the budget. The hotel
-can be canceled; the flight was non-refundable. Every tool call worked, yet
+budget: to save time it books the flight (900) and the hotel (700) in
+parallel. Both calls succeed, but together they break the budget; the hotel
+can be canceled, the flight was non-refundable. Every tool call worked, yet
 the workflow left a state in the world that cannot be fully repaired.
 
 Agents make this common: they run steps in parallel, execute likely
 actions early to hide latency, and recover by retrying. Each
 is useful, and each can produce a new kind of external-effect failure. We
-argue these failures form one catalog, with three sources.
+argue these failures form one catalog, with three sources, in the
+anomaly-based style of classical isolation
+levels~\cite{berenson1995critique,adya1999}.
 \emph{Uncertainty} failures: when the system cannot confirm the outcome of
 an effect --- after a crash, a timeout, or a lost acknowledgment --- and must
 act anyway, the same effect may happen twice, fail to happen while the
@@ -85,10 +87,8 @@ The mechanisms agent runtimes use --- replay, retry, compensation, staged
 release, coordinated access --- are not new: they come from long-running and
 multilevel transaction processing, including sagas, semantic recovery, and
 escrow-style concurrency
-control~\cite{garcia1987sagas,korth1990formal,elmagarmid1992transaction,weikum2001transactional,oneil1986escrow},
-in the anomaly-based style of classical isolation
-levels~\cite{berenson1995critique,adya1999}. The mechanisms are familiar;
-what changes in the agent setting is the boundary, where runtimes often
+control~\cite{garcia1987sagas,korth1990formal,elmagarmid1992transaction,weikum2001transactional,oneil1986escrow}.
+What changes in the agent setting is the boundary, where runtimes often
 compose independently supplied tools through shared interfaces that expose
 little of the transactional semantics those mechanisms require. Each runtime
 therefore recovers the properties it needs locally --- adapter annotations,
@@ -135,8 +135,7 @@ together, the properties of L0 operations are declared by construction, and
 a runtime that owns its adapter layer is in a similar position: it can
 attach the properties it needs tool by tool. Neither option transfers
 cleanly across a shared interface, where a client sees only what the
-interface carries and local declarations are not reusable by other
-runtimes. The Model Context Protocol
+interface carries. The Model Context Protocol
 (MCP) is a widely used interface of this kind and is publicly inspectable, which is why we return to it in Section~\ref{sec:grounding}.
 However the properties are obtained, they constrain which effect-safety
 guarantees are achievable at L1.
@@ -292,7 +291,7 @@ no mediator prevented their unordered externalization.
 
 \emph{A8} differs from all of these. An external party acts on an effect
 that is later withdrawn:
-\par\noindent\begin{minipage}{\linewidth}
+\par\medskip\noindent\begin{minipage}{\linewidth}
 \begingroup\footnotesize\begin{verbatim}
 externalize(a1, e)       # offer sent
 externalize_ext(S, x)    # supplier acts on it
@@ -303,6 +302,7 @@ survives(x)              # supplier action stands
 => offer retracted; the reaction is not
 \end{verbatim}\endgroup
 \end{minipage}
+\par\medskip\noindent
 The dependent effect $x$ is exogenous: no attempt of the runtime produced it
 and no compensation reaches it. This separates A8 from A6, where the
 surviving effect is managed. A1--A7 concern effects within the managed or
@@ -487,7 +487,8 @@ runtime has no general way to transform the realized state into one
 corresponding to a serial order; undo and re-application would provide such
 a path, but irreversibility rules it out. What
 remains is prevention: mediation before unordered externalization, or gating
-conflicting calls until earlier ones commit, as CoAgent does.
+conflicting calls until earlier ones commit, as
+CoAgent~\cite{lyu2026coagent} does.
 
 Third, an open-world reaction ends the reach of compensation: once an outside
 actor has observed a released effect and acted, retracting the effect does
@@ -500,8 +501,8 @@ releases leaves a partial externalization that the runtime cannot generally
 complete or undo: committing risks a missing required effect (A2), while
 aborting leaves surviving residue (A4). Avoiding this choice is the
 classical atomic-commitment problem~\cite{bernstein1987concurrency} and
-needs tool-side prepare/commit participation, a limit Atomix states for its
-own release step.
+needs tool-side prepare/commit participation, a limit
+Atomix~\cite{mohammadi2026atomix} states for its own release step.
 
 \section{What the Boundary Declares Today}
 \label{sec:grounding}
@@ -518,12 +519,14 @@ each). Of these, 9{,}454 exposed no remote endpoint and were out of scope
 because probing them would require executing a package or stdio server. We
 anonymously queried \texttt{tools/list} on all 9{,}234 remote targets,
 including those declaring an authentication header; no responding target
-rejected discovery with HTTP 401 or 403. Of these targets, 4{,}838 returned
+rejected discovery with HTTP 401 or 403 (connection failures were not
+classified). Of these targets, 4{,}838 returned
 at least one tool, 4{,}318 failed to connect, 74 timed out, and four
 returned no tools, yielding 98{,}291 tools (median 11 per server). No
-tool was called. Code, data,
-and full methodology are available in the accompanying
-artifact.\footnote{\url{https://github.com/REPLACE-ME/mcp-annotation-census}} For each tool we recorded the four annotations the
+tool was called. The resulting measurements therefore describe the
+reachable remote subset; unreachable and package/stdio-only servers may
+differ. Code, data, and full methodology are available in the accompanying
+artifact.\footnote{\url{https://github.com/flame-stream/mcp-annotation-census}} For each tool we recorded the four annotations the
 specification defines --- \texttt{readOnlyHint}, \texttt{destructiveHint},
 \texttt{idempotentHint}, \texttt{openWorldHint} --- keeping an explicit
 \texttt{false} distinct from an omitted field.

@@ -2904,8 +2904,7 @@ Trill uses a streaming batched-columnar data representation with a new dynamic c
   booktitle = {Proceedings of the 1995 ACM SIGMOD International Conference on Management of Data},
   pages     = {1--10},
   year      = {1995},
-  publisher = {ACM},
-  doi       = {10.1145/223784.223785}
+  publisher = {ACM}
 }
 
 @phdthesis{adya1999,
@@ -2922,14 +2921,24 @@ Trill uses a streaming batched-columnar data representation with a new dynamic c
   pages     = {249--259},
   year      = {1987},
   publisher = {ACM},
-  doi       = {10.1145/38713.38742}
 }
 
-@article{korth1990formal,
-  title   = {A Formal Approach to Recovery by Compensating Transactions},
-  author  = {Korth, Henry F. and Levy, Eliezer and Silberschatz, Abraham},
-  journal = {Proceedings of the VLDB Endowment},
-  year    = {1990}
+@inproceedings{korth1990formal,
+  author       = {Henry F. Korth and
+                  Eliezer Levy and
+                  Abraham Silberschatz},
+  editor       = {Dennis McLeod and
+                  Ron Sacks{-}Davis and
+                  Hans{-}J{\"{o}}rg Schek},
+  title        = {A Formal Approach to Recovery by Compensating Transactions},
+  booktitle    = {16th International Conference on Very Large Data Bases, August 13-16,
+                  1990, Brisbane, Queensland, Australia, Proceedings},
+  pages        = {95--106},
+  publisher    = {Morgan Kaufmann},
+  year         = {1990},
+  timestamp    = {Wed, 29 Mar 2017 16:45:24 +0200},
+  biburl       = {https://dblp.org/rec/conf/vldb/KorthLS90.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
 }
 
 @article{oneil1986escrow,
@@ -2944,11 +2953,21 @@ Trill uses a streaming batched-columnar data representation with a new dynamic c
 }
 
 @inproceedings{chrysanthis1991acta,
-  title     = {ACTA: A Framework for Specifying and Reasoning about Transaction Structure and Behavior},
-  author    = {Chrysanthis, Panos K. and Ramamritham, Krithi},
-  booktitle = {Proceedings of the 1990 ACM SIGMOD International Conference on Management of Data},
-  year      = {1990},
-  publisher = {ACM}
+  author       = {Panos K. Chrysanthis and
+                  Krithi Ramamritham},
+  editor       = {Hector Garcia{-}Molina and
+                  H. V. Jagadish},
+  title        = {{ACTA:} {A} Framework for Specifying and Reasoning about Transaction
+                  Structure and Behavior},
+  booktitle    = {Proceedings of the 1990 {ACM} {SIGMOD} International Conference on
+                  Management of Data, Atlantic City, NJ, USA, May 23-25, 1990},
+  pages        = {194--203},
+  publisher    = {{ACM} Press},
+  year         = {1990},
+  doi          = {10.1145/93597.98729},
+  timestamp    = {Tue, 16 Aug 2022 23:04:20 +0200},
+  biburl       = {https://dblp.org/rec/conf/sigmod/ChrysanthisR90.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
 }
 
 @article{weikum1991principles,
@@ -2958,15 +2977,21 @@ Trill uses a streaming batched-columnar data representation with a new dynamic c
   volume  = {16},
   number  = {1},
   pages   = {132--180},
-  year    = {1991},
-  doi     = {10.1145/103140.103145}
+  year    = {1991}
 }
 
-@article{stonebraker2025consistency,
-  title   = {Consistency and Correctness in Data-Oriented Workflow Systems},
-  author  = {Stonebraker, Michael and Zhou, Xinjing and Kraft, Peter and Li, Qian},
-  journal = {Conference on Innovative Data Systems Research},
-  year    = {2026}
+@inproceedings{stonebraker2025consistency,
+  author       = {Michael Stonebraker and
+                  Xinjing Zhou and
+                  Peter Kraft and
+                  Qian Li},
+  title        = {Consistency and Correctness in Data-Oriented Workflow Systems},
+  booktitle    = {16th Conference on Innovative Data Systems Research, {CIDR} 2026,
+                  Chaminade, CA, USA, January 18-21, 2026},
+  year         = {2026},
+  timestamp    = {Mon, 02 Feb 2026 16:48:29 +0100},
+  biburl       = {https://dblp.org/rec/conf/cidr/StonebrakerZK026.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
 }
 
 @article{chang2025sagallm,
@@ -2976,8 +3001,7 @@ Trill uses a streaming batched-columnar data representation with a new dynamic c
   volume  = {18},
   number  = {12},
   pages   = {4874--4886},
-  year    = {2025},
-  doi     = {10.14778/3750601.3750611}
+  year    = {2025}
 }
 
 @article{mohammadi2026atomix,
@@ -3011,11 +3035,12 @@ journal = {arXiv preprint arXiv:2603.20625},
 year    = {2026}
 }
 
-@article{perera2026rac,
-title   = {Robust Agent Compensation (RAC): Teaching AI Agents to Compensate},
-author  = {Perera, Srinath and Hapuarachchi, Kaviru and Leymann, Frank and Khalaf, Rania},
-journal = {arXiv preprint arXiv:2605.03409},
-year    = {2026}
+@inproceedings{perera2026rac,
+  title={Robust Agent Compensation (RAC): Teaching AI Agents to Compensate},
+  author={Perera, Srinath and Hapuarachchi, Kaviru and Leymann, Frank and Khalaf, Rania},
+  booktitle={Proceedings of the ACM Conference on AI and Agentic Systems},
+  pages={253--262},
+  year={2026}
 }
 
 @article{zhai2026revisable,
@@ -3054,8 +3079,6 @@ year = {2008},
 isbn = {9781595937957},
 publisher = {Association for Computing Machinery},
 address = {New York, NY, USA},
-url = {https://doi.org/10.1145/1345206.1345233},
-doi = {10.1145/1345206.1345233},
 abstract = {Transactional memory (TM) is perceived as an appealing alternative to critical sections for general purpose concurrent programming. Despite the large amount of recent work on TM implementations, however, very little effort has been devoted to precisely defining what guarantees these implementations should provide. A formal description of such guarantees is necessary in order to check the correctness of TM systems, as well as to establish TM optimality results and inherent trade-offs.This paper presents opacity, a candidate correctness criterion for TM implementations. We define opacity as a property of concurrent transaction histories and give its graph theoretical interpretation. Opacity captures precisely the correctness requirements that have been intuitively described by many TM designers. Most TM systems we know of do ensure opacity.At a very first approximation, opacity can be viewed as an extension of the classical database serializability property with the additional requirement that even non-committed transactions are prevented from accessing inconsistent states. Capturing this requirement precisely, in the context of general objects, and without precluding pragmatic strategies that are often used by modern TM implementations, such as versioning, invisible reads, lazy updates, and open nesting, is not trivial.As a use case of opacity, we prove the first lower bound on the complexity of TM implementations. Basically, we show that every single-version TM system that uses invisible reads and does not abort non-conflicting transactions requires, in the worst case, ?(k) steps for an operation to terminate, where k is the total number of objects shared by transactions. This (tight) bound precisely captures an inherent trade-off in the design of TM systems. The bound also highlights a fundamental gap between systems in which transactions can be fully isolated from the outside environment, e.g., databases or certain specialized transactional languages, and systems that lack such isolation capabilities, e.g., general TM frameworks.},
 booktitle = {Proceedings of the 13th ACM SIGPLAN Symposium on Principles and Practice of Parallel Programming},
 pages = {175–184},
