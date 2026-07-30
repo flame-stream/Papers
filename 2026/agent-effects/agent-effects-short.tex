@@ -26,9 +26,10 @@ and place orders. Such effects generally cannot be rolled back, only
 compensated, and agents release them while retrying failed calls,
 speculating, and sharing resources with other executions. The mechanisms for
 this --- replay, compensation, staged release, coordinated access --- come
-from long-running and multilevel transaction processing; what is new is the
-boundary, since an agent typically calls third-party tools that declare
-little about themselves.
+from long-running and multilevel transaction processing. What changes in the agent setting is the
+boundary, where runtimes often compose independently supplied tools through
+shared interfaces that expose little of the transactional semantics these
+mechanisms require.
 
 We give an effect-history model that separates what externalized in the world
 from what the runtime observed, and a catalog of eight external-effect
@@ -36,13 +37,11 @@ anomalies grouped by the three ways transactional control is lost:
 uncertainty, workflow structure, and interaction. Read in the other
 direction, the catalog yields the boundary capabilities a runtime must
 establish to exclude each anomaly, and four limits beyond which no runtime can
-provide a general guarantee from black-box tool invocation alone. Current runtimes supply these
-capabilities through adapter layers they control, but such declarations stay
-runtime-local rather than reusable across a shared interface. A census of
-90{,}818 tools exposed by registered Model Context Protocol servers finds
-annotation fields carried at scale but expressing little: three signatures cover 77\% of tools,
-and only 13.2\% are in a configuration where the destructiveness hint
-applies at all.
+provide a general guarantee from black-box tool invocation alone. A census of 98{,}291 tools exposed by registered Model
+Context Protocol servers finds annotation fields widely emitted but semantically
+coarse: none of the required boundary capabilities is fully expressible, and
+although 66 of 81 possible annotation signatures occur, three account for
+75.8\% of tools.
 \end{abstract}
 
 \maketitle
@@ -57,21 +56,19 @@ parallel. Both calls succeed, but together they break the budget. The hotel
 can be canceled; the flight was non-refundable. Every tool call worked, yet
 the workflow left a state in the world that cannot be fully repaired.
 
-Agents make this common because they run steps in parallel (supervisor-worker
-decomposition), plan speculatively (tree search, best-of-$k$), execute likely
-actions early to hide latency, and recover by retrying after failures. Each
-is useful, but each can also produce a new kind of external-effect failure.
-We argue these failures form one catalog, with three sources.
+Agents make this common: they run steps in parallel, execute likely
+actions early to hide latency, and recover by retrying. Each
+is useful, and each can produce a new kind of external-effect failure. We
+argue these failures form one catalog, with three sources.
 \emph{Uncertainty} failures: when the system cannot confirm the outcome of
-an effect --- because of a crash, a timeout, or a lost acknowledgment --- and
-must act anyway, the same effect may happen
-twice, fail to happen while the workflow proceeds as if it had, or be
-compensated blindly. \emph{Workflow} failures: an effect may outlive an
+an effect --- after a crash, a timeout, or a lost acknowledgment --- and must
+act anyway, the same effect may happen twice, fail to happen while the
+workflow proceeds as if it had, or be compensated blindly. \emph{Workflow} failures: an effect may outlive an
 aborted workflow, leak before the workflow decides, or be depended on by a
 committed branch though it came from an abandoned one. \emph{Interaction}
 failures: an effect meets something outside its own execution --- a
 concurrent execution writing the same resource, or an outside actor that
-observes and reacts to it before it can be undone. Agents show all three,
+reacts to it before it can be undone. Agents show all three,
 because an agent is a long-running workflow that acts on tools whose
 outcomes it cannot always confirm and shares an open world with others.
 
@@ -90,30 +87,25 @@ multilevel transaction processing, including sagas, semantic recovery, and
 escrow-style concurrency
 control~\cite{garcia1987sagas,korth1990formal,elmagarmid1992transaction,weikum2001transactional,oneil1986escrow},
 in the anomaly-based style of classical isolation
-levels~\cite{berenson1995critique,adya1999}. The saga lineage isolates the
-pivot after which effects are no longer compensable; our catalog classifies
-the ways an effect can be incorrect at that point, extended to concurrent,
-speculative, and nondeterministic workflows. What differs is the boundary:
-those models reason over operations whose semantic properties are known to,
-assumed by, or supplied to the transaction manager, whereas an agent
-typically calls third-party tools whose properties the interface leaves
-largely undeclared. Current runtimes therefore supply the properties they
-need themselves --- adapter annotations, registered inverses, per-effect
-tiers --- out of band and for themselves alone. Better replay and recovery do not close
-the gap on their own: the missing piece is a contract layer at the tool
-interface.
+levels~\cite{berenson1995critique,adya1999}. The mechanisms are familiar;
+what changes in the agent setting is the boundary, where runtimes often
+compose independently supplied tools through shared interfaces that expose
+little of the transactional semantics those mechanisms require. Each runtime
+therefore recovers the properties it needs locally --- adapter annotations,
+registered inverses, per-effect tiers --- out of band. Better replay and recovery do not close the gap on their
+own: the missing piece is a contract layer at the tool interface.
 
-This paper makes three contributions. First, an effect-history model for
+This paper makes four contributions. First, an effect-history model for
 agent workflows whose operations are calls to externally supplied tools
 (Section~\ref{sec:model}). Second, a catalog of eight external-effect
-anomalies, organized by the three ways transactional control is lost ---
-uncertainty, workflow structure, and interaction --- with guarantee profiles
-naming the exclusion sets and a reading of current agent runtimes as partial
-coverage of it (Section~\ref{sec:catalog}). Third, for each anomaly, the
-tool contracts that make excluding it achievable, and four guarantee
-boundaries identifying where black-box invocation alone is insufficient
-under our model (Section~\ref{sec:contracts}), grounded by a registry-wide census
-of MCP tool annotations (Section~\ref{sec:grounding}).
+anomalies, organized by the three ways transactional control is lost, with
+guarantee profiles naming their exclusion sets and a reading of current agent
+runtimes as partial coverage of the catalog (Section~\ref{sec:catalog}).
+Third, a contract-level account of how the required boundary capabilities
+can be exposed, together with four limits where black-box invocation alone is
+insufficient (Section~\ref{sec:contracts}). Fourth, a registry-wide census of
+current MCP tool annotations, showing that none of the required capabilities
+is fully expressible (Section~\ref{sec:grounding}).
 
 \section{Effect Histories and the Tool Boundary}
 \label{sec:model}
@@ -125,10 +117,12 @@ two adjacent levels $L_i$ and $L_{i+1}$, written L0 and L1. L0 holds the
 operations the agent issues as atomic calls --- typically tools behind
 external APIs, \texttt{charge()} or \texttt{book\_flight()}; L1 holds the
 workflows composed from them, \texttt{BookTrip} or \texttt{HireCandidate}.
-A workflow can itself serve as an operation one level up. The history is
-defined at L0 over external events and the runtime's observations of them,
-of which the runtime generally sees only a projection; effect safety is
-defined at L1, against the workflow's decisions.
+A workflow can itself serve as an operation one level up. A history spans the
+slice: it records L0 attempts and external effects, the runtime's partial
+observations of them, and L1 workflow resolutions. Each attempt and
+compensating action, and every effect they externalize, is attributed to the
+workflow and branch that issued it. Effect safety is evaluated at L1, against
+those resolutions.
 
 The slice is relative downwards too: \texttt{book\_flight} is atomic only
 from the caller's side, while for its provider it is a workflow over
@@ -143,27 +137,26 @@ attach the properties it needs tool by tool. Neither option transfers
 cleanly across a shared interface, where a client sees only what the
 interface carries and local declarations are not reusable by other
 runtimes. The Model Context Protocol
-(MCP) is the widely used interface of this kind and is publicly
-inspectable, which is why we return to it in Section~\ref{sec:grounding}.
+(MCP) is a widely used interface of this kind and is publicly inspectable, which is why we return to it in Section~\ref{sec:grounding}.
 However the properties are obtained, they constrain which effect-safety
 guarantees are achievable at L1.
 
-We focus on five properties of L0 operations: idempotence, invertibility,
-externalization, determinism, and commutativity. They are independent ---
+We focus on five dimensions of L0 operations: idempotence, invertibility,
+externalization timing and control, determinism, and commutativity. They are
+not reducible to a single reversible/irreversible scale ---
 \texttt{increment} commutes but is not idempotent, \texttt{delete} is
-idempotent but does not commute --- and so form a property space rather than
-a single reversible/irreversible scale. Commutativity is moreover
+idempotent but does not commute. Commutativity is moreover
 \emph{relational}, a property of operation pairs, and often conditional on
 state (escrow-style~\cite{oneil1986escrow}); determinism, not usually
 treated as an operation contract, matters because black-box LLM-backed tools
 can be nondeterministic.
 
-An execution is a history over two layers: what happened outside, and what
-the runtime learned about it (Table~\ref{tab:model}). A retry is a second
+An execution history separates execution and external events from the
+runtime's knowledge of their outcomes (Table~\ref{tab:model}). A retry is a second
 attempt of the same logical operation; a compensating action externalizes in
-its own right; an exogenous effect is one no attempt precedes and no
-compensation reaches; and \emph{unknown} means no acknowledgment arrived, so
-whether the effect happened is undetermined for the runtime though
+its own right; an exogenous effect is produced by an external party rather
+than directly by a runtime action; and \emph{unknown} means no
+authoritative outcome is available to the runtime, although the outcome is
 determined in the world. We write $externalize(q, e \text{ on } r)$ when the
 resource matters. Where the individual attempt is not at issue we
 write $effect(\ell)$ and $cmp(\ell)$.
@@ -173,7 +166,8 @@ write $effect(\ell)$ and $cmp(\ell)$.
 \renewcommand{\arraystretch}{1.15}
 \footnotesize
 \caption{Effect-history vocabulary. The upper group records execution and
-external events; the lower, runtime observations and derived predicates.}
+external events; the lower, runtime observations, workflow assertions, and
+derived predicates.}
 \label{tab:model}
 \begin{tabularx}{\linewidth}{@{}l X@{}}
 $attempt(a, \ell)$ & attempt $a$ of logical operation $\ell$ \\
@@ -184,18 +178,18 @@ $neutralizes(c, e)$ & $c$ neutralized effect $e$ \\
 $dep(e_2 \leftarrow e_1)$ & $e_2$ produced having observed $e_1$ \\
 $commit(w)$, $abort(w)$ & workflow $w$ is resolved \\[2pt]
 $observe(a, s)$ & outcome for $a$: confirmed, failed, unknown \\
-$Req(w)$ & operations the commit of $w$ asserts \\
+$Req(w)$ & operations that $commit(w)$ asserts took effect \\
 $resolved(w)$ & $w$ has committed or aborted \\
 $survives(e)$ & $e$ externalized, never neutralized \\
 \end{tabularx}
 \end{table}
 
-Keeping the two layers apart matters below: an effect either occurred or did
-not, while \emph{unknown} is a state of the runtime, and acting under it is
-what several anomalies turn on. Unlike read-write
-histories~\cite{adya1999}, effect histories describe what a workflow
-externalized, and the anomalies live in the window between externalization
-and $resolved$ --- a window those models do not have.
+Unlike read-write histories~\cite{adya1999}, effect histories keep events
+and observations apart: an effect either occurred or did not, while
+\emph{unknown} is a state of the runtime, and acting under it is what
+several anomalies turn on. Many of the anomalies become possible because
+effects may already be irreversible or externally visible before the
+workflow resolves.
 
 \section{Effect Anomalies}
 \label{sec:catalog}
@@ -203,8 +197,7 @@ and $resolved$ --- a window those models do not have.
 Each anomaly exposes something missing at the agent--tool boundary:
 evidence (A1--A3), lifecycle control (A4--A6), or coordination (A7--A8).
 The uncertainty anomalies arise when the runtime cannot confirm the outcome
-of an effect --- after a crash, a timeout, or a lost acknowledgment --- and
-must act anyway. The workflow anomalies arise from the structure of a single
+of an effect and must act anyway. The workflow anomalies arise from the structure of a single
 execution: survival under abort, timing relative to its resolution, and
 dependency. The interaction anomalies arise when an effect meets something
 outside its own execution: another execution writing the same resource (A7),
@@ -213,49 +206,60 @@ human --- it may itself be an agent workflow at a level our boundary does not
 see.
 
 Table~\ref{tab:catalog} states the eight patterns together with the boundary
-capability each one requires. The two readings are dual: a forbidden pattern
-says what may go wrong, and the capability says what a runtime must be able
-to establish from the boundary to exclude it in general. Boundary
-capabilities do not themselves exclude anomalies; protocols consume them,
-through safe retry, commit gating, compensation, dependency tracking, and
-mediated ordering. Realizations are illustrative: equivalent sources of
-evidence, control, or coordination satisfy the same capability.
+capability needed to exclude each one in general. We derive the middle
+column by asking what information or control must be available at the
+boundary for a runtime protocol to rule out the anomalous history. If the
+runtime cannot distinguish the anomalous history from a safe one, the
+boundary must provide additional evidence. If the anomaly remains reachable
+even once the relevant facts are known, exclusion additionally requires
+lifecycle control or coordination. Boundary capabilities do not themselves
+exclude anomalies; protocols consume them through safe retry, commit gating,
+compensation, dependency tracking, and mediated ordering. The final column
+gives representative ways to realize these capabilities rather than unique
+or minimal implementations: some recur in the systems of
+Section~\ref{sec:systems}, while others are standard transaction-processing
+mechanisms or boundary primitives those systems do not expose.
+Section~\ref{sec:contracts} organizes them into reusable contract families.
 
 \begin{table*}[htbp]
 \centering
-\renewcommand{\arraystretch}{1.3}
+\renewcommand{\arraystretch}{1.15}
 \small
-\caption{External-effect anomalies and the boundary capabilities required
-to exclude them in general. Representative realizations are illustrative
-rather than prescriptive.}
+\caption{External-effect anomalies, the boundary capabilities required to
+exclude them in general, and representative realizations.}
 \label{tab:catalog}
 \begin{tabularx}{\textwidth}{@{}l X X X@{}}
 \textbf{} & \textbf{Forbidden pattern} & \textbf{Required boundary capability} & \textbf{Representative realization} \\
 A1 Duplicated & one logical operation externalizes twice & authoritative convergence on one outcome & logical-operation ID; idempotent re-issue returning the original outcome \\
-A2 Missing & commit without a required effect & authoritative outcome; atomic batch & status endpoint; prepare/commit \\
+A2 Missing & commit without a required effect & authoritative outcome; atomic multi-effect participation & status endpoint; prepare/commit \\
 A3 Orphaned & compensation issued under an unknown outcome & outcome resolution before compensating & outcome query; outcome-conditioned compensation \\
 A4 Residue & aborted workflow leaves a surviving effect & residue prevention or safe neutralization & compensation declaration; staging \\
 A5 Premature & possibly non-surviving effect externalizes before resolution & pre-externalization observation or control & \texttt{quote}/\texttt{dry\_run}; \texttt{hold} with expiry \\
-A6 Contaminated & committed effect depends on a non-surviving effect & stable identity for dependencies & stable effect and resource identity \\
-A7 Conflicting & unordered non-commuting effects from independent executions & shared-resource coordination & resource scope; commutativity or inverse; mediator \\
+A6 Contaminated & committed effect depends on a non-surviving effect & dependency observability and commit control & stable effect/resource identity; dependency tracking; commit gating \\
+A7 Conflicting & unordered non-commuting effects from independent executions & shared-resource coordination & resource scope; commutativity declaration; mediator or ordered release \\
 A8 Phantom & exogenous consequence of a compensated effect survives & control of external observability & visibility control; mediated observation \\
 \end{tabularx}
 \end{table*}
 
-Four of the patterns need more than a line. \emph{A3} is unusual in that the
+Four of the patterns need more than a line. Not all are final-state
+violations: A3 is defined at action time, and A5 and A7 are preventive,
+relative to profiles that forbid relying on outcomes the boundary does not
+establish. \emph{A3} is unusual in that the
 fault is the action itself, not the state it leaves. The runtime compensates
 without knowing whether the original attempt externalized:
-\begin{verbatim}
+\begingroup\footnotesize\begin{verbatim}
 attempt(a1, pay_invoice)
 observe(a1, unknown)     # outcome not confirmed
 cmp(c1, a1)              # compensate blindly
 externalize(c1, refund)  # refund takes effect
 => if a1 never externalized, refund is spurious
-\end{verbatim}
+\end{verbatim}\endgroup
 A1, A2, and A3 are one family: all three stem from an outcome the runtime
 cannot confirm and differ only in the reaction --- re-issue, commit, or
-compensate. A1 and A2 are visible in the final history; A3 is wrong at the
-moment it is done, whatever the outcome turns out to be. The family also
+compensate. A1 and A2 are visible in the final history; A3 is a violation at the moment
+compensation is issued: under an unknown outcome the runtime cannot know
+whether compensation is required, and even where the resulting state happens
+to be correct, the action was taken without authoritative evidence. The family also
 marks where this setting departs from classical transaction processing.
 There, an in-doubt outcome is temporary: participants run a recovery
 protocol and resolve it. A third-party tool runs no such protocol, so an
@@ -266,20 +270,20 @@ family concerns the third-party boundary.
 
 \emph{A6} is the effect-world analogue of a dirty read. A committed branch
 acts on a temporary reservation made by a branch that is later canceled:
-\begin{verbatim}
+\begingroup\footnotesize\begin{verbatim}
 effect(reserve_room R) [b1]
 dep(send_invites <- reserve_room R) [b2]
 effect(send_invites) [b2]  # invites name R
 commit(b2)                 # b2 wins
 abort(b1); cmp(reserve_room R)
 => b2 announced R, which no longer survives
-\end{verbatim}
+\end{verbatim}\endgroup
 The contamination is causal, not about reversibility: the harm --- invitations
 already sent naming a room that was released --- would arise even if those
 invitations were themselves reversible.
 
-\emph{A7} covers two coding workers pushing to the same branch from the same
-base, neither having observed the other. Commutativity \emph{excludes} the
+\emph{A7} covers two coding workers publishing incompatible updates to the
+same shared artifact from the same base, neither having observed the other. Commutativity \emph{excludes} the
 anomaly; invertibility does not exclude it but makes it \emph{repairable},
 letting the loser be rolled back and re-applied toward a serializable state;
 mediation prevents the race by ordering access. The conflict is beyond
@@ -289,7 +293,7 @@ no mediator prevented their unordered externalization.
 \emph{A8} differs from all of these. An external party acts on an effect
 that is later withdrawn:
 \par\noindent\begin{minipage}{\linewidth}
-\begin{verbatim}
+\begingroup\footnotesize\begin{verbatim}
 externalize(a1, e)       # offer sent
 externalize_ext(S, x)    # supplier acts on it
 dep(x <- e)              # x saw e
@@ -297,26 +301,25 @@ cmp(c1, a1)              # offer withdrawn
 neutralizes(c1, e)
 survives(x)              # supplier action stands
 => offer retracted; the reaction is not
-\end{verbatim}
+\end{verbatim}\endgroup
 \end{minipage}
 The dependent effect $x$ is exogenous: no attempt of the runtime produced it
 and no compensation reaches it. This separates A8 from A6, where the
 surviving effect is managed. A1--A7 concern effects within the managed or
 mediated boundary and can be detected and sometimes repaired after the fact;
-an exogenous consequence lies outside the projection the runtime observes
-and can compensate. The reacting party may also sit outside any contractual
+an exogenous consequence lies outside both the projection the runtime
+observes and the set of effects it can compensate. The reacting party may also sit outside any contractual
 boundary, so no ordering or commutativity can be declared for it, and the
 enforceable primitive is preventive: control whether and when the effect
 becomes externally observable.
 
-A5 and A7 are profile-relative preventive patterns: a particular execution
-may happen to end safely --- the resource may serialize the calls on its own,
-and an early effect may turn out to survive --- but the stronger profile
-forbids relying on an outcome the boundary does not establish.
+For A5 and A7, a particular execution may still end safely --- the resource
+may serialize the calls, or an early effect may ultimately survive --- but
+the stronger profiles forbid relying on such favorable outcomes.
 
 \begin{table*}[htbp]
 \centering
-\renewcommand{\arraystretch}{1.3}
+\renewcommand{\arraystretch}{1.15}
 \small
 \caption{Coverage of the anomaly catalog by current agent runtimes, under
 the assumptions each system states.}
@@ -328,7 +331,7 @@ ACRFence~\cite{zheng2026acrfence} & unknown-safe partial (A1) & proposed; attack
 RAC~\cite{perera2026rac} & compensation-safe partial (A4) & no gating; no idempotency, so A1--A3 not addressed \\
 Atomix~\cite{mohammadi2026atomix} & A1/A3 partial, compensation-safe (A4), speculation-safe (A5, A6), externally-mediated partial (A7) & idempotent-known-outcome path; no crash-safe exactly-once; A2 gap on multi-effect release \\
 Cordon~\cite{chen2026cordon} & A1/A3 partial, compensation-safe (A4), speculation-safe partial (A5) & idempotent tools; staged effects; task-scoped \\
-CoAgent~\cite{lyu2026coagent} & externally-mediated partial (A7) & multi-agent serializability via reorder + registered inverse; irreversibles gated \\
+CoAgent~\cite{lyu2026coagent} & externally-mediated partial (A7) & reordering prevents some conflicts; registered inverses permit repair where prevention does not apply; irreversibles gated \\
 Shepherd~\cite{yu2026shepherd} & per-effect reversibility tiers; A7 observed in supervisor use case & meta-agent substrate, not a runtime guarantee; irreversibles recorded for audit \\
 \end{tabularx}
 \renewcommand{\arraystretch}{1}
@@ -353,20 +356,17 @@ resolve the workflow can be observed without effect --- through a
 \subsection{Current Runtimes Against the Catalog}
 \label{sec:systems}
 
-Existing systems target different fragments of the catalog under
-runtime-specific assumptions. Table~\ref{tab:systems} summarizes their
+We next use the catalog to identify which of the required capabilities
+current agent runtimes target or establish under their stated assumptions.
+Table~\ref{tab:systems} summarizes their
 stated coverage rather than proven guarantees; none realizes a clean
 cumulative hierarchy.
 
 
 Atomix and Cordon stage effects, with Atomix additionally tracking
 speculative dependencies; their A1/A3 coverage is conditional on assumed
-tool semantics rather than on a general outcome-resolution protocol. CoAgent
-reorders shared-resource effects using registered inverses and gates
-irreversible calls when no inverse exists --- an instance
-of the achievability condition for A7 rather than an unconditional
-guarantee. Shepherd exposes reversibility tiers as a substrate rather than a
-guarantee. Across these systems, coverage rests on runtime-owned
+tool semantics rather than on a general outcome-resolution protocol. CoAgent's reordering with registered inverses is an instance of the
+achievability condition for A7 rather than an unconditional guarantee. Across these systems, coverage rests on runtime-owned
 declarations --- adapter-declared idempotency keys, reversibility
 annotations, registered inverses, per-effect tiers --- rather than a
 reusable shared contract; none controls exogenous reactions (A8), and no
@@ -383,9 +383,10 @@ systems~\cite{stonebraker2025consistency}.
 The catalog is coverage-oriented rather than complete by theorem: absolute
 completeness is unavailable in an open world, where an external actor can
 react in unbounded ways. Each family has a structural reason for its
-membership. The uncertainty family is fixed by the reactions available when
-an outcome is not confirmed: re-issue, commit as though it had
-externalized, or compensate. The workflow family is fixed by how an
+membership. The uncertainty family is fixed by the safety-relevant actions a runtime
+can take while an outcome is unresolved: re-issue, commit as though it had
+externalized, or compensate. Waiting, querying, or escalating creates no new
+effect-history pattern until one of these is taken. The workflow family is fixed by how an
 externalized effect relates to its resolution point --- survival, timing,
 dependency. The interaction family separates unmediated concurrent effects
 on a shared resource from an exogenous consequence of a later-compensated
@@ -405,10 +406,9 @@ conflict; and liveness failures.
 \label{sec:contracts}
 \label{sec:unknown}
 
-Existing runtimes obtain tool semantics through adapter layers they control.
 Classical transaction models assume properties such as idempotence,
 invertibility, and commutativity are known; at a third-party boundary they
-are often absent or merely inferred. A reusable contract layer must
+are often absent or inferred. A reusable contract layer must
 therefore distinguish established, assumed, and unknown properties, since
 acting on an assumption --- compensating an operation with no true inverse
 --- is a failure mode of its own. Such declarations do not replace runtime
@@ -432,19 +432,19 @@ families. A capability is what the boundary lets a runtime establish; a
 contract is the reusable declaration that exposes it, possibly composed of
 several operations and their documentation.
 
-Uncertainty requires authoritative convergence on one logical outcome: a
-status query, a durable acknowledgment, or idempotent re-issue returning the
-original result. Deduplication alone excludes A1 but does not resolve the
+Uncertainty requires authoritative convergence on one logical outcome.
+Deduplication alone excludes A1 but does not resolve the
 outcome that A2 and A3 turn on. The adapter-declared idempotency key is the
 closest primitive in use among the systems of Section~\ref{sec:systems};
-atomic multi-tool release additionally requires prepare/commit
-participation, which none of them supplies.
+atomic multi-effect release is deferred to
+Section~\ref{sec:boundaries}.
 
 Lifecycle control (A4--A6) needs the workflow's invariants to be checkable
 before irreversible effects occur, compensation semantics for what a
 compensator requires and what counts as its success, and stable effect and
-resource identity afterwards. A read-only \texttt{quote} or an expiring
-\texttt{hold} provides pre-externalization control; the unit dependency
+resource identity afterwards. A read-only \texttt{quote} avoids externalization altogether; an expiring
+\texttt{hold} replaces the final effect with a provisional one whose
+visibility, expiry, and release semantics are declared. The unit dependency
 tracking protects is a \emph{commit sphere}, the minimal set of effects that
 must become final together.
 
@@ -452,14 +452,14 @@ Coordination (A7--A8) requires contracts at a different granularity.
 Idempotency, status, quote, and compensation are properties of a single
 operation, whereas commutativity holds of a \emph{pair} of operations on a
 resource and cannot be set by rules given to one agent: it must be declared
-at the resource, together with inverses and, where neither holds, a mediator
-that serializes access. Visibility is likewise a property of the boundary:
+at the resource; where it does not hold, exclusion requires a mediator that
+serializes access, and declared inverses support repair after a conflict. Visibility is likewise a property of the boundary:
 who may observe an effect before it is final.
 
-A boundary that exposes these capabilities makes the corresponding exclusions
-implementable by any runtime, given a suitable protocol and declarations
-that hold, in place of the out-of-band declarations of
-Section~\ref{sec:systems}.
+A boundary that exposes these capabilities makes the corresponding
+exclusions implementable by a conforming runtime, given a suitable protocol
+and declarations that hold, rather than runtime-local out-of-band
+knowledge.
 
 \subsection{Guarantee Boundaries Above Black-Box Tools}
 \label{sec:boundaries}
@@ -467,20 +467,25 @@ Section~\ref{sec:systems}.
 Four boundaries mark where black-box invocation alone is insufficient:
 stronger guarantees require authoritative tool participation, shared
 mediation, or visibility control. We state them as consequences of the
-definitions, instantiated by current systems; formal proofs are future
+definitions and relate them to current systems; formal proofs are future
 work.
 
-First, without a primitive that lets retries converge on the authoritative
-outcome --- idempotent re-issue returning the original outcome, a status
-endpoint, or a durable acknowledgment --- no general unknown-safe execution
-is available: over an unreliable channel the runtime cannot learn in bounded
+First, without a primitive that establishes one authoritative outcome ---
+idempotent re-issue returning the original outcome, a status endpoint, or a
+durable acknowledgment --- no protocol can both resolve the workflow after
+an ambiguous tool call and guarantee unknown-safe and compensation-safe
+execution. Over an unreliable channel the runtime cannot learn in bounded
 time whether an effect took place, the classical exactly-once
-barrier~\cite{bernstein1987concurrency} at the agent--tool boundary, and can
-only choose which reaction to risk, trading A1 against A2 against A3.
+barrier~\cite{bernstein1987concurrency} at the agent--tool boundary.
+Re-issuing risks A1, committing risks A2, compensating risks A3, and
+aborting without compensation risks A4 if the effect occurred. Waiting
+avoids this resolution-time choice but gives up resolution.
 
 Second, non-commuting irreversible effects without a mediator admit no
-general conflict repair, since repair means restoring a serial order by
-undoing and re-applying effects, which irreversibility rules out. What
+general conflict repair. Without operation-specific reconciliation, the
+runtime has no general way to transform the realized state into one
+corresponding to a serial order; undo and re-application would provide such
+a path, but irreversibility rules it out. What
 remains is prevention: mediation before unordered externalization, or gating
 conflicting calls until earlier ones commit, as CoAgent does.
 
@@ -490,8 +495,10 @@ not retract the reaction (A8). The available contract is preventive ---
 visibility control before observation.
 
 Fourth, several irreversible effects on different tools cannot be released
-atomically above the tool layer; a crash between releases leaves some
-effects placed and others missing (A2). Making the batch atomic is the
+atomically above the tool layer. A crash or persistent failure between
+releases leaves a partial externalization that the runtime cannot generally
+complete or undo: committing risks a missing required effect (A2), while
+aborting leaves surviving residue (A4). Avoiding this choice is the
 classical atomic-commitment problem~\cite{bernstein1987concurrency} and
 needs tool-side prepare/commit participation, a limit Atomix states for its
 own release step.
@@ -503,108 +510,98 @@ We census what a runtime can establish from the standard MCP annotation
 vocabulary. The measurement covers declarations at the agent-facing
 boundary, not service behavior: a value states what a server asserts, and we
 do not verify it. A capability we do not find is therefore \emph{not
-established from the annotations}, and may still follow from a tool's input
-schema, its documentation, or the upstream API it wraps.
+established from the annotations}.
 
-We took a full snapshot of the official MCP registry on 2026-07-28
+We took a full snapshot of the official MCP registry on 2026-07-30
 (59{,}625 entries; 18{,}688 distinct servers, keeping the latest version of
-each) and queried every anonymously reachable remote server with
-\texttt{tools/list} (15\,s timeout, no retries), against specification
-revision 2025-03-26. No tool was
-called. Of 7{,}987 such targets, 4{,}584 returned at least one tool,
-yielding 90{,}818 tools (median 11 per server). The remainder failed to
-connect or timed out; servers requiring authentication and stdio-only
-packages are out of scope, so the sample covers anonymously reachable
-remote integrations. For each tool we recorded the four annotations the
+each). Of these, 9{,}454 exposed no remote endpoint and were out of scope
+because probing them would require executing a package or stdio server. We
+anonymously queried \texttt{tools/list} on all 9{,}234 remote targets,
+including those declaring an authentication header; no responding target
+rejected discovery with HTTP 401 or 403. Of these targets, 4{,}838 returned
+at least one tool, 4{,}318 failed to connect, 74 timed out, and four
+returned no tools, yielding 98{,}291 tools (median 11 per server). No
+tool was called. Code, data,
+and full methodology are available in the accompanying
+artifact.\footnote{\url{https://github.com/REPLACE-ME/mcp-annotation-census}} For each tool we recorded the four annotations the
 specification defines --- \texttt{readOnlyHint}, \texttt{destructiveHint},
 \texttt{idempotentHint}, \texttt{openWorldHint} --- keeping an explicit
 \texttt{false} distinct from an omitted field.
 
-\paragraph{Annotations are widely transmitted.}
-76.3\% of tools carry at least one annotation and 65.3\% carry all four.
-Transmission is not the same as
-semantic information, however: the four booleans are serialized whether or
-not their values say anything about the particular tool. The specification
-renders \texttt{destructiveHint} vacuous when \texttt{readOnlyHint} is
-true, and that pairing alone covers 56\% of all tools.
+\paragraph{Annotation fields are widely emitted.}
+At the wire level, 74.0\% of tools serialize at least one field and 61.7\%
+serialize all four. This is schema coverage, not semantic completeness: the
+specification renders \texttt{destructiveHint} inapplicable when
+\texttt{readOnlyHint} is true, and that pairing alone covers 52.8\% of all
+tools.
 
-\paragraph{The values that are sent are concentrated.}
+\paragraph{Tool-level signatures are concentrated.}
 Reading each tool as a signature over the four fields --- each true, false,
-or omitted --- 66 of the 81 possible signatures appear, but their
-frequencies are concentrated: one signature (read-only, non-destructive,
-idempotent, open-world) covers 42.7\% of tools, and three cover 76.7\%. 77.3\% of annotating multi-tool servers use more than one signature, so the
-concentration is not one default copied across every tool;
-nevertheless, the effective annotation vocabulary a runtime encounters is
-dominated by a few recurring patterns. The limitation is not presence on the wire but the resolution of
-what the fields can say; we do not attribute the values to author intent,
+or omitted --- 66 of the 81 possible signatures appear, but one signature
+(read-only, non-destructive, idempotent, open-world) covers 39.9\% of tools
+and three cover 75.8\%. Among multi-tool servers that emit at least one
+field, 76.7\% use more than one signature. Yet across all emitting servers,
+the median server's dominant signature covers 79.4\% of its tools, so
+differentiation is widespread but coarse. We do not attribute these values to author intent,
 since many may originate in SDK defaults or server templates.
 
 \paragraph{What the hints do not resolve.}
 The specification makes \texttt{destructiveHint} meaningful only when
-\texttt{readOnlyHint} is false. The field is present on 69.3\% of tools,
-but only 13.2\% are in a position to say anything about destructiveness at
-all, and 3.0\% assert a destructive operation.
+\texttt{readOnlyHint} is false. The field is present on 65.8\% of tools, but only 12.9\% carry an
+applicable destructiveness classification, and 3.1\% assert a destructive
+operation.
 
 \medskip
 
 \noindent
-The four hints express only coarse properties of a call: whether it may
-modify its environment, whether such modification may be destructive,
-whether repetition adds further effects, and whether it interacts with
-external entities.
+The four hints express only coarse properties of a call;
 Table~\ref{tab:gap} reads the boundary capabilities of
 Section~\ref{sec:contracts} against that vocabulary.
 
 \begin{table}[htbp]
 \centering
-\renewcommand{\arraystretch}{1.2}
+\renewcommand{\arraystretch}{1.1}
 \footnotesize
 \caption{Expressibility of the boundary capabilities of
 Section~\ref{sec:contracts} in current MCP tool annotations.}
 \label{tab:gap}
 \begin{tabularx}{\linewidth}{@{}X l@{}}
 \textbf{Boundary capability} & \textbf{In annotations} \\
-A1 authoritative convergence & Limited: idempotence only \\
-A2 authoritative outcome; atomic batch & No \\
+A1 authoritative convergence & Limited: idempotence hint only \\
+A2 authoritative outcome; atomic participation & No \\
 A3 outcome resolution before compensating & No \\
 A4 residue prevention or neutralization & No \\
 A5 pre-externalization observation/control & No \\
-A6 stable identity for dependencies & No \\
+A6 dependency observability; commit control & No \\
 A7 shared-resource coordination & No: externality only \\
 A8 control of external observability & No \\
 \end{tabularx}
 \end{table}
 
 \noindent
-The gap is not confined to effectful tools --- read-only operations also
-have properties the vocabulary cannot state, such as determinism or
-freshness --- but these are the ones a transactional protocol consumes.
-
 Current MCP metadata is thus sufficient to distinguish coarse execution
-modes --- read against write, declared idempotent versus potentially
-non-idempotent --- and
-insufficient to express the semantics a runtime needs to reason about
-retries, compensation, speculation, or concurrency. The ecosystem already
-provides metadata at scale; what is missing is the vocabulary needed for
-transactional reasoning.
+modes and insufficient to express the semantics a runtime needs to reason
+about retries, compensation, speculation, or concurrency.
 
 \section{Conclusion and Future Work}
 
-We identify eight recurring structural ways an agent workflow loses
-transactional control over external effects, from three sources.
-Each anomaly identifies a boundary capability --- evidence, control, or
-coordination --- that a runtime needs in order to exclude it generally, and current runtimes cover parts of the
-catalog by supplying those declarations themselves, out of band. Better replay and recovery do not close this gap on their
-own: the missing layer is a set of transactional contracts at the tool
-interface.
+We identify eight recurring ways in which AI agent workflows lose
+transactional control over external effects, arising from uncertainty,
+workflow structure, and interaction. The catalog maps each forbidden history to a boundary
+capability --- evidence, lifecycle control, or coordination --- and exposes
+four points where black-box invocation alone cannot provide a general
+guarantee. Existing runtimes cover fragments of this space under
+runtime-local declarations and assumptions.
+An MCP census shows that metadata already exists at scale: among 98{,}291
+tools, annotation fields are widely emitted, yet none of the required
+capabilities is fully expressible. The missing layer is therefore not
+another runtime-local recovery mechanism, but reusable transactional
+contracts at the tool boundary.
 
-Future work includes recovering how much of each capability is available
-from server implementations and upstream
-APIs~\cite{toeppe2026mcpdataset}, and where it is lost at the wrapper;
-formalizing the guarantee boundaries; synthesizing protocols from declared
-contracts; and studying coverage of the catalog and composition across more
-than two levels, where a workflow's contract becomes an operation contract
-one level up.
+Future work includes tracing these capabilities through server
+implementations and upstream APIs~\cite{toeppe2026mcpdataset}, formalizing
+the guarantee boundaries, synthesizing protocols from declared contracts,
+and studying catalog coverage and composition across multiple levels.
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{../../bibliography/flame-stream}
