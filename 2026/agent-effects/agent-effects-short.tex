@@ -2,6 +2,7 @@
 \usepackage{tabularx}
 \sloppy
 
+\raggedbottom
 \begin{document}
 
 \title{External Effect Anomalies in AI Agent Workflows}
@@ -24,7 +25,7 @@
 AI agents increasingly execute long-running workflows that externalize
 effects through independently supplied tools. Under retries, speculative
 execution, concurrency, and partial failures, the resulting external state
-may be inconsistent with any intended committed execution: required effects
+may be inconsistent with the workflow's intended resolution: required effects
 may be missing or duplicated, aborted effects may survive, and committed
 effects may depend on provisional state that is later withdrawn. Classical
 transaction mechanisms address related failures, but assume that
@@ -54,8 +55,8 @@ AI agents increasingly execute multi-step workflows whose operations
 change the external world: they send messages, charge cards, place orders,
 and invoke independently operated services. The correctness question
 we study is not whether each tool call succeeds locally, but whether the
-external effects that survive can be explained by a coherent committed
-execution of the workflow. Under retries, speculative execution,
+external effects that survive are consistent with a coherent resolution of
+the workflow. Under retries, speculative execution,
 concurrency, and partial failures, they may not: one logical action may
 occur twice, a workflow may commit without a required effect, an aborted
 branch may leave residue, or a committed action may depend on an effect
@@ -74,9 +75,9 @@ dependency identity, commutativity, and visibility control.
 Consider an agent booking a trip on a 1500 EUR budget. To reduce latency,
 it books a 900 EUR flight and a 700 EUR hotel in parallel. Both calls
 succeed, but their combined effects violate the workflow invariant. The
-hotel can be canceled; the flight is non-refundable. Each operation
-completed correctly in isolation, yet the surviving external state is
-inconsistent with the intended workflow outcome.
+workflow aborts and cancels the hotel; the non-refundable flight survives.
+Each operation completed correctly in isolation, yet the surviving external
+state is inconsistent with the intended workflow outcome.
 
 We argue that such failures form a common catalog with three sources, in
 the anomaly-based style of classical isolation
@@ -181,6 +182,7 @@ $externalize_{\mathit{ext}}(p, x)$ & external party $p$ produced $x$ \\
 $cmp(c, a)$ & compensating action $c$ for attempt $a$ \\
 $neutralizes(c, e)$ & $c$ neutralized effect $e$ \\
 $dep(e_2 \leftarrow e_1)$ & $e_2$ produced having observed $e_1$ \\
+$commute(e_1, e_2)$ & effects commute on their shared resource \\
 $commit(w)$, $abort(w)$ & workflow $w$ is resolved \\[2pt]
 $observe(a, s)$ & outcome for $a$: confirmed, failed, unknown \\
 $Req(w)$ & operations that $commit(w)$ asserts took effect \\
@@ -246,12 +248,53 @@ A8 Phantom & exogenous consequence of a compensated effect survives & control of
 \end{tabularx}
 \end{table*}
 
-Four of the patterns need more than a line. Not all are final-state
-violations: A3 is defined at action time, and A5 and A7 are preventive,
-relative to profiles that forbid relying on outcomes the boundary does not
-establish. \emph{A3} is unusual in that the
-fault is the action itself, not the state it leaves. The runtime compensates
-without knowing whether the original attempt externalized:
+Not all of the patterns are final-state violations: A3 is defined at
+action time, and A5 and A7 are preventive, relative to profiles that forbid
+relying on outcomes the boundary does not establish.
+
+\paragraph{A1: Duplicated Effect (uncertainty)}
+Two attempts of the same logical operation both externalize. The
+outcome of a call is not confirmed, so the runtime re-issues it, and both
+attempts take effect:
+\par\vspace{2pt}\noindent\begin{minipage}{\linewidth}
+\begingroup\footnotesize\begin{verbatim}
+attempt(a1, pay_invoice)
+externalize(a1, e1)      # payment goes through
+observe(a1, unknown)     # no acknowledgment
+attempt(a2, pay_invoice) # re-issued
+externalize(a2, e2)
+=> invoice paid twice
+\end{verbatim}\endgroup
+\end{minipage}\par\noindent
+Non-determinism makes this worse: re-issuing an operation may produce a
+\emph{different} effect rather than a duplicate. An idempotent re-issue
+prevents repeated externalization. Determinism does not by itself make
+re-issue safe; it only makes semantic replay comparison meaningful by
+making repeated executions predictable.
+
+\paragraph{A2: Missing Committed Effect (uncertainty)}
+A workflow commits relying on an effect that did not externalize.
+The canonical case is uncertainty resolved optimistically: the runtime
+assumes an unconfirmed effect succeeded and commits, though nothing
+externalized. With $pay\_invoice \in Req(Order)$:
+\par\vspace{2pt}\noindent\begin{minipage}{\linewidth}
+\begingroup\footnotesize\begin{verbatim}
+attempt(a1, pay_invoice)
+observe(a1, unknown)     # outcome not confirmed
+commit(Order)            # assumes success
+=> required effect absent, yet committed
+\end{verbatim}\endgroup
+\end{minipage}\par\noindent
+The anomaly is narrow: it is \emph{not} that the agent omitted a step ---
+a planning failure --- but that a required effect is absent from the
+committed history. We focus on the uncertainty-induced case: if failure is
+authoritatively known and the workflow commits anyway, the same final-state
+pattern is a protocol error rather than a boundary limitation.
+
+\paragraph{A3: Orphaned Compensation (uncertainty)}
+A compensation is issued for an attempt whose outcome is unknown.
+The unconfirmed outcome is resolved pessimistically instead:
+\par\vspace{2pt}\noindent\begin{minipage}{\linewidth}
 \begingroup\footnotesize\begin{verbatim}
 attempt(a1, pay_invoice)
 observe(a1, unknown)     # outcome not confirmed
@@ -259,22 +302,59 @@ cmp(c1, a1)              # compensate blindly
 externalize(c1, refund)  # refund takes effect
 => if a1 never externalized, refund is spurious
 \end{verbatim}\endgroup
+\end{minipage}\par\noindent
 A1, A2, and A3 are one family: all three stem from an outcome the runtime
-cannot confirm and differ only in the reaction --- re-issue, commit, or
-compensate. A1 and A2 are visible in the final history; A3 is a violation at the moment
-compensation is issued: under an unknown outcome the runtime cannot know
-whether compensation is required, and even where the resulting state happens
-to be correct, the action was taken without authoritative evidence. The family also
-marks where this setting departs from classical transaction processing.
-There, an in-doubt outcome is temporary: participants run a recovery
-protocol and resolve it. A third-party tool runs no such protocol, so an
-unknown outcome stays unknown until the tool itself offers a way out --- a
-durable acknowledgment, a status endpoint, or idempotent re-issue. When
-agent and tools are developed together the classical picture applies; the
-family concerns the third-party boundary.
+cannot confirm and differ only in the reaction. A1 and A2 are visible in
+the final history; A3 is a violation at the moment compensation is issued:
+under an unknown outcome the runtime cannot know whether compensation is
+required, and even where the resulting state happens to be correct, the
+action was taken without authoritative evidence. The family also marks
+where this setting departs from classical transaction processing. There, an
+in-doubt outcome is temporary: participants run a recovery protocol and
+resolve it. A third-party tool runs no such protocol, so an unknown outcome
+stays unknown until the tool itself offers a way out --- a durable
+acknowledgment, a status endpoint, or idempotent re-issue. When agent and
+tools are developed together the classical picture applies; the family
+concerns the third-party boundary.
 
-\emph{A6} is the effect-world analogue of a dirty read. A committed branch
-acts on a temporary reservation made by a branch that is later canceled:
+\paragraph{A4: Uncompensated Residue (workflow)}
+An aborted workflow leaves a surviving effect that was not
+successfully neutralized --- no compensation exists, it was not invoked,
+or it was incomplete. A non-refundable ticket is bought, then the trip is
+aborted:
+\par\vspace{2pt}\noindent\begin{minipage}{\linewidth}
+\begingroup\footnotesize\begin{verbatim}
+attempt(a1, book_flight)
+externalize(a1, e1)    # non-refundable ticket
+abort(BookTrip)        # budget violated
+cmp(c1, a1)            # cancellation attempted
+NOT neutralizes(c1, e1)
+=> survives(e1); money lost
+\end{verbatim}\endgroup
+\end{minipage}\par
+
+\paragraph{A5: Premature Externalization (workflow)}
+An effect that may not survive is externalized before its workflow
+resolves. An offer letter is sent before approval completes, and approval
+is later denied:
+\par\vspace{2pt}\noindent\begin{minipage}{\linewidth}
+\begingroup\footnotesize\begin{verbatim}
+effect(send_offer)     # letter goes out
+NOT resolved(Hire)     # approval pending
+abort(Hire)            # approval denied
+=> send_offer preceded resolved(Hire)
+\end{verbatim}\endgroup
+\end{minipage}\par\noindent
+A5 is profile-relative: it is not a violation under compensation-safe
+execution, which may externalize an effect early and compensate later; it
+is the pattern that speculation-safe execution excludes by staging or
+gating effects that may not survive.
+
+\paragraph{A6: Contaminated Speculation (workflow)}
+A committed effect causally depends on an effect from a branch that
+does not survive. A committed branch acts on a temporary reservation made
+by a branch that is later canceled:
+\par\vspace{2pt}\noindent\begin{minipage}{\linewidth}
 \begingroup\footnotesize\begin{verbatim}
 effect(reserve_room R) [b1]
 dep(send_invites <- reserve_room R) [b2]
@@ -283,20 +363,45 @@ commit(b2)                 # b2 wins
 abort(b1); cmp(reserve_room R)
 => b2 announced R, which no longer survives
 \end{verbatim}\endgroup
-The contamination is causal, not about reversibility: the harm --- invitations
-already sent naming a room that was released --- would arise even if those
-invitations were themselves reversible.
+\end{minipage}\par\noindent
+The contamination is causal, not about reversibility: this is the
+effect-world analogue of a \emph{dirty read} --- reading uncommitted state
+that is later rolled back --- except the ``read'' is a causal dependency on
+an external effect. The harm, invitations already sent naming a room that
+was released, would arise even if those invitations were themselves
+reversible.
 
-\emph{A7} covers two coding workers publishing incompatible updates to the
-same shared artifact from the same base, neither having observed the other. Commutativity \emph{excludes} the
-anomaly; invertibility does not exclude it but makes it \emph{repairable},
-letting the loser be rolled back and re-applied toward a serializable state;
-mediation prevents the race by ordering access
-(Section~\ref{sec:boundaries}).
+\paragraph{A7: Conflicting Externalization (interaction)}
+Two independent executions release potentially non-commuting effects
+on a shared resource without an ordering or mediation contract, so the
+outcome may depend on their interleaving. Two coding workers publish
+incompatible updates to the same shared artifact from the same base,
+neither having observed the other:
+\par\vspace{2pt}\noindent\begin{minipage}{\linewidth}
+\begingroup\footnotesize\begin{verbatim}
+effect(publish U1 on S) [w1]  # from base B
+effect(publish U2 on S) [w2]  # also from B
+NOT dep(U2 <- U1); NOT dep(U1 <- U2)
+NOT commute(U1, U2)      # order changes result
+=> outcome depends on interleaving
+\end{verbatim}\endgroup
+\end{minipage}\par\noindent
+Unlike A6, there is no dependency between the two executions: neither
+observed the other; both acted on the shared resource independently.
+Commutativity \emph{excludes} the anomaly. Invertibility does not exclude
+it but makes it \emph{repairable}: a versioned reversible resource lets
+the loser be rolled back and re-applied toward a serializable state, as in
+classical concurrency control. Mediation prevents the race by ordering
+access (Section~\ref{sec:boundaries}). A7 is profile-relative, as A5 is:
+the resource may serialize the calls on its own, and the resulting state
+may then admit a serial explanation, but the externally-mediated profile
+forbids relying on that outcome, since nothing at the boundary establishes
+it.
 
-\emph{A8} differs from all of these. An external party acts on an effect
-that is later withdrawn:
-\par\medskip\noindent\begin{minipage}{\linewidth}
+\paragraph{A8: Phantom Compensation (interaction, open-world)}
+An effect is compensated, but an external consequence that depends
+on it survives. A supplier reacts to an offer that is later withdrawn:
+\par\vspace{2pt}\noindent\begin{minipage}{\linewidth}
 \begingroup\footnotesize\begin{verbatim}
 externalize(a1, e)       # offer sent
 externalize_ext(S, x)    # supplier acts on it
@@ -306,21 +411,15 @@ neutralizes(c1, e)
 survives(x)              # supplier action stands
 => offer retracted; the reaction is not
 \end{verbatim}\endgroup
-\end{minipage}
-\par\medskip\noindent
+\end{minipage}\par\noindent
 The dependent effect $x$ is exogenous: no attempt of the runtime produced it
 and no compensation reaches it. This separates A8 from A6, where the
-surviving effect is managed. A1--A7 concern effects within the managed or
-mediated boundary and can be detected and sometimes repaired after the fact;
-an exogenous consequence lies outside both the projection the runtime
-observes and the set of effects it can compensate. The reacting party may also sit outside any contractual
-boundary, so no ordering or commutativity can be declared for it, and the
-enforceable primitive is preventive: control whether and when the effect
-becomes externally observable.
-
-For A5 and A7, a particular execution may still end safely --- the resource
-may serialize the calls, or an early effect may ultimately survive --- but
-the stronger profiles forbid relying on such favorable outcomes.
+surviving effect is managed. A1--A7 concern effects issued through the managed or mediated boundary; an
+exogenous consequence lies outside both the projection the runtime observes
+and the set of effects it can compensate. The reacting party may
+also sit outside any contractual boundary, so no ordering or commutativity
+can be declared for it, and the enforceable primitive is preventive:
+control whether and when the effect becomes externally observable.
 
 \begin{table*}[htbp]
 \centering
