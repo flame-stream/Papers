@@ -8,7 +8,7 @@
 
 \author{Artem Trofimov}
 \affiliation{%
-  \institution{Independent Researcher}
+  \institution{AVIV Group}
   \city{Berlin}
   \country{Germany}}
 \email{artemtrofimov@acm.org}
@@ -21,67 +21,73 @@
 \email{borisnov@acm.org}
 
 \begin{abstract}
-AI agents act on the world through tools that send messages, charge cards,
-and place orders. Such effects generally cannot be rolled back, only
-compensated, and agents release them while retrying failed calls,
-speculating, and sharing resources with other executions. The mechanisms for
-this --- replay, compensation, staged release, coordinated access --- come
-from long-running and multilevel transaction processing. What changes in the agent setting is the
-boundary, where runtimes often compose independently supplied tools through
-shared interfaces that expose little of the transactional semantics these
-mechanisms require.
+AI agents increasingly execute long-running workflows that externalize
+effects through independently supplied tools. Under retries, speculative
+execution, concurrency, and partial failures, the resulting external state
+may be inconsistent with any intended committed execution: required effects
+may be missing or duplicated, aborted effects may survive, and committed
+effects may depend on provisional state that is later withdrawn. Classical
+transaction mechanisms address related failures, but assume that
+lower-level operations expose the semantics they depend on: whether an
+effect occurred, whether it can be compensated, staged, or safely
+reordered. Shared agent--tool interfaces usually do not.
 
-We give an effect-history model that separates what externalized in the world
-from what the runtime observed, and a catalog of eight external-effect
-anomalies grouped by the three ways transactional control is lost:
-uncertainty, workflow structure, and interaction. Read in the other
-direction, the catalog yields the boundary capabilities a runtime must
-establish to exclude each anomaly, and four limits beyond which no runtime can
-provide a general guarantee from black-box tool invocation alone. A census of 98{,}291 tools exposed by registered Model
-Context Protocol servers finds annotation fields widely emitted but semantically
-coarse: none of the required boundary capabilities is fully expressible, and
-although 66 of 81 possible annotation signatures occur, three account for
-75.8\% of tools.
+We contribute an effect-history model that separates events in the
+external world from the runtime's observations of them, and a catalog of
+eight recurring external-effect anomalies, grouped by uncertainty, workflow
+structure, and interaction. From the catalog we derive the boundary
+capabilities required to exclude each anomaly in general, and four points
+where black-box tool invocation alone cannot provide a general guarantee. A
+census of 98{,}291 tools exposed by registered Model Context Protocol (MCP)
+servers then measures what current interfaces declare: annotation fields
+are widely emitted but semantically coarse. None of the required
+capabilities is fully expressible, and three of 81 possible annotation
+signatures account for 75.8\% of tools. These results motivate reusable
+transactional contracts at the tool boundary.
 \end{abstract}
 
 \maketitle
 
 \section{Introduction}
 
-AI agents increasingly take actions that change the outside world: sending
-emails, charging cards, placing orders, calling external services. Such
-effects often cannot be undone. Take an agent booking a trip on a 1500 EUR
-budget: to save time it books the flight (900) and the hotel (700) in
-parallel. Both calls succeed, but together they break the budget; the hotel
-can be canceled, the flight was non-refundable. Every tool call worked, yet
-the workflow left a state in the world that cannot be fully repaired.
+AI agents increasingly execute multi-step workflows whose operations
+change the external world: they send messages, charge cards, place orders,
+and invoke independently operated services. The correctness question
+we study is not whether each tool call succeeds locally, but whether the
+external effects that survive can be explained by a coherent committed
+execution of the workflow. Under retries, speculative execution,
+concurrency, and partial failures, they may not: one logical action may
+occur twice, a workflow may commit without a required effect, an aborted
+branch may leave residue, or a committed action may depend on an effect
+that is later withdrawn.
 
-Agents make this common: they run steps in parallel, execute likely
-actions early to hide latency, and recover by retrying. Each
-is useful, and each can produce a new kind of external-effect failure. We
-argue these failures form one catalog, with three sources, in the
-anomaly-based style of classical isolation
-levels~\cite{berenson1995critique,adya1999}.
-\emph{Uncertainty} failures: when the system cannot confirm the outcome of
-an effect --- after a crash, a timeout, or a lost acknowledgment --- and must
-act anyway, the same effect may happen twice, fail to happen while the
-workflow proceeds as if it had, or be compensated blindly. \emph{Workflow} failures: an effect may outlive an
-aborted workflow, leak before the workflow decides, or be depended on by a
-committed branch though it came from an abandoned one. \emph{Interaction}
-failures: an effect meets something outside its own execution --- a
-concurrent execution writing the same resource, or an outside actor that
-reacts to it before it can be undone. Agents show all three,
-because an agent is a long-running workflow that acts on tools whose
-outcomes it cannot always confirm and shares an open world with others.
+This is a consistency problem at the agent--tool boundary. External effects
+generally cannot be rolled back, may become visible before the workflow
+resolves, and may trigger reactions outside the runtime's control. At the
+same time, a runtime invoking a third-party tool may receive only partial
+evidence of whether an effect occurred --- after a crash, a timeout, or a
+lost acknowledgment. Correctness therefore depends not only on
+orchestration logic, but also on semantics supplied by the lower-level
+operations: outcome resolution, idempotence, compensation, staging,
+dependency identity, commutativity, and visibility control.
 
-We define correctness through a catalog of anomalies, each a forbidden
-pattern in the effect history. The intuition: a safe execution is one whose
-surviving external effects can still be explained as the intended committed
-workflow --- in the spirit of opacity~\cite{guerraoui2008opacity}, but for
-effects that cannot be rolled back. Three features shape the setting: there
-is no rollback, only optional and fallible compensation; effects may be
-released before the workflow decides; and the surrounding world is open and
-may react.
+Consider an agent booking a trip on a 1500 EUR budget. To reduce latency,
+it books a 900 EUR flight and a 700 EUR hotel in parallel. Both calls
+succeed, but their combined effects violate the workflow invariant. The
+hotel can be canceled; the flight is non-refundable. Each operation
+completed correctly in isolation, yet the surviving external state is
+inconsistent with the intended workflow outcome.
+
+We argue that such failures form a common catalog with three sources, in
+the anomaly-based style of classical isolation
+levels~\cite{berenson1995critique,adya1999}: uncertainty about whether an
+effect occurred, workflow structure that releases or depends on effects
+before resolution, and interaction with concurrent executions or external
+observers. We define correctness by excluding anomalous patterns from an
+effect history --- in the spirit of opacity~\cite{guerraoui2008opacity},
+but for effects that cannot be rolled back: a safe execution is one whose
+surviving external effects remain consistent with the workflow's
+resolution.
 
 The mechanisms agent runtimes use --- replay, retry, compensation, staged
 release, coordinated access --- are not new: they come from long-running and
@@ -285,9 +291,8 @@ invitations were themselves reversible.
 same shared artifact from the same base, neither having observed the other. Commutativity \emph{excludes} the
 anomaly; invertibility does not exclude it but makes it \emph{repairable},
 letting the loser be rolled back and re-applied toward a serializable state;
-mediation prevents the race by ordering access. The conflict is beyond
-runtime repair when the effects are both non-commuting and irreversible and
-no mediator prevented their unordered externalization.
+mediation prevents the race by ordering access
+(Section~\ref{sec:boundaries}).
 
 \emph{A8} differs from all of these. An external party acts on an effect
 that is later withdrawn:
@@ -588,18 +593,19 @@ about retries, compensation, speculation, or concurrency.
 
 \section{Conclusion and Future Work}
 
-We identify eight recurring ways in which AI agent workflows lose
-transactional control over external effects, arising from uncertainty,
-workflow structure, and interaction. The catalog maps each forbidden history to a boundary
-capability --- evidence, lifecycle control, or coordination --- and exposes
-four points where black-box invocation alone cannot provide a general
-guarantee. Existing runtimes cover fragments of this space under
-runtime-local declarations and assumptions.
-An MCP census shows that metadata already exists at scale: among 98{,}291
-tools, annotation fields are widely emitted, yet none of the required
-capabilities is fully expressible. The missing layer is therefore not
-another runtime-local recovery mechanism, but reusable transactional
-contracts at the tool boundary.
+This paper contributes an effect-history model that separates world
+events from runtime observations, and a catalog of eight recurring
+external-effect anomalies arising from uncertainty, workflow structure, and
+interaction. Each anomaly names the boundary capability --- evidence,
+lifecycle control, or coordination --- required to exclude it in general;
+four guarantee boundaries mark where black-box invocation alone is
+insufficient. A census of 98{,}291 tools exposed by registered MCP servers measures the
+semantics the standard interface declares. Together these results show that
+existing runtimes cover fragments of the problem under runtime-local
+declarations and assumptions, while standardized tool metadata remains
+insufficient for transactional reasoning. The missing layer is therefore
+not another recovery mechanism, but reusable transactional contracts at the
+tool boundary.
 
 Future work includes tracing these capabilities through server
 implementations and upstream APIs~\cite{toeppe2026mcpdataset}, formalizing
