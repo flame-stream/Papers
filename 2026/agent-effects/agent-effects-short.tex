@@ -5,7 +5,8 @@
 \raggedbottom
 \begin{document}
 
-\title{External Effect Anomalies in AI Agent Workflows}
+\title[Anomalies at the Agent--Tool Boundary]{When Tool Calls Succeed but
+Workflows Fail:\\ Anomalies at the Agent--Tool Boundary}
 
 \author{Artem Trofimov}
 \affiliation{%
@@ -27,8 +28,8 @@ effects through independently supplied tools. Under retries, speculative
 execution, concurrency, and partial failures, the resulting external state
 may be inconsistent with the workflow's intended resolution: required effects
 may be missing or duplicated, aborted effects may survive, and committed
-effects may depend on provisional state that is later withdrawn. Classical
-transaction mechanisms address related failures, but assume that
+effects may depend on provisional state that is later withdrawn. Advanced
+transaction models address related failures, but assume that
 lower-level operations expose the semantics they depend on: whether an
 effect occurred, whether it can be compensated, staged, or safely
 reordered. Shared agent--tool interfaces usually do not.
@@ -38,13 +39,12 @@ external world from the runtime's observations of them, and a catalog of
 eight recurring external-effect anomalies, grouped by uncertainty, workflow
 structure, and interaction. From the catalog we derive the boundary
 capabilities required to exclude each anomaly in general, and four points
-where black-box tool invocation alone cannot provide a general guarantee. A
-census of 98{,}291 tools exposed by registered Model Context Protocol (MCP)
-servers then measures what current interfaces declare: annotation fields
-are widely emitted but semantically coarse. None of the required
-capabilities is fully expressible, and three of 81 possible annotation
-signatures account for 75.8\% of tools. These results motivate reusable
-transactional contracts at the tool boundary.
+where black-box tool invocation alone cannot provide a general guarantee. We then ask how much of this a widely used shared tool interface can
+express, using a census of 98{,}291 tools exposed by registered Model
+Context Protocol (MCP) servers. Annotation fields are widely emitted, but
+their vocabulary is limited to coarse call-level hints, and none of the
+required capabilities is fully expressible. These results motivate
+reusable transactional contracts at the tool boundary.
 \end{abstract}
 
 \maketitle
@@ -52,8 +52,8 @@ transactional contracts at the tool boundary.
 \section{Introduction}
 
 AI agents increasingly execute multi-step workflows whose operations
-change the external world: they send messages, charge cards, place orders,
-and invoke independently operated services. The correctness question
+change the external world: they send messages, charge credit cards, place
+orders, and invoke independently operated services. The correctness question
 we study is not whether each tool call succeeds locally, but whether the
 external effects that survive are consistent with a coherent resolution of
 the workflow. Under retries, speculative execution,
@@ -91,8 +91,8 @@ surviving external effects remain consistent with the workflow's
 resolution.
 
 The mechanisms agent runtimes use --- replay, retry, compensation, staged
-release, coordinated access --- are not new: they come from long-running and
-multilevel transaction processing, including sagas, semantic recovery, and
+release, coordinated access --- are not new: they come from advanced
+transaction models such as sagas, and from semantic recovery and
 escrow-style concurrency
 control~\cite{garcia1987sagas,korth1990formal,elmagarmid1992transaction,weikum2001transactional,oneil1986escrow}.
 What changes in the agent setting is the boundary, where runtimes often
@@ -143,9 +143,7 @@ a runtime that owns its adapter layer is in a similar position: it can
 attach the properties it needs tool by tool. Neither option transfers
 cleanly across a shared interface, where a client sees only what the
 interface carries. The Model Context Protocol
-(MCP) is a widely used interface of this kind and is publicly inspectable, which is why we return to it in Section~\ref{sec:grounding}.
-However the properties are obtained, they constrain which effect-safety
-guarantees are achievable at L1.
+(MCP) is a widely used interface of this kind and is publicly inspectable.
 
 We focus on five dimensions of L0 operations: idempotence, invertibility,
 externalization timing and control, determinism, and commutativity. They are
@@ -435,8 +433,8 @@ ACRFence~\cite{zheng2026acrfence} & unknown-safe partial (A1) & proposed; attack
 RAC~\cite{perera2026rac} & compensation-safe partial (A4) & no gating; no idempotency, so A1--A3 not addressed \\
 Atomix~\cite{mohammadi2026atomix} & A1/A3 partial, compensation-safe (A4), speculation-safe (A5, A6), externally-mediated partial (A7) & idempotent-known-outcome path; no crash-safe exactly-once; A2 gap on multi-effect release \\
 Cordon~\cite{chen2026cordon} & A1/A3 partial, compensation-safe (A4), speculation-safe partial (A5) & idempotent tools; staged effects; task-scoped \\
-CoAgent~\cite{lyu2026coagent} & externally-mediated partial (A7) & reordering prevents some conflicts; registered inverses permit repair where prevention does not apply; irreversibles gated \\
-Shepherd~\cite{yu2026shepherd} & per-effect reversibility tiers; A7 observed in supervisor use case & meta-agent substrate, not a runtime guarantee; irreversibles recorded for audit \\
+CoAgent~\cite{lyu2026coagent} & externally-mediated partial (A7) & reordering prevents some conflicts; registered inverses enable repair; irreversibles gated \\
+Shepherd~\cite{yu2026shepherd} & per-effect reversibility tiers; A7 observed in supervisor use case & meta-agent substrate, not a runtime guarantee; irreversibles logged \\
 \end{tabularx}
 \renewcommand{\arraystretch}{1}
 \end{table*}
@@ -510,7 +508,7 @@ conflict; and liveness failures.
 \label{sec:contracts}
 \label{sec:unknown}
 
-Classical transaction models assume properties such as idempotence,
+Advanced transaction models assume properties such as idempotence,
 invertibility, and commutativity are known; at a third-party boundary they
 are often absent or inferred. A reusable contract layer must
 therefore distinguish established, assumed, and unknown properties, since
@@ -698,7 +696,7 @@ external-effect anomalies arising from uncertainty, workflow structure, and
 interaction. Each anomaly names the boundary capability --- evidence,
 lifecycle control, or coordination --- required to exclude it in general;
 four guarantee boundaries mark where black-box invocation alone is
-insufficient. A census of 98{,}291 tools exposed by registered MCP servers measures the
+insufficient. Our census of 98{,}291 tools exposed by registered MCP servers measures the
 semantics the standard interface declares. Together these results show that
 existing runtimes cover fragments of the problem under runtime-local
 declarations and assumptions, while standardized tool metadata remains
