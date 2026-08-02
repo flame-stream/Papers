@@ -36,14 +36,13 @@ reordered. Shared agent--tool interfaces usually do not.
 
 We contribute an effect-history model that separates events in the
 external world from the runtime's observations of them, and a catalog of
-eight recurring external-effect anomalies, grouped by uncertainty, workflow
-structure, and interaction. From the catalog we derive the boundary
+eight recurring external-effect anomalies. From the catalog we derive the boundary
 capabilities required to exclude each anomaly in general, and four points
-where black-box tool invocation alone cannot provide a general guarantee. We then ask how much of this a widely used shared tool interface can
-express, using a census of 98{,}291 tools exposed by registered Model
-Context Protocol (MCP) servers. Annotation fields are widely emitted, but
-their vocabulary is limited to coarse call-level hints, and none of the
-required capabilities is fully expressible. These results motivate
+where black-box tool invocation alone cannot provide a general guarantee. We then ask how much of this is expressible in a widely used shared tool
+interface, measuring the use of the standard annotation vocabulary across
+98{,}291 tools exposed by registered Model Context Protocol (MCP) servers.
+The fields are widely emitted but provide only coarse call-level hints, and
+none of the required capabilities is fully expressible. These results motivate
 reusable transactional contracts at the tool boundary.
 \end{abstract}
 
