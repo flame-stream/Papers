@@ -3,6 +3,8 @@
 \sloppy
 
 \raggedbottom
+\setlength{\aboverulesep}{0.2ex}
+\setlength{\belowrulesep}{0.35ex}
 \begin{document}
 
 \title[Anomalies at the Agent--Tool Boundary]{When Tool Calls Succeed but
@@ -56,12 +58,13 @@ orders, and invoke independently operated services. The correctness question
 we study is not whether each tool call succeeds locally, but whether the
 external effects that survive are consistent with a coherent resolution of
 the workflow. Under retries, speculative execution,
-concurrency, and partial failures, they may not: one logical action may
+concurrency, and partial failures, they need not be: one logical action may
 occur twice, a workflow may commit without a required effect, an aborted
 branch may leave residue, or a committed action may depend on an effect
 that is later withdrawn.
 
-This is a consistency problem at the agent--tool boundary. External effects
+These failures constitute a single consistency problem at the agent--tool
+boundary. External effects
 generally cannot be rolled back, may become visible before the workflow
 resolves, and may trigger reactions outside the runtime's control. At the
 same time, a runtime invoking a third-party tool may receive only partial
@@ -117,7 +120,7 @@ is fully expressible (Section~\ref{sec:grounding}).
 \label{sec:model}
 
 Agent systems form a hierarchy of levels, as in multilevel transaction
-management, where the guarantees of one level derive from the properties of
+management, where the guarantees of one level are derived from the properties of
 the operations below~\cite{weikum1991principles}. We work with a slice of
 two adjacent levels $L_i$ and $L_{i+1}$, written L0 and L1. L0 holds the
 operations the agent issues as atomic calls --- typically tools behind
@@ -173,6 +176,7 @@ external events; the lower, runtime observations, workflow assertions, and
 derived predicates.}
 \label{tab:model}
 \begin{tabularx}{\linewidth}{@{}l X@{}}
+\toprule
 $attempt(a, \ell)$ & attempt $a$ of logical operation $\ell$ \\
 $externalize(q, e)$ & runtime action $q$ produced external effect $e$ \\
 $externalize_{\mathit{ext}}(p, x)$ & external party $p$ produced $x$ \\
@@ -180,11 +184,13 @@ $cmp(c, a)$ & compensating action $c$ for attempt $a$ \\
 $neutralizes(c, e)$ & $c$ neutralized effect $e$ \\
 $dep(e_2 \leftarrow e_1)$ & $e_2$ produced having observed $e_1$ \\
 $commute(e_1, e_2)$ & effects commute on their shared resource \\
-$commit(w)$, $abort(w)$ & workflow $w$ is resolved \\[2pt]
+$commit(w)$, $abort(w)$ & workflow $w$ is resolved \\
+\midrule
 $observe(a, s)$ & outcome for $a$: confirmed, failed, unknown \\
 $Req(w)$ & operations that $commit(w)$ asserts took effect \\
 $resolved(w)$ & $w$ has committed or aborted \\
 $survives(e)$ & $e$ externalized, never neutralized \\
+\bottomrule
 \end{tabularx}
 \end{table}
 
@@ -233,7 +239,9 @@ Section~\ref{sec:contracts} organizes them into reusable contract families.
 exclude them in general, and representative realizations.}
 \label{tab:catalog}
 \begin{tabularx}{\textwidth}{@{}l X X X@{}}
+\toprule
 \textbf{} & \textbf{Forbidden pattern} & \textbf{Required boundary capability} & \textbf{Representative realization} \\
+\midrule
 A1 Duplicated & one logical operation externalizes twice & authoritative convergence on one outcome & logical-operation ID; idempotent re-issue returning the original outcome \\
 A2 Missing & commit without a required effect & authoritative outcome; atomic multi-effect participation & status endpoint; prepare/commit \\
 A3 Orphaned & compensation issued under an unknown outcome & outcome resolution before compensating & outcome query; outcome-conditioned compensation \\
@@ -242,6 +250,7 @@ A5 Premature & possibly non-surviving effect externalizes before resolution & pr
 A6 Contaminated & committed effect depends on a non-surviving effect & dependency observability and commit control & stable effect/resource identity; dependency tracking; commit gating \\
 A7 Conflicting & unordered non-commuting effects from independent executions & shared-resource coordination & resource scope; commutativity declaration; mediator or ordered release \\
 A8 Phantom & exogenous consequence of a compensated effect survives & control of external observability & visibility control; mediated observation \\
+\bottomrule
 \end{tabularx}
 \end{table*}
 
@@ -310,9 +319,7 @@ where this setting departs from classical transaction processing. There, an
 in-doubt outcome is temporary: participants run a recovery protocol and
 resolve it. A third-party tool runs no such protocol, so an unknown outcome
 stays unknown until the tool itself offers a way out --- a durable
-acknowledgment, a status endpoint, or idempotent re-issue. When agent and
-tools are developed together the classical picture applies; the family
-concerns the third-party boundary.
+acknowledgment, a status endpoint, or idempotent re-issue.
 
 \paragraph{A4: Uncompensated Residue (workflow)}
 An aborted workflow leaves a surviving effect that was not
@@ -390,10 +397,8 @@ it but makes it \emph{repairable}: a versioned reversible resource lets
 the loser be rolled back and re-applied toward a serializable state, as in
 classical concurrency control. Mediation prevents the race by ordering
 access (Section~\ref{sec:boundaries}). A7 is profile-relative, as A5 is:
-the resource may serialize the calls on its own, and the resulting state
-may then admit a serial explanation, but the externally-mediated profile
-forbids relying on that outcome, since nothing at the boundary establishes
-it.
+the resource may serialize the calls on its own, but the externally-mediated
+profile forbids relying on an outcome not established at the boundary.
 
 \paragraph{A8: Phantom Compensation (interaction, open-world)}
 An effect is compensated, but an external consequence that depends
@@ -426,14 +431,16 @@ control whether and when the effect becomes externally observable.
 the assumptions each system states.}
 \label{tab:systems}
 \begin{tabularx}{\textwidth}{@{}l X X@{}}
+\toprule
 \textbf{System} & \textbf{Targeted coverage} & \textbf{Notes} \\
-\hline
+\midrule
 ACRFence~\cite{zheng2026acrfence} & unknown-safe partial (A1) & proposed; attack validated, not implemented \\
 RAC~\cite{perera2026rac} & compensation-safe partial (A4) & no gating; no idempotency, so A1--A3 not addressed \\
 Atomix~\cite{mohammadi2026atomix} & A1/A3 partial, compensation-safe (A4), speculation-safe (A5, A6), externally-mediated partial (A7) & idempotent-known-outcome path; no crash-safe exactly-once; A2 gap on multi-effect release \\
 Cordon~\cite{chen2026cordon} & A1/A3 partial, compensation-safe (A4), speculation-safe partial (A5) & idempotent tools; staged effects; task-scoped \\
 CoAgent~\cite{lyu2026coagent} & externally-mediated partial (A7) & reordering prevents some conflicts; registered inverses enable repair; irreversibles gated \\
 Shepherd~\cite{yu2026shepherd} & per-effect reversibility tiers; A7 observed in supervisor use case & meta-agent substrate, not a runtime guarantee; irreversibles logged \\
+\bottomrule
 \end{tabularx}
 \renewcommand{\arraystretch}{1}
 \end{table*}
@@ -450,9 +457,7 @@ succeed), \textbf{speculation-safe} (A5--A6), and
 Interactive tasks explain why compensation-safe is sometimes the best
 achievable profile: an agent negotiating on a user's behalf cannot learn the
 counterparty's reaction without sending an offer, so the action must precede
-the observation and full gating is unavailable. Where the inputs needed to
-resolve the workflow can be observed without effect --- through a
-\texttt{quote} --- the stronger profile becomes attainable.
+the observation and full gating is unavailable.
 
 \subsection{Current Runtimes Against the Catalog}
 \label{sec:systems}
@@ -498,7 +503,7 @@ minimality, and independence are future work.
 
 We place outside the model, so the catalog is not mistaken for covering
 them: semantic planning errors (the agent booked the wrong city); read-side
-anomalies, the subject of read-side isolation work; security and policy
+anomalies; security and policy
 violations; tool-contract misclassification (a tool declared reversible that
 is not); intra-execution effect order, except insofar as it participates in an A7
 conflict; and liveness failures.
@@ -530,8 +535,8 @@ these fields is measured in Section~\ref{sec:grounding}.
 
 The capabilities in Table~\ref{tab:catalog} fall into three contract
 families. A capability is what the boundary lets a runtime establish; a
-contract is the reusable declaration that exposes it, possibly composed of
-several operations and their documentation.
+contract is its reusable declaration, possibly spanning several
+operations.
 
 Uncertainty requires authoritative convergence on one logical outcome.
 Deduplication alone excludes A1 but does not resolve the
@@ -670,7 +675,9 @@ Section~\ref{sec:contracts} against that vocabulary.
 Section~\ref{sec:contracts} in current MCP tool annotations.}
 \label{tab:gap}
 \begin{tabularx}{\linewidth}{@{}X l@{}}
+\toprule
 \textbf{Boundary capability} & \textbf{In annotations} \\
+\midrule
 A1 authoritative convergence & Limited: idempotence hint only \\
 A2 authoritative outcome; atomic participation & No \\
 A3 outcome resolution before compensating & No \\
@@ -679,6 +686,7 @@ A5 pre-externalization observation/control & No \\
 A6 dependency observability; commit control & No \\
 A7 shared-resource coordination & No: externality only \\
 A8 control of external observability & No \\
+\bottomrule
 \end{tabularx}
 \end{table}
 
