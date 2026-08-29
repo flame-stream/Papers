@@ -1,28 +1,38 @@
-\documentclass[sigconf,nonacm]{acmart}
+\documentclass{article}
+\usepackage[dblblindworkshop]{neurips_2026}
+\workshoptitle{Who Verifies the Agents? Toward Reliable Agent Development}
+\setcitestyle{numbers,square}
+% Убираем строки-заглушки анонимного блока (патч документа, стиль не тронут)
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd{\@maketitle}
+  {Anonymous Author(s) \\
+        Affiliation \\
+        Address \\
+        \texttt{email} \\}
+  {Anonymous Author(s) \\}
+  {}{\PackageWarning{local}{maketitle patch failed}}
+\makeatother
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
 \usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{url}
 \sloppy
-
 \raggedbottom
+\setlength{\abovecaptionskip}{5pt}
+\setlength{\belowcaptionskip}{3pt}
 \setlength{\aboverulesep}{0.2ex}
 \setlength{\belowrulesep}{0.35ex}
+
+\title{When Tool Calls Succeed but Workflows Fail:\\ Anomalies at the Agent--Tool Boundary}
+
+\author{Anonymous Authors}
+
 \begin{document}
-
-\title[Anomalies at the Agent--Tool Boundary]{When Tool Calls Succeed but
-Workflows Fail:\\ Anomalies at the Agent--Tool Boundary}
-
-\author{Artem Trofimov}
-\affiliation{%
-  \institution{AVIV Group}
-  \city{Berlin}
-  \country{Germany}}
-\email{artemtrofimov@acm.org}
-
-\author{Boris Novikov}
-\affiliation{%
-  \institution{Independent Researcher}
-  \city{Helsinki}
-  \country{Finland}}
-\email{borisnov@acm.org}
+\maketitle
 
 \begin{abstract}
 AI agents increasingly execute long-running workflows that externalize
@@ -63,6 +73,12 @@ occur twice, a workflow may commit without a required effect, an aborted
 branch may leave residue, or a committed action may depend on an effect
 that is later withdrawn.
 
+This is a verification problem before it is a recovery problem: whether an
+agent's execution can be checked at all (by the runtime itself, a supervising agent, or an external auditor) depends on what the tool
+boundary makes observable. A verifier cannot establish that an effect
+happened exactly once, survived an abort, or leaked to an outside observer
+if the interface exposes no evidence either way.
+
 These failures constitute a single consistency problem at the agent--tool
 boundary. External effects
 generally cannot be rolled back, may become visible before the workflow
@@ -86,22 +102,28 @@ the anomaly-based style of classical isolation
 levels~\cite{berenson1995critique,adya1999}: uncertainty about whether an
 effect occurred, workflow structure that releases or depends on effects
 before resolution, and interaction with concurrent executions or external
-observers. We define correctness by excluding anomalous patterns from an
+observers. The catalog is not an open-ended list: each family is enumerated
+by construction. The uncertainty anomalies (A1--A3) are fixed by the three
+safety-relevant actions a runtime can take under an unresolved outcome ---
+re-issue, commit, or compensate; the workflow anomalies (A4--A6) by the
+three ways an externalized effect can relate to its resolution point ---
+survival, timing, and dependency; the interaction anomalies (A7--A8) by the
+two kinds of external participant an effect can meet --- a concurrent
+execution or an exogenous observer. We define correctness by excluding
+anomalous patterns from an
 effect history --- in the spirit of opacity~\cite{guerraoui2008opacity},
 but for effects that cannot be rolled back: a safe execution is one whose
 surviving external effects remain consistent with the workflow's
 resolution.
 
-The mechanisms agent runtimes use --- replay, retry, compensation, staged
-release, coordinated access --- are not new: they come from advanced
+The mechanisms agent runtimes use (replay, retry, compensation, staged release, coordinated access) are not new: they come from advanced
 transaction models such as sagas, and from semantic recovery and
 escrow-style concurrency
 control~\cite{garcia1987sagas,korth1990formal,elmagarmid1992transaction,weikum2001transactional,oneil1986escrow}.
 What changes in the agent setting is the boundary, where runtimes often
 compose independently supplied tools through shared interfaces that expose
 little of the transactional semantics those mechanisms require. Each runtime
-therefore recovers the properties it needs locally --- adapter annotations,
-registered inverses, per-effect tiers --- out of band. Better replay and recovery do not close the gap on their
+therefore recovers the properties it needs locally (adapter annotations, registered inverses, per-effect tiers), out of band. Better replay and recovery do not close the gap on their
 own: the missing piece is a contract layer at the tool interface.
 
 This paper makes four contributions. First, an effect-history model for
@@ -136,8 +158,7 @@ those resolutions.
 The slice is relative downwards too: \texttt{book\_flight} is atomic only
 from the caller's side, while for its provider it is a workflow over
 operations the caller does not see, of unknown depth. When that hidden
-structure shows through --- a timeout inside the provider's workflow --- the
-caller is left with an outcome it cannot confirm.
+structure shows through, as when a timeout occurs inside the provider's workflow, the caller is left with an outcome it cannot confirm.
 
 The boundary also varies in who owns it. When agent and tools are built
 together, the properties of L0 operations are declared by construction, and
@@ -167,7 +188,7 @@ determined in the world. We write $externalize(q, e \text{ on } r)$ when the
 resource matters. Where the individual attempt is not at issue we
 write $effect(\ell)$ and $cmp(\ell)$.
 
-\begin{table}[htbp]
+\begin{table}[t]
 \centering
 \renewcommand{\arraystretch}{1.15}
 \footnotesize
@@ -231,14 +252,13 @@ Section~\ref{sec:systems}, while others are standard transaction-processing
 mechanisms or boundary primitives those systems do not expose.
 Section~\ref{sec:contracts} organizes them into reusable contract families.
 
-\begin{table*}[htbp]
+\begin{table}[t]
 \centering
 \renewcommand{\arraystretch}{1.15}
 \small
-\caption{External-effect anomalies, the boundary capabilities required to
-exclude them in general, and representative realizations.}
+\caption{The catalog of external-effect anomalies.}
 \label{tab:catalog}
-\begin{tabularx}{\textwidth}{@{}l X X X@{}}
+\begin{tabularx}{\linewidth}{@{}l X X X@{}}
 \toprule
 \textbf{} & \textbf{Forbidden pattern} & \textbf{Required boundary capability} & \textbf{Representative realization} \\
 \midrule
@@ -252,7 +272,7 @@ A7 Conflicting & unordered non-commuting effects from independent executions & s
 A8 Phantom & exogenous consequence of a compensated effect survives & control of external observability & visibility control; mediated observation \\
 \bottomrule
 \end{tabularx}
-\end{table*}
+\end{table}
 
 Not all of the patterns are final-state violations: A3 is defined at
 action time, and A5 and A7 are preventive, relative to profiles that forbid
@@ -291,8 +311,7 @@ commit(Order)            # assumes success
 => required effect absent, yet committed
 \end{verbatim}\endgroup
 \end{minipage}\par\noindent
-The anomaly is narrow: it is \emph{not} that the agent omitted a step ---
-a planning failure --- but that a required effect is absent from the
+The anomaly is narrow: it is \emph{not} that the agent omitted a step (a planning failure) but that a required effect is absent from the
 committed history. We focus on the uncertainty-induced case: if failure is
 authoritatively known and the workflow commits anyway, the same final-state
 pattern is a protocol error rather than a boundary limitation.
@@ -369,8 +388,7 @@ abort(b1); cmp(reserve_room R)
 \end{verbatim}\endgroup
 \end{minipage}\par\noindent
 The contamination is causal, not about reversibility: this is the
-effect-world analogue of a \emph{dirty read} --- reading uncommitted state
-that is later rolled back --- except the ``read'' is a causal dependency on
+effect-world analogue of a \emph{dirty read} (reading uncommitted state that is later rolled back), except that the ``read'' is a causal dependency on
 an external effect. The harm, invitations already sent naming a room that
 was released, would arise even if those invitations were themselves
 reversible.
@@ -423,27 +441,7 @@ also sit outside any contractual boundary, so no ordering or commutativity
 can be declared for it, and the enforceable primitive is preventive:
 control whether and when the effect becomes externally observable.
 
-\begin{table*}[htbp]
-\centering
-\renewcommand{\arraystretch}{1.15}
-\small
-\caption{Coverage of the anomaly catalog by current agent runtimes, under
-the assumptions each system states.}
-\label{tab:systems}
-\begin{tabularx}{\textwidth}{@{}l X X@{}}
-\toprule
-\textbf{System} & \textbf{Targeted coverage} & \textbf{Notes} \\
-\midrule
-ACRFence~\cite{zheng2026acrfence} & unknown-safe partial (A1) & proposed; attack validated, not implemented \\
-RAC~\cite{perera2026rac} & compensation-safe partial (A4) & no gating; no idempotency, so A1--A3 not addressed \\
-Atomix~\cite{mohammadi2026atomix} & A1/A3 partial, compensation-safe (A4), speculation-safe (A5, A6), externally-mediated partial (A7) & idempotent-known-outcome path; no crash-safe exactly-once; A2 gap on multi-effect release \\
-Cordon~\cite{chen2026cordon} & A1/A3 partial, compensation-safe (A4), speculation-safe partial (A5) & idempotent tools; staged effects; task-scoped \\
-CoAgent~\cite{lyu2026coagent} & externally-mediated partial (A7) & reordering prevents some conflicts; registered inverses enable repair; irreversibles gated \\
-Shepherd~\cite{yu2026shepherd} & per-effect reversibility tiers; A7 observed in supervisor use case & meta-agent substrate, not a runtime guarantee; irreversibles logged \\
-\bottomrule
-\end{tabularx}
-\renewcommand{\arraystretch}{1}
-\end{table*}
+
 
 \subsection{Safety Guarantee Profiles}
 \label{sec:levels}
@@ -462,6 +460,26 @@ the observation and full gating is unavailable.
 \subsection{Current Runtimes Against the Catalog}
 \label{sec:systems}
 
+\begin{table}[t]
+\centering
+\renewcommand{\arraystretch}{1.15}
+\small
+\caption{Coverage of the anomaly catalog by current agent runtimes.}
+\label{tab:systems}
+\begin{tabularx}{\linewidth}{@{}l X X@{}}
+\toprule
+\textbf{System} & \textbf{Targeted coverage} & \textbf{Notes} \\
+\midrule
+ACRFence~\cite{zheng2026acrfence} & unknown-safe partial (A1) & proposed; attack validated, not implemented \\
+RAC~\cite{perera2026rac} & compensation-safe partial (A4) & no gating; no idempotency, so A1--A3 not addressed \\
+Atomix~\cite{mohammadi2026atomix} & A1/A3 partial, compensation-safe (A4), speculation-safe (A5, A6), externally-mediated partial (A7) & idempotent-known-outcome path; no crash-safe exactly-once; A2 gap on multi-effect release \\
+Cordon~\cite{chen2026cordon} & A1/A3 partial, compensation-safe (A4), speculation-safe partial (A5) & idempotent tools; staged effects; task-scoped \\
+CoAgent~\cite{lyu2026coagent} & externally-mediated partial (A7) & reordering prevents some conflicts; registered inverses enable repair; irreversibles gated \\
+Shepherd~\cite{yu2026shepherd} & per-effect reversibility tiers; A7 observed in supervisor use case & meta-agent substrate, not a runtime guarantee; irreversibles logged \\
+\bottomrule
+\end{tabularx}
+\renewcommand{\arraystretch}{1}
+\end{table}
 We next use the catalog to identify which of the required capabilities
 current agent runtimes target or establish under their stated assumptions.
 Table~\ref{tab:systems} summarizes their
@@ -472,10 +490,7 @@ cumulative hierarchy.
 Atomix and Cordon stage effects, with Atomix additionally tracking
 speculative dependencies; their A1/A3 coverage is conditional on assumed
 tool semantics rather than on a general outcome-resolution protocol. CoAgent's reordering with registered inverses is an instance of the
-achievability condition for A7 rather than an unconditional guarantee. Across these systems, coverage rests on runtime-owned
-declarations --- adapter-declared idempotency keys, reversibility
-annotations, registered inverses, per-effect tiers --- rather than a
-reusable shared contract; none controls exogenous reactions (A8), and no
+achievability condition for A7 rather than an unconditional guarantee. Across these systems, coverage rests on runtime-owned declarations (adapter-declared idempotency keys, reversibility annotations, registered inverses, per-effect tiers) rather than a reusable shared contract; none controls exogenous reactions (A8), and no
 system covers the full catalog. Adjacent work governs the \emph{read} side
 of shared agent state~\cite{khan2026sbus} and intent revision under
 conflicting irreversible actions~\cite{zhai2026revisable}, applies
@@ -501,14 +516,13 @@ Section~\ref{sec:model}, every loss of transactional control the model can
 represent falls into one of the three families; formal coverage,
 minimality, and independence are future work.
 
-We place outside the model, so the catalog is not mistaken for covering
-them: semantic planning errors (the agent booked the wrong city); read-side
+We place the following outside the model, so the catalog is not mistaken for covering them: semantic planning errors (the agent booked the wrong city); read-side
 anomalies; security and policy
 violations; tool-contract misclassification (a tool declared reversible that
 is not); intra-execution effect order, except insofar as it participates in an A7
 conflict; and liveness failures.
 
-\section[Transactional Tool Contracts and Guarantee Boundaries]{Transactional Tool Contracts and\\ Guarantee Boundaries}
+\section[Transactional Tool Contracts and Guarantee Boundaries]{Transactional Tool Contracts and Guarantee Boundaries}
 \label{sec:contracts}
 \label{sec:unknown}
 
@@ -516,8 +530,7 @@ Advanced transaction models assume properties such as idempotence,
 invertibility, and commutativity are known; at a third-party boundary they
 are often absent or inferred. A reusable contract layer must
 therefore distinguish established, assumed, and unknown properties, since
-acting on an assumption --- compensating an operation with no true inverse
---- is a failure mode of its own. Such declarations do not replace runtime
+acting on an assumption, such as compensating an operation with no true inverse, is a failure mode of its own. Such declarations do not replace runtime
 protocols: they are their precondition.
 
 A runtime consuming tools through a shared interface reads only what that
@@ -576,9 +589,7 @@ mediation, or visibility control. We state them as consequences of the
 definitions and relate them to current systems; formal proofs are future
 work.
 
-First, without a primitive that establishes one authoritative outcome ---
-idempotent re-issue returning the original outcome, a status endpoint, or a
-durable acknowledgment --- no protocol can both resolve the workflow after
+First, without a primitive that establishes one authoritative outcome (idempotent re-issue returning the original outcome, a status endpoint, or a durable acknowledgment), no protocol can both resolve the workflow after
 an ambiguous tool call and guarantee unknown-safe and compensation-safe
 execution. Over an unreliable channel the runtime cannot learn in bounded
 time whether an effect took place, the classical exactly-once
@@ -613,13 +624,51 @@ Atomix~\cite{mohammadi2026atomix} states for its own release step.
 \section{What the Boundary Declares Today}
 \label{sec:grounding}
 
-We census what a runtime can establish from the standard MCP annotation
-vocabulary. The measurement covers declarations at the agent-facing
-boundary, not service behavior: a value states what a server asserts, and we
-do not verify it. A capability we do not find is therefore \emph{not
-established from the annotations}.
+Section~\ref{sec:contracts} named the boundary capabilities a runtime needs. We now ask how far the standard MCP annotation vocabulary expresses them: what the annotations do not carry cannot be obtained from the interface as a guarantee, whatever a tool arranges out of band. Our census covers 98{,}291 tools in the official MCP registry (snapshot 2026-07-27), recording the four annotations the specification defines (\texttt{readOnlyHint}, \texttt{destructiveHint}, \texttt{idempotentHint}, \texttt{openWorldHint}) and keeping an explicit \texttt{false} distinct from an omitted field. Appendix~\ref{app:methodology} details the sampling and methodology.
 
-We took a full snapshot of the official MCP registry on 2026-07-30
+\paragraph{Annotation fields are widely emitted.}
+At the wire level, 74.0\% of tools serialize at least one field and 61.7\% serialize all four. But a field being present says little about whether it was chosen: many values may originate in SDK defaults or server templates rather than deliberate declaration (Appendix~\ref{app:methodology}), and some carry no information even when set, since \texttt{destructiveHint} is inapplicable when \texttt{readOnlyHint} is true, a pairing that accounts for 52.8\% of all tools.
+
+\paragraph{Tool-level signatures are concentrated.}
+Reading each tool as a signature over the four fields (each true, false, or omitted), 66 of the 81 possible signatures appear, but one signature
+(read-only, non-destructive, idempotent, open-world) covers 39.9\% of tools
+and three cover 75.8\%. Among multi-tool servers that emit at least one
+field, 76.7\% use more than one signature. Across emitting servers, the median dominant signature covers 79.4\% of a server's tools: differentiation is widespread but coarse.
+
+\paragraph{What the hints do not resolve.}
+Even fully populated, the four fields describe the shape of a call while leaving its transactional semantics unstated: none gives an idempotency key, a status endpoint, a compensation contract, or a commutativity rule. Take \texttt{destructiveHint}, the one field about risk. It is set on 65.8\% of all tools, but is meaningful only where the tool is not read-only: just 12.9\% of tools carry an applicable classification, and only 3.1\% assert an actual destructive operation.
+
+\medskip
+
+\noindent
+Table~\ref{tab:gap} (Appendix~\ref{app:methodology}) reads the boundary
+capabilities of Section~\ref{sec:contracts} against that vocabulary:
+current MCP metadata distinguishes coarse execution modes but cannot
+express the semantics needed for retries, compensation, speculation, or
+concurrency. The census reads the boundary as declared, not as implementations behave. Tools may enforce stronger semantics
+internally (deduplication, idempotency keys) than any annotation surfaces;
+that safety remains unusable to a runtime that only sees the interface, and measuring the gap requires implementation-level analysis~\cite{toeppe2026mcpdataset}.
+
+\section{Conclusion and Future Work}
+\enlargethispage{2\baselineskip}
+
+This paper contributes an effect-history model separating world events
+from runtime observations, and a catalog of eight recurring
+external-effect anomalies, each naming the boundary capability required to exclude it in general: evidence, lifecycle control, or coordination. Four guarantee boundaries mark where black-box invocation alone is
+insufficient. Our census of 98{,}291 MCP tools measures what the standard interface declares. Existing runtimes cover fragments under runtime-local assumptions; standardized tool metadata remains insufficient for transactional reasoning. The missing layer is therefore
+not another recovery mechanism, but reusable transactional contracts at the
+tool boundary. Future work includes formal proofs of the guarantee
+boundaries, protocol synthesis from declared contracts, and a cost model
+that prices anomalies against their compensations, deciding when speculation
+or early release is worth its residue.
+
+\bibliographystyle{unsrtnat}
+\bibliography{bibliography/flame-stream}
+
+\appendix
+\section{Census Methodology}
+\label{app:methodology}
+We took a full snapshot of the official MCP registry on 2026-07-27
 (59{,}625 entries; 18{,}688 distinct servers, keeping the latest version of
 each). Of these, 9{,}454 exposed no remote endpoint and were out of scope
 because probing them would require executing a package or stdio server. We
@@ -632,42 +681,11 @@ returned no tools, yielding 98{,}291 tools (median 11 per server). No
 tool was called. The resulting measurements therefore describe the
 reachable remote subset; unreachable and package/stdio-only servers may
 differ. Code, data, and full methodology are available in the accompanying
-artifact.\footnote{\url{https://github.com/flame-stream/mcp-annotation-census}} For each tool we recorded the four annotations the
-specification defines --- \texttt{readOnlyHint}, \texttt{destructiveHint},
-\texttt{idempotentHint}, \texttt{openWorldHint} --- keeping an explicit
-\texttt{false} distinct from an omitted field.
+artifact.\footnote{Code, data, and full methodology: \url{https://anonymous.4open.science/r/mcp-annotation-census}} For each tool we recorded the four annotations the
+specification defines (\texttt{readOnlyHint}, \texttt{destructiveHint}, \texttt{idempotentHint}, \texttt{openWorldHint}), keeping an explicit
+\texttt{false} distinct from an omitted field. We do not attribute measured values to author intent.
 
-\paragraph{Annotation fields are widely emitted.}
-At the wire level, 74.0\% of tools serialize at least one field and 61.7\%
-serialize all four. This is schema coverage, not semantic completeness: the
-specification renders \texttt{destructiveHint} inapplicable when
-\texttt{readOnlyHint} is true, and that pairing alone covers 52.8\% of all
-tools.
-
-\paragraph{Tool-level signatures are concentrated.}
-Reading each tool as a signature over the four fields --- each true, false,
-or omitted --- 66 of the 81 possible signatures appear, but one signature
-(read-only, non-destructive, idempotent, open-world) covers 39.9\% of tools
-and three cover 75.8\%. Among multi-tool servers that emit at least one
-field, 76.7\% use more than one signature. Yet across all emitting servers,
-the median server's dominant signature covers 79.4\% of its tools, so
-differentiation is widespread but coarse. We do not attribute these values to author intent,
-since many may originate in SDK defaults or server templates.
-
-\paragraph{What the hints do not resolve.}
-The specification makes \texttt{destructiveHint} meaningful only when
-\texttt{readOnlyHint} is false. The field is present on 65.8\% of tools, but only 12.9\% carry an
-applicable destructiveness classification, and 3.1\% assert a destructive
-operation.
-
-\medskip
-
-\noindent
-The four hints express only coarse properties of a call;
-Table~\ref{tab:gap} reads the boundary capabilities of
-Section~\ref{sec:contracts} against that vocabulary.
-
-\begin{table}[htbp]
+\begin{table}[h]
 \centering
 \renewcommand{\arraystretch}{1.1}
 \footnotesize
@@ -689,34 +707,5 @@ A8 control of external observability & No \\
 \bottomrule
 \end{tabularx}
 \end{table}
-
-\noindent
-Current MCP metadata is thus sufficient to distinguish coarse execution
-modes and insufficient to express the semantics a runtime needs to reason
-about retries, compensation, speculation, or concurrency.
-
-\section{Conclusion and Future Work}
-
-This paper contributes an effect-history model that separates world
-events from runtime observations, and a catalog of eight recurring
-external-effect anomalies arising from uncertainty, workflow structure, and
-interaction. Each anomaly names the boundary capability --- evidence,
-lifecycle control, or coordination --- required to exclude it in general;
-four guarantee boundaries mark where black-box invocation alone is
-insufficient. Our census of 98{,}291 tools exposed by registered MCP servers measures the
-semantics the standard interface declares. Together these results show that
-existing runtimes cover fragments of the problem under runtime-local
-declarations and assumptions, while standardized tool metadata remains
-insufficient for transactional reasoning. The missing layer is therefore
-not another recovery mechanism, but reusable transactional contracts at the
-tool boundary.
-
-Future work includes tracing these capabilities through server
-implementations and upstream APIs~\cite{toeppe2026mcpdataset}, formalizing
-the guarantee boundaries, synthesizing protocols from declared contracts,
-and studying catalog coverage and composition across multiple levels.
-
-\bibliographystyle{ACM-Reference-Format}
-\bibliography{../../bibliography/flame-stream}
 
 \end{document}
