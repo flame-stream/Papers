@@ -522,7 +522,7 @@ violations; tool-contract misclassification (a tool declared reversible that
 is not); intra-execution effect order, except insofar as it participates in an A7
 conflict; and liveness failures.
 
-\section[Transactional Tool Contracts and Guarantee Boundaries]{Transactional Tool Contracts and Guarantee Boundaries}
+\section{Transactional Tool Contracts and Guarantee Boundaries}
 \label{sec:contracts}
 \label{sec:unknown}
 
@@ -630,9 +630,7 @@ Section~\ref{sec:contracts} named the boundary capabilities a runtime needs. We 
 At the wire level, 74.0\% of tools serialize at least one field and 61.7\% serialize all four. But a field being present says little about whether it was chosen: many values may originate in SDK defaults or server templates rather than deliberate declaration (Appendix~\ref{app:methodology}), and some carry no information even when set, since \texttt{destructiveHint} is inapplicable when \texttt{readOnlyHint} is true, a pairing that accounts for 52.8\% of all tools.
 
 \paragraph{Tool-level signatures are concentrated.}
-Reading each tool as a signature over the four fields (each true, false, or omitted), 66 of the 81 possible signatures appear, but one signature
-(read-only, non-destructive, idempotent, open-world) covers 39.9\% of tools
-and three cover 75.8\%. Among multi-tool servers that emit at least one
+Reading each tool as a signature over the four fields (each true, false, or omitted), 66 of the 81 possible signatures appear, but one signature (read-only, non-destructive, idempotent, open-world) covers 39.9\% of tools, and the next most common is no annotation at all (26.0\%); the top three together cover 75.8\%. Among multi-tool servers that emit at least one
 field, 76.7\% use more than one signature. Across emitting servers, the median dominant signature covers 79.4\% of a server's tools: differentiation is widespread but coarse.
 
 \paragraph{What the hints do not resolve.}
