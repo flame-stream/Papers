@@ -1,18 +1,24 @@
 \documentclass{article}
-\usepackage[dblblindworkshop]{neurips_2026}
-\workshoptitle{Who Verifies the Agents? Toward Reliable Agent Development}
+% --- Build mode -------------------------------------------------------
+% preprint               : arXiv; authors shown, no line numbers
+% dblblindworkshop       : anonymous submission (also uncomment the
+%                          \workshoptitle line and the patch below)
+% final,dblblindworkshop : camera-ready after acceptance
+\usepackage[preprint]{neurips_2026}
+% \workshoptitle{Who Verifies the Agents? Toward Reliable Agent Development}
 \setcitestyle{numbers,square}
-% Убираем строки-заглушки анонимного блока (патч документа, стиль не тронут)
-\usepackage{etoolbox}
-\makeatletter
-\patchcmd{\@maketitle}
-  {Anonymous Author(s) \\
-        Affiliation \\
-        Address \\
-        \texttt{email} \\}
-  {Anonymous Author(s) \\}
-  {}{\PackageWarning{local}{maketitle patch failed}}
-\makeatother
+% Anonymous mode only: drops the Affiliation/Address/email placeholders
+% \usepackage{etoolbox}
+% \makeatletter
+% \patchcmd{\@maketitle}
+%   {Anonymous Author(s) \\
+%         Affiliation \\
+%         Address \\
+%         \texttt{email} \\}
+%   {Anonymous Author(s) \\}
+%   {}{\PackageWarning{local}{maketitle patch failed}}
+% \makeatother
+% ----------------------------------------------------------------------
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{amsmath}
@@ -29,7 +35,17 @@
 
 \title{When Tool Calls Succeed but Workflows Fail:\\ Anomalies at the Agent--Tool Boundary}
 
-\author{Anonymous Authors}
+\author{%
+  Artem Trofimov \\
+  AVIV Group \\
+  Berlin, Germany \\
+  \texttt{atrofimov@acm.org} \\
+  \And
+  Boris Novikov \\
+  Independent Researcher \\
+  Helsinki, Finland \\
+  \texttt{borisnov@acm.org} \\
+}
 
 \begin{document}
 \maketitle
@@ -493,10 +509,22 @@ tool semantics rather than on a general outcome-resolution protocol. CoAgent's r
 achievability condition for A7 rather than an unconditional guarantee. Across these systems, coverage rests on runtime-owned declarations (adapter-declared idempotency keys, reversibility annotations, registered inverses, per-effect tiers) rather than a reusable shared contract; none controls exogenous reactions (A8), and no
 system covers the full catalog. Adjacent work governs the \emph{read} side
 of shared agent state~\cite{khan2026sbus} and intent revision under
-conflicting irreversible actions~\cite{zhai2026revisable}, applies
-Saga-style validation to multi-agent planning~\cite{chang2025sagallm}, and
+conflicting irreversible actions~\cite{zhai2026revisable}, applies Saga-style validation to multi-agent planning~\cite{chang2025sagallm}, and
 argues for isolation-level reasoning in workflow
-systems~\cite{stonebraker2025consistency}.
+systems~\cite{stonebraker2025consistency}. Agentic
+Transaction~\cite{sun2026agentic} articulates ACID-oriented semantic
+guarantees for agent systems and instantiates them in a runtime for data
+agents; we ask instead what the boundary to third-party tools must declare
+for guarantees of this kind to be establishable at all. A recent formal
+catalog of concurrency anomalies for multi-agent runtimes comes with
+mechanically verified detectors and safety
+guarantees~\cite{khan2026verified}; its causal-cascade anomaly, in which a
+dependent operation survives an aborted ancestor, is close to our A6, and
+the model likewise admits external effects that no internal rollback can
+undo. Our catalog differs in what it centers: the outcome uncertainty of
+calls to independently supplied tools, and the interface capabilities a
+boundary must expose to exclude each anomaly, rather than verified
+protocols over a runtime's shared state.
 
 \subsection{Scope and Coverage}
 \label{sec:coverage}
@@ -519,7 +547,8 @@ minimality, and independence are future work.
 We place the following outside the model, so the catalog is not mistaken for covering them: semantic planning errors (the agent booked the wrong city); read-side
 anomalies; security and policy
 violations; tool-contract misclassification (a tool declared reversible that
-is not); intra-execution effect order, except insofar as it participates in an A7
+is not); intra-execution effect order (formalized for multi-agent runtimes
+by~\cite{khan2026verified}), except insofar as it participates in an A7
 conflict; and liveness failures.
 
 \section{Transactional Tool Contracts and Guarantee Boundaries}
@@ -624,48 +653,9 @@ Atomix~\cite{mohammadi2026atomix} states for its own release step.
 \section{What the Boundary Declares Today}
 \label{sec:grounding}
 
-Section~\ref{sec:contracts} named the boundary capabilities a runtime needs. We now ask how far the standard MCP annotation vocabulary expresses them: what the annotations do not carry cannot be obtained from the interface as a guarantee, whatever a tool arranges out of band. Our census covers 98{,}291 tools in the official MCP registry (snapshot 2026-07-27), recording the four annotations the specification defines (\texttt{readOnlyHint}, \texttt{destructiveHint}, \texttt{idempotentHint}, \texttt{openWorldHint}) and keeping an explicit \texttt{false} distinct from an omitted field. Appendix~\ref{app:methodology} details the sampling and methodology.
+Section~\ref{sec:contracts} named the boundary capabilities a runtime needs. We now ask how far the standard MCP annotation vocabulary expresses them: what the annotations do not carry cannot be obtained from the interface as a guarantee, whatever a tool arranges out of band. Our census covers 98{,}291 tools in the official MCP registry (snapshot 2026-07-27), recording the four annotations the specification defines (\texttt{readOnlyHint}, \texttt{destructiveHint}, \texttt{idempotentHint}, \texttt{openWorldHint}) and keeping an explicit \texttt{false} distinct from an omitted field.
 
-\paragraph{Annotation fields are widely emitted.}
-At the wire level, 74.0\% of tools serialize at least one field and 61.7\% serialize all four. But a field being present says little about whether it was chosen: many values may originate in SDK defaults or server templates rather than deliberate declaration (Appendix~\ref{app:methodology}), and some carry no information even when set, since \texttt{destructiveHint} is inapplicable when \texttt{readOnlyHint} is true, a pairing that accounts for 52.8\% of all tools.
-
-\paragraph{Tool-level signatures are concentrated.}
-Reading each tool as a signature over the four fields (each true, false, or omitted), 66 of the 81 possible signatures appear, but one signature (read-only, non-destructive, idempotent, open-world) covers 39.9\% of tools, and the next most common is no annotation at all (26.0\%); the top three together cover 75.8\%. Among multi-tool servers that emit at least one
-field, 76.7\% use more than one signature. Across emitting servers, the median dominant signature covers 79.4\% of a server's tools: differentiation is widespread but coarse.
-
-\paragraph{What the hints do not resolve.}
-Even fully populated, the four fields describe the shape of a call while leaving its transactional semantics unstated: none gives an idempotency key, a status endpoint, a compensation contract, or a commutativity rule. Take \texttt{destructiveHint}, the one field about risk. It is set on 65.8\% of all tools, but is meaningful only where the tool is not read-only: just 12.9\% of tools carry an applicable classification, and only 3.1\% assert an actual destructive operation.
-
-\medskip
-
-\noindent
-Table~\ref{tab:gap} (Appendix~\ref{app:methodology}) reads the boundary
-capabilities of Section~\ref{sec:contracts} against that vocabulary:
-current MCP metadata distinguishes coarse execution modes but cannot
-express the semantics needed for retries, compensation, speculation, or
-concurrency. The census reads the boundary as declared, not as implementations behave. Tools may enforce stronger semantics
-internally (deduplication, idempotency keys) than any annotation surfaces;
-that safety remains unusable to a runtime that only sees the interface, and measuring the gap requires implementation-level analysis~\cite{toeppe2026mcpdataset}.
-
-\section{Conclusion and Future Work}
-\enlargethispage{2\baselineskip}
-
-This paper contributes an effect-history model separating world events
-from runtime observations, and a catalog of eight recurring
-external-effect anomalies, each naming the boundary capability required to exclude it in general: evidence, lifecycle control, or coordination. Four guarantee boundaries mark where black-box invocation alone is
-insufficient. Our census of 98{,}291 MCP tools measures what the standard interface declares. Existing runtimes cover fragments under runtime-local assumptions; standardized tool metadata remains insufficient for transactional reasoning. The missing layer is therefore
-not another recovery mechanism, but reusable transactional contracts at the
-tool boundary. Future work includes formal proofs of the guarantee
-boundaries, protocol synthesis from declared contracts, and a cost model
-that prices anomalies against their compensations, deciding when speculation
-or early release is worth its residue.
-
-\bibliographystyle{unsrtnat}
-\bibliography{bibliography/flame-stream}
-
-\appendix
-\section{Census Methodology}
-\label{app:methodology}
+\paragraph{Sampling and methodology.}
 We took a full snapshot of the official MCP registry on 2026-07-27
 (59{,}625 entries; 18{,}688 distinct servers, keeping the latest version of
 each). Of these, 9{,}454 exposed no remote endpoint and were out of scope
@@ -679,11 +669,21 @@ returned no tools, yielding 98{,}291 tools (median 11 per server). No
 tool was called. The resulting measurements therefore describe the
 reachable remote subset; unreachable and package/stdio-only servers may
 differ. Code, data, and full methodology are available in the accompanying
-artifact.\footnote{Code, data, and full methodology: \url{https://anonymous.4open.science/r/mcp-annotation-census}} For each tool we recorded the four annotations the
+artifact.\footnote{Code, data, and full methodology: \url{https://github.com/flame-stream/mcp-annotation-census}} For each tool we recorded the four annotations the
 specification defines (\texttt{readOnlyHint}, \texttt{destructiveHint}, \texttt{idempotentHint}, \texttt{openWorldHint}), keeping an explicit
 \texttt{false} distinct from an omitted field. We do not attribute measured values to author intent.
 
-\begin{table}[h]
+\paragraph{Annotation fields are widely emitted.}
+At the wire level, 74.0\% of tools serialize at least one field and 61.7\% serialize all four. But a field being present says little about whether it was chosen: many values may originate in SDK defaults or server templates rather than deliberate declaration, and some carry no information even when set, since \texttt{destructiveHint} is inapplicable when \texttt{readOnlyHint} is true, a pairing that accounts for 52.8\% of all tools.
+
+\paragraph{Tool-level signatures are concentrated.}
+Reading each tool as a signature over the four fields (each true, false, or omitted), 66 of the 81 possible signatures appear, but one signature (read-only, non-destructive, idempotent, open-world) covers 39.9\% of tools, and the next most common is no annotation at all (26.0\%); the top three together cover 75.8\%. Among multi-tool servers that emit at least one
+field, 76.7\% use more than one signature. Across emitting servers, the median dominant signature covers 79.4\% of a server's tools: differentiation is widespread but coarse.
+
+\paragraph{What the hints do not resolve.}
+Even fully populated, the four fields describe the shape of a call while leaving its transactional semantics unstated: none gives an idempotency key, a status endpoint, a compensation contract, or a commutativity rule. Take \texttt{destructiveHint}, the one field about risk. It is set on 65.8\% of all tools, but is meaningful only where the tool is not read-only: just 12.9\% of tools carry an applicable classification, and only 3.1\% assert an actual destructive operation.
+
+\begin{table}[t]
 \centering
 \renewcommand{\arraystretch}{1.1}
 \footnotesize
@@ -705,5 +705,32 @@ A8 control of external observability & No \\
 \bottomrule
 \end{tabularx}
 \end{table}
+
+\medskip
+
+\noindent
+Table~\ref{tab:gap} reads the boundary
+capabilities of Section~\ref{sec:contracts} against that vocabulary:
+current MCP metadata distinguishes coarse execution modes but cannot
+express the semantics needed for retries, compensation, speculation, or
+concurrency. The census reads the boundary as declared, not as implementations behave. Tools may enforce stronger semantics
+internally (deduplication, idempotency keys) than any annotation surfaces;
+that safety remains unusable to a runtime that only sees the interface, and measuring the gap requires implementation-level analysis~\cite{toeppe2026mcpdataset}.
+
+\section{Conclusion and Future Work}
+
+This paper contributes an effect-history model separating world events
+from runtime observations, and a catalog of eight recurring
+external-effect anomalies, each naming the boundary capability required to exclude it in general: evidence, lifecycle control, or coordination. Four guarantee boundaries mark where black-box invocation alone is
+insufficient. Our census of 98{,}291 MCP tools measures what the standard interface declares. Existing runtimes cover fragments under runtime-local assumptions; standardized tool metadata remains insufficient for transactional reasoning. The missing layer is therefore
+not another recovery mechanism, but reusable transactional contracts at the
+tool boundary. Future work includes formal proofs of the guarantee
+boundaries, protocol synthesis from declared contracts, and a cost model
+that prices anomalies against their compensations, deciding when speculation
+or early release is worth its residue.
+
+\setlength{\bibsep}{0pt plus 0.5pt}
+\bibliographystyle{unsrtnat}
+\bibliography{bibliography/flame-stream}
 
 \end{document}
