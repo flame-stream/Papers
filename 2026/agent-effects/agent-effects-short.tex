@@ -6,7 +6,7 @@
 % final,dblblindworkshop : camera-ready after acceptance
 \usepackage[preprint]{neurips_2026}
 % \workshoptitle{Who Verifies the Agents? Toward Reliable Agent Development}
-\setcitestyle{numbers,square}
+\setcitestyle{numbers,square,comma}
 % Anonymous mode only: drops the Affiliation/Address/email placeholders
 % \usepackage{etoolbox}
 % \makeatletter
@@ -668,10 +668,9 @@ at least one tool, 4{,}318 failed to connect, 74 timed out, and four
 returned no tools, yielding 98{,}291 tools (median 11 per server). No
 tool was called. The resulting measurements therefore describe the
 reachable remote subset; unreachable and package/stdio-only servers may
-differ. Code, data, and full methodology are available in the accompanying
-artifact.\footnote{Code, data, and full methodology: \url{https://github.com/flame-stream/mcp-annotation-census}} For each tool we recorded the four annotations the
-specification defines (\texttt{readOnlyHint}, \texttt{destructiveHint}, \texttt{idempotentHint}, \texttt{openWorldHint}), keeping an explicit
-\texttt{false} distinct from an omitted field. We do not attribute measured values to author intent.
+differ. We do not attribute measured values to author intent. Code, data,
+and full methodology are available in the accompanying
+artifact.\footnote{\url{https://github.com/flame-stream/mcp-annotation-census}}
 
 \paragraph{Annotation fields are widely emitted.}
 At the wire level, 74.0\% of tools serialize at least one field and 61.7\% serialize all four. But a field being present says little about whether it was chosen: many values may originate in SDK defaults or server templates rather than deliberate declaration, and some carry no information even when set, since \texttt{destructiveHint} is inapplicable when \texttt{readOnlyHint} is true, a pairing that accounts for 52.8\% of all tools.
