@@ -1,12 +1,4 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Journal of Intelligent Information Systems (Springer) submission
-%% Requires the Springer Nature LaTeX template (sn-jnl.cls).
-%% In Overleaf: New Project -> Templates -> "Springer Nature LaTeX Template",
-%% then drop this file in as the main document.
-%% JIIS requires: numbered citations in square brackets, sn-basic.bst,
-%% 25-page limit including references and tables, no subfolders.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\documentclass[pdflatex,sn-basic]{sn-jnl}
+\documentclass[pdflatex,sn-mathphys-num]{sn-jnl}
 
 \usepackage{graphicx}
 \usepackage{multirow}
@@ -174,7 +166,8 @@ not reducible to a single reversible/irreversible scale ---
 idempotent but does not commute. Commutativity is moreover
 \emph{relational}, a property of operation pairs, and often conditional on
 state (escrow-style~\citep{oneil1986escrow}); determinism, not usually
-treated as an operation contract, matters because black-box LLM-backed tools
+treated as an operation contract, matters because black-box tools backed by
+large language models (LLMs)
 can be nondeterministic.
 
 An execution history separates execution and external events from the
@@ -582,8 +575,7 @@ protocols: they are their precondition.
 A runtime consuming tools through a shared interface reads only what that
 interface carries, and MCP is not entirely silent: since its 2025-03-26
 revision, tool annotations let a server flag a tool as read-only,
-destructive, idempotent, or open-world.\footnote{Model Context Protocol
-specification, revision 2025-03-26.} These are advisory boolean hints ---
+destructive, idempotent, or open-world~\citep{mcp2025spec}. These are advisory boolean hints ---
 unenforced, optional, and coarser than the capabilities of
 Table~\ref{tab:catalog}: \texttt{idempotentHint} marks a property but
 supplies no idempotency key, and no hint covers status resolution,

@@ -1,0 +1,61 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{parskip}
+\usepackage{url}
+
+\pagestyle{empty}
+
+\begin{document}
+
+\noindent Dear Editor,
+
+We submit our manuscript, ``When Tool Calls Succeed but Workflows Fail:
+Anomalies at the Agent--Tool Boundary,'' to the \emph{Journal of Intelligent
+Information Systems}.
+
+The paper studies a problem in agent workflows: individual tool calls can
+succeed, while their combined effects leave an incorrect result. Retries,
+partial failures, speculative execution, and concurrent actions can all lead
+to this. Transaction processing offers ways to handle such problems, but
+these depend on properties that independently supplied tools often do not
+expose.
+
+We present an effect-history model and a catalog of eight anomalies. We
+identify the tool capabilities needed to prevent them and discuss four
+limits on what a runtime can guarantee without support from the tools. We
+also examine the standard MCP annotations across 98,291 tools. These
+annotations provide some useful hints, but do not fully express the
+capabilities needed for these guarantees.
+
+We think JIIS is a good fit because the paper connects
+transaction-processing concepts with the reliability of AI agents. Its main
+contribution is an analysis of the contracts needed between agents and
+tools, supported by measurements of an existing interface.
+
+The data, code, and methodology are available at:\\
+\url{https://github.com/flame-stream/mcp-annotation-census}
+
+A preprint is available at:\\
+\url{https://arxiv.org/abs/2609.15397}
+
+The manuscript has not been published in a journal and is not under
+consideration by another journal. All authors have read and approved this
+submission and declare no competing interests.
+
+Thank you for considering our manuscript.
+
+\vspace{1em}
+
+\noindent Sincerely,
+
+\vspace{0.5em}
+
+\noindent Artem Trofimov\\
+Corresponding author, on behalf of Artem Trofimov and Boris Novikov\\
+AVIV Group, Berlin, Germany\\
+\texttt{atrofimov@acm.org}
+
+\end{document}
