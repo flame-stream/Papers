@@ -5,6 +5,7 @@
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{booktabs}
 \usepackage{tabularx}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
 \usepackage{url}
 
 \raggedbottom
@@ -14,7 +15,7 @@
 \title[Anomalies at the Agent--Tool Boundary]{When Tool Calls Succeed but
 Workflows Fail: Anomalies at the Agent--Tool Boundary}
 
-\author*[1]{\fnm{Artem} \sur{Trofimov}}\email{atrofimov@acm.org}
+\author*[1]{\fnm{Artem} \sur{Trofimov}}\email{artemtrofimov@acm.org}
 
 \author[2]{\fnm{Boris} \sur{Novikov}}\email{borisnov@acm.org}
 
@@ -190,7 +191,7 @@ events may compensate its effects but cannot revise its outcome.
 external events; the lower, runtime observations, workflow assertions, and
 derived predicates.}
 \label{tab:model}
-\begin{tabularx}{\linewidth}{@{}l X@{}}
+\begin{tabularx}{\linewidth}{@{}l L@{}}
 \toprule
 $attempt(a, \ell)$ & attempt $a$ of logical operation $\ell$ \\
 $externalize(q, e)$ & runtime action $q$ produced external effect $e$ \\
@@ -252,11 +253,11 @@ Section~\ref{sec:contracts} organizes them into reusable contract families.
 \small
 \caption{The catalog of external-effect anomalies.}
 \label{tab:catalog}
-\begin{tabularx}{\linewidth}{@{}l X X X@{}}
+\begin{tabularx}{\linewidth}{@{}l L L L@{}}
 \toprule
 \textbf{} & \textbf{Forbidden pattern} & \textbf{Required boundary capability} & \textbf{Representative realization} \\
 \midrule
-A1 Duplicated & one logical operation externalizes twice & authoritative convergence on one outcome & logical-operation ID; idempotent re-issue returning the original outcome \\
+A1 Duplicated & one logical operation externalizes twice & deduplication of the logical operation & logical-operation ID; idempotent re-issue \\
 A2 Missing & commit without a required effect & authoritative outcome; atomic multi-effect participation & status endpoint; prepare/commit \\
 A3 Orphaned & compensation issued under an unknown outcome & outcome resolution before compensating & outcome query; outcome-conditioned compensation \\
 A4 Residue & aborted workflow leaves a surviving effect & residue prevention or safe neutralization & compensation declaration; staging \\
@@ -276,8 +277,8 @@ relying on outcomes the boundary does not establish.
 Two attempts of the same logical operation both externalize. The
 outcome of a call is not confirmed, so the runtime re-issues it, and both
 attempts take effect:
-\par\vspace{2pt}\noindent\begin{minipage}{\linewidth}
-\begingroup\footnotesize\begin{verbatim}
+\par\medskip\noindent\begin{minipage}{\linewidth}
+\begingroup\small\begin{verbatim}
 attempt(a1, pay_invoice)
 externalize(a1, e1)      # payment goes through
 observe(a1, unknown)     # no acknowledgment
@@ -285,7 +286,7 @@ attempt(a2, pay_invoice) # re-issued
 externalize(a2, e2)
 => invoice paid twice
 \end{verbatim}\endgroup
-\end{minipage}\par\noindent
+\end{minipage}\par\medskip\noindent
 Non-determinism makes this worse: re-issuing an operation may produce a
 \emph{different} effect rather than a duplicate. An idempotent re-issue
 prevents repeated externalization. Determinism does not by itself make
@@ -297,14 +298,14 @@ A workflow commits relying on an effect that did not externalize.
 The canonical case is uncertainty resolved optimistically: the runtime
 assumes an unconfirmed effect succeeded and commits, though nothing
 externalized. With $pay\_invoice \in Req(Order)$:
-\par\vspace{2pt}\noindent\begin{minipage}{\linewidth}
-\begingroup\footnotesize\begin{verbatim}
+\par\medskip\noindent\begin{minipage}{\linewidth}
+\begingroup\small\begin{verbatim}
 attempt(a1, pay_invoice)
 observe(a1, unknown)     # outcome not confirmed
 commit(Order)            # assumes success
 => required effect absent, yet committed
 \end{verbatim}\endgroup
-\end{minipage}\par\noindent
+\end{minipage}\par\medskip\noindent
 The anomaly is narrow: it is \emph{not} that the agent omitted a step (a planning failure) but that a required effect is absent from the
 committed history. We focus on the uncertainty-induced case: if failure is
 authoritatively known and the workflow commits anyway, the same final-state
@@ -313,34 +314,44 @@ pattern is a protocol error rather than a boundary limitation.
 \paragraph{A3: Orphaned Compensation (uncertainty)}
 A compensation is issued for an attempt whose outcome is unknown.
 The unconfirmed outcome is resolved pessimistically instead:
-\par\vspace{2pt}\noindent\begin{minipage}{\linewidth}
-\begingroup\footnotesize\begin{verbatim}
+\par\medskip\noindent\begin{minipage}{\linewidth}
+\begingroup\small\begin{verbatim}
 attempt(a1, pay_invoice)
 observe(a1, unknown)     # outcome not confirmed
 cmp(c1, a1)              # compensate blindly
 externalize(c1, refund)  # refund takes effect
 => if a1 never externalized, refund is spurious
 \end{verbatim}\endgroup
-\end{minipage}\par\noindent
+\end{minipage}\par\medskip\noindent
+The forbidden action is a compensation whose external effect does not
+depend on the outcome of the original attempt. What matters is whose
+knowledge decides whether an effect happens. A runtime that issues an
+unconditional refund under an unknown outcome bets on the outcome, and that
+bet is the violation. A compensator that checks the original operation
+itself and refunds only if it occurred resolves the outcome inside the
+tool, and the runtime makes no bet; its invocation is not A3 even though
+the runtime's own observation is still unknown.
+
 A1, A2, and A3 are one family: all three stem from an outcome the runtime
 cannot confirm and differ only in the reaction. A1 and A2 are visible in
 the final history; A3 is a violation at the moment compensation is issued:
 under an unknown outcome the runtime cannot know whether compensation is
-required, and even where the resulting state happens to be correct, the
-action was taken without authoritative evidence. The family also marks
+required, and even where the resulting state happens to be correct, the compensating
+effect was produced without authoritative evidence. The family also marks
 where this setting departs from classical transaction processing. There, an
 in-doubt outcome is temporary: participants run a recovery protocol and
 resolve it. A third-party tool runs no such protocol, so an unknown outcome
 stays unknown until the tool itself offers a way out --- a durable
-acknowledgment, a status endpoint, or idempotent re-issue.
+acknowledgment, a status endpoint, idempotent re-issue, or a compensator
+that resolves the outcome itself.
 
 \paragraph{A4: Uncompensated Residue (workflow)}
 An aborted workflow leaves a surviving effect that was not
 successfully neutralized --- no compensation exists, it was not invoked,
 or it was incomplete. A non-refundable ticket is bought, then the trip is
 aborted:
-\par\vspace{2pt}\noindent\begin{minipage}{\linewidth}
-\begingroup\footnotesize\begin{verbatim}
+\par\medskip\noindent\begin{minipage}{\linewidth}
+\begingroup\small\begin{verbatim}
 attempt(a1, book_flight)
 externalize(a1, e1)    # non-refundable ticket
 abort(BookTrip)        # budget violated
@@ -348,20 +359,20 @@ cmp(c1, a1)            # cancellation attempted
 NOT neutralizes(c1, e1)
 => survives(e1); money lost
 \end{verbatim}\endgroup
-\end{minipage}\par
+\end{minipage}\par\medskip
 
 \paragraph{A5: Premature Externalization (workflow)}
 An effect that may not survive is externalized before its workflow
 resolves. An offer letter is sent before approval completes, and approval
 is later denied:
-\par\vspace{2pt}\noindent\begin{minipage}{\linewidth}
-\begingroup\footnotesize\begin{verbatim}
+\par\medskip\noindent\begin{minipage}{\linewidth}
+\begingroup\small\begin{verbatim}
 effect(send_offer)     # letter goes out
 NOT resolved(Hire)     # approval pending
 abort(Hire)            # approval denied
 => send_offer preceded resolved(Hire)
 \end{verbatim}\endgroup
-\end{minipage}\par\noindent
+\end{minipage}\par\medskip\noindent
 A5 is profile-relative: it is not a violation under compensation-safe
 execution, which may externalize an effect early and compensate later; it
 is the pattern that speculation-safe execution excludes by staging or
@@ -371,8 +382,8 @@ gating effects that may not survive.
 A committed effect causally depends on an effect from a branch that
 does not survive. A committed branch acts on a temporary reservation made
 by a branch that is later canceled:
-\par\vspace{2pt}\noindent\begin{minipage}{\linewidth}
-\begingroup\footnotesize\begin{verbatim}
+\par\medskip\noindent\begin{minipage}{\linewidth}
+\begingroup\small\begin{verbatim}
 effect(reserve_room R) [b1]
 dep(send_invites <- reserve_room R) [b2]
 effect(send_invites) [b2]  # invites name R
@@ -380,7 +391,7 @@ commit(b2)                 # b2 wins
 abort(b1); cmp(reserve_room R)
 => b2 announced R, which no longer survives
 \end{verbatim}\endgroup
-\end{minipage}\par\noindent
+\end{minipage}\par\medskip\noindent
 The contamination is causal, not about reversibility: this is the
 effect-world analogue of a \emph{dirty read} (reading uncommitted state that is later rolled back), except that the ``read'' is a causal dependency on
 an external effect. The harm, invitations already sent naming a room that
@@ -393,15 +404,15 @@ on a shared resource without an ordering or mediation contract, so the
 outcome may depend on their interleaving. Two coding workers publish
 incompatible updates to the same shared artifact from the same base,
 neither having observed the other:
-\par\vspace{2pt}\noindent\begin{minipage}{\linewidth}
-\begingroup\footnotesize\begin{verbatim}
+\par\medskip\noindent\begin{minipage}{\linewidth}
+\begingroup\small\begin{verbatim}
 effect(publish U1 on S) [w1]  # from base B
 effect(publish U2 on S) [w2]  # also from B
 NOT dep(U2 <- U1); NOT dep(U1 <- U2)
 NOT commute(U1, U2)      # order changes result
 => outcome depends on interleaving
 \end{verbatim}\endgroup
-\end{minipage}\par\noindent
+\end{minipage}\par\medskip\noindent
 Unlike A6, there is no dependency between the two executions: neither
 observed the other; both acted on the shared resource independently.
 Commutativity \emph{excludes} the anomaly. Invertibility does not exclude
@@ -415,8 +426,8 @@ profile forbids relying on an outcome not established at the boundary.
 \paragraph{A8: Phantom Compensation (interaction, open-world)}
 An effect is compensated, but an external consequence that depends
 on it survives. A supplier reacts to an offer that is later withdrawn:
-\par\vspace{2pt}\noindent\begin{minipage}{\linewidth}
-\begingroup\footnotesize\begin{verbatim}
+\par\medskip\noindent\begin{minipage}{\linewidth}
+\begingroup\small\begin{verbatim}
 externalize(a1, e)       # offer sent
 externalize_ext(S, x)    # supplier acts on it
 dep(x <- e)              # x saw e
@@ -425,7 +436,7 @@ neutralizes(c1, e)
 survives(x)              # supplier action stands
 => offer retracted; the reaction is not
 \end{verbatim}\endgroup
-\end{minipage}\par\noindent
+\end{minipage}\par\medskip\noindent
 The dependent effect $x$ is exogenous: no attempt of the runtime produced it
 and no compensation reaches it. This separates A8 from A6, where the
 surviving effect is managed. A1--A7 concern effects issued through the managed or mediated boundary; an
@@ -460,7 +471,7 @@ the observation and full gating is unavailable.
 \small
 \caption{Coverage of the anomaly catalog by current agent runtimes.}
 \label{tab:systems}
-\begin{tabularx}{\linewidth}{@{}l X X@{}}
+\begin{tabularx}{\linewidth}{@{}l L L@{}}
 \toprule
 \textbf{System} & \textbf{Targeted coverage} & \textbf{Notes} \\
 \midrule
@@ -577,10 +588,50 @@ interface carries, and MCP is not entirely silent: since its 2025-03-26
 revision, tool annotations let a server flag a tool as read-only,
 destructive, idempotent, or open-world~\citep{mcp2025spec}. These are advisory boolean hints ---
 unenforced, optional, and coarser than the capabilities of
-Table~\ref{tab:catalog}: \texttt{idempotentHint} marks a property but
-supplies no idempotency key, and no hint covers status resolution,
-compensation, staging, commutativity, or visibility. How servers populate
-these fields is measured in Section~\ref{sec:grounding}.
+Table~\ref{tab:catalog}: \texttt{idempotentHint} asserts that repetition is
+safe but supplies no idempotency key, so a tool that accepts one can declare
+the fact only in its input schema, outside the annotation vocabulary; and no
+hint covers status resolution, compensation, staging, commutativity, or
+visibility. The 2025-11-25 revision added experimental
+tasks~\citep{mcp2025tasks}, which return a durable handle that the caller
+polls for a terminal status. This supplies part of the observability A1
+and A2 need, but nothing of the rest: tasks carry no idempotency,
+compensation, or commit semantics, cancellation is cooperative rather
+than an undo, and the handle can itself be lost before it is received,
+which moves an unknown outcome one request earlier rather than removing
+it.
+Table~\ref{tab:gap} goes through the capabilities one by one. None of them
+has a place in the annotation vocabulary, so the standard annotations alone
+provide no reusable transactional contract. A tool can still arrange such
+a contract on top of MCP, through its input schema, its description, or
+tasks, but that contract is particular to the tool and must be learned tool
+by tool. This is a property of the specification. How the four fields it
+does define are used in practice is the subject of
+Section~\ref{sec:grounding}.
+
+\begin{table}[t]
+\centering
+\renewcommand{\arraystretch}{1.1}
+\footnotesize
+\caption{Expressibility of the boundary capabilities in current MCP tool
+annotations.}
+\label{tab:gap}
+\begin{tabularx}{\linewidth}{@{}L l@{}}
+\toprule
+\textbf{Boundary capability} & \textbf{In annotations} \\
+\midrule
+A1 deduplication of the logical operation & Limited: idempotence hint only \\
+A2 authoritative outcome; atomic participation & No \\
+A3 outcome resolution before compensating & No \\
+A4 residue prevention or neutralization & No \\
+A5 pre-externalization observation/control & No \\
+A6 dependency observability; commit control & No \\
+A7 shared-resource coordination & No: externality only \\
+A8 control of external observability & No \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
 
 \subsection{Recurring Contract Families}
 
@@ -666,7 +717,13 @@ Atomix~\citep{mohammadi2026atomix} states for its own release step.
 \section{What the Boundary Declares Today}
 \label{sec:grounding}
 
-Section~\ref{sec:contracts} named the boundary capabilities a runtime needs. We now ask how far the standard MCP annotation vocabulary expresses them: what the annotations do not carry cannot be obtained from the interface as a guarantee, whatever a tool arranges out of band. Our census covers 98{,}291 tools in the official MCP registry (snapshot 2026-07-27), recording the four annotations the specification defines (\texttt{readOnlyHint}, \texttt{destructiveHint}, \texttt{idempotentHint}, \texttt{openWorldHint}) and keeping an explicit \texttt{false} distinct from an omitted field.
+The vocabulary cannot carry the capabilities of Section~\ref{sec:contracts},
+but it does carry four fields, and what servers put in them decides what
+a runtime can learn today. We measured this with a census of 98{,}291
+tools in the official MCP registry (snapshot 2026-07-27), recording
+\texttt{readOnlyHint}, \texttt{destructiveHint}, \texttt{idempotentHint},
+and \texttt{openWorldHint} for each tool and keeping an explicit
+\texttt{false} distinct from an omitted field.
 
 \paragraph{Sampling and methodology.}
 We took a full snapshot of the official MCP registry on 2026-07-27
@@ -679,55 +736,55 @@ rejected discovery with HTTP 401 or 403 (connection failures were not
 classified). Of these targets, 4{,}838 returned
 at least one tool, 4{,}318 failed to connect, 74 timed out, and four
 returned no tools, yielding 98{,}291 tools (median 11 per server). No
-tool was called. The resulting measurements therefore describe the
-reachable remote subset; unreachable and package/stdio-only servers may
-differ. We do not attribute measured values to author intent. Code, data,
+tool was called. The resulting measurements describe the reachable remote
+subset; unreachable and package/stdio-only servers may differ. We do not attribute measured values to author intent. Code, data,
 and full methodology are available in the accompanying
 artifact.\footnote{\url{https://github.com/flame-stream/mcp-annotation-census}}
 
-\paragraph{Annotation fields are widely emitted.}
-At the wire level, 74.0\% of tools serialize at least one field and 61.7\% serialize all four. But a field being present says little about whether it was chosen: many values may originate in SDK defaults or server templates rather than deliberate declaration, and some carry no information even when set, since \texttt{destructiveHint} is inapplicable when \texttt{readOnlyHint} is true, a pairing that accounts for 52.8\% of all tools.
+\paragraph{Annotation fields are widely emitted, by one publisher.}
+At the wire level, 74.0\% of tools serialize at least one field and 61.7\%
+serialize all four. Most of this is one fleet. A single publisher,
+\texttt{io.github.pipeworx-io}, contributes 1{,}274 of the 4{,}838
+responding servers and 44{,}227 tools, 45.0\% of the corpus, every one of
+them with all four fields set. Without it, 52.8\% of the remaining tools
+serialize at least one field and 30.3\% serialize all four. A field being
+present therefore says little about whether it was chosen, and some fields
+carry no information even when set: \texttt{destructiveHint} is
+inapplicable when \texttt{readOnlyHint} is true, a pairing that accounts for
+52.8\% of all tools and 26.0\% without the dominant publisher.
 
 \paragraph{Tool-level signatures are concentrated.}
-Reading each tool as a signature over the four fields (each true, false, or omitted), 66 of the 81 possible signatures appear, but one signature (read-only, non-destructive, idempotent, open-world) covers 39.9\% of tools, and the next most common is no annotation at all (26.0\%); the top three together cover 75.8\%. Among multi-tool servers that emit at least one
-field, 76.7\% use more than one signature. Across emitting servers, the median dominant signature covers 79.4\% of a server's tools: differentiation is widespread but coarse.
+Reading each tool as a signature over the four fields (each true, false, or
+omitted), 66 of the 81 possible signatures appear, but one signature
+(read-only, non-destructive, idempotent, open-world) covers 39.9\% of tools
+and the next most common is no annotation at all (26.0\%); the top three
+together cover 75.8\%. The dominant signature is the dominant publisher's
+template: without that publisher it falls to 7.3\% and no annotation at all
+becomes the most common signature, at 47.2\% of tools. Among multi-tool
+servers that emit at least one field, 76.7\% use more than one signature,
+and across emitting servers the median dominant signature covers 79.4\% of
+a server's tools: differentiation is widespread but coarse.
 
 \paragraph{What the hints do not resolve.}
-Even fully populated, the four fields describe the shape of a call while leaving its transactional semantics unstated: none gives an idempotency key, a status endpoint, a compensation contract, or a commutativity rule. Take \texttt{destructiveHint}, the one field about risk. It is set on 65.8\% of all tools, but is meaningful only where the tool is not read-only: just 12.9\% of tools carry an applicable classification, and only 3.1\% assert an actual destructive operation.
+Even fully populated, the four fields describe the shape of a call while leaving its transactional semantics unstated: none gives an idempotency key, a status endpoint, a compensation contract, or a commutativity rule. Take \texttt{destructiveHint}, the one field about risk. It is set on
+65.8\% of all tools, but is meaningful only where the tool is not
+read-only: just 12.9\% of tools carry an applicable classification, and
+only 3.1\% assert an actual destructive operation. Unlike the emission
+figures, these two do not depend on the dominant publisher: without it
+they are 11.7\% and 3.2\%.
 
-\begin{table}[t]
-\centering
-\renewcommand{\arraystretch}{1.1}
-\footnotesize
-\caption{Expressibility of the boundary capabilities of
-Section~\ref{sec:contracts} in current MCP tool annotations.}
-\label{tab:gap}
-\begin{tabularx}{\linewidth}{@{}X l@{}}
-\toprule
-\textbf{Boundary capability} & \textbf{In annotations} \\
-\midrule
-A1 authoritative convergence & Limited: idempotence hint only \\
-A2 authoritative outcome; atomic participation & No \\
-A3 outcome resolution before compensating & No \\
-A4 residue prevention or neutralization & No \\
-A5 pre-externalization observation/control & No \\
-A6 dependency observability; commit control & No \\
-A7 shared-resource coordination & No: externality only \\
-A8 control of external observability & No \\
-\bottomrule
-\end{tabularx}
-\end{table}
 
 \medskip
 
 \noindent
-Table~\ref{tab:gap} reads the boundary
-capabilities of Section~\ref{sec:contracts} against that vocabulary:
-current MCP metadata distinguishes coarse execution modes but cannot
-express the semantics needed for retries, compensation, speculation, or
-concurrency. The census reads the boundary as declared, not as implementations behave. Tools may enforce stronger semantics
-internally (deduplication, idempotency keys) than any annotation surfaces;
-that safety remains unusable to a runtime that only sees the interface, and measuring the gap requires implementation-level analysis~\citep{toeppe2026mcpdataset}.
+Taken together, the four fields are emitted at scale but distinguish little:
+they separate coarse execution modes, and the one field that speaks to risk
+is mostly set where the specification gives it no meaning. The census reads
+the boundary as declared, not as implementations behave. Tools may enforce
+stronger semantics internally (deduplication, idempotency keys) than any
+annotation surfaces; a runtime that relies on the annotations cannot use that
+safety, and measuring the gap requires implementation-level
+analysis~\citep{toeppe2026mcpdataset}.
 
 \section{Related Work}
 \label{sec:related}
@@ -779,16 +836,16 @@ conflicting irreversible actions make full specification satisfaction
 impossible, an algorithm-independent limit that parallels our achievability
 bounds; their earliest-conflict rollback is defined over a linear action
 sequence, whereas our dependency relation is a partial order in which
-\emph{earliest} is not uniquely defined. The runtimes that implement
-effect-level mechanisms are discussed in Section~\ref{sec:systems} as
-partial coverage of the catalog.
+\emph{earliest} is not uniquely defined. Agent runtimes are discussed in Section~\ref{sec:systems}.
 
 \section{Conclusion and Future Work}
 
 This paper contributes an effect-history model separating world events
 from runtime observations, and a catalog of eight recurring
 external-effect anomalies, each naming the boundary capability required to exclude it in general: evidence, lifecycle control, or coordination. Four guarantee boundaries mark where black-box invocation alone is
-insufficient. Our census of 98{,}291 MCP tools measures what the standard interface declares. Existing runtimes cover fragments under runtime-local assumptions; standardized tool metadata remains insufficient for transactional reasoning. The missing layer is therefore
+insufficient. Existing runtimes cover fragments of the catalog under runtime-local
+assumptions, and our census of 98{,}291 MCP tools shows that the standard
+annotations do not carry what transactional reasoning needs. The missing layer is therefore
 not another recovery mechanism, but reusable transactional contracts at the
 tool boundary. Future work includes formal proofs of the guarantee
 boundaries, protocol synthesis from declared contracts, and a cost model
