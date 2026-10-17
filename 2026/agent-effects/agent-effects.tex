@@ -25,7 +25,7 @@ Workflows Fail: Anomalies at the Agent--Tool Boundary}
 \affil[2]{\orgname{Independent Researcher}, \orgaddress{\city{Helsinki},
 \country{Finland}}}
 
-\abstract{AI agents increasingly execute long-running workflows that
+\abstract{Artificial intelligence (AI) agents increasingly execute long-running workflows that
 externalize effects through independently supplied tools. Under retries,
 speculative execution, concurrency, and partial failures, the resulting
 external state may be inconsistent with the workflow's intended resolution:
@@ -47,8 +47,8 @@ The fields are widely emitted but provide only coarse call-level hints, and
 none of the required capabilities is fully expressible. These results
 motivate reusable transactional contracts at the tool boundary.}
 
-\keywords{Agent reliability, Tool use, Transactional semantics, Effect
-anomalies, Model Context Protocol, Runtime verification}
+\keywords{Agent reliability, Interaction protocols, Language model agents, Tool use,
+Transactional semantics, Model Context Protocol}
 
 \maketitle
 
@@ -80,7 +80,10 @@ evidence of whether an effect occurred --- after a crash, a timeout, or a
 lost acknowledgment. Correctness therefore depends not only on
 orchestration logic, but also on semantics supplied by the lower-level
 operations: outcome resolution, idempotence, compensation, staging,
-dependency identity, commutativity, and visibility control.
+dependency identity, commutativity, and visibility control. In
+multiagent-systems terms, a tool is an independently operated service
+outside the agent's control, and its call interface need not define a
+shared protocol for resolving outcomes or managing external effects.
 
 Consider an agent booking a trip on a 1500 EUR budget. To reduce latency,
 it books a 900 EUR flight and a 700 EUR hotel in parallel. Both calls
@@ -810,6 +813,29 @@ explainable surviving effects is of the same kind, for effects that cannot
 be rolled back. What the agent setting adds is the boundary, since
 black-box tools do not in general expose the contracts these models assume.
 
+Multiagent-systems research has long treated interaction among autonomous
+parties as a protocol problem rather than a matter of calls and returns.
+Commitment-based approaches specify an interaction by the social meaning
+of its messages, so that commitments are created, discharged, or
+cancelled as it unfolds~\citep{yolum2002commitment}; information protocols
+such as BSPL specify it by the causal information each message
+carries~\citep{singh2011bspl}. Mandrake builds fault tolerance on this
+foundation: agents treat a lost message as a violated expectation and
+retry, and key-based correlation makes duplicates idempotent, without
+assuming reliable or ordered transport~\citep{christie2022mandrake}. This
+is a protocol-level analogue of the identification and deduplication
+mechanism that A1 requires: the correlation key plays the role of
+logical-operation identity, although what it deduplicates is repeated
+messages and observations rather than repeated external effects. The difference lies in who participates. In Mandrake every
+party enacts the same protocol and its keys; at the agent--tool boundary
+the tool is an independently supplied party that publishes a call
+signature and a few hints, and a runtime cannot assume it takes part in
+any protocol the agent uses. The capabilities of Table~\ref{tab:catalog}
+can be read as what a tool would have to declare to become such a
+participant: an authoritative outcome to correlate against, a compensation
+with stated preconditions, and the resource scope over which ordering is
+agreed.
+
 Recent work carries transactional goals into agent systems. Agentic
 Transaction~\citep{sun2026agentic} articulates ACID-oriented semantic
 guarantees and instantiates them in a runtime for data agents, and
@@ -848,7 +874,9 @@ assumptions, and our census of 98{,}291 MCP tools shows that the standard
 annotations do not carry what transactional reasoning needs. The missing layer is therefore
 not another recovery mechanism, but reusable transactional contracts at the
 tool boundary. Future work includes formal proofs of the guarantee
-boundaries, protocol synthesis from declared contracts, and a cost model
+boundaries, protocol synthesis from declared contracts, expressing the
+boundary capabilities in information-protocol languages so that tools can
+take part in verifiable interaction protocols, and a cost model
 that prices anomalies against their compensations, deciding when speculation
 or early release is worth its residue.
 
@@ -862,6 +890,9 @@ or early release is worth its residue.
 \item \textbf{Funding.} No funding was received for conducting this study.
 \item \textbf{Competing interests.} The authors declare no competing
 interests.
+\item \textbf{Ethics approval.} Not applicable. The census queried only
+public tool listings; no tool was invoked and no personal data was
+collected.
 \item \textbf{Data availability.} The census data, the collection code, and
 the full methodology are openly available at
 \url{https://github.com/flame-stream/mcp-annotation-census}.

@@ -1,0 +1,143 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{parskip}
+\usepackage{url}
+\usepackage{enumitem}
+\setlist{nosep,leftmargin=1.4em}
+
+\pagestyle{plain}
+
+\begin{document}
+
+\begin{center}
+{\large\textbf{Information Sheet}}\\[3pt]
+``When Tool Calls Succeed but Workflows Fail: Anomalies at the
+Agent--Tool Boundary''\\
+Artem Trofimov and Boris Novikov
+\end{center}
+
+\subsection*{1. What is the main claim, and why is it an important
+contribution to the autonomous agents and multiagent systems literature?}
+
+LLM-based agents now act on the world through tools supplied by
+independent parties: they send messages, place orders, and charge cards.
+Our claim is that the correctness of such an agent cannot be settled by
+the agent or its runtime alone. Whether its surviving external effects are
+consistent with what the workflow decided depends on what the tools
+declare at the boundary, and the standard annotations of the most widely
+used tool interface cannot express what is needed.
+
+The contribution to the agents literature is a specification-level
+account of what it means for an agent's actions to be correct when they
+are retried, executed speculatively, run concurrently with other agents,
+and observed by outside parties. We give an effect-history model that
+separates events in the world from the agent's observations of them; a
+catalog of eight anomalies, each a forbidden pattern in that history,
+grouped by outcome uncertainty, workflow structure, and interaction with
+other agents or exogenous observers; the boundary capability needed to
+exclude each anomaly; and four limits beyond which no runtime can provide
+a guarantee
+without additional boundary support, such as authoritative tool
+participation, shared mediation, or visibility control. In multiagent-systems terms,
+a tool is an independently operated service outside the agent's control,
+whose call interface need not define a shared protocol for resolving
+outcomes or managing external effects. Work on information protocols and
+commitments shows how fault tolerance follows once all parties enact a
+common protocol~[1,2,3]. Our capabilities state what a tool would have to
+declare to become such a participant.
+
+\subsection*{2. What evidence supports the claim?}
+
+\begin{itemize}
+\item \emph{Analytical.} The model, the catalog, and the capability
+derivation are the main results. The catalog is organized by
+construction: the uncertainty anomalies follow from the three actions a
+runtime can take under an unresolved outcome (re-issue, commit,
+compensate), the workflow anomalies from the relations of an effect to its
+resolution point, and the interaction anomalies from the two kinds of
+party an effect can meet. The four guarantee limits are argued from the
+definitions rather than proved: two correspond to classical results, the
+exactly-once barrier and atomic commitment, and formal proofs for all
+four are left as future work.
+\item \emph{Comparative.} We place six recent agent runtimes, including
+Atomix~[4], Cordon~[5], and CoAgent~[6], against the catalog. Each covers a
+fragment, and each obtains the tool properties it needs out of band,
+through its own adapter declarations.
+\item \emph{Empirical.} A census of 98,291 tools from the official Model
+Context Protocol registry shows that annotation fields are widely emitted
+but carry only coarse call-level hints. None of the eight capabilities is
+fully expressible in the standard vocabulary. The census supports this
+claim about what the interface declares; it does not, and is not meant
+to, establish the guarantee limits. Data, code, and methodology are
+public.
+\end{itemize}
+
+\subsection*{3. Which papers by other authors make the most closely related
+contributions, and how is this paper related to them?}
+
+\begin{itemize}
+\item \emph{Fault-tolerant interaction protocols}~[1,2,3]. Mandrake
+deduplicates repeated messages through key-based correlation when every
+party enacts the same information protocol, a protocol-level analogue of
+the logical-operation identity that A1 requires. We study the boundary where the
+other party is an independently supplied tool that cannot be assumed to
+enact such a protocol, and derive what it would need to expose.
+\item \emph{Transactional agent runtimes}~[4,5,6,7]. These systems
+implement staging, compensation, or concurrency control for tool calls. We
+do not propose another runtime; we characterize which guarantees any
+runtime can establish from what the boundary declares, and read these
+systems as partial coverage of the catalog.
+\item \emph{Anomaly catalogs for agent systems}~[8]. A recent verified
+catalog of concurrency anomalies targets a runtime's shared state. Ours
+centers the outcome uncertainty of calls to third-party tools and the
+interface capabilities that exclude each anomaly.
+\item \emph{Transaction processing}~[9,10,11]. We borrow anomaly-based
+correctness and multilevel derivation of guarantees, and show that the
+assumption those models make, that operation semantics are known, fails at
+the agent--tool boundary.
+\end{itemize}
+
+\subsection*{4. Have parts of this paper been published elsewhere?}
+
+No part of this paper has appeared in an archival venue. A preprint is
+available at \url{https://arxiv.org/abs/2609.15397}, and an earlier
+version has been accepted at ``Who Verifies the Agents?'', a non-archival
+NeurIPS 2026 workshop without proceedings, to be held in December 2026.
+
+\subsection*{References}
+
+\small
+\begin{enumerate}[label={[\arabic*]},leftmargin=2em]
+\item S.~H. Christie V, A.~K. Chopra, M.~P. Singh. Mandrake: multiagent
+systems as a basis for programming fault-tolerant decentralized
+applications. \emph{Autonomous Agents and Multi-Agent Systems}
+36(1):16, 2022.
+\item M.~P. Singh. Information-driven interaction-oriented programming:
+BSPL, the blindingly simple protocol language. In \emph{Proc.\ AAMAS},
+pp.~491--498, 2011.
+\item P. Yolum, M.~P. Singh. Commitment machines. In \emph{Intelligent
+Agents VIII (ATAL 2001)}, LNAI 2333, pp.~235--247, Springer, 2002.
+\item B. Mohammadi et al. Atomix: Timely, transactional tool use for
+reliable agentic workflows. arXiv:2602.14849, 2026.
+\item Z. Chen et al. Cordon: Semantic transactions for tool-using LLM
+agents. arXiv:2606.17573, 2026.
+\item H. Lyu et al. CoAgent: Concurrency control for multi-agent systems.
+arXiv:2606.15376, 2026.
+\item S. Perera, K. Hapuarachchi, F. Leymann, R. Khalaf. Robust Agent
+Compensation (RAC): Teaching AI agents to compensate. In \emph{Proc.\ ACM
+Conference on AI and Agentic Systems}, pp.~253--262, 2026.
+\item S. Khan. Verified detection and prevention of concurrency anomalies
+in multi-agent large language model systems. arXiv:2606.17182, 2026.
+\item G. Weikum. Principles and realization strategies of multilevel
+transaction management. \emph{ACM Transactions on Database Systems}
+16(1):132--180, 1991.
+\item H. Garcia-Molina, K. Salem. Sagas. In \emph{Proc.\ ACM SIGMOD},
+pp.~249--259, 1987.
+\item H. Berenson et al. A critique of ANSI SQL isolation levels. In
+\emph{Proc.\ ACM SIGMOD}, pp.~1--10, 1995.
+\end{enumerate}
+
+\end{document}
