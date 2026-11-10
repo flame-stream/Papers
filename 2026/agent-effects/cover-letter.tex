@@ -13,47 +13,49 @@
 \noindent Dear Editors,
 
 We submit our manuscript, ``When Tool Calls Succeed but Workflows Fail:
-Anomalies at the Agent--Tool Boundary,'' for consideration as a regular
-paper in \emph{Autonomous Agents and Multi-Agent Systems}.
+Anomalies at the Agent--Tool Boundary,'' for consideration in
+\emph{Computer Science and Information Systems}.
 
-LLM-based agents increasingly act through tools supplied by independent
-parties. Individual tool calls can succeed while their combined effects
-leave the world in a state the workflow never intended: an action happens
-twice, an aborted branch leaves residue, or an outside party reacts to an
-effect that is later withdrawn. Retries, speculative execution, and
-concurrency among agents all lead to such outcomes.
+Information systems increasingly delegate work to AI agents that act
+through services supplied by independent parties: they send messages,
+place orders, and charge cards. Individual service calls can succeed while
+their combined effects leave the system in a state the workflow never
+intended: an action happens twice, an aborted branch leaves residue, or an
+outside party reacts to an effect that is later withdrawn. Retries,
+speculative execution, and concurrent executions all lead to such
+outcomes.
 
 The paper gives an effect-history model that separates what happened in
 the world from what the agent observed, and a catalog of eight anomalies
 grouped by outcome uncertainty, workflow structure, and interaction with
-other agents or outside observers. For each anomaly we identify the
+other executions or outside observers. For each anomaly we identify the
 capability the tool boundary must provide to exclude it, and we describe
 four limits beyond which no agent runtime can provide a guarantee
 without additional boundary support, such as authoritative tool
-participation, shared mediation, or visibility control. A census of 98,291 tools from the Model Context
-Protocol registry shows that the standard annotation vocabulary expresses none of
-these capabilities in full.
+participation, shared mediation, or visibility control. A census of
+98,291 tools from the Model Context Protocol registry shows that the
+standard annotation vocabulary expresses none of these capabilities in
+full.
 
-We believe the paper fits the journal's interest in the specification and
-verification of agent systems. It treats a tool as an independently operated
-service whose call interface need not define a shared protocol for resolving
-outcomes, and relates our
-capabilities to work on fault-tolerant information protocols and
-commitments in the multiagent-systems literature. The required
-information sheet is attached.
+We believe the paper fits the journal's scope in information systems and
+software engineering. It combines a theoretical analysis, building on
+transaction models such as sagas and multilevel transactions, with an
+empirical study of a widely used service interface.
 
 Data, code, and methodology are available at\\
 \url{https://github.com/flame-stream/mcp-annotation-census}\\
 and a preprint at\\
 \url{https://arxiv.org/abs/2609.15397}.
 
-An earlier, shorter version has been accepted at ``Who Verifies the
-Agents?'', a non-archival workshop at NeurIPS 2026 (December 2026) that does not publish
-proceedings. This manuscript revises it based on the workshop reviews.
+An earlier version has been accepted at ``Who Verifies the
+Agents?'', a non-archival workshop at NeurIPS 2026 (December 2026) that
+does not publish proceedings. This manuscript revises it based on the
+workshop reviews.
 
 Apart from the preprint noted above, the manuscript has not been
-published and is not under consideration elsewhere. Both authors have read and approved this submission and
-declare no competing interests.
+published and is not under consideration elsewhere. Both authors have
+read and approved this submission. We are not aware of any conflicts of
+interest with the editors or potential reviewers.
 
 Thank you for considering our manuscript.
 

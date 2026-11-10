@@ -1,56 +1,66 @@
-\documentclass[pdflatex,sn-mathphys-num]{sn-jnl}
+\documentclass[runningheads]{comsis3}
 
+%% Necessary definitions for the running heads
+\def\journalissue{Computer Science and Information Systems 00(0):0000--0000}
+\def\paperidnum{https://doi.org/10.2298/CSIS123456789X}
+\def\papercategory{Paper Type: Research Paper}
+\setcounter{page}{1}
+
+\usepackage[T1]{fontenc}
 \usepackage{graphicx}
 \usepackage{multirow}
-\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{amsmath,amssymb}
 \usepackage{booktabs}
 \usepackage{tabularx}
 \newcolumntype{L}{>{\raggedright\arraybackslash}X}
 \usepackage{url}
 
+%% Line numbers for review (remove in the camera-ready version)
+\usepackage[pagewise]{lineno}
+\linenumbers
+
 \raggedbottom
+\sloppy
+
+\title{When Tool Calls Succeed but Workflows Fail:\\
+Anomalies at the Agent--Tool Boundary}
+
+\titlerunning{Anomalies at the Agent--Tool Boundary}
+
+\author{Anonymous Authors}
+
+\authorrunning{Anonymous Authors}
+
+\institute{Affiliations withheld for anonymous review}
 
 \begin{document}
 
-\title[Anomalies at the Agent--Tool Boundary]{When Tool Calls Succeed but
-Workflows Fail: Anomalies at the Agent--Tool Boundary}
-
-\author*[1]{\fnm{Artem} \sur{Trofimov}}\email{artemtrofimov@acm.org}
-
-\author[2]{\fnm{Boris} \sur{Novikov}}\email{borisnov@acm.org}
-
-\affil*[1]{\orgname{AVIV Group}, \orgaddress{\city{Berlin},
-\country{Germany}}}
-
-\affil[2]{\orgname{Independent Researcher}, \orgaddress{\city{Helsinki},
-\country{Finland}}}
-
-\abstract{Artificial intelligence (AI) agents increasingly execute long-running workflows that
-externalize effects through independently supplied tools. Under retries,
-speculative execution, concurrency, and partial failures, the resulting
-external state may be inconsistent with the workflow's intended resolution:
-required effects may be missing or duplicated, aborted effects may survive,
-and committed effects may depend on provisional state that is later
-withdrawn. Advanced transaction models address related failures, but assume
-that lower-level operations expose the semantics they depend on: whether an
-effect occurred, whether it can be compensated, staged, or safely reordered.
-Shared agent--tool interfaces usually do not. We contribute an
-effect-history model that separates events in the external world from the
-runtime's observations of them, and a catalog of eight recurring
-external-effect anomalies. From the catalog we derive the boundary
-capabilities required to exclude each anomaly in general, and four points
-where black-box tool invocation alone cannot provide a general guarantee. We
-then ask how much of this is expressible in a widely used shared tool
-interface, measuring the use of the standard annotation vocabulary across
-98{,}291 tools exposed by registered Model Context Protocol (MCP) servers.
-The fields are widely emitted but provide only coarse call-level hints, and
-none of the required capabilities is fully expressible. These results
-motivate reusable transactional contracts at the tool boundary.}
-
-\keywords{Agent reliability, Interaction protocols, Language model agents, Tool use,
-Transactional semantics, Model Context Protocol}
-
 \maketitle
+
+\begin{abstract}
+Artificial intelligence (AI) agents increasingly execute long-running
+workflows that externalize effects through independently supplied tools.
+Under retries, speculative execution, concurrency, and partial failures,
+the resulting external state may be inconsistent with the workflow's
+intended resolution: required effects may be missing or duplicated,
+aborted effects may survive, and committed effects may depend on
+provisional state that is later withdrawn. Advanced transaction models
+address related failures, but assume that lower-level operations expose
+the semantics they depend on, such as whether an effect occurred or can be
+compensated. Shared agent--tool interfaces usually do not. We contribute
+an effect-history model that separates events in the external world from
+the runtime's observations of them, and a catalog of eight recurring
+external-effect anomalies. From the catalog we derive the boundary
+capabilities required to exclude each anomaly, and four points where
+black-box tool invocation alone cannot provide a general guarantee. A
+census of 98{,}291 tools exposed by reachable remote servers in the
+official Model Context Protocol (MCP) registry shows that the standard
+annotation fields are widely emitted but provide only coarse call-level
+hints, and none of the required capabilities is fully expressible. These
+results motivate reusable transactional contracts at the tool boundary.
+
+\vspace{6pt}\textbf{Keywords:} Agent reliability, Interaction protocols, Language model agents, Tool use, Transactional semantics, Model Context Protocol.
+\end{abstract}
 
 \section{Introduction}
 
@@ -94,7 +104,7 @@ state is inconsistent with the intended workflow outcome.
 
 We argue that such failures form a common catalog with three sources, in
 the anomaly-based style of classical isolation
-levels~\citep{berenson1995critique,adya1999}: uncertainty about whether an
+levels~\cite{berenson1995critique,adya1999}: uncertainty about whether an
 effect occurred, workflow structure that releases or depends on effects
 before resolution, and interaction with concurrent executions or external
 observers. The catalog is organized around three sources of lost
@@ -106,7 +116,7 @@ survival, timing, and dependency; the interaction anomalies (A7--A8) by the
 two kinds of external participant an effect can meet --- a concurrent
 execution or an exogenous observer. We define correctness by excluding
 anomalous patterns from an
-effect history --- in the spirit of opacity~\citep{guerraoui2008opacity},
+effect history --- in the spirit of opacity~\cite{guerraoui2008opacity},
 but for effects that cannot be rolled back: a safe execution is one whose
 surviving external effects remain consistent with the workflow's
 resolution.
@@ -114,7 +124,7 @@ resolution.
 The mechanisms agent runtimes use (replay, retry, compensation, staged release, coordinated access) are not new: they come from advanced
 transaction models such as sagas, and from semantic recovery and
 escrow-style concurrency
-control~\citep{garcia1987sagas,korth1990formal,elmagarmid1992transaction,weikum2001transactional,oneil1986escrow}.
+control~\cite{garcia1987sagas,korth1990formal,elmagarmid1992transaction,weikum2001transactional,oneil1986escrow}.
 What changes in the agent setting is the boundary, where runtimes often
 compose independently supplied tools through shared interfaces that expose
 little of the transactional semantics those mechanisms require. Each runtime
@@ -129,8 +139,8 @@ guarantee profiles naming their exclusion sets and a reading of current agent
 runtimes as partial coverage of the catalog (Section~\ref{sec:catalog}).
 Third, a contract-level account of how the required boundary capabilities
 can be exposed, together with four limits where black-box invocation alone is
-insufficient (Section~\ref{sec:contracts}). Fourth, a registry-wide census of
-current MCP tool annotations, showing that none of the required capabilities
+insufficient (Section~\ref{sec:contracts}). Fourth, a census of current MCP tool
+annotations across reachable remote servers in the official registry, showing that none of the required capabilities
 is fully expressible (Section~\ref{sec:grounding}).
 
 \section{Effect Histories and the Tool Boundary}
@@ -138,7 +148,7 @@ is fully expressible (Section~\ref{sec:grounding}).
 
 Agent systems form a hierarchy of levels, as in multilevel transaction
 management, where the guarantees of one level are derived from the properties of
-the operations below~\citep{weikum1991principles}. We work with a slice of
+the operations below~\cite{weikum1991principles}. We work with a slice of
 two adjacent levels $L_i$ and $L_{i+1}$, written L0 and L1. L0 holds the
 operations the agent issues as atomic calls --- typically tools behind
 external APIs, \texttt{charge()} or \texttt{book\_flight()}; L1 holds the
@@ -169,7 +179,7 @@ not reducible to a single reversible/irreversible scale ---
 \texttt{increment} commutes but is not idempotent, \texttt{delete} is
 idempotent but does not commute. Commutativity is moreover
 \emph{relational}, a property of operation pairs, and often conditional on
-state (escrow-style~\citep{oneil1986escrow}); determinism, not usually
+state (escrow-style~\cite{oneil1986escrow}); determinism, not usually
 treated as an operation contract, matters because black-box tools backed by
 large language models (LLMs)
 can be nondeterministic.
@@ -213,7 +223,7 @@ $survives(e)$ & $e$ externalized, never neutralized \\
 \end{tabularx}
 \end{table}
 
-Unlike read-write histories~\citep{adya1999}, effect histories keep events
+Unlike read-write histories~\cite{adya1999}, effect histories keep events
 and observations apart: an effect either occurred or did not, while
 \emph{unknown} is a state of the runtime, and acting under it is what
 several anomalies turn on. Many of the anomalies become possible because
@@ -478,12 +488,12 @@ the observation and full gating is unavailable.
 \toprule
 \textbf{System} & \textbf{Targeted coverage} & \textbf{Notes} \\
 \midrule
-ACRFence~\citep{zheng2026acrfence} & unknown-safe partial (A1) & proposed; attack validated, not implemented \\
-RAC~\citep{perera2026rac} & compensation-safe partial (A4) & no gating; no idempotency, so A1--A3 not addressed \\
-Atomix~\citep{mohammadi2026atomix} & A1/A3 partial, compensation-safe (A4), speculation-safe (A5, A6), externally-mediated partial (A7) & idempotent-known-outcome path; no crash-safe exactly-once; A2 gap on multi-effect release \\
-Cordon~\citep{chen2026cordon} & A1/A3 partial, compensation-safe (A4), speculation-safe partial (A5) & idempotent tools; staged effects; task-scoped \\
-CoAgent~\citep{lyu2026coagent} & externally-mediated partial (A7) & reordering prevents some conflicts; registered inverses enable repair; irreversibles gated \\
-Shepherd~\citep{yu2026shepherd} & per-effect reversibility tiers; A7 observed in supervisor use case & meta-agent substrate, not a runtime guarantee; irreversibles logged \\
+ACRFence~\cite{zheng2026acrfence} & unknown-safe partial (A1) & proposed; attack validated, not implemented \\
+RAC~\cite{perera2026rac} & compensation-safe partial (A4) & no gating; no idempotency, so A1--A3 not addressed \\
+Atomix~\cite{mohammadi2026atomix} & A1/A3 partial, compensation-safe (A4), speculation-safe (A5, A6), externally-mediated partial (A7) & idempotent-known-outcome path; no crash-safe exactly-once; A2 gap on multi-effect release \\
+Cordon~\cite{chen2026cordon} & A1/A3 partial, compensation-safe (A4), speculation-safe partial (A5) & idempotent tools; staged effects; task-scoped \\
+CoAgent~\cite{lyu2026coagent} & externally-mediated partial (A7) & reordering prevents some conflicts; registered inverses enable repair; irreversibles gated \\
+Shepherd~\cite{yu2026shepherd} & per-effect reversibility tiers; A7 observed in supervisor use case & meta-agent substrate, not a runtime guarantee; irreversibles logged \\
 \bottomrule
 \end{tabularx}
 \renewcommand{\arraystretch}{1}
@@ -495,14 +505,14 @@ stated coverage rather than proven guarantees; none realizes a clean
 cumulative hierarchy.
 
 
-ACRFence~\citep{zheng2026acrfence} targets A1 for the nondeterministic-replay
+ACRFence~\cite{zheng2026acrfence} targets A1 for the nondeterministic-replay
 case. After a checkpoint-restore the model re-synthesizes a syntactically
 different but semantically equivalent irreversible call, which the server
 accepts as new; the proposed mitigation logs effects and enforces
 replay-or-fork. The attack is validated on real executions, the mitigation
 is not yet implemented.
 
-RAC~\citep{perera2026rac} targets A4 by compensation rather than gating.
+RAC~\cite{perera2026rac} targets A4 by compensation rather than gating.
 Effects externalize immediately, and the runtime logs them and runs
 compensations on abort in dependency order, dependents before parents.
 Because it does not gate, an irreversible effect that externalized before
@@ -511,7 +521,7 @@ runtime assumes the tool had no side effect, which makes its A4 coverage
 partial. It has no idempotency mechanism, so the uncertainty family is
 outside its target.
 
-Atomix~\citep{mohammadi2026atomix} and Cordon~\citep{chen2026cordon} gate
+Atomix~\cite{mohammadi2026atomix} and Cordon~\cite{chen2026cordon} gate
 irreversible effects until commit, which removes A4 for gated effects and,
 for eagerly externalized reversible ones, under the usual compensation
 assumptions. They avoid A1 and A3 only on paths where unknown outcomes are
@@ -526,7 +536,7 @@ rather than A4. Atomix additionally tracks speculative dependencies (A6)
 and orders concurrent writes to a shared resource, though ordering is not
 atomicity and non-commuting irreversible effects can still race.
 
-CoAgent~\citep{lyu2026coagent} addresses A7 directly. It fixes a
+CoAgent~\cite{lyu2026coagent} addresses A7 directly. It fixes a
 serialization order at launch, applies writes speculatively, and undoes and
 reorders misplaced writes through an inverse that each tool registers in
 advance. The two mechanisms are the ones the catalog predicts, reordering
@@ -536,7 +546,7 @@ so CoAgent falls back to gating it until predecessors commit. Its coverage
 is therefore an instance of the achievability condition for A7 rather than
 an unconditional guarantee.
 
-Shepherd~\citep{yu2026shepherd} approaches the boundary as a substrate
+Shepherd~\cite{yu2026shepherd} approaches the boundary as a substrate
 rather than a runtime guarantee. Every effect in its execution trace
 carries a reversibility tier, reversible, compensable, or irreversible,
 matching the classes the catalog builds on; reversible and compensable
@@ -572,7 +582,7 @@ We place the following outside the model, so the catalog is not mistaken for cov
 anomalies; security and policy
 violations; tool-contract misclassification (a tool declared reversible that
 is not); intra-execution effect order (formalized for multi-agent runtimes
-by \citet{khan2026verified}), except insofar as it participates in an A7
+by Khan~\cite{khan2026verified}), except insofar as it participates in an A7
 conflict; and liveness failures.
 
 \section{Transactional Tool Contracts and Guarantee Boundaries}
@@ -589,14 +599,14 @@ protocols: they are their precondition.
 A runtime consuming tools through a shared interface reads only what that
 interface carries, and MCP is not entirely silent: since its 2025-03-26
 revision, tool annotations let a server flag a tool as read-only,
-destructive, idempotent, or open-world~\citep{mcp2025spec}. These are advisory boolean hints ---
+destructive, idempotent, or open-world~\cite{mcp2025spec}. These are advisory boolean hints ---
 unenforced, optional, and coarser than the capabilities of
 Table~\ref{tab:catalog}: \texttt{idempotentHint} asserts that repetition is
 safe but supplies no idempotency key, so a tool that accepts one can declare
 the fact only in its input schema, outside the annotation vocabulary; and no
 hint covers status resolution, compensation, staging, commutativity, or
 visibility. The 2025-11-25 revision added experimental
-tasks~\citep{mcp2025tasks}, which return a durable handle that the caller
+tasks~\cite{mcp2025tasks}, which return a durable handle that the caller
 polls for a terminal status. This supplies part of the observability A1
 and A2 need, but nothing of the rest: tasks carry no idempotency,
 compensation, or commit semantics, cancellation is cooperative rather
@@ -689,7 +699,7 @@ First, without a primitive that establishes one authoritative outcome (idempoten
 an ambiguous tool call and guarantee unknown-safe and compensation-safe
 execution. Over an unreliable channel the runtime cannot learn in bounded
 time whether an effect took place, the classical exactly-once
-barrier~\citep{bernstein1987concurrency} at the agent--tool boundary.
+barrier~\cite{bernstein1987concurrency} at the agent--tool boundary.
 Re-issuing risks A1, committing risks A2, compensating risks A3, and
 aborting without compensation risks A4 if the effect occurred. Waiting
 avoids this resolution-time choice but gives up resolution.
@@ -701,7 +711,7 @@ corresponding to a serial order; undo and re-application would provide such
 a path, but irreversibility rules it out. What
 remains is prevention: mediation before unordered externalization, or gating
 conflicting calls until earlier ones commit, as
-CoAgent~\citep{lyu2026coagent} does.
+CoAgent~\cite{lyu2026coagent} does.
 
 Third, an open-world reaction ends the reach of compensation: once an outside
 actor has observed a released effect and acted, retracting the effect does
@@ -713,9 +723,9 @@ atomically above the tool layer. A crash or persistent failure between
 releases leaves a partial externalization that the runtime cannot generally
 complete or undo: committing risks a missing required effect (A2), while
 aborting leaves surviving residue (A4). Avoiding this choice is the
-classical atomic-commitment problem~\citep{bernstein1987concurrency} and
+classical atomic-commitment problem~\cite{bernstein1987concurrency} and
 needs tool-side prepare/commit participation, a limit
-Atomix~\citep{mohammadi2026atomix} states for its own release step.
+Atomix~\cite{mohammadi2026atomix} states for its own release step.
 
 \section{What the Boundary Declares Today}
 \label{sec:grounding}
@@ -723,7 +733,8 @@ Atomix~\citep{mohammadi2026atomix} states for its own release step.
 The vocabulary cannot carry the capabilities of Section~\ref{sec:contracts},
 but it does carry four fields, and what servers put in them decides what
 a runtime can learn today. We measured this with a census of 98{,}291
-tools in the official MCP registry (snapshot 2026-07-27), recording
+tools exposed by reachable remote servers in the official MCP registry
+(snapshot 2026-07-27), recording
 \texttt{readOnlyHint}, \texttt{destructiveHint}, \texttt{idempotentHint},
 and \texttt{openWorldHint} for each tool and keeping an explicit
 \texttt{false} distinct from an omitted field.
@@ -742,7 +753,7 @@ returned no tools, yielding 98{,}291 tools (median 11 per server). No
 tool was called. The resulting measurements describe the reachable remote
 subset; unreachable and package/stdio-only servers may differ. We do not attribute measured values to author intent. Code, data,
 and full methodology are available in the accompanying
-artifact.\footnote{\url{https://github.com/flame-stream/mcp-annotation-census}}
+artifact.\footnote{\url{https://anonymous.4open.science/r/mcp-annotation-census}}
 
 \paragraph{Annotation fields are widely emitted, by one publisher.}
 At the wire level, 74.0\% of tools serialize at least one field and 61.7\%
@@ -787,26 +798,26 @@ the boundary as declared, not as implementations behave. Tools may enforce
 stronger semantics internally (deduplication, idempotency keys) than any
 annotation surfaces; a runtime that relies on the annotations cannot use that
 safety, and measuring the gap requires implementation-level
-analysis~\citep{toeppe2026mcpdataset}.
+analysis~\cite{toeppe2026mcpdataset}.
 
 \section{Related Work}
 \label{sec:related}
 
 This work builds on transaction processing. It borrows the way correctness
 is defined there, by naming patterns a history must not
-contain~\citep{berenson1995critique,adya1999}, and the vocabulary of
+contain~\cite{berenson1995critique,adya1999}, and the vocabulary of
 operation properties that goes with it. Advanced transaction models supply
 compensation, sagas, and
-semantic recovery~\citep{garcia1987sagas,korth1990formal,elmagarmid1992transaction,weikum2001transactional},
+semantic recovery~\cite{garcia1987sagas,korth1990formal,elmagarmid1992transaction,weikum2001transactional},
 multilevel transactions supply the derivation of one level's guarantees
-from the operations below~\citep{weikum1991principles}, and escrow methods
-supply conditional commutativity~\citep{oneil1986escrow}. The saga lineage
+from the operations below~\cite{weikum1991principles}, and escrow methods
+supply conditional commutativity~\cite{oneil1986escrow}. The saga lineage
 already isolates a point of no return, the pivot after which effects are no
 longer compensable, and prescribes placing irreversible steps after
 fallible ones. Our catalog can be read as classifying the ways an effect
 can be incorrect at that point, extended to the concurrent, speculative,
 and nondeterministic workflows a single-workflow saga model does not
-address. In transactional memory, opacity~\citep{guerraoui2008opacity}
+address. In transactional memory, opacity~\cite{guerraoui2008opacity}
 extends correctness to aborted transactions, requiring a history to stay
 explainable even for transactions that do not commit; our intuition of
 explainable surviving effects is of the same kind, for effects that cannot
@@ -817,12 +828,12 @@ Multiagent-systems research has long treated interaction among autonomous
 parties as a protocol problem rather than a matter of calls and returns.
 Commitment-based approaches specify an interaction by the social meaning
 of its messages, so that commitments are created, discharged, or
-cancelled as it unfolds~\citep{yolum2002commitment}; information protocols
+cancelled as it unfolds~\cite{yolum2002commitment}; information protocols
 such as BSPL specify it by the causal information each message
-carries~\citep{singh2011bspl}. Mandrake builds fault tolerance on this
+carries~\cite{singh2011bspl}. Mandrake builds fault tolerance on this
 foundation: agents treat a lost message as a violated expectation and
 retry, and key-based correlation makes duplicates idempotent, without
-assuming reliable or ordered transport~\citep{christie2022mandrake}. This
+assuming reliable or ordered transport~\cite{christie2022mandrake}. This
 is a protocol-level analogue of the identification and deduplication
 mechanism that A1 requires: the correlation key plays the role of
 logical-operation identity, although what it deduplicates is repeated
@@ -837,16 +848,16 @@ with stated preconditions, and the resource scope over which ordering is
 agreed.
 
 Recent work carries transactional goals into agent systems. Agentic
-Transaction~\citep{sun2026agentic} articulates ACID-oriented semantic
+Transaction~\cite{sun2026agentic} articulates ACID-oriented semantic
 guarantees and instantiates them in a runtime for data agents, and
-SagaLLM~\citep{chang2025sagallm} applies Saga-style validation to
-multi-agent planning; \citet{stonebraker2025consistency}
+SagaLLM~\cite{chang2025sagallm} applies Saga-style validation to
+multi-agent planning; Stonebraker et al.~\cite{stonebraker2025consistency}
 argue for isolation-level reasoning in data-oriented workflow systems. We
 ask a prior question, namely what the boundary to third-party tools must
 declare for guarantees of this kind to be establishable at all. On the
 verification side, a formal catalog of concurrency anomalies for
 multi-agent runtimes comes with mechanically verified detectors and safety
-guarantees~\citep{khan2026verified}; its causal-cascade anomaly, in which a
+guarantees~\cite{khan2026verified}; its causal-cascade anomaly, in which a
 dependent operation survives an aborted ancestor, is close to our A6, and
 the model likewise admits external effects that no internal rollback can
 undo. Our catalog differs in what it centers, the outcome uncertainty of
@@ -854,9 +865,9 @@ calls to independently supplied tools and the interface capabilities a
 boundary must expose, rather than verified protocols over a runtime's
 shared state.
 
-Two lines are complementary along other axes. S-Bus~\citep{khan2026sbus}
+Two lines are complementary along other axes. S-Bus~\cite{khan2026sbus}
 formalizes read-side isolation, governing what an agent observes of shared
-mutable state, where we govern what it irreversibly externalizes. \citet{zhai2026revisable} study intent revision during streaming
+mutable state, where we govern what it irreversibly externalizes. Zhai et al.~\cite{zhai2026revisable} study intent revision during streaming
 execution, classifying actions by reversibility and showing that
 conflicting irreversible actions make full specification satisfaction
 impossible, an algorithm-independent limit that parallels our achievability
@@ -880,29 +891,7 @@ take part in verifiable interaction protocols, and a cost model
 that prices anomalies against their compensations, deciding when speculation
 or early release is worth its residue.
 
-\setlength{\bibsep}{0pt plus 0.5pt}
-
-\backmatter
-
-\section*{Statements and Declarations}
-
-\begin{itemize}
-\item \textbf{Funding.} No funding was received for conducting this study.
-\item \textbf{Competing interests.} The authors declare no competing
-interests.
-\item \textbf{Ethics approval.} Not applicable. The census queried only
-public tool listings; no tool was invoked and no personal data was
-collected.
-\item \textbf{Data availability.} The census data, the collection code, and
-the full methodology are openly available at
-\url{https://github.com/flame-stream/mcp-annotation-census}.
-\item \textbf{Author contributions.} Both authors contributed to the study
-conception, the formal model, and the manuscript. The census was designed
-and carried out by A.T. Both authors read and approved the final manuscript.
-\item \textbf{Preprint.} A preprint of this article is available at
-\url{https://arxiv.org/abs/2609.15397}.
-\end{itemize}
-
+\bibliographystyle{splncs03}
 \bibliography{bibliography/flame-stream}
 
 \end{document}
