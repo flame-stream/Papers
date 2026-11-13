@@ -4,7 +4,10 @@
 % dblblindworkshop       : anonymous submission (also uncomment the
 %                          \workshoptitle line and the patch below)
 % final,dblblindworkshop : camera-ready after acceptance
-\usepackage[preprint]{neurips_2026}
+\usepackage[final]{neurips_2026}
+\makeatletter
+\renewcommand{\@noticestring}{Workshop on Who Verifies the Agents? Toward Reliable Agent Development, NeurIPS 2026.}
+\makeatother
 % \workshoptitle{Who Verifies the Agents? Toward Reliable Agent Development}
 \setcitestyle{numbers,square,comma}
 % Anonymous mode only: drops the Affiliation/Address/email placeholders
@@ -60,21 +63,18 @@ effects may depend on provisional state that is later withdrawn. Advanced
 transaction models address related failures, but assume that
 lower-level operations expose the semantics they depend on: whether an
 effect occurred, whether it can be compensated, staged, or safely
-reordered. Shared agent--tool interfaces usually do not.
-
-We contribute an effect-history model that separates events in the
+reordered. Shared agent--tool interfaces usually do not. We contribute an effect-history model that separates events in the
 external world from the runtime's observations of them, and a catalog of
 eight recurring external-effect anomalies. From the catalog we derive the boundary
 capabilities required to exclude each anomaly in general, and four points
 where black-box tool invocation alone cannot provide a general guarantee. We then ask how much of this is expressible in a widely used shared tool
 interface, measuring the use of the standard annotation vocabulary across
-98{,}291 tools exposed by registered Model Context Protocol (MCP) servers.
+98{,}291 tools exposed by reachable remote servers in the official Model
+Context Protocol (MCP) registry.
 The fields are widely emitted but provide only coarse call-level hints, and
 none of the required capabilities is fully expressible. These results motivate
 reusable transactional contracts at the tool boundary.
 \end{abstract}
-
-\maketitle
 
 \section{Introduction}
 
@@ -150,9 +150,11 @@ guarantee profiles naming their exclusion sets and a reading of current agent
 runtimes as partial coverage of the catalog (Section~\ref{sec:catalog}).
 Third, a contract-level account of how the required boundary capabilities
 can be exposed, together with four limits where black-box invocation alone is
-insufficient (Section~\ref{sec:contracts}). Fourth, a registry-wide census of
-current MCP tool annotations, showing that none of the required capabilities
-is fully expressible (Section~\ref{sec:grounding}).
+insufficient, and the observation that none of the capabilities is fully
+expressible in the standard MCP annotation vocabulary
+(Section~\ref{sec:contracts}). Fourth, a census of how current MCP tools use
+that vocabulary across reachable remote servers in the official registry
+(Section~\ref{sec:grounding}).
 
 \section{Effect Histories and the Tool Boundary}
 \label{sec:model}
@@ -278,7 +280,7 @@ Section~\ref{sec:contracts} organizes them into reusable contract families.
 \toprule
 \textbf{} & \textbf{Forbidden pattern} & \textbf{Required boundary capability} & \textbf{Representative realization} \\
 \midrule
-A1 Duplicated & one logical operation externalizes twice & authoritative convergence on one outcome & logical-operation ID; idempotent re-issue returning the original outcome \\
+A1 Duplicated & one logical operation externalizes twice & deduplication of the logical operation & logical-operation ID; idempotent re-issue \\
 A2 Missing & commit without a required effect & authoritative outcome; atomic multi-effect participation & status endpoint; prepare/commit \\
 A3 Orphaned & compensation issued under an unknown outcome & outcome resolution before compensating & outcome query; outcome-conditioned compensation \\
 A4 Residue & aborted workflow leaves a surviving effect & residue prevention or safe neutralization & compensation declaration; staging \\
@@ -344,17 +346,27 @@ externalize(c1, refund)  # refund takes effect
 => if a1 never externalized, refund is spurious
 \end{verbatim}\endgroup
 \end{minipage}\par\noindent
+The forbidden action is a compensation whose external effect does not
+depend on the outcome of the original attempt. What matters is whose
+knowledge decides whether an effect happens. A runtime that issues an
+unconditional refund under an unknown outcome bets on the outcome, and that
+bet is the violation. A compensator that checks the original operation
+itself and refunds only if it occurred resolves the outcome inside the
+tool, and the runtime makes no bet; its invocation is not A3 even though
+the runtime's own observation is still unknown.
+
 A1, A2, and A3 are one family: all three stem from an outcome the runtime
 cannot confirm and differ only in the reaction. A1 and A2 are visible in
 the final history; A3 is a violation at the moment compensation is issued:
 under an unknown outcome the runtime cannot know whether compensation is
-required, and even where the resulting state happens to be correct, the
-action was taken without authoritative evidence. The family also marks
+required, and even where the resulting state happens to be correct, the compensating
+effect was produced without authoritative evidence. The family also marks
 where this setting departs from classical transaction processing. There, an
 in-doubt outcome is temporary: participants run a recovery protocol and
 resolve it. A third-party tool runs no such protocol, so an unknown outcome
 stays unknown until the tool itself offers a way out --- a durable
-acknowledgment, a status endpoint, or idempotent re-issue.
+acknowledgment, a status endpoint, idempotent re-issue, or a compensator
+that resolves the outcome itself.
 
 \paragraph{A4: Uncompensated Residue (workflow)}
 An aborted workflow leaves a surviving effect that was not
@@ -565,13 +577,52 @@ protocols: they are their precondition.
 A runtime consuming tools through a shared interface reads only what that
 interface carries, and MCP is not entirely silent: since its 2025-03-26
 revision, tool annotations let a server flag a tool as read-only,
-destructive, idempotent, or open-world.\footnote{Model Context Protocol
-specification, revision 2025-03-26.} These are advisory boolean hints ---
+destructive, idempotent, or open-world~\cite{mcp2025spec}. These are advisory boolean hints ---
 unenforced, optional, and coarser than the capabilities of
-Table~\ref{tab:catalog}: \texttt{idempotentHint} marks a property but
-supplies no idempotency key, and no hint covers status resolution,
-compensation, staging, commutativity, or visibility. How servers populate
-these fields is measured in Section~\ref{sec:grounding}.
+Table~\ref{tab:catalog}: \texttt{idempotentHint} asserts that repetition is
+safe but supplies no idempotency key, so a tool that accepts one can declare
+the fact only in its input schema, outside the annotation vocabulary; and no
+hint covers status resolution, compensation, staging, commutativity, or
+visibility. The 2025-11-25 revision added experimental
+tasks~\cite{mcp2025tasks}, which return a durable handle that the caller
+polls for a terminal status. This supplies part of the observability A1
+and A2 need, but nothing of the rest: tasks carry no idempotency,
+compensation, or commit semantics, cancellation is cooperative rather
+than an undo, and the handle can itself be lost before it is received,
+which moves an unknown outcome one request earlier rather than removing
+it.
+Table~\ref{tab:gap} goes through the capabilities one by one. None of these
+capabilities is fully expressible in the annotation vocabulary, so the standard annotations alone
+provide no reusable transactional contract. A tool can still arrange such
+a contract on top of MCP, through its input schema, its description, or
+tasks, but that contract is particular to the tool and must be learned tool
+by tool. This is a property of the specification. How the four fields it
+does define are used in practice is the subject of
+Section~\ref{sec:grounding}.
+
+\begin{table}[t]
+\centering
+\renewcommand{\arraystretch}{1.1}
+\footnotesize
+\caption{Expressibility of the boundary capabilities in current MCP tool
+annotations.}
+\label{tab:gap}
+\begin{tabularx}{\linewidth}{@{}X l@{}}
+\toprule
+\textbf{Boundary capability} & \textbf{In annotations} \\
+\midrule
+A1 deduplication of the logical operation & Limited: idempotence hint only \\
+A2 authoritative outcome; atomic participation & No \\
+A3 outcome resolution before compensating & No \\
+A4 residue prevention or neutralization & No \\
+A5 pre-externalization observation/control & No \\
+A6 dependency observability; commit control & No \\
+A7 shared-resource coordination & No: externality only \\
+A8 control of external observability & No \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
 
 \subsection{Recurring Contract Families}
 
@@ -590,9 +641,13 @@ Section~\ref{sec:boundaries}.
 Lifecycle control (A4--A6) needs the workflow's invariants to be checkable
 before irreversible effects occur, compensation semantics for what a
 compensator requires and what counts as its success, and stable effect and
-resource identity afterwards. A read-only \texttt{quote} avoids externalization altogether; an expiring
+resource identity afterwards. The first of these is a condition on the
+boundary rather than on the runtime, since gating is available only where
+the values an invariant depends on can be observed without an effect. A
+read-only \texttt{quote} provides such an observation and an expiring
 \texttt{hold} replaces the final effect with a provisional one whose
-visibility, expiry, and release semantics are declared. The unit dependency
+visibility, expiry, and release semantics are declared, while a
+negotiation-style interaction offers neither. The unit dependency
 tracking protects is a \emph{commit sphere}, the minimal set of effects that
 must become final together.
 
@@ -653,7 +708,14 @@ Atomix~\cite{mohammadi2026atomix} states for its own release step.
 \section{What the Boundary Declares Today}
 \label{sec:grounding}
 
-Section~\ref{sec:contracts} named the boundary capabilities a runtime needs. We now ask how far the standard MCP annotation vocabulary expresses them: what the annotations do not carry cannot be obtained from the interface as a guarantee, whatever a tool arranges out of band. Our census covers 98{,}291 tools in the official MCP registry (snapshot 2026-07-27), recording the four annotations the specification defines (\texttt{readOnlyHint}, \texttt{destructiveHint}, \texttt{idempotentHint}, \texttt{openWorldHint}) and keeping an explicit \texttt{false} distinct from an omitted field.
+The vocabulary cannot carry the capabilities of Section~\ref{sec:contracts},
+but it does carry four fields, and what servers put in them decides what
+a runtime can learn today. We measured this with a census of 98{,}291
+tools exposed by reachable remote servers in the official MCP registry
+(snapshot 2026-07-27), recording
+\texttt{readOnlyHint}, \texttt{destructiveHint}, \texttt{idempotentHint},
+and \texttt{openWorldHint} for each tool and keeping an explicit
+\texttt{false} distinct from an omitted field.
 
 \paragraph{Sampling and methodology.}
 We took a full snapshot of the official MCP registry on 2026-07-27
@@ -666,67 +728,64 @@ rejected discovery with HTTP 401 or 403 (connection failures were not
 classified). Of these targets, 4{,}838 returned
 at least one tool, 4{,}318 failed to connect, 74 timed out, and four
 returned no tools, yielding 98{,}291 tools (median 11 per server). No
-tool was called. The resulting measurements therefore describe the
-reachable remote subset; unreachable and package/stdio-only servers may
-differ. We do not attribute measured values to author intent. Code, data,
+tool was called. The resulting measurements describe the reachable remote
+subset; unreachable and package/stdio-only servers may differ. We do not attribute measured values to author intent. Code, data,
 and full methodology are available in the accompanying
 artifact.\footnote{\url{https://github.com/flame-stream/mcp-annotation-census}}
 
-\paragraph{Annotation fields are widely emitted.}
-At the wire level, 74.0\% of tools serialize at least one field and 61.7\% serialize all four. But a field being present says little about whether it was chosen: many values may originate in SDK defaults or server templates rather than deliberate declaration, and some carry no information even when set, since \texttt{destructiveHint} is inapplicable when \texttt{readOnlyHint} is true, a pairing that accounts for 52.8\% of all tools.
+\paragraph{Annotation fields are widely emitted, by one publisher.}
+At the wire level, 74.0\% of tools serialize at least one field and 61.7\%
+serialize all four. Most of this is one fleet. A single publisher,
+\texttt{io.github.pipeworx-io}, contributes 1{,}274 of the 4{,}838
+responding servers and 44{,}227 tools, 45.0\% of the corpus, every one of
+them with all four fields set. Without it, 52.8\% of the remaining tools
+serialize at least one field and 30.3\% serialize all four. A field being
+present therefore says little about whether it was chosen, and some fields
+carry no information even when set: \texttt{destructiveHint} is
+inapplicable when \texttt{readOnlyHint} is true, a pairing that accounts for
+52.8\% of all tools and 26.0\% without the dominant publisher.
 
 \paragraph{Tool-level signatures are concentrated.}
-Reading each tool as a signature over the four fields (each true, false, or omitted), 66 of the 81 possible signatures appear, but one signature (read-only, non-destructive, idempotent, open-world) covers 39.9\% of tools, and the next most common is no annotation at all (26.0\%); the top three together cover 75.8\%. Among multi-tool servers that emit at least one
-field, 76.7\% use more than one signature. Across emitting servers, the median dominant signature covers 79.4\% of a server's tools: differentiation is widespread but coarse.
+Reading each tool as a signature over the four fields (each true, false, or
+omitted), 66 of the 81 possible signatures appear, but one signature
+(read-only, non-destructive, idempotent, open-world) covers 39.9\% of tools
+and the next most common is no annotation at all (26.0\%); the top three
+together cover 75.8\%. The dominant signature is the dominant publisher's
+template: without that publisher it falls to 7.3\% and no annotation at all
+becomes the most common signature, at 47.2\% of tools. Among multi-tool
+servers that emit at least one field, 76.7\% use more than one signature,
+and across emitting servers the median dominant signature covers 79.4\% of
+a server's tools: differentiation is widespread but coarse.
 
 \paragraph{What the hints do not resolve.}
-Even fully populated, the four fields describe the shape of a call while leaving its transactional semantics unstated: none gives an idempotency key, a status endpoint, a compensation contract, or a commutativity rule. Take \texttt{destructiveHint}, the one field about risk. It is set on 65.8\% of all tools, but is meaningful only where the tool is not read-only: just 12.9\% of tools carry an applicable classification, and only 3.1\% assert an actual destructive operation.
+Even fully populated, the four fields describe the shape of a call while leaving its transactional semantics unstated: none gives an idempotency key, a status endpoint, a compensation contract, or a commutativity rule. Take \texttt{destructiveHint}, the one field about risk. It is set on
+65.8\% of all tools, but is meaningful only where the tool is not
+read-only: just 12.9\% of tools carry an applicable classification, and
+only 3.1\% assert an actual destructive operation. Unlike the emission
+figures, these two do not depend on the dominant publisher: without it
+they are 11.7\% and 3.2\%.
 
-\begin{table}[t]
-\centering
-\renewcommand{\arraystretch}{1.1}
-\footnotesize
-\caption{Expressibility of the boundary capabilities of
-Section~\ref{sec:contracts} in current MCP tool annotations.}
-\label{tab:gap}
-\begin{tabularx}{\linewidth}{@{}X l@{}}
-\toprule
-\textbf{Boundary capability} & \textbf{In annotations} \\
-\midrule
-A1 authoritative convergence & Limited: idempotence hint only \\
-A2 authoritative outcome; atomic participation & No \\
-A3 outcome resolution before compensating & No \\
-A4 residue prevention or neutralization & No \\
-A5 pre-externalization observation/control & No \\
-A6 dependency observability; commit control & No \\
-A7 shared-resource coordination & No: externality only \\
-A8 control of external observability & No \\
-\bottomrule
-\end{tabularx}
-\end{table}
 
 \medskip
 
 \noindent
-Table~\ref{tab:gap} reads the boundary
-capabilities of Section~\ref{sec:contracts} against that vocabulary:
-current MCP metadata distinguishes coarse execution modes but cannot
-express the semantics needed for retries, compensation, speculation, or
-concurrency. The census reads the boundary as declared, not as implementations behave. Tools may enforce stronger semantics
-internally (deduplication, idempotency keys) than any annotation surfaces;
-that safety remains unusable to a runtime that only sees the interface, and measuring the gap requires implementation-level analysis~\cite{toeppe2026mcpdataset}.
+The census reads
+the boundary as declared, not as implementations behave. Tools may enforce
+stronger semantics internally (deduplication, idempotency keys) than any
+annotation surfaces; a runtime that relies on the annotations cannot use that
+safety, and measuring the gap requires implementation-level
+analysis~\cite{toeppe2026mcpdataset}.
 
 \section{Conclusion and Future Work}
 
-This paper contributes an effect-history model separating world events
-from runtime observations, and a catalog of eight recurring
-external-effect anomalies, each naming the boundary capability required to exclude it in general: evidence, lifecycle control, or coordination. Four guarantee boundaries mark where black-box invocation alone is
-insufficient. Our census of 98{,}291 MCP tools measures what the standard interface declares. Existing runtimes cover fragments under runtime-local assumptions; standardized tool metadata remains insufficient for transactional reasoning. The missing layer is therefore
-not another recovery mechanism, but reusable transactional contracts at the
-tool boundary. Future work includes formal proofs of the guarantee
-boundaries, protocol synthesis from declared contracts, and a cost model
-that prices anomalies against their compensations, deciding when speculation
-or early release is worth its residue.
+We introduced an effect-history model, a catalog of eight external-effect
+anomalies with the boundary capability that excludes each, and four limits
+of black-box invocation. Current runtimes cover fragments of the catalog,
+and the standard MCP annotations express none of the capabilities in full:
+the missing layer is reusable transactional contracts at the tool boundary.
+Future work includes formal proofs of the limits, protocol synthesis from
+declared contracts, and a cost model that prices anomalies against their
+compensations.
 
 \setlength{\bibsep}{0pt plus 0.5pt}
 \bibliographystyle{unsrtnat}
