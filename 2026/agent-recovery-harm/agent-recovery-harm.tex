@@ -52,7 +52,7 @@ In summary, our contributions are as follows:
 \item We examine two sources of operation identity for an idempotency contract: the model, in a pilot, and the call content, in a counterfactual analysis of the sample. The pilot is small, so we consider its results as emerging evidence.
 \end{enumerate}
 
-This study complements the effect-history taxonomy of agent-tool anomalies~\cite{trofimov2026toolcallssucceedworkflows} with measurements of harm during a recovery, including task-level errors beyond that taxonomy. Data, labels, and scripts are available online.\footnote{\todo{repository URL}}
+In the catalog of agent-tool anomalies~\cite{trofimov2026toolcallssucceedworkflows}, duplication follows the duplicated-effect pattern, although here the completed writes are observable in the state; the other kinds of harm are task-level errors outside that catalog. Data, labels, and scripts are available online.\footnote{\url{https://github.com/flame-stream/agent-recovery-harm}}
 
 \section{Data and Labels}\label{sec:setting}
 
@@ -211,13 +211,13 @@ The contract also has a cost. In the confirmed episodes, the same key would have
 
 The results allow us to outline the following requirements for agent runtimes:
 \begin{enumerate}
-\item \textbf{Idempotency must not rely solely on identifiers supplied by the model.} In our pilot, forcing all calls through a contract does not change this.
+\item \textbf{Idempotency must not rely solely on identifiers supplied by the model.} In our pilot, forcing all calls through a contract does not change this, so identifiers supplied by the model alone are not a reliable basis for excluding duplicated effects~\cite{trofimov2026toolcallssucceedworkflows}.
 \item \textbf{A ledger of past calls is not sufficient.} Identity derived from the content would cover most duplicated writes, but it does not cover first-time wrong writes and would also match required writes on accumulating APIs, with a risk of suppressing legitimate effects.
 \item \textbf{The scope of recovery writes should be limited.} Wrong first-time writes and deletions cannot be addressed by an idempotency contract. The footprint of the failed block is evidence of what was done but not a permission.
 \item \textbf{Monitoring should compare the state with the task.} Signals that search for repeats miss the harm that is not a repeat.
 \end{enumerate}
 
-In terms of exactly-once processing, the regenerated block is a non-deterministic operator, and the service is a sink that is not idempotent by content, so the assumptions behind deduplication at the sink hold only for a part of the recoveries~\cite{thepaper}. A classical alternative is to hold the effects until the unit of work completes~\cite{strom1985optimistic}: the writes of a block are not externalized until the block succeeds. This idea is applied on the level of a task~\cite{chen2026cordon} and named as a requirement for agent sandboxes (effect gating)~\cite{wang2026forkexplorecommitos}. Our data motivate this direction but do not evaluate it.
+In terms of exactly-once processing, the regenerated block is a non-deterministic operator, and the service is a sink that is not idempotent by content, so the assumptions behind deduplication at the sink hold only for a part of the recoveries~\cite{Akidau:2013:MFS:2536222.2536229}. A classical alternative is to hold the writes of a block until it succeeds~\cite{strom1985optimistic}. This idea is applied to agents in~\cite{chen2026cordon,wang2026forkexplorecommitos}. Compensation~\cite{mohammadi2026atomix,perera2026rac} also covers operations that are not idempotent, but it requires knowing which writes took effect, and unguided deletions are themselves harmful in our sample. Our data motivate these directions but do not evaluate them.
 
 \section{Related Work}\label{sec:related}
 
